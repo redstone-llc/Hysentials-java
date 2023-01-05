@@ -1,0 +1,16 @@
+{
+  "compatibilityLevel": "JAVA_8",
+  "minVersion": "0.7",
+  "package": "cc.woverflow.hysentials.mixin",
+  "plugin": "cc.woverflow.hysentials.forge.HysentialsMixinPlugin",
+  "refmap": "mixins.hysentials.refmap.json",
+  "verbose": true,
+  "client": [
+    "EntityPlayerSPMixin_MessageHandling",
+    "GuiNewChatMixin_LocrawHider",
+    "MinecraftMixin",
+    "MinecraftMixin_LeftClickInteract",
+    "NetHandlerPlayClientMixin_GameChecker",
+    "TextureUtilMixin"
+    ]
+}

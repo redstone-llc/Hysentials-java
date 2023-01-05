@@ -1,0 +1,128 @@
+//file:noinspection UnnecessaryQualifiedReference
+//file:noinspection GroovyAssignabilityCheck
+
+plugins {
+    id "dev.architectury.architectury-pack200" version "0.1.3"
+    id "gg.essential.loom" version "0.10.0.4"
+    id "net.kyori.blossom" version "1.3.0"
+    id "java"
+    id 'maven-publish'
+}
+
+version = mod_version
+group = "net.sinender"
+archivesBaseName = mod_name
+
+blossom {
+    String className = "src/main/java/cc/woverflow/hysentials/Hysentials.java"
+    replaceToken("@VER@", project.version, className)
+    replaceToken("@NAME@", mod_name, className)
+    replaceToken("@ID@", mod_id, className)
+}
+
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
+compileJava.options.encoding = 'UTF-8'
+
+loom {
+    launchConfigs {
+        client {
+            arg("--tweakClass", "cc.polyfrost.oneconfigwrapper.OneConfigWrapper")
+            property("onecore.mixin", "mixins.hysentials.json")
+
+            property("mixin.debug.export", "true")
+        }
+    }
+    runConfigs {
+        client {
+            ideConfigGenerated = true
+        }
+    }
+    forge {
+        pack200Provider = new dev.architectury.pack200.java.Pack200Adapter()
+        mixinConfig("mixins.hysentials.json")
+        mixin.defaultRefmapName.set("mixins.hysentials.refmap.json")
+        accessTransformer(file("src/main/resources/hysentials_at.cfg"))
+    }
+}
+
+configurations {
+    include
+    implementation.extendsFrom(include)
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.polyfrost.cc/releases' }
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    minecraft("com.mojang:minecraft:1.8.9")
+    mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
+    forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
+
+    compileOnly('cc.polyfrost:oneconfig-1.8.9-forge:0.1.0-alpha+')
+    include('cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-alpha+')
+    include("org.java-websocket:Java-WebSocket:1.5.3")
+    include("org.json:json:20220924")
+    include ('org.slick2d:slick2d-core:1.0.2') {
+        exclude module: 'lwjgl'
+    }
+
+    compileOnly('org.spongepowered:mixin:0.7.11-SNAPSHOT')
+
+    compileOnly files('libs/Hytils.Reborn-1.5.1-beta1.jar')
+    compileOnly("me.djtheredstoner:DevAuth-forge-legacy:1.1.0")
+}
+
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", version
+    inputs.property "name", mod_name
+    inputs.property "id", mod_id
+
+    filesMatching("mcmod.info") {
+        expand(
+                "id": mod_id,
+                "name": mod_name,
+                "version": version
+        )
+    }
+
+    rename '(.+_at.cfg)', 'META-INF/$1'
+}
+
+sourceSets {
+    dummy {
+
+    }
+    main {
+        compileClasspath += dummy.output
+        output.resourcesDir = java.classesDirectory
+    }
+}
+
+jar {
+    dependsOn configurations.include
+    from(configurations.include.collect { it.isDirectory() ? it : zipTree(it) }) {
+        def i = 0
+        filesMatching("META-INF/NOTICE*") { name = "$name.${i++}" }
+        filesMatching("META-INF/LICENSE*") { name = "$name.${i++}" }
+        filesMatching("META-INF/mods.toml") { name = "$name.${i++}" }
+        filesMatching("LICENSE*") { name = "$name.${i++}" }
+    }
+
+    manifest.attributes(
+            'ModSide': 'CLIENT',
+            'ForceLoadAsMod': true,
+            'FMLAT': "hysentials_at.cfg",
+            'MixinConfigs': "mixins.hysentials.json",
+            "TweakOrder": "0",
+            'TweakClass': "cc.polyfrost.oneconfigwrapper.OneConfigWrapper"
+    )
+    //set the destination directory to be the desktop for easy testing
+}
+
+remapJar {
+    destinationDirectory = file("C:\\Users\\griff\\Desktop\\games\\MultiMC\\instances\\1.8.9\\.minecraft\\mods")
+}
