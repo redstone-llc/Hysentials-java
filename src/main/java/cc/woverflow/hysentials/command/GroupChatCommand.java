@@ -20,21 +20,13 @@ package cc.woverflow.hysentials.command;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.utils.commands.annotations.*;
-import cc.woverflow.chatting.chat.ChatTabs;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
-import cc.woverflow.hysentials.util.BlockWAPIUtils;
+import cc.woverflow.hysentials.handlers.groupchats.GroupChat;
 import cc.woverflow.hysentials.util.DuoVariable;
 import cc.woverflow.hysentials.websocket.Request;
 import cc.woverflow.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
-import org.json.JSONObject;
-
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
-import static cc.woverflow.hysentials.handlers.groupchats.GroupChat.getDividerAqua;
 
 @Command(value = "groupchat", aliases = {"grc", "group"}, customHelpMessage = {
     "§9§m-----------------------------------------------------",
@@ -247,7 +239,7 @@ public class GroupChatCommand {
         Socket.awaiting.add(new DuoVariable<>("groupHide", jsonObject -> {
             UChat.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
             if (Hysentials.INSTANCE.isChatting) {
-                ChatTabs.INSTANCE.getTabs().remove(ChatTabs.INSTANCE.getTabs().stream().filter(tab -> tab.getName().equals(name)).findFirst().orElse(null));
+                GroupChat.hideTab(name);
             }
         }));
     }

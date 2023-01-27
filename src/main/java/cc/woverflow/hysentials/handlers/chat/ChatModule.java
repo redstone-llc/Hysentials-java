@@ -20,6 +20,7 @@ package cc.woverflow.hysentials.handlers.chat;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
+import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
@@ -97,7 +98,7 @@ interface ChatModule {
      */
     @Nullable
     default LocrawInfo getLocraw() {
-        return HypixelUtils.INSTANCE.getLocrawInfo();
+        return LocrawUtil.INSTANCE.getLocrawInfo();
     }
 
     /**

@@ -60,4 +60,10 @@ public final class ChatTab {
     public final String getName() {
         return "this.name";
     }
+    public final boolean isEnabled() {
+        return false;
+    }
+    public final void setEnabled(boolean enabled) {
+
+    }
 }

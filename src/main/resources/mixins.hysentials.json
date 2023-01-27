@@ -8,9 +8,11 @@
   "client": [
     "EntityPlayerSPMixin_MessageHandling",
     "GuiNewChatMixin_LocrawHider",
-    "MinecraftMixin",
     "MinecraftMixin_LeftClickInteract",
     "NetHandlerPlayClientMixin_GameChecker",
-    "TextureUtilMixin"
-    ]
+    "TextureUtilMixin",
+    "MinecraftMixin",
+    "MixinRenderPlayer",
+    "MixinRenderManager"
+  ]
 }

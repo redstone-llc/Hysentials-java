@@ -24,6 +24,7 @@ import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.utils.commands.CommandManager;
 import cc.woverflow.hysentials.command.GlobalChatCommand;
 import cc.woverflow.hysentials.command.GroupChatCommand;
+import cc.woverflow.hysentials.command.HypixelChatCommand;
 import cc.woverflow.hysentials.command.HysentialsCommand;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.handlers.bwranks.BwRanks;
@@ -31,17 +32,16 @@ import cc.woverflow.hysentials.handlers.cache.CosmeticsHandler;
 import cc.woverflow.hysentials.handlers.cache.HeightHandler;
 import cc.woverflow.hysentials.handlers.chat.ChatHandler;
 import cc.woverflow.hysentials.handlers.groupchats.GroupChat;
+import cc.woverflow.hysentials.handlers.language.LanguageHandler;
 import cc.woverflow.hysentials.handlers.lobby.LobbyChecker;
-import cc.woverflow.hysentials.user.Player;
+import cc.woverflow.hysentials.pets.cubit.CubitCompanion;
+import cc.woverflow.hysentials.pets.hamster.HamsterCompanion;
 import cc.woverflow.hysentials.util.HypixelAPIUtils;
-import cc.woverflow.hysentials.util.SplashProgress;
 import cc.woverflow.hysentials.util.blockw.OnlineCache;
 import cc.woverflow.hysentials.util.friends.FriendCache;
 import cc.woverflow.hysentials.util.skyblock.SkyblockChecker;
 import cc.woverflow.hysentials.websocket.Socket;
-import cc.woverflow.hysentials.handlers.language.LanguageHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
@@ -53,7 +53,6 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.EventBus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.Sys;
 
 import java.io.File;
 
@@ -70,7 +69,7 @@ public class Hysentials {
     @Mod.Instance(MOD_ID)
     public static Hysentials INSTANCE;
 
-    public File modDir = new File(new File(Minecraft.getMinecraft().mcDataDir, "W-OVERFLOW"), MOD_NAME);
+    public File modDir = new File("OVERFLOW", MOD_NAME);
 
     private HysentialsConfig config;
     private final Logger logger = LogManager.getLogger("Hytils Reborn");
@@ -81,13 +80,17 @@ public class Hysentials {
     private final OnlineCache onlineCache = new OnlineCache();
 
     private final LobbyChecker lobbyChecker = new LobbyChecker();
-    private final ChatHandler chatHandler = new ChatHandler();
+    private ChatHandler chatHandler;
 
     public boolean isPatcher;
     public boolean isChatting;
     private boolean loadedCall;
 
     public String rank;
+
+    public HamsterCompanion hamsterCompanion;
+
+    public CubitCompanion cubitCompanion;
 
     @Mod.EventHandler
     public void onFMLPreInitialization(FMLPreInitializationEvent event) {
@@ -98,39 +101,32 @@ public class Hysentials {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        SplashProgress.setProgress(5, "Loading config");
         config = new HysentialsConfig();
 
-        SplashProgress.setProgress(6, "Loading Commands");
         CommandManager.INSTANCE.registerCommand(new HysentialsCommand());
         CommandManager.INSTANCE.registerCommand(new GroupChatCommand());
         ClientCommandHandler.instance.registerCommand(new GlobalChatCommand());
+        ClientCommandHandler.instance.registerCommand(new HypixelChatCommand());
 
-
-        SplashProgress.setProgress(7, "Loading Events");
         CosmeticsHandler.INSTANCE.initialize();
         HeightHandler.INSTANCE.initialize();
-
-        registerHandlers();
     }
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
-        SplashProgress.setProgress(8, "Finalizing");
         isPatcher = Loader.isModLoaded("patcher");
         isChatting = Loader.isModLoaded("chatting");
-        System.out.println(isChatting);
+        chatHandler = new ChatHandler();
+        registerHandlers();
 
         rank = HypixelAPIUtils.getRank(Minecraft.getMinecraft().getSession().getUsername());
 
         Socket.createSocket();
-        SplashProgress.setProgress(9, "Complete");
     }
 
     @Mod.EventHandler
     public void finishedStarting(FMLLoadCompleteEvent event) {
         this.loadedCall = true;
-        Player.CLIENT = new Player(Minecraft.getMinecraft().thePlayer.getName(), Minecraft.getMinecraft().thePlayer.getUniqueID().toString());
     }
 
     private void registerHandlers() {
@@ -138,7 +134,9 @@ public class Hysentials {
 
         // general stuff
         eventBus.register(languageHandler);
-        eventBus.register(new GroupChat());
+        if (isChatting) {
+            eventBus.register(new GroupChat());
+        }
         // chat
         eventBus.register(chatHandler);
         // lobby
@@ -147,6 +145,9 @@ public class Hysentials {
 
         // height overlay
         EventManager.INSTANCE.register(HeightHandler.INSTANCE);
+
+        cc.woverflow.hysentials.event.EventBus.INSTANCE.register(hamsterCompanion = new HamsterCompanion());
+        cc.woverflow.hysentials.event.EventBus.INSTANCE.register(cubitCompanion = new CubitCompanion());
 
         eventBus.register(new HypixelAPIUtils());
     }

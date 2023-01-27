@@ -25,6 +25,7 @@ import cc.polyfrost.oneconfig.libs.caffeine.cache.Caffeine;
 import cc.polyfrost.oneconfig.libs.eventbus.Subscribe;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
+import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.util.HypixelAPIUtils;
@@ -58,10 +59,10 @@ public class HeightHandler {
 
     public int getHeight() {
         if (currentHeight != -2) return currentHeight;
-        if (HypixelUtils.INSTANCE.getLocrawInfo() == null || jsonObject == null || Hysentials.INSTANCE.getLobbyChecker().playerIsInLobby())
+        if (LocrawUtil.INSTANCE.getLocrawInfo() == null || jsonObject == null || Hysentials.INSTANCE.getLobbyChecker().playerIsInLobby())
             return -1;
         try {
-            LocrawInfo locraw = HypixelUtils.INSTANCE.getLocrawInfo();
+            LocrawInfo locraw = LocrawUtil.INSTANCE.getLocrawInfo();
             if (cc.woverflow.hysentials.util.HypixelAPIUtils.isBedwars) {
                 if (locraw.getMapName() != null && !locraw.getMapName().trim().isEmpty()) {
                     String map = locraw.getMapName().toLowerCase(Locale.ENGLISH).replace(" ", "_");

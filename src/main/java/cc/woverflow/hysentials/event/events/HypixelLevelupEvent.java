@@ -1,6 +1,6 @@
 /*
  * Hytils Reborn - Hypixel focused Quality of Life mod.
- * Copyright (C) 2022  W-OVERFLOW
+ * Copyright (C) 2020, 2021, 2022  Polyfrost, Sk1er LLC and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,19 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package cc.woverflow.hysentials.events;
+package cc.woverflow.hysentials.event.events;
 
 import net.minecraftforge.fml.common.eventhandler.Event;
 
-public class HypixelAchievementEvent extends Event {
+public class HypixelLevelupEvent extends Event {
 
-    private final String achievement;
+    private final int level;
 
-    public HypixelAchievementEvent(String achievement) {
-        this.achievement = achievement;
+    public HypixelLevelupEvent(int level) {
+        this.level = level;
     }
 
-    public String getAchievement() {
-        return achievement;
+    public int getLevel() {
+        return level;
     }
 }

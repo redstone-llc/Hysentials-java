@@ -22,11 +22,13 @@ import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
+import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
 import cc.woverflow.chatting.chat.ChatTab;
 import cc.woverflow.chatting.chat.ChatTabs;
 import cc.woverflow.chatting.mixin.GuiNewChatAccessor;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.user.Player;
 import cc.woverflow.hysentials.util.BlockWAPIUtils;
 import net.minecraft.client.Minecraft;
@@ -51,7 +53,7 @@ public class GroupChat {
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
-        final LocrawInfo locraw = HypixelUtils.INSTANCE.getLocrawInfo();
+        final LocrawInfo locraw = LocrawUtil.INSTANCE.getLocrawInfo();
         if (event.phase != TickEvent.Phase.START || Minecraft.getMinecraft().thePlayer == null || !HypixelUtils.INSTANCE.isHypixel() || locraw == null) {
             return;
         }
@@ -59,6 +61,43 @@ public class GroupChat {
         if (++this.tick == 80) {
             if (Hysentials.INSTANCE.isChatting) {
                 Multithreading.runAsync(() -> {
+                    if (HysentialsConfig.globalChatEnabled) {
+                        if (!ChatTabs.INSTANCE.getTabs().stream().anyMatch((tab) -> tab.getName().equals("GLOBAL"))) {
+                            ChatTab tab = new ChatTab(
+                                true,
+                                "GLOBAL",
+                                true,
+                                false,
+                                Collections.singletonList("Global" + " > "),
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                16755200,
+                                16777120,
+                                10526880,
+                                ""
+                            );
+                            tab.initialize();
+
+                            Multithreading.schedule(() -> ChatTabs.INSTANCE.getTabs().add(tab), 500, TimeUnit.MILLISECONDS);
+                        } else {
+                            ChatTab tab = ChatTabs.INSTANCE.getTabs().stream().filter((t) -> t.getName().equals("GLOBAL")).findFirst().orElse(null);
+                            if (tab != null) {
+                                tab.setEnabled(true);
+                            }
+                        }
+                    } else {
+                        ChatTab tab = ChatTabs.INSTANCE.getTabs().stream().filter((t) -> t.getName().equals("GLOBAL")).findFirst().orElse(null);
+                        if (tab != null) {
+                            tab.setEnabled(false);
+                        }
+                    }
                     List<BlockWAPIUtils.Group> groups = BlockWAPIUtils.getGroups();
                     List<BlockWAPIUtils.Group> foundGroups = new ArrayList<>();
                     for (BlockWAPIUtils.Group group : groups) {
@@ -97,11 +136,8 @@ public class GroupChat {
                             10526880,
                             ""
                         );
-                        System.out.println("Adding group chat messages");
                         tab.setMessages(messages);
                         tab.initialize();
-
-                        System.out.println("Added group chat tab for " + tab.getName());
 
                         Multithreading.schedule(() -> ChatTabs.INSTANCE.getTabs().add(tab), 500, TimeUnit.MILLISECONDS);
                     }
@@ -113,17 +149,10 @@ public class GroupChat {
 
     @SubscribeEvent
     public void onWorldLoad(WorldEvent.Load event) {
-        this.tick = 79;
+        this.tick = 70;
     }
 
     public static void chat(JSONObject json) {
-        BlockWAPIUtils.Group group = Hysentials.INSTANCE.getOnlineCache().getCachedGroups().stream().filter(g -> g.getName().equalsIgnoreCase(json.getString("name"))).findFirst().get();
-        group.getMessages().add(json.getString("message"));
-        if (Hysentials.INSTANCE.isChatting) {
-            ChatTabs.INSTANCE.getTabs().stream().filter((tab) -> tab.getName().equalsIgnoreCase(json.getString("name"))).findFirst().ifPresent((tab) -> {
-                tab.getMessages().add(0, json.getString("message"));
-            });
-        }
         UChat.chat(json.getString("message"));
     }
 
@@ -138,6 +167,12 @@ public class GroupChat {
             UChat.chat(getDividerAqua());
         }
     }
+
+    public static void hideTab(String name) {
+        ChatTabs.INSTANCE.getTabs().remove(ChatTabs.INSTANCE.getTabs().stream().filter(tab -> tab.getName().equals(name)).findFirst().orElse(null));
+    }
+
+
 
     public static String getDividerAqua() {
         return "§b§m-----------------------------------------------------";

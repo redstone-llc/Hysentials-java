@@ -1,6 +1,6 @@
 /*
  * Hytils Reborn - Hypixel focused Quality of Life mod.
- * Copyright (C) 2020, 2021, 2022  Polyfrost, Sk1er LLC and contributors
+ * Copyright (C) 2022  W-OVERFLOW
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,19 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package cc.woverflow.hysentials.events;
+package cc.woverflow.hysentials.event.events;
 
+import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
-public class HypixelLevelupEvent extends Event {
+/**
+ * TitleEvent is fired when a title is being rendered.
+ * If this event is canceled, the title does not appear.
+ */
+@Cancelable
+public class TitleEvent extends Event {
 
-    private final int level;
+    private final String title;
+    private final String subtitle;
 
-    public HypixelLevelupEvent(int level) {
-        this.level = level;
+    public TitleEvent(String title, String subtitle) {
+        this.title = title;
+        this.subtitle = subtitle;
     }
 
-    public int getLevel() {
-        return level;
+    public String getTitle() {
+        return title;
+    }
+
+    public String getSubtitle() {
+        return subtitle;
     }
 }

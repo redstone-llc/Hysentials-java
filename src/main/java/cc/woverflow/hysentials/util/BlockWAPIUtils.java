@@ -36,9 +36,10 @@ public class BlockWAPIUtils {
             List<Player> players = new ArrayList<>();
             //http://localhost/
             //https://hysentials.blockworks.studio/
-            JsonElement online = NetworkUtils.getJsonElement("http://localhost/api/online");
-            JsonElement ranks = NetworkUtils.getJsonElement("http://localhost/api/ranks").getAsJsonObject().get("ranks");
+            JsonElement online = NetworkUtils.getJsonElement("https://hysentials.blockworks.studio/api/online");
+            JsonElement ranks = NetworkUtils.getJsonElement("https://hysentials.blockworks.studio/api/ranks");
             if (online.isJsonNull()) return new HashMap<>();
+            if (ranks.isJsonNull()) return new HashMap<>();
             JsonArray users = online.getAsJsonObject().get("uuids").getAsJsonArray();
             HashMap<UUID, String> onlinePlayers = new HashMap<>();
             for (JsonElement element : users) {
@@ -48,7 +49,7 @@ public class BlockWAPIUtils {
             Hysentials.INSTANCE.getOnlineCache().setOnlinePlayers(onlinePlayers);
             HashMap<UUID, String> rankCache = new HashMap<>();
             ArrayList<UUID> plusPlayers = new ArrayList<>();
-            for (JsonElement element : ranks.getAsJsonArray()) {
+            for (JsonElement element : ranks.getAsJsonObject().get("ranks").getAsJsonArray()) {
                 JsonArray uuids = element.getAsJsonObject().get("users").getAsJsonArray();
                 for (JsonElement uuid : uuids) {
                     if (onlinePlayers.containsKey(UUID.fromString(uuid.getAsString()))) {
@@ -83,7 +84,7 @@ public class BlockWAPIUtils {
 
     public static List<Group> getGroups() {
         try {
-            JsonElement groups = NetworkUtils.getJsonElement("http://localhost/api/groups");
+            JsonElement groups = NetworkUtils.getJsonElement("https://hysentials.blockworks.studio/api/groups");
             if (groups.isJsonNull()) return new ArrayList<>();
             JsonArray groupsArray = groups.getAsJsonObject().get("groups").getAsJsonArray();
             List<Group> groupList = new ArrayList<>();

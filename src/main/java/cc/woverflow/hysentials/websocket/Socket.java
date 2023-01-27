@@ -29,17 +29,14 @@ import net.minecraft.client.Minecraft;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONObject;
-import scala.util.parsing.json.JSON;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class Socket {
     public static WebSocketClient CLIENT;
@@ -53,8 +50,8 @@ public class Socket {
             serverId = UUID.randomUUID().toString().replace("-", "");
             Minecraft.getMinecraft().getSessionService().joinServer(Minecraft.getMinecraft().getSession().getProfile(), Minecraft.getMinecraft().getSession().getToken(), serverId);
 
-            WebSocketClient ws = new WebSocketClient(new URI("ws://localhost:8080")) {
-            //WebSocketClient ws = new WebSocketClient(new URI("ws://137.184.54.174:8080")) {
+            //WebSocketClient ws = new WebSocketClient(new URI("ws://localhost:8080")) {
+            WebSocketClient ws = new WebSocketClient(new URI("ws://137.184.54.174:8080")) {
                 @Override
                 public void onOpen(ServerHandshake handshakedata) {
                     System.out.println("Connected to websocket server");

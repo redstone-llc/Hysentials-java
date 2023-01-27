@@ -19,6 +19,7 @@
 package cc.woverflow.hysentials.mixin;
 
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
+import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.woverflow.hysentials.Hysentials;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ChatLine;

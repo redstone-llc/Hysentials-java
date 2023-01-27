@@ -24,23 +24,19 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Description;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
-import cc.woverflow.chatting.chat.ChatTab;
-import cc.woverflow.chatting.chat.ChatTabs;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.util.HypixelAPIUtils;
 import cc.woverflow.hysentials.websocket.Socket;
 import cc.woverflow.hytils.HytilsReborn;
 import cc.woverflow.hytils.config.HytilsConfig;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.EnumChatFormatting;
 import org.apache.commons.lang3.ArrayUtils;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Command(value = "hysentials", aliases = {"hs"})
 public class HysentialsCommand {
@@ -59,6 +55,16 @@ public class HysentialsCommand {
     @SubCommand(description = "open config", aliases = "config")
     private static void config() {
         Hysentials.INSTANCE.getConfig().openGui();
+    }
+
+    @SubCommand(aliases = "spawnhamster")
+    private static void spawnhamster() {
+        Hysentials.INSTANCE.hamsterCompanion.spawnPet(Minecraft.getMinecraft().thePlayer);
+    }
+
+    @SubCommand(aliases = "spawncubit")
+    private static void spawncubit() {
+        Hysentials.INSTANCE.cubitCompanion.spawnPet(Minecraft.getMinecraft().thePlayer);
     }
 
     @SubCommand(description = "Sets your API key.", aliases = "setkey")

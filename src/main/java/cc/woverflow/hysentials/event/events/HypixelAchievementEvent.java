@@ -16,31 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package cc.woverflow.hysentials.events;
+package cc.woverflow.hysentials.event.events;
 
-import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
-/**
- * TitleEvent is fired when a title is being rendered.
- * If this event is canceled, the title does not appear.
- */
-@Cancelable
-public class TitleEvent extends Event {
+public class HypixelAchievementEvent extends Event {
 
-    private final String title;
-    private final String subtitle;
+    private final String achievement;
 
-    public TitleEvent(String title, String subtitle) {
-        this.title = title;
-        this.subtitle = subtitle;
+    public HypixelAchievementEvent(String achievement) {
+        this.achievement = achievement;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public String getSubtitle() {
-        return subtitle;
+    public String getAchievement() {
+        return achievement;
     }
 }

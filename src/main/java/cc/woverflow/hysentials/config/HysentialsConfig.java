@@ -23,6 +23,9 @@ import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.config.migration.VigilanceMigrator;
+import cc.polyfrost.oneconfig.utils.Multithreading;
+import cc.woverflow.chatting.chat.ChatTab;
+import cc.woverflow.chatting.chat.ChatTabs;
 import cc.woverflow.hysentials.Hysentials;
 import org.apache.commons.io.FileUtils;
 
@@ -31,6 +34,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 public class HysentialsConfig extends Config {
 
@@ -48,13 +53,6 @@ public class HysentialsConfig extends Config {
     )
     public static boolean globalChatEnabled = true;
 
-
-    public static int configNumber = 0;
-
-    @Exclude
-    public static final ArrayList<String> wbMessages = new ArrayList<>();
-
-
     public HysentialsConfig() {
         super(new Mod("Hysentials", ModType.HYPIXEL, new VigilanceMigrator(new File(Hysentials.INSTANCE.modDir, "hysentials.toml").getAbsolutePath())), "hysentials.json");
         initialize();
@@ -70,14 +68,6 @@ public class HysentialsConfig extends Config {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
-
-        if (configNumber != 2) { // Config version has not been set or is outdated
-            if (configNumber == 1) {
-
-            }
-            configNumber = 2; // set this to the current config version
-            save();
         }
     }
 }
