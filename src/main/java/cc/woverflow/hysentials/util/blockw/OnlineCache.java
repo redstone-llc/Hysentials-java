@@ -20,13 +20,15 @@ package cc.woverflow.hysentials.util.blockw;
 
 import cc.woverflow.hysentials.user.Player;
 import cc.woverflow.hysentials.util.BlockWAPIUtils;
-import cc.woverflow.hysentials.util.DuoVariable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 public class OnlineCache {
     public HashMap<UUID, String> onlinePlayers = new HashMap<>();
-    public List<Player> playersCache = new ArrayList<>();
+    public HashMap<UUID, Player> playersCache = new HashMap<>();
     public HashMap<UUID, String> rankCache = new HashMap<>();
     public ArrayList<BlockWAPIUtils.Group> groups = new ArrayList<>(); //This may be a bit of a memory leak...... :P
     public ArrayList<UUID> plusPlayers = new ArrayList<>();

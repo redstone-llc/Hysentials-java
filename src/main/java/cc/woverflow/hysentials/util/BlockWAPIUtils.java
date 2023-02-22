@@ -20,10 +20,11 @@ package cc.woverflow.hysentials.util;
 
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
 import cc.woverflow.hysentials.user.Player;
 import com.google.gson.*;
+import org.jetbrains.annotations.NotNull;
 
-import java.beans.ConstructorProperties;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,15 +32,23 @@ import java.util.UUID;
 
 public class BlockWAPIUtils {
 
+    @NotNull
     public static HashMap<UUID, String> getOnline() {
         try {
             List<Player> players = new ArrayList<>();
             //http://localhost/
             //https://hysentials.blockworks.studio/
-            JsonElement online = NetworkUtils.getJsonElement("https://hysentials.blockworks.studio/api/online");
-            JsonElement ranks = NetworkUtils.getJsonElement("https://hysentials.blockworks.studio/api/ranks");
-            if (online.isJsonNull()) return new HashMap<>();
-            if (ranks.isJsonNull()) return new HashMap<>();
+            //https://hysentials.redstone.llc/
+            JsonElement online = null;
+            JsonElement ranks = null;
+            try {
+                online = NetworkUtils.getJsonElement("https://hysentials.redstone.llc/api/online");
+                ranks = NetworkUtils.getJsonElement("https://hysentials.redstone.llc/api/ranks");
+            } catch (Exception ignored) {
+            }
+            if (online == null || online.isJsonNull()) return new HashMap<>();
+            if (ranks == null || ranks.isJsonNull()) return new HashMap<>();
+
             JsonArray users = online.getAsJsonObject().get("uuids").getAsJsonArray();
             HashMap<UUID, String> onlinePlayers = new HashMap<>();
             for (JsonElement element : users) {
@@ -71,8 +80,12 @@ public class BlockWAPIUtils {
                     }
                 }
             }
+            players.forEach(player -> {
+                Hysentials.INSTANCE.getOnlineCache().playersCache.put(UUID.fromString(player.getUuid()), player);
+            });
             Hysentials.INSTANCE.getOnlineCache().rankCache = rankCache;
             Hysentials.INSTANCE.getOnlineCache().plusPlayers = plusPlayers;
+
             return onlinePlayers;
         } catch (Exception e) {
             return new HashMap<>();
@@ -84,7 +97,7 @@ public class BlockWAPIUtils {
 
     public static List<Group> getGroups() {
         try {
-            JsonElement groups = NetworkUtils.getJsonElement("https://hysentials.blockworks.studio/api/groups");
+            JsonElement groups = NetworkUtils.getJsonElement("https://hysentials.redstone.llc/api/groups");
             if (groups.isJsonNull()) return new ArrayList<>();
             JsonArray groupsArray = groups.getAsJsonObject().get("groups").getAsJsonArray();
             List<Group> groupList = new ArrayList<>();
@@ -103,28 +116,43 @@ public class BlockWAPIUtils {
         ADMIN("1", "§c[ADMIN] ", "§c"),
         MOD("2", "§2[MOD] ", "§2"),
         CREATOR("3", "§3[§fCREATOR§3] ", "§3"),
-        DEFAULT("replace", "", "");
+        DEFAULT("replace", "", "", "");
 
         private final String id;
         private final String prefix;
         private final String color;
+
+        private String placeholder;
 
         Rank(String id, String prefix, String color) {
             this.id = id;
             this.prefix = prefix;
             this.color = color;
         }
+        Rank(String id, String prefix, String color, String placeholder) {
+            this.id = id;
+            this.prefix = prefix;
+            this.color = color;
+            this.placeholder = placeholder;
+        }
 
         public String getId() {
             return id;
         }
 
-        public String getPrefix() {
+        public String getPrefix(String name) {
             return prefix;
         }
 
         public String getColor() {
             return color;
+        }
+
+        public String getPlaceholder() {
+            if (placeholder == null && ImageIcon.getIcon(name().toLowerCase()) != null) {
+                return color + ":" + ImageIcon.getIcon(name().toLowerCase()).getName() + ": ";
+            }
+            return placeholder;
         }
     }
 
@@ -141,7 +169,6 @@ public class BlockWAPIUtils {
         private final List<String> hidden;
 
 
-        @ConstructorProperties({"name", "groupId", "owner", "members", "invites"})
         public Group(String name, String groupId, String owner, List<String> members, List<String> officers, List<String> invites, String color, JsonObject settings, List<String> messages, List<String> hidden) {
             this.name = name;
             this.groupId = groupId;

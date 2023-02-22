@@ -19,55 +19,47 @@ package cc.woverflow.hysentials.pets.cubit;
 
 import cc.polyfrost.oneconfig.events.event.TickEvent;
 import cc.woverflow.hysentials.event.InvokeEvent;
-import cc.woverflow.hysentials.event.render.RenderEntitiesEvent;
-import cc.woverflow.hysentials.event.render.RenderPlayerEvent;
 import cc.woverflow.hysentials.event.world.WorldChangeEvent;
 import cc.woverflow.hysentials.pets.AbstractCosmetic;
+import cc.woverflow.hysentials.user.Player;
+import cc.woverflow.hysentials.util.UUIDUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class CubitCompanion extends AbstractCosmetic {
-    private List<EntityPlayer> toAdd = new ArrayList<>();
     private Map<UUID, EntityCubit> hamsters = new HashMap<>();
 
     public CubitCompanion() {
         super(false);
     }
 
-    @InvokeEvent
-    public void renderEntities(RenderEntitiesEvent entitiesEvent) {
-        renderPlayer(new RenderPlayerEvent(Minecraft.getMinecraft().thePlayer, Minecraft.getMinecraft().getRenderManager(), 0, 0, 0,
-            entitiesEvent.getPartialTicks()));
-    }
-
-    @InvokeEvent
-    public void renderPlayer(RenderPlayerEvent e) {
-        if (Minecraft.getMinecraft().theWorld == null) return;
-        UUID uuid = e.getEntity().getUniqueID();
-
-        toAdd.add(e.getEntity());
-    }
+    private int ticks = 0;
 
     @InvokeEvent
     public void onTick(TickEvent e) {
         WorldClient theWorld = Minecraft.getMinecraft().theWorld;
         if (theWorld == null) return;
-
-        toAdd.forEach(this::spawnPet);
-        toAdd.clear();
-
-        Iterator<Map.Entry<UUID, EntityCubit>> ite = hamsters.entrySet().iterator();
-
-        while (ite.hasNext()) {
-            Map.Entry<UUID, EntityCubit> next = ite.next();
-
-            if (!worldHasEntityWithUUID(theWorld, next.getKey())) {
-                theWorld.unloadEntities(Collections.singletonList(next.getValue()));
-                ite.remove();
+        if (ticks++ % 20 != 0) return;
+        for (EntityPlayer player : theWorld.playerEntities) {
+            if (player == null) continue;
+            if (player.getUniqueID().equals(UUIDUtil.getClientUUID())) continue;
+            if (player.isDead) continue;
+            if (!hamsters.containsKey(player.getUniqueID())) {
+                if (!worldHasEntityWithUUID(theWorld, player.getUniqueID())) {
+                    spawnPet(player);
+                }
+            } else {
+                boolean isPlus = Player.getPlayer(player).isPlus();
+                if (!isPlus) {
+                    hamsters.get(player.getUniqueID()).setDead();
+                    hamsters.remove(player.getUniqueID());
+                }
             }
         }
     }
@@ -83,6 +75,7 @@ public class CubitCompanion extends AbstractCosmetic {
 
     @Override
     public void spawnPet(EntityPlayer player) {
+        if (!Player.getPlayer(player).isPlus()) return;
         WorldClient theWorld = Minecraft.getMinecraft().theWorld;
         EntityCubit hamster = new EntityCubit(theWorld);
         hamster.setPosition(player.posX, player.posY, player.posZ);

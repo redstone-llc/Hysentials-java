@@ -19,13 +19,12 @@
 package cc.woverflow.hysentials.config;
 
 import cc.polyfrost.oneconfig.config.Config;
-import cc.polyfrost.oneconfig.config.annotations.*;
+import cc.polyfrost.oneconfig.config.annotations.Button;
+import cc.polyfrost.oneconfig.config.annotations.Switch;
+import cc.polyfrost.oneconfig.config.annotations.Text;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.config.migration.VigilanceMigrator;
-import cc.polyfrost.oneconfig.utils.Multithreading;
-import cc.woverflow.chatting.chat.ChatTab;
-import cc.woverflow.chatting.chat.ChatTabs;
 import cc.woverflow.hysentials.Hysentials;
 import org.apache.commons.io.FileUtils;
 
@@ -33,15 +32,13 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
 
 public class HysentialsConfig extends Config {
 
     @Text(
         name = "Chat Prefix",
         category = "General",
+        subcategory = "General",
         description = "The prefix of most Hysentials related messages, so you know the message is a result of Hysentials and not other mods."
     )
     public static String chatPrefix = "&b[HYSENTIALS]";
@@ -49,13 +46,45 @@ public class HysentialsConfig extends Config {
     @Switch(
         name = "Global Chat Enabled",
         category = "General",
+        subcategory = "Chat",
         description = "Enable global chat. This will allow you to chat with other players who are using Hysentials."
     )
     public static boolean globalChatEnabled = true;
 
+    @Switch(
+        name = "Futuristic Ranks",
+        category = "General",
+        subcategory = "Ranks",
+        description = "Enable futuristic ranks. This will allow you to see an image as a users rank."
+    )
+    public static boolean futuristicRanks = true;
+
+    @Button(
+        name = "Hamster Pet",
+        category = "Pets",
+        subcategory = "Hamster",
+        description = "Will enable the hamster pet, if you have it unlocked.",
+        text = "DISABLED"
+    )
+    public void hamsterEnabled() {
+
+    }
+
+    @Button(
+        name = "Cubit Pet",
+        category = "Pets",
+        subcategory = "Cubit",
+        description = "Will enable the cubit pet, if you have it unlocked. Only available for \"Special\" Plus Players.",
+        text = "DISABLED"
+    )
+    public void cubitEnabled() {
+
+    }
+
     public HysentialsConfig() {
         super(new Mod("Hysentials", ModType.HYPIXEL, new VigilanceMigrator(new File(Hysentials.INSTANCE.modDir, "hysentials.toml").getAbsolutePath())), "hysentials.json");
         initialize();
+        new HytilsExtensionConfig(this.mod);
         try {
             File modDir = Hysentials.INSTANCE.modDir;
             File oldModDir = new File(modDir.getParentFile(), "Hysentials");

@@ -19,12 +19,16 @@ package cc.woverflow.hysentials.pets;
 
 import cc.woverflow.hysentials.event.InvokeEvent;
 import cc.woverflow.hysentials.event.world.WorldChangeEvent;
+import cc.woverflow.hysentials.user.Player;
 import cc.woverflow.hysentials.util.UUIDUtil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static java.lang.Thread.sleep;
 
 /**
  * Created by mitchellkatz on 3/17/18. Designed for production use on Sk1er.club
@@ -50,6 +54,24 @@ public abstract class AbstractCosmetic {
         if (id == null) {
             return;
         }
+        new Thread(() -> {
+            boolean playerExists = false;
+            while (!playerExists) {
+                if (Player.CLIENT == null) {
+                    continue;
+                }
+                if (Player.CLIENT.getClientPlayer() == null) {
+                    continue;
+                }
+                spawnPet(Minecraft.getMinecraft().thePlayer);
+                playerExists = true;
+                try {
+                    sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
     }
 
     public abstract void spawnPet(EntityPlayer player);

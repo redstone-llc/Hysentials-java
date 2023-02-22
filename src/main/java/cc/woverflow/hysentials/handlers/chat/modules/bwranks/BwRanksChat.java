@@ -19,67 +19,116 @@
 package cc.woverflow.hysentials.handlers.chat.modules.bwranks;
 
 import cc.woverflow.hysentials.Hysentials;
-import cc.woverflow.hysentials.command.HysentialsCommand;
-import cc.woverflow.hysentials.handlers.chat.ChatReceiveModule;
+import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.util.BlockWAPIUtils;
-import cc.woverflow.hysentials.util.DuoVariable;
-import cc.woverflow.hysentials.util.blockw.OnlineCache;
+import cc.woverflow.hysentials.util.HypixelRanks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.ChatComponentText;
-import net.minecraftforge.client.event.ClientChatReceivedEvent;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.lwjgl.Sys;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class BwRanksChat implements ChatReceiveModule {
-    @Override
-    public void onMessageReceived(@NotNull ClientChatReceivedEvent event) {
-        try {
-            final String message = event.message.getFormattedText();
-            if (HysentialsCommand.collecting) {
-                if (StringUtils.contains(message, Minecraft.getMinecraft().thePlayer.getName())) {
-                    HysentialsCommand.messages.add(message);
-                }
+public class BwRanksChat {
+
+    static HashMap<UUID, String> previousNames = new HashMap<>();
+    public static String onMessageReceivedS(String message) {
+        HashMap<UUID, String> users = new HashMap<>(previousNames);
+        Minecraft.getMinecraft().getNetHandler().getPlayerInfoMap().forEach(playerInfo -> {
+            if (!previousNames.containsKey(playerInfo.getGameProfile().getId())) {
+                users.put(playerInfo.getGameProfile().getId(), playerInfo.getGameProfile().getName());
+                previousNames.put(playerInfo.getGameProfile().getId(), playerInfo.getGameProfile().getName());
             }
-            for (Map.Entry<UUID, String> entry : Hysentials.INSTANCE.getOnlineCache().getOnlinePlayers().entrySet()) {
-                UUID uuid = entry.getKey();
-                String name = entry.getValue();
-                BlockWAPIUtils.Rank rank = null;
-                try {
-                    rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().getRankCache().get(uuid).toUpperCase());
-                } catch (Exception ignored) {
-                    rank = BlockWAPIUtils.Rank.DEFAULT;
+        });
+
+        for (Map.Entry<UUID, String> user : users.entrySet()) {
+            UUID uuid = user.getKey();
+            String name = user.getValue();
+
+            String regex1 = "\\[[A-Za-z§0-9+]+] " + name;
+            String regex2 = "(§r§7|§7)" + name;
+            String regex3 = "[a-f0-9§]{2}" + name;
+
+            String replacement = Hysentials.INSTANCE.getOnlineCache().getPlayerDisplayNames().get(uuid);
+            if (replacement == null) {
+                continue;
+            }
+            if (Pattern.compile(regex1).matcher(message).find(0)) {
+                message = message.replaceAll("\\[[A-Za-z§0-9+]+] " + name, replacement).replace("§7:", "§f:");
+            } else if (Pattern.compile(regex2).matcher(message.split("§7:")[0]).find(0)) {
+                message = message.replaceAll("(§r§7|§7)" + name, replacement).replace("§7:", "§f:");
+            } else if (Pattern.compile(regex3).matcher(message).find(0)) {
+                message = message.replaceAll("[a-f0-9§]{2}" + name, replacement).replace("§7:", "§f:");
+            }
+        }
+        return message;
+    }
+
+    public static String getMessage(String message) {
+        try {
+            HashMap<UUID, String> users = new HashMap<>(previousNames);
+            Minecraft.getMinecraft().getNetHandler().getPlayerInfoMap().forEach(playerInfo -> {
+                if (!previousNames.containsKey(playerInfo.getGameProfile().getId())) {
+                    users.put(playerInfo.getGameProfile().getId(), playerInfo.getGameProfile().getName());
+                    previousNames.put(playerInfo.getGameProfile().getId(), playerInfo.getGameProfile().getName());
                 }
-                if (!rank.equals(BlockWAPIUtils.Rank.DEFAULT)) {
-                    String regex1 = "\\[[A-Za-z§0-9+]+] " + name;
-                    String regex2 = "(§r§7|§7)" + name;
-                    String regex3 = "[a-f0-9§]{2}" + name;
-                    if (Pattern.compile(regex1).matcher(message).find(0)) {
-                        event.message = colorMessage(message.replaceAll("\\[[A-Za-z§0-9+]+] " + name, rank.getPrefix() + name + getPlus(uuid)).replace("§7:", "§f:"));
-                    } else if (Pattern.compile(regex2).matcher(message).find(0)) {
-                        event.message = colorMessage(message.replaceAll("(§r§7|§7)" + name, rank.getPrefix() + name + getPlus(uuid)).replace("§7:", "§f:"));
+            });
+            for (Map.Entry<UUID, String> user : users.entrySet()) {
+                UUID uuid = user.getKey();
+                String name = user.getValue();
+                BlockWAPIUtils.Rank rank = null;
+                if (Hysentials.INSTANCE.getOnlineCache().getOnlinePlayers().containsKey(uuid)) {
+                    try {
+                        rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().getRankCache().get(uuid).toUpperCase());
+                    } catch (Exception ignored) {
+                        rank = BlockWAPIUtils.Rank.DEFAULT;
+                    }
+                }
+
+                String regex1 = "\\[[A-Za-z§0-9+]+] " + name;
+                String regex2 = "(§r§7|§7)" + name;
+                String regex3 = "[a-f0-9§]{2}" + name;
+                if (rank != null && rank != BlockWAPIUtils.Rank.DEFAULT) {
+                    String replacement = (rank.getPrefix(name) + name + getPlus(uuid));
+                    if (HysentialsConfig.futuristicRanks) {
+                        replacement = (rank.getPlaceholder() + name + getPlus(uuid));
+                    }
+                    Matcher m1 = Pattern.compile(regex1).matcher(message);
+                    if (m1.find(0)) {
+                        message = message.replaceAll("\\[[A-Za-z§0-9+]+] " + name, replacement).replace("§7:", "§f:");
+                    } else if (Pattern.compile(regex2).matcher(message.split("§7:")[0]).find(0)) {
+                        message = message.replaceAll("(§r§7|§7)" + name, replacement).replace("§7:", "§f:");
                     } else if (Pattern.compile(regex3).matcher(message).find(0)) {
-                        event.message = colorMessage(message.replaceAll("[a-f0-9§]{2}" + name, rank.getColor() + name + getPlus(uuid)).replace("§7:", "§f:"));
+                        message = message.replaceAll("[a-f0-9§]{2}" + name, replacement).replace("§7:", "§f:");
                     }
                 } else {
-                    event.message = colorMessage(message.replaceAll(name, name + getPlus(uuid)));
+                    Matcher m1 = Pattern.compile(regex1).matcher(message);
+                    if (m1.find(0)) {
+                        message = message.replaceAll("\\[[A-Za-z§0-9+]+] " + name, getReplacement(m1.group(0).split(" ")[0], name, uuid));
+                    }
+
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        return message;
     }
 
-    public String getPlus(UUID id) {
+    public static String getReplacement(String match, String name, UUID uuid) {
+        String replacement = "";
+        for (HypixelRanks rank : HypixelRanks.values()) {
+            if (rank.getPrefix().replace(" ", "").equals(match)) {
+                replacement = (rank.getPrefix() + name + getPlus(uuid));
+                if (HysentialsConfig.futuristicRanks) {
+                    replacement = (rank.getAsPlaceholder() + name + getPlus(uuid));
+                }
+            }
+        }
+        return replacement;
+    }
+
+
+    public static String getPlus(UUID id) {
         return Hysentials.INSTANCE.getOnlineCache().getPlusPlayers().contains(id) ? " §6[+]§r" : "";
     }
 }

@@ -19,7 +19,6 @@
 package cc.woverflow.hysentials.handlers.chat;
 
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
-import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.handlers.chat.modules.bwranks.BwRanksChat;
 import cc.woverflow.hysentials.handlers.chat.modules.misc.GlobalChatStuff;
@@ -41,7 +40,10 @@ public class ChatHandler {
     private final List<ChatReceiveResetModule> resetModules = new ArrayList<>();
 
     public ChatHandler() {
-        this.registerModule(new BwRanksChat());
+
+    }
+
+    public void init () {
         if (Hysentials.INSTANCE.isChatting) {
             this.registerModule(new GroupChatMessage());
         }
@@ -96,6 +98,10 @@ public class ChatHandler {
             try {
                 if (module.isEnabled()) {
                     module.onMessageReceived(event);
+                    IChatComponent comp = module.onMessageReceivedS(event);
+                    if (comp != null) {
+                        event.message = comp;
+                    }
                     if (event.isCanceled()) {
                         return;
                     }

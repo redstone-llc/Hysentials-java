@@ -18,8 +18,6 @@
 
 package cc.woverflow.hysentials.mixin;
 
-import cc.woverflow.hysentials.event.EventBus;
-import cc.woverflow.hysentials.event.world.WorldChangeEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
@@ -32,9 +30,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
 public class MinecraftMixin_LeftClickInteract {
@@ -53,8 +49,8 @@ public class MinecraftMixin_LeftClickInteract {
         return instance.clickBlock(itemstack, block1);
     }
 
-    @Inject(method = "loadWorld(Lnet/minecraft/client/multiplayer/WorldClient;)V", at = @At("HEAD"))
-    private void loadWorld(WorldClient worldClient, CallbackInfo ci) {
-        EventBus.INSTANCE.post(new WorldChangeEvent());
-    }
+//    @Inject(method = "loadWorld(Lnet/minecraft/client/multiplayer/WorldClient;)V", at = @At("HEAD"))
+//    private void loadWorld(WorldClient worldClient, CallbackInfo ci) {
+//        EventBus.INSTANCE.post(new WorldChangeEvent());
+//    }
 }

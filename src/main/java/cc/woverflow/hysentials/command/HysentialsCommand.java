@@ -18,25 +18,27 @@
 
 package cc.woverflow.hysentials.command;
 
+import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
-import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
-import cc.polyfrost.oneconfig.utils.commands.annotations.Description;
-import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
-import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
+import cc.polyfrost.oneconfig.utils.commands.annotations.*;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
+import cc.woverflow.hysentials.handlers.chat.modules.bwranks.BwRanksChat;
 import cc.woverflow.hysentials.util.HypixelAPIUtils;
 import cc.woverflow.hysentials.websocket.Socket;
 import cc.woverflow.hytils.HytilsReborn;
 import cc.woverflow.hytils.config.HytilsConfig;
 import net.minecraft.client.Minecraft;
+import net.minecraft.event.ClickEvent;
 import net.minecraft.util.EnumChatFormatting;
 import org.apache.commons.lang3.ArrayUtils;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Command(value = "hysentials", aliases = {"hs"})
 public class HysentialsCommand {
@@ -57,14 +59,43 @@ public class HysentialsCommand {
         Hysentials.INSTANCE.getConfig().openGui();
     }
 
-    @SubCommand(aliases = "spawnhamster")
-    private static void spawnhamster() {
-        Hysentials.INSTANCE.hamsterCompanion.spawnPet(Minecraft.getMinecraft().thePlayer);
+    @SubCommand(description = "test command", aliases = "test")
+    private static void test(String command, @Greedy String args) {
+        if (Minecraft.getMinecraft().thePlayer.getName().equals("EndKloon")) {
+            switch (command.toLowerCase()) {
+                case "socket": {
+                    Hysentials.INSTANCE.sendMessage("§aSocket is " + (Socket.CLIENT.isOpen() ? "connected" : "disconnected"));
+                    break;
+                }
+                case "size": {
+                    Hysentials.INSTANCE.sendMessage("§aSize: " + Minecraft.getMinecraft().fontRendererObj.getStringWidth(args));
+                    break;
+                }
+                case "rankicon": {
+                    Hysentials.INSTANCE.sendMessage("§aTranslated Message: " + BwRanksChat.onMessageReceivedS(ChatColor.Companion.translateAlternateColorCodes('&', args)));
+                    break;
+                }
+                case "rankicon2": {
+                    Hysentials.INSTANCE.sendMessage("§aTranslated Message: " + Hysentials.INSTANCE.getOnlineCache().playerDisplayNames.get(UUID.fromString(args)));
+                    break;
+                }
+                case "alluuids": {
+                    Minecraft.getMinecraft().getNetHandler().getPlayerInfoMap().forEach(playerInfo -> {
+                        UTextComponent textComponent = new UTextComponent("§a" + playerInfo.getGameProfile().getName() + ": " + playerInfo.getGameProfile().getId());
+                        textComponent.setClick(ClickEvent.Action.SUGGEST_COMMAND, playerInfo.getGameProfile().getId().toString());
+                        UChat.chat(textComponent);
+                    });
+                    break;
+                }
+            }
+        }
     }
 
-    @SubCommand(aliases = "spawncubit")
-    private static void spawncubit() {
-        Hysentials.INSTANCE.cubitCompanion.spawnPet(Minecraft.getMinecraft().thePlayer);
+    @SubCommand(aliases = "reconnect")
+    private static void reconnect() {
+        if (Socket.CLIENT != null && Socket.CLIENT.isOpen())
+            Socket.CLIENT.close();
+        Socket.createSocket();
     }
 
     @SubCommand(description = "Sets your API key.", aliases = "setkey")
@@ -99,7 +130,6 @@ public class HysentialsCommand {
             Multithreading.runAsync(() -> {
                 JSONObject response = Socket.data;
                 response.put("server", false);
-                System.out.println(response);
                 Socket.CLIENT.send(response.toString());
                 Socket.linking = false;
                 Socket.data = null;

@@ -4,15 +4,11 @@ import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.util.BlockWAPIUtils;
 import cc.woverflow.hysentials.util.HypixelAPIUtils;
-import cc.woverflow.hysentials.util.blockw.OnlineCache;
 import cc.woverflow.hytils.config.HytilsConfig;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.authlib.GameProfile;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.ItemInWorldManager;
-import net.minecraft.world.WorldServer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +22,22 @@ public class Player {
     private boolean isOnline;
     private String username;
     private final String uuid;
+    private String displayName;
     private final List<String> groups;
 
     public Player(String username, String uuid) {
         this.username = username;
         this.uuid = uuid;
         this.groups = new ArrayList<>();
+    }
+
+    public EntityPlayer getClientPlayer() {
+        if (this == CLIENT) {
+            return Minecraft.getMinecraft().thePlayer;
+        } else {
+            if (Minecraft.getMinecraft().theWorld == null) return null;
+            return Minecraft.getMinecraft().theWorld.getPlayerEntityByUUID(UUID.fromString(uuid));
+        }
     }
 
     public String getUuid() {
@@ -58,14 +64,26 @@ public class Player {
         return groups;
     }
 
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     /*
     This method is only supposed to be used occasionally, as it is very slow. It is recommended to use the cache instead. (OnlineCache)
 
     Should be used in an async thread.
      */
-    public String getDisplayName() {
+    public String getDisplayName(boolean cache) {
+        if (cache && displayName != null && !displayName.isEmpty()) return displayName;
+
         String displayName = username;
-        JsonElement request = NetworkUtils.getJsonElement("https://api.hypixel.net/player?key" + HytilsConfig.apiKey + "&uuid=" + uuid.replace("-", ""));
+        if (uuid == null) return displayName;
+        try {
+            UUID.fromString(uuid);
+        } catch (IllegalArgumentException e) {
+            return displayName;
+        }
+        JsonElement request = NetworkUtils.getJsonElement("https://api.hypixel.net/player?key=" + HytilsConfig.apiKey + "&uuid=" + uuid.replace("-", ""));
         if (request.isJsonNull()) return displayName;
         if (request.getAsJsonObject().get("player").isJsonNull()) return displayName;
         JsonObject player = request.getAsJsonObject().get("player").getAsJsonObject();
@@ -107,6 +125,7 @@ public class Player {
             }
         }
         Hysentials.INSTANCE.getOnlineCache().playerDisplayNames.put(UUID.fromString(uuid), displayName);
+        this.displayName = displayName;
         return displayName;
     }
 
@@ -124,5 +143,27 @@ public class Player {
 
     public void setOnline(boolean online) {
         isOnline = online;
+    }
+
+
+    public static Player getPlayer(UUID uuid) {
+        return Hysentials.INSTANCE.getOnlineCache().playersCache.get(uuid);
+    }
+
+    public static Player getPlayer(EntityPlayer player) {
+        return getPlayer(player.getUniqueID());
+    }
+
+    public static Player getPlayer() {
+        return CLIENT;
+    }
+
+    public static Player getPlayer(String username) {
+        for (Map.Entry<UUID, Player> entry : Hysentials.INSTANCE.getOnlineCache().playersCache.entrySet()) {
+            if (entry.getValue().getUsername().equalsIgnoreCase(username)) {
+                return entry.getValue();
+            }
+        }
+        return null;
     }
 }

@@ -18,6 +18,7 @@
 
 package cc.woverflow.hysentials.handlers.chat;
 
+import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.common.MinecraftForge;
 import org.jetbrains.annotations.NotNull;
@@ -44,6 +45,12 @@ public interface ChatReceiveModule extends cc.woverflow.hysentials.handlers.chat
      *
      * @param event a {@link ClientChatReceivedEvent}
      */
-    void onMessageReceived(@NotNull ClientChatReceivedEvent event);
+    default void onMessageReceived(@NotNull ClientChatReceivedEvent event) {
+
+    }
+
+    default IChatComponent onMessageReceivedS(@NotNull ClientChatReceivedEvent event) {
+        return null;
+    }
 
 }

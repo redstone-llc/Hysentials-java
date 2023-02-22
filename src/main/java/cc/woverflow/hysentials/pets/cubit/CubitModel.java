@@ -142,10 +142,7 @@ public class CubitModel extends ModelBase
 
     @Override
     public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float p_78086_2_, float p_78086_3_, float partialTickTime) {
-        Shape9.setRotationPoint(-2.4F, 19F, 5.0F);
-        Shape9.rotateAngleX = ((float) Math.PI * 3F / 2F);
-        Shape10.setRotationPoint(0.4F, 19F, 5.0F);
-        Shape10.rotateAngleX = ((float) Math.PI * 3F / 2F);
+
     }
 
     public void setRotationAngles(float f, float f1, float f2, float f3, float f4, float f5, Entity entity)

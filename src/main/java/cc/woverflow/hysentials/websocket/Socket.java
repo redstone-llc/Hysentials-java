@@ -19,22 +19,28 @@
 package cc.woverflow.hysentials.websocket;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.handlers.groupchats.GroupChat;
+import cc.woverflow.hysentials.user.Player;
 import cc.woverflow.hysentials.util.DuoVariable;
 import cc.woverflow.hytils.config.HytilsConfig;
 import com.mojang.authlib.exceptions.AuthenticationException;
+import kotlin.random.Random;
 import net.minecraft.client.Minecraft;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONObject;
 
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -47,11 +53,17 @@ public class Socket {
 
     public static void createSocket() {
         try {
-            serverId = UUID.randomUUID().toString().replace("-", "");
-            Minecraft.getMinecraft().getSessionService().joinServer(Minecraft.getMinecraft().getSession().getProfile(), Minecraft.getMinecraft().getSession().getToken(), serverId);
+            serverId = randomString(Random.Default.nextInt(3, 16));
+            String hash = hash("Hysentials_" + serverId);
+
+            Minecraft.getMinecraft().getSessionService().joinServer(
+                Minecraft.getMinecraft().getSession().getProfile(),
+                Minecraft.getMinecraft().getSession().getToken(),
+                hash
+            );
 
             //WebSocketClient ws = new WebSocketClient(new URI("ws://localhost:8080")) {
-            WebSocketClient ws = new WebSocketClient(new URI("ws://137.184.54.174:8080")) {
+            WebSocketClient ws = new WebSocketClient(new URI("wss://socket.redstone.llc:8443")) {
                 @Override
                 public void onOpen(ServerHandshake handshakedata) {
                     System.out.println("Connected to websocket server");
@@ -65,17 +77,39 @@ public class Socket {
                 @Override
                 public void onMessage(String message) {
                     JSONObject json = new JSONObject(message);
-                    if (json.has("success") && json.has("authenticated") && json.getBoolean("success") && json.getBoolean("authenticated")) {
-                        UChat.chat(HysentialsConfig.chatPrefix + " §aLogged in successfully!");
-                        CLIENT = this;
-                    }
                     if (json.has("method")) {
                         switch (json.getString("method")) {
+                            case "login": {
+                                if (json.has("success") && json.getBoolean("success")) {
+                                    UChat.chat(HysentialsConfig.chatPrefix + " §aLogged in successfully!");
+                                    CLIENT = this;
+                                }
+                                break;
+                            }
                             case "chat": {
-                                UChat.chat((HytilsConfig.shortChannelNames ? "&6Gl > " : "&6Global > ")
-                                    + json.getString("displayName")
-                                    + "&f: "
-                                    + json.getString("message"));
+                                System.out.println(json);
+                                Player player = Player.getPlayer(json.getString("username"));
+                                System.out.println(player.getDisplayName(true));
+                                if (player == null) {
+                                    if (HysentialsConfig.futuristicRanks) {
+                                        UChat.chat(":globalchat:"
+                                            + "&f" + json.getString("username")
+                                            + "&f: "
+                                            + json.getString("message"));
+                                    } else {
+                                        UChat.chat((HytilsConfig.shortChannelNames ? "&6Gl > " : "&6Global > ")
+                                            + "&f" + json.getString("username")
+                                            + "&f: "
+                                            + json.getString("message"));
+                                    }
+                                }
+                                Minecraft.getMinecraft().thePlayer.addChatMessage(UTextComponent.Companion.from(
+                                        (HytilsConfig.shortChannelNames ? "&6Gl > " : "&6Global > ")
+                                                + player.getDisplayName(true)
+                                                + "&f: "
+                                                + json.getString("message")
+                                ));
+
                                 break;
                             }
 
@@ -130,5 +164,30 @@ public class Socket {
         } catch (URISyntaxException | AuthenticationException e) {
             e.printStackTrace();
         }
+    }
+
+    private static String randomString(int size) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < size; i++) {
+            int random = (int) (Math.random() * chars.length());
+            sb.append(chars.charAt(random));
+        }
+        return sb.toString();
+    }
+
+    public static String hash(String str) {
+        try {
+            byte[] digest = digest(str, "SHA-1");
+            return new BigInteger(digest).toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static byte[] digest(String str, String algorithm) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(algorithm);
+        byte[] strBytes = str.getBytes(StandardCharsets.UTF_8);
+        return md.digest(strBytes);
     }
 }

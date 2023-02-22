@@ -73,10 +73,6 @@ public class SplashProgress {
     private static ResourceLocation splash;
     private static boolean done = false;
     private static boolean introDone = false;
-
-    // Font renderer
-    private static HysentialsFontRenderer raleway;
-    private static HysentialsFontRenderer roboto;
     private static Texture fontTexture;
     private static Texture logoTexture;
     private static Texture forgeTexture;
@@ -116,8 +112,6 @@ public class SplashProgress {
      */
     public static void drawSplash() {
         boolean defaultEnabled = !System.getProperty("os.name").toLowerCase().contains("mac");
-
-        System.out.println("Drawing splash");
 
         if (!defaultEnabled) return;
         // Get the users screen width and height to apply

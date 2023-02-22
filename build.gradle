@@ -26,7 +26,7 @@ compileJava.options.encoding = 'UTF-8'
 loom {
     launchConfigs {
         client {
-            arg("--tweakClass", "cc.polyfrost.oneconfigwrapper.OneConfigWrapper")
+            arg("--tweakClass", "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker")
             arg("--release", "8")
             property("onecore.mixin", "mixins.hysentials.json")
 
@@ -63,8 +63,9 @@ dependencies {
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
 
     compileOnly('cc.polyfrost:oneconfig-1.8.9-forge:0.2.0-alpha159')
-    include('cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-alpha+')
+    include('cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta+')
     include("org.java-websocket:Java-WebSocket:1.5.3")
+    include('org.reflections:reflections:0.10.2')
     include("org.json:json:20220924")
     include ('org.slick2d:slick2d-core:1.0.2') {
         exclude module: 'lwjgl'
@@ -72,7 +73,7 @@ dependencies {
 
     compileOnly('org.spongepowered:mixin:0.7.11-SNAPSHOT')
 
-    compileOnly files('libs/Hytils.Reborn-1.5.1-beta1.jar')
+    compileOnly files('libs/Hytils Reborn-1.5.1-beta4alpha3.jar')
     compileOnly("me.djtheredstoner:DevAuth-forge-legacy:1.1.0")
 }
 
@@ -119,7 +120,7 @@ jar {
             'FMLAT': "hysentials_at.cfg",
             'MixinConfigs': "mixins.hysentials.json",
             "TweakOrder": "0",
-            'TweakClass': "cc.polyfrost.oneconfigwrapper.OneConfigWrapper"
+            'TweakClass': "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker"
     )
     //set the destination directory to be the desktop for easy testing
 }
