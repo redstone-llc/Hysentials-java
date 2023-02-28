@@ -11,14 +11,13 @@ import net.minecraft.util.ResourceLocation;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ImageIcon {
-    public static List<ImageIcon> imageIcons = new ArrayList<>();
+    public static HashMap<String, ImageIcon> imageIcons = new HashMap<>();
     public static Random random = new Random();
 
     private final ResourceLocation resourceLocation;
@@ -44,7 +43,7 @@ public class ImageIcon {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        ImageIcon.imageIcons.add(this);
+        ImageIcon.imageIcons.put(name, this);
     }
 
 
@@ -80,17 +79,33 @@ public class ImageIcon {
                 return text;
             }
             int i = imageIcon.getWidth();
+
             String first = text.substring(0, text.indexOf(":" + group + ":"));
             String second = text.substring(text.indexOf(":" + group + ":") + group.length() + 2);
 
-            int i1 = Minecraft.getMinecraft().fontRendererObj.getStringWidth(first);
-
+            int i1 = (Minecraft.getMinecraft().fontRendererObj.getStringWidth(first));
             instance.drawStringWithShadow(first, x, y, color);
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            if (color != -1) {
+                GlStateManager.color((float) (color >> 16 & 255) / 255.0F, (float) (color >> 8 & 255) / 255.0F, (float) (color & 255) / 255.0F, (float) (color >> 24 & 255) / 255.0F);
+            } else {
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            }
             Minecraft.getMinecraft().getTextureManager().bindTexture(imageIcon.getResourceLocation());
-            drawModalRectWithCustomSizedTexture((x + i1), y - 1, 0, 0, imageIcon.getWidth(), imageIcon.getHeight(),  imageIcon.getWidth(), imageIcon.getHeight());
+            drawModalRectWithCustomSizedTexture((x + i1), y - 1, 0, 0, imageIcon.getWidth(), imageIcon.getHeight(), imageIcon.getWidth(), imageIcon.getHeight());
             Matcher nextMatcher = stringPattern.matcher(second);
             String chatColor = first.lastIndexOf("§") != -1 ? first.substring(first.lastIndexOf("§"), first.lastIndexOf("§") + 2) : "";
+            String lastHex = "";
+            int j = first.lastIndexOf('<');
+            char c0 = j > -1 ? first.charAt(j) : 0;
+            if (c0 == '<' && j + 8 < text.length()) {
+                String s = text.substring(j, j + 9);
+                if (s.matches("<#([0-9a-fA-F]){6}>")) {
+                    lastHex = s;
+                }
+            }
+            if (chatColor.isEmpty() || first.indexOf(lastHex) > first.indexOf(chatColor)) {
+                chatColor = lastHex;
+            }
             if (nextMatcher.find()) {
                 return shiftRenderText(instance, chatColor + second, x + i1 + i, y, color, shadow);
             } else {
@@ -117,19 +132,14 @@ public class ImageIcon {
         Tessellator tessellator = Tessellator.getInstance();
         WorldRenderer worldRenderer = tessellator.getWorldRenderer();
         worldRenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        worldRenderer.pos((double)x, (double)(y + height), 0.0).tex((double)(u * f), (double)((v + (float)height) * g)).endVertex();
-        worldRenderer.pos((double)(x + width), (double)(y + height), 0.0).tex((double)((u + (float)width) * f), (double)((v + (float)height) * g)).endVertex();
-        worldRenderer.pos((double)(x + width), (double)y, 0.0).tex((double)((u + (float)width) * f), (double)(v * g)).endVertex();
-        worldRenderer.pos((double)x, (double)y, 0.0).tex((double)(u * f), (double)(v * g)).endVertex();
+        worldRenderer.pos((double) x, (double) (y + height), 0.0).tex((double) (u * f), (double) ((v + (float) height) * g)).endVertex();
+        worldRenderer.pos((double) (x + width), (double) (y + height), 0.0).tex((double) ((u + (float) width) * f), (double) ((v + (float) height) * g)).endVertex();
+        worldRenderer.pos((double) (x + width), (double) y, 0.0).tex((double) ((u + (float) width) * f), (double) (v * g)).endVertex();
+        worldRenderer.pos((double) x, (double) y, 0.0).tex((double) (u * f), (double) (v * g)).endVertex();
         tessellator.draw();
     }
 
     public static ImageIcon getIcon(String name) {
-        for (ImageIcon imageIcon : imageIcons) {
-            if (imageIcon.getName().equalsIgnoreCase(name)) {
-                return imageIcon;
-            }
-        }
-        return null;
+        return imageIcons.get(name);
     }
 }

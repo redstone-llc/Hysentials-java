@@ -113,27 +113,30 @@ public class BlockWAPIUtils {
     }
 
     public enum Rank {
-        ADMIN("1", "§c[ADMIN] ", "§c"),
-        MOD("2", "§2[MOD] ", "§2"),
-        CREATOR("3", "§3[§fCREATOR§3] ", "§3"),
-        DEFAULT("replace", "", "", "");
+        ADMIN("1", "§c[ADMIN] ", "§c", "#ff2f2e"),
+        MOD("2", "§2[MOD] ", "§2", ""),
+        CREATOR("3", "§3[§fCREATOR§3] ", "§3", ""),
+        DEFAULT("replace", "", "", "", "");
 
         private final String id;
         private final String prefix;
         private final String color;
+        private final String hex;
 
         private String placeholder;
 
-        Rank(String id, String prefix, String color) {
+        Rank(String id, String prefix, String color, String hex) {
             this.id = id;
             this.prefix = prefix;
             this.color = color;
+            this.hex = hex;
         }
-        Rank(String id, String prefix, String color, String placeholder) {
+        Rank(String id, String prefix, String color, String placeholder, String hex) {
             this.id = id;
             this.prefix = prefix;
             this.color = color;
             this.placeholder = placeholder;
+            this.hex = hex;
         }
 
         public String getId() {
@@ -150,7 +153,7 @@ public class BlockWAPIUtils {
 
         public String getPlaceholder() {
             if (placeholder == null && ImageIcon.getIcon(name().toLowerCase()) != null) {
-                return color + ":" + ImageIcon.getIcon(name().toLowerCase()).getName() + ": ";
+                return (hex.isEmpty() ? color : "<" + hex + ">") + ":" + ImageIcon.getIcon(name().toLowerCase()).getName() + ": ";
             }
             return placeholder;
         }

@@ -12,10 +12,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.opengl.GL11;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 
 import java.util.regex.Matcher;
 
@@ -34,8 +31,8 @@ public abstract class RenderMixin<T extends Entity> {
     }
 
     /**
-     * @author Sin_ender
-     * @reason Render custom icons in entity names
+     * @author
+     * @reason
      */
     @Overwrite
     protected void renderLivingLabel(T entityIn, String str, double x, double y, double z, int maxDistance) {

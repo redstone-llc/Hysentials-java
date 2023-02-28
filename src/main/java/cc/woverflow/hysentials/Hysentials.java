@@ -33,6 +33,7 @@ import cc.woverflow.hysentials.handlers.chat.ChatHandler;
 import cc.woverflow.hysentials.handlers.groupchats.GroupChat;
 import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
 import cc.woverflow.hysentials.handlers.language.LanguageHandler;
+import cc.woverflow.hysentials.handlers.lobby.HousingLagReducer;
 import cc.woverflow.hysentials.handlers.lobby.LobbyChecker;
 import cc.woverflow.hysentials.handlers.redworks.BwRanks;
 import cc.woverflow.hysentials.handlers.redworks.NeighborInstall;
@@ -158,6 +159,7 @@ public class Hysentials {
         }
         // chat
         eventBus.register(chatHandler);
+        eventBus.register(new HousingLagReducer());
         // lobby
         eventBus.register(lobbyChecker);
         eventBus.register(new BwRanks());

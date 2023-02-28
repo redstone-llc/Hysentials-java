@@ -776,19 +776,19 @@ public class HytilsExtensionConfig extends Config {
     @Switch(
             name = "Remove Limbo AFK Title",
             category = "Lobby",
-            subcategory = "General"
+            subcategory = "Limbo"
     )
     public static boolean hideLimboTitle = HytilsConfig.hideLimboTitle;
     @Switch(
             name = "Limbo Limiter",
             category = "Lobby",
-            subcategory = "General"
+            subcategory = "Limbo"
     )
     public static boolean limboLimiter = HytilsConfig.limboLimiter;
     @Slider(
             name = "Limbo Limiter FPS",
             category = "Lobby",
-            subcategory = "General",
+            subcategory = "Limbo",
             min = 1.0F,
             max = 60.0F
     )
@@ -796,7 +796,7 @@ public class HytilsExtensionConfig extends Config {
     @Switch(
             name = "Limbo PM Ding",
             category = "Lobby",
-            subcategory = "General"
+            subcategory = "Limbo"
     )
     public static boolean limboDing = HytilsConfig.limboDing;
     @Switch(

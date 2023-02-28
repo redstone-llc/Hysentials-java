@@ -47,7 +47,7 @@ public class BwRanks {
             });
             this.tick = 0;
         }
-        if (tick % 5 == 0) {
+        if (tick % 20 == 0) {
             if (!HysentialsConfig.futuristicRanks) {
                 Hysentials.INSTANCE.getOnlineCache().playerDisplayNames.clear();
                 return;
@@ -58,7 +58,8 @@ public class BwRanks {
                     ScorePlayerTeam team = Minecraft.getMinecraft().theWorld.getScoreboard().getPlayersTeam(name);
 
                     String displayName = team.getColorPrefix() + name;
-                    displayName = BwRanksChat.getMessage(displayName);
+
+                    displayName = BwRanksChat.getMessage(displayName, name, playerInfo.getGameProfile().getId());
 
                     Hysentials.INSTANCE.getOnlineCache().playerDisplayNames.put(playerInfo.getGameProfile().getId(), displayName);
                 });

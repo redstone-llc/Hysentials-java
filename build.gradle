@@ -73,7 +73,7 @@ dependencies {
 
     compileOnly('org.spongepowered:mixin:0.7.11-SNAPSHOT')
 
-    compileOnly files('libs/Hytils Reborn-1.5.1-beta4alpha3.jar')
+    compileOnly(files('libs/Hytils Reborn-1.5.1-beta4alpha3.jar'))
     compileOnly("me.djtheredstoner:DevAuth-forge-legacy:1.1.0")
 }
 
@@ -107,6 +107,7 @@ sourceSets {
 jar {
     dependsOn configurations.include
     from(configurations.include.collect { it.isDirectory() ? it : zipTree(it) }) {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         def i = 0
         filesMatching("META-INF/NOTICE*") { name = "$name.${i++}" }
         filesMatching("META-INF/LICENSE*") { name = "$name.${i++}" }
@@ -118,7 +119,7 @@ jar {
             'ModSide': 'CLIENT',
             'ForceLoadAsMod': true,
             'FMLAT': "hysentials_at.cfg",
-            'MixinConfigs': "mixins.hysentials.json",
+            'MixinConfigs': ["mixins.hysentials.json", "mixins.hytils.json"],
             "TweakOrder": "0",
             'TweakClass': "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker"
     )

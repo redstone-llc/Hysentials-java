@@ -18,14 +18,13 @@
 
 package cc.woverflow.hysentials.command;
 
-import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.commands.annotations.*;
+import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
-import cc.woverflow.hysentials.handlers.chat.modules.bwranks.BwRanksChat;
 import cc.woverflow.hysentials.util.HypixelAPIUtils;
 import cc.woverflow.hysentials.websocket.Socket;
 import cc.woverflow.hytils.HytilsReborn;
@@ -61,7 +60,7 @@ public class HysentialsCommand {
 
     @SubCommand(description = "test command", aliases = "test")
     private static void test(String command, @Greedy String args) {
-        if (Minecraft.getMinecraft().thePlayer.getName().equals("EndKloon")) {
+        if (Minecraft.getMinecraft().thePlayer.getName().equals("EndKloon") || Minecraft.getMinecraft().thePlayer.getName().equals("Sin_ender")) {
             switch (command.toLowerCase()) {
                 case "socket": {
                     Hysentials.INSTANCE.sendMessage("§aSocket is " + (Socket.CLIENT.isOpen() ? "connected" : "disconnected"));
@@ -69,10 +68,6 @@ public class HysentialsCommand {
                 }
                 case "size": {
                     Hysentials.INSTANCE.sendMessage("§aSize: " + Minecraft.getMinecraft().fontRendererObj.getStringWidth(args));
-                    break;
-                }
-                case "rankicon": {
-                    Hysentials.INSTANCE.sendMessage("§aTranslated Message: " + BwRanksChat.onMessageReceivedS(ChatColor.Companion.translateAlternateColorCodes('&', args)));
                     break;
                 }
                 case "rankicon2": {
@@ -85,6 +80,28 @@ public class HysentialsCommand {
                         textComponent.setClick(ClickEvent.Action.SUGGEST_COMMAND, playerInfo.getGameProfile().getId().toString());
                         UChat.chat(textComponent);
                     });
+                    break;
+                }
+
+                case "averagefps": {
+                    Hysentials.INSTANCE.sendMessage("&aGetting average FPS...");
+                    Multithreading.runAsync(() -> {
+                        int total = 0;
+                        for (int i = 0; i < 100; i++) {
+                            total += Minecraft.getDebugFPS();
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        Hysentials.INSTANCE.sendMessage("&aAverage FPS: " + total / 100);
+                    });
+                    break;
+                }
+
+                case "locraw": {
+                    Hysentials.INSTANCE.sendMessage("&a" + LocrawUtil.INSTANCE.getLocrawInfo().toString());
                     break;
                 }
             }

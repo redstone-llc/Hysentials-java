@@ -1,5 +1,7 @@
 package cc.woverflow.hysentials.mixin;
 
+import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
+import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
 import com.google.common.collect.Ordering;
@@ -43,9 +45,15 @@ public abstract class GuiPlayerTabOverlayMixin extends Gui {
     @Unique
     public String getPName(NetworkPlayerInfo networkPlayerInfoIn) {
         String name = this.getPlayerName(networkPlayerInfoIn);
-        if (Hysentials.INSTANCE.getOnlineCache().playerDisplayNames.containsKey(networkPlayerInfoIn.getGameProfile().getId()))
-            name = name.replaceAll("\\[[A-Za-z§0-9+]+] " + networkPlayerInfoIn.getGameProfile().getName(), Hysentials.INSTANCE.getOnlineCache().playerDisplayNames.get(networkPlayerInfoIn.getGameProfile().getId()));
-
+        if (LocrawUtil.INSTANCE.getLocrawInfo() != null && LocrawUtil.INSTANCE.getLocrawInfo().getGameType().equals(LocrawInfo.GameType.SKYBLOCK)) {
+            return name;
+        }
+        if (!name.contains("[NPC]")) {
+            if (Hysentials.INSTANCE.getOnlineCache().playerDisplayNames.containsKey(networkPlayerInfoIn.getGameProfile().getId())) {
+                name = name.replaceAll("(§r§7|§7)" + networkPlayerInfoIn.getGameProfile().getName(), Hysentials.INSTANCE.getOnlineCache().playerDisplayNames.get(networkPlayerInfoIn.getGameProfile().getId()));
+                name = name.replaceAll("\\[[A-Za-z§0-9+]+] " + networkPlayerInfoIn.getGameProfile().getName(), Hysentials.INSTANCE.getOnlineCache().playerDisplayNames.get(networkPlayerInfoIn.getGameProfile().getId()));
+            }
+        }
         if (Hysentials.INSTANCE.getOnlineCache().getOnlinePlayers().containsKey(networkPlayerInfoIn.getGameProfile().getId()))
             name = "§r§a■ §r" + name;
 
@@ -84,8 +92,8 @@ public abstract class GuiPlayerTabOverlayMixin extends Gui {
     }
 
     /**
-     * @author Sin_ender
-     * @reason Add player icons
+     * @author
+     * @reason
      */
     @Overwrite
     public void renderPlayerlist(int width, Scoreboard scoreboardIn, ScoreObjective scoreObjectiveIn) {

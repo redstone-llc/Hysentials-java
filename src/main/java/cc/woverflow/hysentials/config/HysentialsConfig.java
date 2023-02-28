@@ -59,6 +59,14 @@ public class HysentialsConfig extends Config {
     )
     public static boolean futuristicRanks = true;
 
+    @Switch(
+        name = "Futuristic Channels",
+        category = "General",
+        subcategory = "Chat",
+        description = "Enable futuristic channels. This will allow you to see an image as a chat channel"
+    )
+    public static boolean futuristicChannels = true;
+
     @Button(
         name = "Hamster Pet",
         category = "Pets",
@@ -80,6 +88,14 @@ public class HysentialsConfig extends Config {
     public void cubitEnabled() {
 
     }
+
+    @Switch(
+        name = "Housing Lag Reducer",
+        category= "Lobby",
+        subcategory = "General",
+        description = "Will reduce the lag in the housing lobby, by hiding armorstands further than 20 blocks away from the player."
+    )
+    public static boolean housingLagReducer = true;
 
     public HysentialsConfig() {
         super(new Mod("Hysentials", ModType.HYPIXEL, new VigilanceMigrator(new File(Hysentials.INSTANCE.modDir, "hysentials.toml").getAbsolutePath())), "hysentials.json");
