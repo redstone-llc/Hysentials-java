@@ -27,24 +27,24 @@ public enum PotionEffect {
     ABSORPTION(10, true);
 
     private final int slot;
-    private final boolean page;
+    private final boolean isOnSecondPage;
 
     PotionEffect(int slot) {
         this.slot = slot;
-        this.page = false;
+        this.isOnSecondPage = false;
     }
 
-    PotionEffect(int slot, boolean page) {
+    PotionEffect(int slot, boolean isOnSecondPage) {
         this.slot = slot;
-        this.page = page;
+        this.isOnSecondPage = isOnSecondPage;
     }
 
     public int getSlot() {
         return slot;
     }
 
-    public boolean isPage() {
-        return page;
+    public boolean isOnSecondPage() {
+        return isOnSecondPage;
     }
 
     public static PotionEffect fromString(String effect) {
