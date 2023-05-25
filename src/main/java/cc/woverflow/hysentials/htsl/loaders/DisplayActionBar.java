@@ -4,12 +4,12 @@ import cc.woverflow.hysentials.htsl.Loader;
 import org.json.JSONObject;
 
 public class DisplayActionBar extends Loader {
-    public DisplayActionBar(JSONObject actionData) {
-        super(actionData, "Display Action Bar");
+    public DisplayActionBar(String message) {
+        super("Display Action Bar", message);
 
-        if (actionData.has("message")) {
+        if (message != null) {
             add(LoaderObject.click(10));
-            add(LoaderObject.option(actionData.getString("message")));
+            add(LoaderObject.option(message));
         }
     }
 }

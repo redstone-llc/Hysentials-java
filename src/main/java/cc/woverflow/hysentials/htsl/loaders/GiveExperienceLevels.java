@@ -5,14 +5,13 @@ import org.json.JSONObject;
 
 import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 
-public class ApplyInventoryLayout extends Loader {
+public class GiveExperienceLevels extends Loader {
+    public GiveExperienceLevels(String levels) {
+        super( "Give Experience Levels", levels);
 
-    public ApplyInventoryLayout(String layout) {
-        super("Apply Inventory Layout", layout);
-
-        if (layout != null) {
+        if (levels != null) {
             add(click(10));
-            add(option(layout));
+            add(anvil(levels));
         }
     }
 }

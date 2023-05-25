@@ -5,14 +5,13 @@ import org.json.JSONObject;
 
 import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 
-public class ApplyInventoryLayout extends Loader {
+public class FailParkour extends Loader {
+    public FailParkour(String reason) {
+        super("Fail Parkour", reason);
 
-    public ApplyInventoryLayout(String layout) {
-        super("Apply Inventory Layout", layout);
-
-        if (layout != null) {
+        if (reason != null && !reason.equals("Failed!")) {
             add(click(10));
-            add(option(layout));
+            add(chat(reason));
         }
     }
 }

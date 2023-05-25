@@ -5,23 +5,23 @@ import cc.woverflow.hysentials.htsl.Enchantment;
 import org.json.JSONObject;
 
 public class EnchantHeldItem extends Loader {
-    public EnchantHeldItem(JSONObject actionData) {
-        super(actionData, "Enchant Held Item");
+    public EnchantHeldItem(String enchant, String level) {
+        super("Enchant Held Item", enchant, level);
 
-        if (actionData.has("enchantment")) {
+        if (enchant != null) {
             add(LoaderObject.click(10));
-            Enchantment enchantment = Enchantment.fromString(actionData.getString("enchantment"));
+            Enchantment enchantment = Enchantment.fromString(enchant);
 
             if (enchantment.isOnSecondPage()) {
                 add(LoaderObject.click(53));
             }
 
-            add(LoaderObject.click(slot));
+            add(LoaderObject.click(enchantment.getSlot()));
         }
 
-        if (actionData.has("level")) {
+        if (level != null) {
             add(LoaderObject.click(11));
-            add(LoaderObject.anvil(actionData.getString("level")));
+            add(LoaderObject.anvil(level));
         }
     }
 }

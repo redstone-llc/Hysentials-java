@@ -8,29 +8,29 @@ import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.anvil;
 import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.click;
 
 public class ApplyPotionEffect extends Loader {
-    public ApplyPotionEffect(JSONObject actionData) {
-        super(actionData, "Apply Potion Effect");
+    public ApplyPotionEffect(String effect, double duration, double amplifier, boolean overrideExistingEffects) {
+        super("Apply Potion Effect", effect, duration, amplifier, overrideExistingEffects);
 
-        if (actionData.has("effect")) {
+        if (effect != null) {
             add(click(10));
-            PotionEffect effect = PotionEffect.fromString(actionData.getString("effect"));
-            if (effect.isOnSecondPage()) {
+            PotionEffect potion = PotionEffect.fromString(effect);
+            if (potion.isOnSecondPage()) {
                 add(click(53));
             }
-            add(click(effect.getSlot()));
+            add(click(potion.getSlot()));
         }
 
-        if (!Double.isNaN(actionData.getDouble("duration")) && actionData.getDouble("duration") > 60) {
+        if (!Double.isNaN(duration) && duration > 60) {
             add(click(11));
-            add(anvil(String.valueOf(actionData.getDouble("duration"))));
+            add(anvil(String.valueOf(duration)));
         }
 
-        if (!Double.isNaN(actionData.getDouble("amplifier")) && actionData.getDouble("amplifier") != 1) {
+        if (!Double.isNaN(amplifier) && amplifier != 1) {
             add(click(12));
-            add(anvil(String.valueOf(actionData.getDouble("amplifier"))));
+            add(anvil(String.valueOf(amplifier)));
         }
 
-        if (actionData.getBoolean("overrideExistingEffects")) {
+        if (overrideExistingEffects) {
             add(click(13));
         }
     }

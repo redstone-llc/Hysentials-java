@@ -5,16 +5,48 @@ import cc.woverflow.hysentials.htsl.Loader;
 import cc.woverflow.hysentials.htsl.PotionEffect;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
+
 public class Conditional extends Loader {
-    public Conditional(JSONObject actionData) {
-        super(actionData, "Conditional");
+    public Conditional(String condition, List<Object[]> conditions, boolean matchAnyCondition, List<Object[]> ifActions, List<Object[]> elseActions) {
+        super("Conditional");
+
+        if (condition != null) {
+            add(click(10));
+            conditions.forEach(c -> {
+                sequence.addAll(loadCondition(c));
+            });
+            add(back());
+        }
+
+        if (matchAnyCondition) {
+            add(click(11));
+        }
+
+        if (ifActions != null && ifActions.size() > 0) {
+            add(click(12));
+            ifActions.forEach(action -> {
+                sequence.addAll(loadAction((Object[]) action));
+            });
+            add(back());
+        }
+
+        if (elseActions != null && elseActions.size() > 0) {
+            add(click(13));
+            elseActions.forEach(action -> {
+                sequence.addAll(loadAction((Object[]) action));
+            });
+            add(back());
+        }
     }
 
+
+
     public List<LoaderObject> loadCondition(Object[] condition) {
-        List<LoaderObject> sequence = new java.util.ArrayList<>();
+        List<LoaderObject> sequence = new ArrayList<>();
         String conditionType = condition[0].toString();
         JSONObject conditionData = (JSONObject) condition[1];
 
