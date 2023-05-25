@@ -58,7 +58,7 @@ public class Conditional extends Loader {
                 if (conditionData.has("effect")) {
                     sequence.add(click(10));
                     PotionEffect effect = PotionEffect.fromString(conditionData.getString("effect"));
-                    if (effect.isPage()) {
+                    if (effect.isOnSecondPage()) {
                         sequence.add(click(53));
                     }
                     sequence.add(click(effect.getSlot()));
