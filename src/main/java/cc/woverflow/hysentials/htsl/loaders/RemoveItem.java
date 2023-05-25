@@ -5,14 +5,13 @@ import org.json.JSONObject;
 
 import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 
-public class ApplyInventoryLayout extends Loader {
+public class RemoveItem extends Loader {
+    public RemoveItem(String item) {
+        super("Remove Item", item);
 
-    public ApplyInventoryLayout(String layout) {
-        super("Apply Inventory Layout", layout);
-
-        if (layout != null) {
+        if (item != null) {
             add(click(10));
-            add(option(layout));
+            add(item(item));
         }
     }
 }

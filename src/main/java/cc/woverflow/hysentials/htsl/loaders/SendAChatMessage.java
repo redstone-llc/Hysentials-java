@@ -5,14 +5,13 @@ import org.json.JSONObject;
 
 import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 
-public class ApplyInventoryLayout extends Loader {
+public class SendAChatMessage extends Loader {
+    public SendAChatMessage(String message) {
+        super("Send a Chat Message", message);
 
-    public ApplyInventoryLayout(String layout) {
-        super("Apply Inventory Layout", layout);
-
-        if (layout != null) {
+        if (!message.equals("Hello!")) {
             add(click(10));
-            add(option(layout));
+            add(chat(message));
         }
     }
 }

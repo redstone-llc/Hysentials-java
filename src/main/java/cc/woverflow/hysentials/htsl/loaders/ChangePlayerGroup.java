@@ -6,15 +6,15 @@ import org.json.JSONObject;
 import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 
 public class ChangePlayerGroup extends Loader {
-    public ChangePlayerGroup(JSONObject actionData) {
-        super(actionData, "Change Player's Group");
+    public ChangePlayerGroup(String group, boolean demotionProtection) {
+        super("Change Player's Group", group, demotionProtection);
 
-        if (actionData.has("group")) {
+        if (group != null) {
             add(click(10));
-            add(option(actionData.getString("group")));
+            add(option(group));
         }
 
-        if (actionData.getBoolean("demotionProtection")) {
+        if (demotionProtection) {
             add(click(11));
         }
     }

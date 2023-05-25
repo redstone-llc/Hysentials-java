@@ -1,40 +1,35 @@
-package main.java.cc.woverflow.hysentials.htsl.loaders;
+package cc.woverflow.hysentials.htsl.loaders;
 
 import cc.woverflow.hysentials.htsl.Loader;
 import org.json.JSONObject;
 
 public class DisplayTitle extends Loader {
-    public DisplayActionBar(JSONObject actionData) {
-        super(actionData, "Display Title");
+    public DisplayTitle(String title, String subtitle, double fadeIn, double stay, double fadeOut) {
+        super("Display Title", title, subtitle, fadeIn, stay, fadeOut);
 
-        if (actionData.has("title")) {
+        if (title != null) {
             add(LoaderObject.click(10));
-            add(LoaderObject.option(actionData.getString("title")));
+            add(LoaderObject.option(title));
         }
 
-        if (actionData.has("title")) {
-            add(LoaderObject.click(10));
-            add(LoaderObject.option(actionData.getString("title")));
-        }
-
-        if (actionData.has("subtitle")) {
+        if (subtitle != null) {
             add(LoaderObject.click(11));
-            add(LoaderObject.option(actionData.getString("subtitle")));
+            add(LoaderObject.option(subtitle));
         }
 
-        if (actionData.has("fadeIn") && !actionData.isNull("fadeIn") && !Double.isNaN(actionData.getDouble("fadeIn")) && actionData.getDouble("fadeIn") != 1) {
+        if (!Double.isNaN(fadeIn) && fadeIn != 1) {
             add(LoaderObject.click(12));
-            add(LoaderObject.anvil(actionData.getString("fadeIn")));
+            add(LoaderObject.anvil(String.valueOf(fadeIn)));
         }
 
-        if (actionData.has("stay") && !actionData.isNull("stay") && !Double.isNaN(actionData.getDouble("stay")) && actionData.getDouble("stay") != 5) {
+        if (!Double.isNaN(stay) && stay != 5) {
             add(LoaderObject.click(13));
-            add(LoaderObject.anvil(actionData.getString("stay")));
+            add(LoaderObject.anvil(String.valueOf(stay)));
         }
 
-        if (actionData.has("fadeOut") && !actionData.isNull("fadeOut") && !Double.isNaN(actionData.getDouble("fadeOut")) && actionData.getDouble("fadeOut") != 1) {
+        if (!Double.isNaN(fadeOut) && fadeOut != 1) {
             add(LoaderObject.click(14));
-            add(LoaderObject.anvil(actionData.getString("fadeOut")));
+            add(LoaderObject.anvil(String.valueOf(fadeOut)));
         }
     }
 }

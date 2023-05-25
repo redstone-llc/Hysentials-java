@@ -7,33 +7,33 @@ import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 
 public class ChangePlayerStat extends Loader {
 
-    public ChangePlayerStat(JSONObject actionData) {
-        super(actionData, "Change Player Stat");
+    public ChangePlayerStat(String stat, String mode, String value) {
+        super( "Change Player Stat");
 
-        if (actionData.has("stat")) {
+        if (stat != null) {
             add(click(10));
-            add(chat(actionData.getString("stat")));
+            add(chat(stat));
         }
 
-        if (actionData.has("mode") && !actionData.getString("mode").equals("increment")) {
+        if (mode != null && !mode.equals("increment")) {
             add(click(11));
-            if (actionData.has("mode") && actionData.getString("mode").equals("decrement")) {
+            if (mode.equals("decrement")) {
                 add(click(12));
             }
-            if (actionData.has("mode") && actionData.getString("mode").equals("set")) {
+            if (mode.equals("set")) {
                 add(click(13));
             }
-            if (actionData.has("mode") && actionData.getString("mode").equals("multiply")) {
+            if (mode.equals("multiply")) {
                 add(click(14));
             }
-            if (actionData.has("mode") && actionData.getString("mode").equals("divide")) {
+            if (mode.equals("divide")) {
                 add(click(15));
             }
         }
 
-        if (!actionData.getString("value").equals("1")) {
+        if (!value.equals("1")) {
             add(click(12));
-            add(anvil(actionData.getString("value")));
+            add(anvil(value));
         }
     }
 }
