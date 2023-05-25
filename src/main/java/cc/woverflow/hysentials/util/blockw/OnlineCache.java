@@ -34,6 +34,7 @@ public class OnlineCache {
     public ArrayList<UUID> plusPlayers = new ArrayList<>();
 
     public HashMap<UUID, String> playerDisplayNames = new HashMap<>();
+    public HashMap<String, UUID> guildCache = new HashMap<>();
 
     public void setOnlinePlayers(HashMap<UUID, String> onlinePlayers) {
         this.onlinePlayers = onlinePlayers;

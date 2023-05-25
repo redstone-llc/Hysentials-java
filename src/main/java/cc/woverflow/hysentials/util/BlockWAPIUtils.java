@@ -21,7 +21,6 @@ package cc.woverflow.hysentials.util;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
-import cc.woverflow.hysentials.user.Player;
 import com.google.gson.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,10 +34,6 @@ public class BlockWAPIUtils {
     @NotNull
     public static HashMap<UUID, String> getOnline() {
         try {
-            List<Player> players = new ArrayList<>();
-            //http://localhost/
-            //https://hysentials.blockworks.studio/
-            //https://hysentials.redstone.llc/
             JsonElement online = null;
             JsonElement ranks = null;
             try {
@@ -52,7 +47,6 @@ public class BlockWAPIUtils {
             JsonArray users = online.getAsJsonObject().get("uuids").getAsJsonArray();
             HashMap<UUID, String> onlinePlayers = new HashMap<>();
             for (JsonElement element : users) {
-                players.add(new Player(element.getAsJsonObject().get("username").getAsString(), element.getAsJsonObject().get("uuid").getAsString()));
                 onlinePlayers.put(UUID.fromString(element.getAsJsonObject().get("uuid").getAsString()), element.getAsJsonObject().get("username").getAsString());
             }
             Hysentials.INSTANCE.getOnlineCache().setOnlinePlayers(onlinePlayers);
@@ -63,26 +57,13 @@ public class BlockWAPIUtils {
                 for (JsonElement uuid : uuids) {
                     if (onlinePlayers.containsKey(UUID.fromString(uuid.getAsString()))) {
                         if (element.getAsJsonObject().get("name").getAsString().equals("Plus")) {
-                            players.forEach(player -> {
-                                if (player.getUuid().equals(uuid.getAsString())) {
-                                    player.setPlus(true);
-                                }
-                            });
                             plusPlayers.add(UUID.fromString(uuid.getAsString()));
                         } else {
-                            players.forEach(player -> {
-                                if (player.getUuid().equals(uuid.getAsString())) {
-                                    player.setRank(Rank.valueOf(element.getAsJsonObject().get("name").getAsString().toUpperCase()));
-                                }
-                            });
                             rankCache.put(UUID.fromString(uuid.getAsString()), element.getAsJsonObject().get("name").getAsString());
                         }
                     }
                 }
             }
-            players.forEach(player -> {
-                Hysentials.INSTANCE.getOnlineCache().playersCache.put(UUID.fromString(player.getUuid()), player);
-            });
             Hysentials.INSTANCE.getOnlineCache().rankCache = rankCache;
             Hysentials.INSTANCE.getOnlineCache().plusPlayers = plusPlayers;
 
@@ -114,8 +95,9 @@ public class BlockWAPIUtils {
 
     public enum Rank {
         ADMIN("1", "§c[ADMIN] ", "§c", "#ff2f2e"),
-        MOD("2", "§2[MOD] ", "§2", ""),
-        CREATOR("3", "§3[§fCREATOR§3] ", "§3", ""),
+        MOD("2", "§2[MOD] ", "§2", "#f0fff0"),
+        CREATOR("3", "§3[§fCREATOR§3] ", "§3", "#fff7f0"),
+        TEAM("4", "§b[TEAM] ", "§b", "#00ffff"),
         DEFAULT("replace", "", "", "", "");
 
         private final String id;
@@ -151,9 +133,13 @@ public class BlockWAPIUtils {
             return color;
         }
 
+        public String getHex() {
+            return "<" + hex + ">";
+        }
+
         public String getPlaceholder() {
             if (placeholder == null && ImageIcon.getIcon(name().toLowerCase()) != null) {
-                return (hex.isEmpty() ? color : "<" + hex + ">") + ":" + ImageIcon.getIcon(name().toLowerCase()).getName() + ": ";
+                return "§f:" + ImageIcon.getIcon(name().toLowerCase()).getName() + ": " + (hex.isEmpty() ? color : "<" + hex + ">");
             }
             return placeholder;
         }

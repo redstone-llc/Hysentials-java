@@ -9,14 +9,17 @@
     "ChatLineMixin",
     "EntityPlayerSPMixin_MessageHandling",
     "FontRendererMixin",
+    "GuiNewChatAccessor",
+    "GuiNewChatMixin_GuildListHide",
     "GuiNewChatMixin_LocrawHider",
-    "GuiPlayerTabOverlayMixin",
+    "GuiScreenMixin",
+    "GuiUtilRCMixin",
     "MinecraftMixin",
     "MinecraftMixin_LeftClickInteract",
     "MixinRenderManager",
     "NetHandlerPlayClientMixin_GameChecker",
-    "RenderChatMixin",
     "RenderMixin",
+    "SimpleReloadableResourceManagerMixin",
     "TextureUtilMixin"
   ]
 }

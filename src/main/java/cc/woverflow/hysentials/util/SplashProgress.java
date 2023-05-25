@@ -552,7 +552,7 @@ public class SplashProgress {
         }
     }
 
-    private static InputStream open(ResourceLocation loc) throws IOException {
+    public static InputStream open(ResourceLocation loc) throws IOException {
         if (fmlPack.resourceExists(loc)) {
             return fmlPack.getInputStream(loc);
         }

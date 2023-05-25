@@ -20,9 +20,10 @@ package cc.woverflow.hysentials.websocket;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.utils.Multithreading;
-import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.handlers.groupchats.GroupChat;
+import cc.woverflow.hysentials.handlers.redworks.BwRanksUtils;
+import cc.woverflow.hysentials.util.BlockWAPIUtils;
 import cc.woverflow.hysentials.util.DuoVariable;
 import cc.woverflow.hytils.config.HytilsConfig;
 import com.mojang.authlib.exceptions.AuthenticationException;
@@ -32,18 +33,12 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONObject;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
-import java.security.cert.CertificateException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -69,7 +64,7 @@ public class Socket {
             );
 
             //WebSocketClient ws = new WebSocketClient(new URI("ws://localhost:8080")) {
-            WebSocketClient ws = new WebSocketClient(new URI("wss://socket.redstone.llc:8443")) {
+            WebSocketClient ws = new WebSocketClient(new URI("ws://5.161.201.11:8443")) {
                 @Override
                 public void onOpen(ServerHandshake handshakedata) {
                     System.out.println("Connected to websocket server");
@@ -89,6 +84,7 @@ public class Socket {
                                 if (json.has("success") && json.getBoolean("success")) {
                                     UChat.chat(HysentialsConfig.chatPrefix + " §aLogged in successfully!");
                                     CLIENT = this;
+                                    Multithreading.runAsync(BlockWAPIUtils::getOnline);
                                 }
                                 break;
                             }
@@ -97,13 +93,13 @@ public class Socket {
                                 if (json.getString("username").equals("HYPIXELCONSOLE") && !json.has("uuid")) {
                                     displayName = HysentialsConfig.chatPrefix;
                                 } else {
-                                    displayName = Hysentials.INSTANCE.getOnlineCache().getPlayerDisplayNames().containsKey(UUID.fromString(json.getString("uuid"))) ?
-                                        Hysentials.INSTANCE.getOnlineCache().getPlayerDisplayNames().get(UUID.fromString(json.getString("uuid"))) :
-                                        json.getString("username");
+                                    String sDisplay = json.getString("displayName");
+                                    displayName = BwRanksUtils.getMessage(json.getString("displayName"), json.getString("username"), UUID.fromString(json.getString("uuid")), true, false);
                                 }
+                                displayName = displayName.replace("§r§a■ §r", "");
 
                                 if (HysentialsConfig.futuristicRanks) {
-                                    UChat.chat(":globalchat:"
+                                    UChat.chat(":globalchat: "
                                         + "&f" + displayName
                                         + "&f: "
                                         + json.getString("message"));
@@ -163,32 +159,7 @@ public class Socket {
                     ex.printStackTrace();
                 }
             };
-            //get keystore.jks from resources
-
-            try {
-                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-                InputStream inputStream = classLoader.getResourceAsStream("keystore.jks");
-                KeyStore keyStore = KeyStore.getInstance("JKS");
-                keyStore.load(inputStream, "testss".toCharArray());
-                inputStream.close();
-
-                KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-                kmf.init(keyStore, "test".toCharArray());
-
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-                tmf.init(keyStore);
-
-                SSLContext sslContext = null;
-                sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-                SSLSocketFactory factory = sslContext
-                    .getSocketFactory();
-                ws.setSocketFactory(factory);
-                ws.connectBlocking();
-            } catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException |
-                     UnrecoverableKeyException | KeyManagementException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            ws.connect();
         } catch (URISyntaxException | AuthenticationException e) {
             e.printStackTrace();
         }

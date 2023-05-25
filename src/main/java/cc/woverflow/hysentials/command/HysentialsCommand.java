@@ -25,6 +25,7 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.*;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
+import cc.woverflow.hysentials.guis.actionLibrary.ActionLibrary;
 import cc.woverflow.hysentials.util.HypixelAPIUtils;
 import cc.woverflow.hysentials.websocket.Socket;
 import cc.woverflow.hytils.HytilsReborn;
@@ -80,6 +81,14 @@ public class HysentialsCommand {
                         textComponent.setClick(ClickEvent.Action.SUGGEST_COMMAND, playerInfo.getGameProfile().getId().toString());
                         UChat.chat(textComponent);
                     });
+                    break;
+                }
+                case "openmenu": {
+                    new ActionLibrary().open(Minecraft.getMinecraft().thePlayer);
+                    break;
+                }
+                case "getdisplayname": {
+                    Hysentials.INSTANCE.sendMessage("§aTranslated Message: " + Minecraft.getMinecraft().getNetHandler().getPlayerInfoMap().stream().filter(playerInfo -> playerInfo.getGameProfile().getName().equalsIgnoreCase(args)).findFirst().get().getDisplayName().getFormattedText());
                     break;
                 }
 

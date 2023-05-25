@@ -3,7 +3,6 @@ package cc.woverflow.hysentials.handlers.chat.modules.misc;
 import cc.woverflow.hysentials.command.HypixelChatCommand;
 import cc.woverflow.hysentials.handlers.chat.ChatReceiveModule;
 import cc.woverflow.hysentials.handlers.chat.ChatSendModule;
-import cc.woverflow.hysentials.user.Player;
 import cc.woverflow.hysentials.websocket.Request;
 import cc.woverflow.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
@@ -15,6 +14,7 @@ public class GlobalChatStuff {
     public static class GlobalInChannel implements ChatReceiveModule {
         @Override
         public void onMessageReceived(@NotNull ClientChatReceivedEvent event) {
+            if (event.type != 0 && event.type != 1) return;
             if (HypixelChatCommand.isInGlobalChat) {
                 if (getStrippedMessage(event.message).equals("You're already in this channel!")) {
                     event.setCanceled(true);
@@ -35,7 +35,8 @@ public class GlobalChatStuff {
                     "message", message,
                     "username", Minecraft.getMinecraft().thePlayer.getName(),
                     "server", false,
-                    "displayName", Minecraft.getMinecraft().thePlayer.getName(),
+                    "displayName", Minecraft.getMinecraft().thePlayer.getDisplayName().getFormattedText(),
+                    "uuid", Minecraft.getMinecraft().thePlayer.getUniqueID().toString(),
                     "key", Socket.serverId
                     ).toString());
                 return null;

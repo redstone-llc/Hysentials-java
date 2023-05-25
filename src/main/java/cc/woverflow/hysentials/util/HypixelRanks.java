@@ -12,6 +12,7 @@ public enum HypixelRanks {
     MOD("[MOD] ", "mod", "§2"),
     ADMIN("[ADMIN] ", "admin", "§c", "#ff2f2e"),
     YOUTUBER("[§fYOUTUBE§c] ", "youtube", "§c", "#ff2f2e"),
+    NPC("[NPC] ", "npc", "§8", "#555555"),
 
     //mvp
     MVP_PLUS_BLACK("[MVP§0+§b] ", "mvpplus_black", "§b", "#0fa7e9"),
@@ -95,14 +96,14 @@ public enum HypixelRanks {
     }
 
     public String getHex() {
-        return hex;
+        return "<" + hex + ">";
     }
 
     public String getAsPlaceholder() {
         if (ImageIcon.getIcon(iconName) == null) {
             return null;
         }
-        return "<" + hex + ">" + ":" + iconName + ": ";
+        return "§f:" + iconName + ": " + "<" + hex + ">";
     }
 
     public enum RankColors {

@@ -17,16 +17,18 @@
 
 package cc.woverflow.hysentials.pets.cubit;
 
-import cc.polyfrost.oneconfig.events.event.TickEvent;
-import cc.woverflow.hysentials.event.InvokeEvent;
-import cc.woverflow.hysentials.event.world.WorldChangeEvent;
+import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.pets.AbstractCosmetic;
 import cc.woverflow.hysentials.user.Player;
 import cc.woverflow.hysentials.util.UUIDUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
+import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +43,7 @@ public class CubitCompanion extends AbstractCosmetic {
 
     private int ticks = 0;
 
-    @InvokeEvent
+    @SubscribeEvent
     public void onTick(TickEvent e) {
         WorldClient theWorld = Minecraft.getMinecraft().theWorld;
         if (theWorld == null) return;
@@ -64,9 +66,16 @@ public class CubitCompanion extends AbstractCosmetic {
         }
     }
 
-    @InvokeEvent
-    public void onWorldChange(WorldChangeEvent e) {
+    @SubscribeEvent
+    public void onWorldChange(WorldEvent.Load e) {
         hamsters.clear();
+        UUID id = UUIDUtil.getClientUUID();
+        if (id == null) {
+            return;
+        }
+        new Thread(() -> {
+                spawnPet(Minecraft.getMinecraft().thePlayer);
+        }).start();
     }
 
     public boolean worldHasEntityWithUUID(World world, UUID id) {
@@ -75,13 +84,17 @@ public class CubitCompanion extends AbstractCosmetic {
 
     @Override
     public void spawnPet(EntityPlayer player) {
-        if (!Player.getPlayer(player).isPlus()) return;
+        if (!Hysentials.INSTANCE.getOnlineCache().plusPlayers.contains(player.getUniqueID())) return;
         WorldClient theWorld = Minecraft.getMinecraft().theWorld;
         EntityCubit hamster = new EntityCubit(theWorld);
         hamster.setPosition(player.posX, player.posY, player.posZ);
         hamster.setOwnerId(player.getUniqueID().toString());
-        hamster.setCustomNameTag("§b" + player.getName() + "'s Cubit");
-        hamster.setAlwaysRenderNameTag(true);
+        EntityArmorStand armorStand = new EntityArmorStand(theWorld);
+        armorStand.setPosition(player.posX, player.posY, player.posZ);
+        armorStand.setInvisible(true);
+        armorStand.setCustomNameTag("Cubit Companion");
+        armorStand.setAlwaysRenderNameTag(true);
+        armorStand.noClip = true;
         theWorld.spawnEntityInWorld(hamster);
         hamsters.put(player.getUniqueID(), hamster);
     }

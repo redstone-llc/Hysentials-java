@@ -20,7 +20,7 @@ package cc.woverflow.hysentials.handlers.chat;
 
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import cc.woverflow.hysentials.Hysentials;
-import cc.woverflow.hysentials.handlers.chat.modules.bwranks.BwRanksChat;
+import cc.woverflow.hysentials.handlers.chat.modules.bwranks.BWSReplace;
 import cc.woverflow.hysentials.handlers.chat.modules.misc.GlobalChatStuff;
 import cc.woverflow.hysentials.handlers.groupchats.GroupChatMessage;
 import net.minecraft.util.IChatComponent;
@@ -49,6 +49,10 @@ public class ChatHandler {
         }
         this.registerModule(new GlobalChatStuff.GlobalInChannel());
         this.registerModule(new GlobalChatStuff.GlobalSendMessage());
+        this.registerModule(new BWSReplace());
+//        this.registerModule(new ExecuteGatherer());
+//        this.registerModule(new GuildBridge());
+//        this.registerModule(new HousingBridge());
         // Blockers
 
         //this.registerModule(new AdBlocker());

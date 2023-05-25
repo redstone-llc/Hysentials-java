@@ -62,7 +62,7 @@ dependencies {
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
 
-    compileOnly('cc.polyfrost:oneconfig-1.8.9-forge:0.2.0-alpha159')
+    compileOnly('cc.polyfrost:oneconfig-1.8.9-forge:0.2.0-alpha+')
     include('cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta+')
     include("org.java-websocket:Java-WebSocket:1.5.3")
     include('org.reflections:reflections:0.10.2')
@@ -73,7 +73,8 @@ dependencies {
 
     compileOnly('org.spongepowered:mixin:0.7.11-SNAPSHOT')
 
-    compileOnly(files('libs/Hytils Reborn-1.5.1-beta4alpha3.jar'))
+
+    compileOnly(files('libs/Hytils-Reborn-1.6.0-beta4.jar'))
     compileOnly("me.djtheredstoner:DevAuth-forge-legacy:1.1.0")
 }
 

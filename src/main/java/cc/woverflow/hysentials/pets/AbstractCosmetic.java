@@ -17,12 +17,12 @@
 
 package cc.woverflow.hysentials.pets;
 
-import cc.woverflow.hysentials.event.InvokeEvent;
-import cc.woverflow.hysentials.event.world.WorldChangeEvent;
 import cc.woverflow.hysentials.user.Player;
 import cc.woverflow.hysentials.util.UUIDUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.Map;
 import java.util.UUID;
@@ -33,7 +33,7 @@ import static java.lang.Thread.sleep;
 /**
  * Created by mitchellkatz on 3/17/18. Designed for production use on Sk1er.club
  */
-public abstract class AbstractCosmetic {
+public class AbstractCosmetic {
 
     private final boolean selfOnly;
     private final Map<UUID, Boolean> purchasedBy = new ConcurrentHashMap<>();
@@ -48,8 +48,8 @@ public abstract class AbstractCosmetic {
         }
     }
 
-    @InvokeEvent
-    public void worldSwitch(WorldChangeEvent changeEvent) {
+    @SubscribeEvent
+    public void worldSwitch(WorldEvent.Load changeEvent) {
         UUID id = UUIDUtil.getClientUUID();
         if (id == null) {
             return;
@@ -74,6 +74,8 @@ public abstract class AbstractCosmetic {
         }).start();
     }
 
-    public abstract void spawnPet(EntityPlayer player);
+    public void spawnPet(EntityPlayer player) {
+
+    };
 
 }

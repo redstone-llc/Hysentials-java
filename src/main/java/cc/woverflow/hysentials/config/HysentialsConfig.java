@@ -19,22 +19,14 @@
 package cc.woverflow.hysentials.config;
 
 import cc.polyfrost.oneconfig.config.Config;
-import cc.polyfrost.oneconfig.config.annotations.Button;
-import cc.polyfrost.oneconfig.config.annotations.Switch;
-import cc.polyfrost.oneconfig.config.annotations.Text;
+import cc.polyfrost.oneconfig.config.annotations.*;
+import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
-import cc.polyfrost.oneconfig.config.migration.VigilanceMigrator;
-import cc.woverflow.hysentials.Hysentials;
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import cc.woverflow.hytils.HytilsReborn;
 
 public class HysentialsConfig extends Config {
-
+    // GENERAL
     @Text(
         name = "Chat Prefix",
         category = "General",
@@ -68,26 +60,38 @@ public class HysentialsConfig extends Config {
     public static boolean futuristicChannels = true;
 
     @Button(
-        name = "Hamster Pet",
-        category = "Pets",
-        subcategory = "Hamster",
-        description = "Will enable the hamster pet, if you have it unlocked.",
-        text = "DISABLED"
-    )
-    public void hamsterEnabled() {
-
+            name = "Additional Configs",
+            category = "General",
+            subcategory = "Hytils",
+            description = "Opens the Hytils config page.",
+            text = "OPEN")
+    public void openHytilsConfig() {
+        HytilsReborn.INSTANCE.getConfig().openGui();
     }
 
-    @Button(
-        name = "Cubit Pet",
-        category = "Pets",
-        subcategory = "Cubit",
-        description = "Will enable the cubit pet, if you have it unlocked. Only available for \"Special\" Plus Players.",
-        text = "DISABLED"
-    )
-    public void cubitEnabled() {
+//    // PETS
+//    @Button(
+//        name = "Hamster Pet",
+//        category = "Pets",
+//        subcategory = "Hamster",
+//        description = "Will enable the hamster pet, if you have it unlocked.",
+//        text = "DISABLED"
+//    )
+//    public void hamsterEnabled() {
+//
+//    }
+//
+//    @Button(
+//        name = "Cubit Pet",
+//        category = "Pets",
+//        subcategory = "Cubit",
+//        description = "Will enable the cubit pet, if you have it unlocked. Only available for \"Special\" Plus Players.",
+//        text = "DISABLED"
+//    )
+//    public void cubitEnabled() {
+//    }
 
-    }
+    // LOBBY
 
     @Switch(
         name = "Housing Lag Reducer",
@@ -97,22 +101,94 @@ public class HysentialsConfig extends Config {
     )
     public static boolean housingLagReducer = true;
 
+    // Scoreboard Boxes
+    @Color(
+        name = "Color Picker",
+        description = "Color for the boxes",
+        category = "SBBoxes",
+        subcategory = "General",
+        allowAlpha = true
+    )
+    public static OneColor boxColor = new OneColor(0, 0, 0, 125);
+
+    @Checkbox(
+        name = "Box Shadows",
+        description = "Enables box shadows",
+        category = "SBBoxes",
+        subcategory = "General"
+    )
+    public static boolean boxShadows = true;
+
+    @Checkbox(
+        name = "Scoreboard Boxes",
+        description = "Enables scoreboard boxes",
+        category = "SBBoxes",
+        subcategory = "Boxes"
+    )
+    public static boolean scoreboardBoxes = true;
+
+    @Checkbox(
+        name = "Show Scoreboard",
+        description = "Enables scoreboard",
+        category = "SBBoxes",
+        subcategory = "Boxes"
+    )
+    public static boolean showScoreboard = true;
+
+    @Dropdown(
+        name = "Border Radius",
+        description = "Border radius of the boxes",
+        category = "SBBoxes",
+        subcategory = "Boxes",
+        options = {"0", "2", "4"}
+    )
+    public static int scoreboardBoxesBorderRadius = 1;
+
+    @Checkbox(
+        name = "Action Bar",
+        description = "Enables better action bar",
+        category = "SBBoxes",
+        subcategory = "Action Bar"
+    )
+    public static boolean actionBar = true;
+
+    @Dropdown(
+        name = "Border Radius",
+        description = "Border radius of the action bar",
+        category = "SBBoxes",
+        subcategory = "Action Bar",
+        options = {"0", "2", "4"}
+    )
+    public static int actionBarBorderRadius = 1;
+
+    @Checkbox(
+        name = "Scoreboard",
+        description = "Enables better scoreboard",
+        category = "SBBoxes",
+        subcategory = "Scoreboard"
+    )
+    public static boolean scoreboard = true;
+
+    @Checkbox(
+        name = "Red Numbers",
+        description = "Enables Scoreboard numbers",
+        category = "SBBoxes",
+        subcategory = "Scoreboard"
+    )
+    public static boolean redNumbers = true;
+
+    @Dropdown(
+        name = "Border Radius",
+        description = "Border radius of the scoreboard",
+        category = "SBBoxes",
+        subcategory = "Scoreboard",
+        options = {"0", "2", "4"}
+    )
+    public static int scoreboardBorderRadius = 1;
+
+
     public HysentialsConfig() {
-        super(new Mod("Hysentials", ModType.HYPIXEL, new VigilanceMigrator(new File(Hysentials.INSTANCE.modDir, "hysentials.toml").getAbsolutePath())), "hysentials.json");
-        initialize();
-        new HytilsExtensionConfig(this.mod);
-        try {
-            File modDir = Hysentials.INSTANCE.modDir;
-            File oldModDir = new File(modDir.getParentFile(), "Hysentials");
-            File oldConfig = new File(oldModDir, "hysentials.toml");
-            if (oldConfig.exists()) {
-                FileUtils.writeStringToFile(new File(modDir, "hysentials.toml"), FileUtils.readFileToString(oldConfig, StandardCharsets.UTF_8), StandardCharsets.UTF_8);
-                if (!oldConfig.renameTo(new File(modDir, "hysentials_backup.toml"))) {
-                    Files.move(oldConfig.toPath(), modDir.toPath().resolve("hysentials_backup.toml"), StandardCopyOption.REPLACE_EXISTING);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        super(new Mod("Hysentials", ModType.HYPIXEL), "hysentials.json");
+        this.initialize();
     }
 }

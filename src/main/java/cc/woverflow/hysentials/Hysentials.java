@@ -22,25 +22,32 @@ import cc.polyfrost.oneconfig.events.EventManager;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.utils.commands.CommandManager;
-import cc.woverflow.hysentials.command.GlobalChatCommand;
-import cc.woverflow.hysentials.command.GroupChatCommand;
-import cc.woverflow.hysentials.command.HypixelChatCommand;
-import cc.woverflow.hysentials.command.HysentialsCommand;
+import cc.woverflow.hysentials.command.*;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.event.events.HysentialsLoadedEvent;
+import cc.woverflow.hysentials.guis.ResolutionUtil;
+import cc.woverflow.hysentials.guis.actionLibrary.ActionLibrary;
+import cc.woverflow.hysentials.guis.gameMenu.RevampedGameMenu;
+import cc.woverflow.hysentials.guis.sbBoxes.SBBoxesEditor;
 import cc.woverflow.hysentials.handlers.cache.HeightHandler;
 import cc.woverflow.hysentials.handlers.chat.ChatHandler;
+import cc.woverflow.hysentials.handlers.display.GuiDisplayHandler;
 import cc.woverflow.hysentials.handlers.groupchats.GroupChat;
+import cc.woverflow.hysentials.handlers.guis.GameMenuOpen;
 import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
 import cc.woverflow.hysentials.handlers.language.LanguageHandler;
 import cc.woverflow.hysentials.handlers.lobby.HousingLagReducer;
 import cc.woverflow.hysentials.handlers.lobby.LobbyChecker;
 import cc.woverflow.hysentials.handlers.redworks.BwRanks;
 import cc.woverflow.hysentials.handlers.redworks.NeighborInstall;
+import cc.woverflow.hysentials.handlers.sbb.Actionbar;
+import cc.woverflow.hysentials.handlers.sbb.SbbRenderer;
 import cc.woverflow.hysentials.pets.cubit.CubitCompanion;
 import cc.woverflow.hysentials.pets.hamster.HamsterCompanion;
 import cc.woverflow.hysentials.util.HypixelAPIUtils;
 import cc.woverflow.hysentials.util.HypixelRanks;
+import cc.woverflow.hysentials.util.ImageIconRenderer;
+import cc.woverflow.hysentials.util.JsonData;
 import cc.woverflow.hysentials.util.blockw.OnlineCache;
 import cc.woverflow.hysentials.util.friends.FriendCache;
 import cc.woverflow.hysentials.util.skyblock.SkyblockChecker;
@@ -58,6 +65,8 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.EventBus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 
@@ -87,6 +96,11 @@ public class Hysentials {
     private final LobbyChecker lobbyChecker = new LobbyChecker();
     private final ChatHandler chatHandler = new ChatHandler();
 
+    public final GuiDisplayHandler guiDisplayHandler = new GuiDisplayHandler();
+
+    public ImageIconRenderer imageIconRenderer;
+    public JsonData sbBoxes;
+
     public boolean isPatcher;
     public boolean isChatting;
     private boolean loadedCall;
@@ -94,8 +108,8 @@ public class Hysentials {
     public String rank;
 
     public HamsterCompanion hamsterCompanion;
-
     public CubitCompanion cubitCompanion;
+
 
     @Mod.EventHandler
     public void onFMLPreInitialization(FMLPreInitializationEvent event) {
@@ -107,11 +121,13 @@ public class Hysentials {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         config = new HysentialsConfig();
+        sbBoxes = new JsonData("./config/hysentials/lines.json", new JSONObject().put("lines", new JSONArray()));
 
         CommandManager.INSTANCE.registerCommand(new HysentialsCommand());
         CommandManager.INSTANCE.registerCommand(new GroupChatCommand());
         ClientCommandHandler.instance.registerCommand(new GlobalChatCommand());
         ClientCommandHandler.instance.registerCommand(new HypixelChatCommand());
+        CommandManager.INSTANCE.registerCommand(new SBBoxesCommand());
 
         HeightHandler.INSTANCE.initialize();
 
@@ -128,6 +144,7 @@ public class Hysentials {
 
         Socket.createSocket();
         registerImages();
+//        doorbellBot = new DoorbellBot();
 
         MinecraftForge.EVENT_BUS.post(new HysentialsLoadedEvent());
     }
@@ -148,9 +165,14 @@ public class Hysentials {
             } catch (Exception ignored) {
             }
         }
+        imageIconRenderer = new ImageIconRenderer();
+        Minecraft.getMinecraft().fontRendererObj = imageIconRenderer;
     }
     private void registerHandlers() {
         final EventBus eventBus = MinecraftForge.EVENT_BUS;
+        final cc.woverflow.hysentials.event.EventBus hyBus = cc.woverflow.hysentials.event.EventBus.INSTANCE;
+        RevampedGameMenu.initGUI();
+        SBBoxesEditor.initGUI();
 
         // general stuff
         eventBus.register(languageHandler);
@@ -159,19 +181,28 @@ public class Hysentials {
         }
         // chat
         eventBus.register(chatHandler);
+
         eventBus.register(new HousingLagReducer());
         // lobby
         eventBus.register(lobbyChecker);
+        eventBus.register(guiDisplayHandler);
+        eventBus.register(new ResolutionUtil());
         eventBus.register(new BwRanks());
+        eventBus.register(new GameMenuOpen());
+        eventBus.register(new SbbRenderer());
+        eventBus.register(new Actionbar());
+        eventBus.register(new ActionLibrary());
 
         // height overlay
         EventManager.INSTANCE.register(HeightHandler.INSTANCE);
-
-        cc.woverflow.hysentials.event.EventBus.INSTANCE.register(hamsterCompanion = new HamsterCompanion());
-        cc.woverflow.hysentials.event.EventBus.INSTANCE.register(cubitCompanion = new CubitCompanion());
+        EventManager.INSTANCE.register(new BwRanks());
 
         eventBus.register(new HypixelAPIUtils());
         eventBus.register(new NeighborInstall());
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            sbBoxes.save();
+        }));
     }
 
     public void sendMessage(String message) {

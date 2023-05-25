@@ -72,8 +72,9 @@ public class GlobalChatCommand extends CommandBase {
         json.put("method", "chat");
         json.put("message", message);
         json.put("username", sender.getName());
+        json.put("uuid", sender.getCommandSenderEntity().getUniqueID().toString());
         json.put("server", false);
-        json.put("displayName", sender.getDisplayName()); //This gets overwritten by the server lol!
+        json.put("displayName", sender.getDisplayName().getFormattedText()); //This gets overwritten by the server lol!
         json.put("key", Socket.serverId);
 
         Socket.CLIENT.send(json.toString());
