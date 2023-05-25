@@ -14,7 +14,7 @@ public class ApplyPotionEffect extends Loader {
         if (actionData.has("effect")) {
             add(click(10));
             PotionEffect effect = PotionEffect.fromString(actionData.getString("effect"));
-            if (effect.isPage()) {
+            if (effect.isOnSecondPage()) {
                 add(click(53));
             }
             add(click(effect.getSlot()));
