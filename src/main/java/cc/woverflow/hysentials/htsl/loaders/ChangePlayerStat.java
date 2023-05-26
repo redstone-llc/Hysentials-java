@@ -3,12 +3,14 @@ package cc.woverflow.hysentials.htsl.loaders;
 import cc.woverflow.hysentials.htsl.Loader;
 import org.json.JSONObject;
 
+import java.util.List;
+
 import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 
 public class ChangePlayerStat extends Loader {
 
     public ChangePlayerStat(String stat, String mode, String value) {
-        super( "Change Player Stat");
+        super("Change Player Stat", "stat", stat, mode, value);
 
         if (stat != null) {
             add(click(10));
@@ -35,5 +37,15 @@ public class ChangePlayerStat extends Loader {
             add(click(12));
             add(anvil(value));
         }
+    }
+
+    @Override
+    public void load(int index, List<String> args, List<String> compileErorrs) {
+        String mode = validOperator(args.get(1));
+        if (mode == null) {
+            compileErorrs.add("&cUnknown operator on line &e" + (index + 1) + "&c!");
+            return;
+        }
+        new ChangePlayerStat(args.get(0), mode, args.get(2));
     }
 }

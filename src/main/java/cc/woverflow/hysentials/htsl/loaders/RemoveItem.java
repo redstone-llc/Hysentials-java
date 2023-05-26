@@ -7,7 +7,7 @@ import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 
 public class RemoveItem extends Loader {
     public RemoveItem(String item) {
-        super("Remove Item", item);
+        super("Remove Item", "removeItem", item);
 
         if (item != null) {
             add(click(10));

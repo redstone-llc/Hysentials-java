@@ -1,18 +1,18 @@
-package main.java.cc.woverflow.hysentials.htsl.loaders;
+package cc.woverflow.hysentials.htsl.loaders;
 
 import cc.woverflow.hysentials.htsl.Loader;
 import org.json.JSONObject;
 
 public class TriggerFunction extends Loader {
-    public TriggerFunction(JSONObject actionData) {
-        super(actionData, "Trigger Function");
+    public TriggerFunction(String function, boolean triggerForAllPlayers) {
+        super("Trigger Function", "function", function, triggerForAllPlayers);
 
-        if (actionData.has("function")) {
+        if (function != null) {
             add(LoaderObject.click(10));
-            add(LoaderObject.option(actionData.getString("function")));
+            add(LoaderObject.option(function));
         }
 
-        if (actionData.optBoolean("triggerForAllPlayers")) {
+        if (triggerForAllPlayers) {
             add(LoaderObject.click(11));
         }
     }

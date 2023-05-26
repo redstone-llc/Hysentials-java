@@ -6,7 +6,7 @@ import org.json.JSONObject;
 import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 public class SetCompassTarget extends Loader {
     public SetCompassTarget(String location, String coordinates) {
-        super("Set Compass Target", location);
+        super("Set Compass Target", "compassTarget", location);
 
         add(click(10));
 

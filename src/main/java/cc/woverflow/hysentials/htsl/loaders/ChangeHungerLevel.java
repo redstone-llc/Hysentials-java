@@ -3,32 +3,41 @@ package main.java.cc.woverflow.hysentials.htsl.loaders;
 import cc.woverflow.hysentials.htsl.Loader;
 import org.json.JSONObject;
 
+import java.util.List;
+
 public class ChangeHungerLevel extends Loader {
-    public ChangeHungerLevel(JSONObject actionData) {
-        super(actionData, "Change Hunger Level");
+    public ChangeHungerLevel(String mode, String level) {
+        super("Change Hunger Level", "hungerLevel", mode, level);
 
-        boolean hasMode = actionData.has("mode");
-        boolean hasLevel = actionData.has("level");
-
-        if (hasLevel && !actionData.getString("level").equals("20")) {
+        if (level != null && !level.equals("20")) {
             add(LoaderObject.click(10));
-            add(LoaderObject.anvil(actionData.getString("level")));
+            add(LoaderObject.anvil(level));
         }
 
-        if (hasMode && !actionData.getString("mode").equals("set")) {
-            if (actionData.getString("mode").equals("increment")) {
+        if (mode != null && !mode.equals("set")) {
+            if (mode.equals("increment")) {
                 add(LoaderObject.click(10));
             }
             add(LoaderObject.click(11));
-            if (actionData.getString("mode").equals("decrement")) {
+            if (mode.equals("decrement")) {
                 add(LoaderObject.click(11));
             }
-            if (actionData.getString("mode").equals("multiply")) {
+            if (mode.equals("multiply")) {
                 add(LoaderObject.click(13));
             }
-            if (actionData.getString("mode").equals("divide")) {
+            if (mode.equals("divide")) {
                 add(LoaderObject.click(14));
             }
         }
+    }
+
+    @Override
+    public void load(int index, List<String> args, List<String> compileErorrs) {
+        String mode = validOperator(args.get(0));
+        if (mode == null) {
+            compileErorrs.add("&cUnknown operator on line &e" + (index + 1) + "&c!");
+            return;
+        }
+        new ChangeHungerLevel(mode, args.get(1));
     }
 }

@@ -12,7 +12,7 @@ import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 
 public class Conditional extends Loader {
     public Conditional(String condition, List<Object[]> conditions, boolean matchAnyCondition, List<Object[]> ifActions, List<Object[]> elseActions) {
-        super("Conditional");
+        super("Conditional", "condition", condition, conditions, matchAnyCondition, ifActions, elseActions);
 
         if (condition != null) {
             add(click(10));

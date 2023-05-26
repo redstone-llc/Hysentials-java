@@ -6,7 +6,7 @@ import org.json.JSONObject;
 import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 public class SetGamemode extends Loader {
     public SetGamemode(String gamemode) {
-        super("Set Gamemode", gamemode);
+        super("Set Gamemode", "gamemode", gamemode);
 
         if (gamemode != null) {
             switch(gamemode) {

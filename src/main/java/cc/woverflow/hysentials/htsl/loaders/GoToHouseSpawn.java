@@ -7,6 +7,6 @@ import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 
 public class GoToHouseSpawn extends Loader {
     public GoToHouseSpawn() {
-        super("Go to House Spawn");
+        super("Go to House Spawn", "houseSpawn");
     }
 }

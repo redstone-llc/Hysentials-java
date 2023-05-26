@@ -1,15 +1,17 @@
-package main.java.cc.woverflow.hysentials.htsl.loaders;
+package cc.woverflow.hysentials.htsl.loaders;
 
 import cc.woverflow.hysentials.htsl.Loader;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.List;
+
 public class TeleportPlayer extends Loader {
-    public TeleportPlayer(JSONObject actionData) {
-        super(actionData, "Teleport Player");
+    public TeleportPlayer(String location, List<String> coordinates) {
+        super("Teleport Player", "tp", location, coordinates);
 
         add(LoaderObject.click(10));
 
-        String location = actionData.optString("location");
         switch (location) {
             case "house_spawn":
                 add(LoaderObject.click(10));
@@ -19,8 +21,7 @@ public class TeleportPlayer extends Loader {
                 break;
             case "custom_coordinates":
                 add(LoaderObject.click(12));
-                JSONArray coordinates = actionData.getJSONArray("coordinates");
-                String coordinatesText = String.join(" ", coordinates.toList());
+                String coordinatesText = String.join(" ", coordinates);
                 add(LoaderObject.anvil(coordinatesText));
                 break;
         }

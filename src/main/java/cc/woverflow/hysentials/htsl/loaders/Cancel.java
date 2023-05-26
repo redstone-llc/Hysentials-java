@@ -5,6 +5,6 @@ import org.json.JSONObject;
 
 public class Cancel extends Loader {
     public Cancel() {
-        super("Cancel Event");
+        super("Cancel Event", "cancelEvent");
     }
 }

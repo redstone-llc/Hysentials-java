@@ -7,7 +7,7 @@ import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 
 public class FailParkour extends Loader {
     public FailParkour(String reason) {
-        super("Fail Parkour", reason);
+        super("Fail Parkour", "failParkour", reason);
 
         if (reason != null && !reason.equals("Failed!")) {
             add(click(10));

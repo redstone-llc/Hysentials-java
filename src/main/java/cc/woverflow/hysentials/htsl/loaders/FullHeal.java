@@ -7,6 +7,6 @@ import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 
 public class FullHeal extends Loader {
     public FullHeal() {
-        super("Full Heal");
+        super("Full Heal", "fullHeal");
     }
 }

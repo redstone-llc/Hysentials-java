@@ -1,33 +1,31 @@
-package main.java.cc.woverflow.hysentials.htsl.loaders;
+package cc.woverflow.hysentials.htsl.loaders;
 
 import cc.woverflow.hysentials.htsl.Loader;
 import org.json.JSONObject;
 
+import java.util.List;
+
 public class ChangeMaxHealth extends Loader {
-    public ChangeMaxHealth(JSONObject actionData) {
-        super(actionData, "Change Max Health");
+    public ChangeMaxHealth(String mode, String health, boolean healOnChange) {
+        super("Change Max Health", "maxHealth", mode, health, healOnChange);
 
-        boolean hasMode = actionData.has("mode");
-        boolean hasHealth = actionData.has("health");
-        boolean healOnChange = actionData.optBoolean("healOnChange");
-
-        if (hasHealth && !actionData.getString("health").equals("20")) {
+        if (health != null && !health.equals("20")) {
             add(LoaderObject.click(10));
-            add(LoaderObject.anvil(actionData.getString("health")));
+            add(LoaderObject.anvil(health));
         }
 
-        if (hasMode && !actionData.getString("mode").equals("set")) {
-            if (actionData.getString("mode").equals("increment")) {
+        if (mode != null && !mode.equals("set")) {
+            if (mode.equals("increment")) {
                 add(LoaderObject.click(10));
             }
             add(LoaderObject.click(11));
-            if (actionData.getString("mode").equals("decrement")) {
+            if (mode.equals("decrement")) {
                 add(LoaderObject.click(11));
             }
-            if (actionData.getString("mode").equals("multiply")) {
+            if (mode.equals("multiply")) {
                 add(LoaderObject.click(13));
             }
-            if (actionData.getString("mode").equals("divide")) {
+            if (mode.equals("divide")) {
                 add(LoaderObject.click(14));
             }
         }
@@ -35,5 +33,19 @@ public class ChangeMaxHealth extends Loader {
         if (healOnChange) {
             add(LoaderObject.click(12));
         }
+    }
+
+    @Override
+    public void load(int index, List<String> args, List<String> compileErorrs) {
+        boolean heal = true;
+        if (args.get(2).equalsIgnoreCase("false")) {
+            heal = false;
+        }
+        String mode = validOperator(args.get(0));
+        if (mode == null) {
+            compileErorrs.add("&cUnknown operator on line &e" + (index + 1) + "&c!");
+            return;
+        }
+        new ChangeMaxHealth(mode, args.get(1), heal);
     }
 }

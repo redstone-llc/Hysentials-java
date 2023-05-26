@@ -6,7 +6,7 @@ import java.util.List;
 
 public class RandomAction extends Loader {
     public RandomAction(List<Object[]> actions) {
-        super("Random Action", actions);
+        super("Random Action", "random", actions);
         if (actions != null) {
             add(LoaderObject.click(10));
             actions.forEach(action -> sequence.addAll(loadAction(action)));

@@ -7,7 +7,7 @@ import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 
 public class PlaySound extends Loader {
     public PlaySound(String sound, double pitch) {
-        super("Play Sound", sound, pitch);
+        super("Play Sound", "sound", sound, pitch);
 
         if (sound != null) {
             add(click(10));

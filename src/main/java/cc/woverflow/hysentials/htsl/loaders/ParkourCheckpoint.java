@@ -7,6 +7,6 @@ import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 
 public class ParkourCheckpoint extends Loader {
     public ParkourCheckpoint() {
-        super( "Parkour Checkpoint");
+        super( "Parkour Checkpoint", "parkCheck");
     }
 }

@@ -6,7 +6,7 @@ import org.json.JSONObject;
 
 public class EnchantHeldItem extends Loader {
     public EnchantHeldItem(String enchant, String level) {
-        super("Enchant Held Item", enchant, level);
+        super("Enchant Held Item", "enchant", enchant, level);
 
         if (enchant != null) {
             add(LoaderObject.click(10));

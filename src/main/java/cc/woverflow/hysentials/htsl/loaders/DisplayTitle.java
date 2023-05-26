@@ -5,7 +5,7 @@ import org.json.JSONObject;
 
 public class DisplayTitle extends Loader {
     public DisplayTitle(String title, String subtitle, double fadeIn, double stay, double fadeOut) {
-        super("Display Title", title, subtitle, fadeIn, stay, fadeOut);
+        super("Display Title", "title", title, subtitle, fadeIn, stay, fadeOut);
 
         if (title != null) {
             add(LoaderObject.click(10));
