@@ -26,6 +26,8 @@ import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.guis.actionLibrary.ActionLibrary;
+import cc.woverflow.hysentials.handlers.htsl.CodeEditor;
+import cc.woverflow.hysentials.htsl.compiler.Compiler;
 import cc.woverflow.hysentials.util.HypixelAPIUtils;
 import cc.woverflow.hysentials.websocket.Socket;
 import cc.woverflow.hytils.HytilsReborn;
@@ -33,9 +35,12 @@ import cc.woverflow.hytils.config.HytilsConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.util.EnumChatFormatting;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -52,6 +57,11 @@ public class HysentialsCommand {
     @Main
     private void handleDefault() {
         Hysentials.INSTANCE.getConfig().openGui();
+    }
+
+    @SubCommand(description = "HTSL Editor", aliases = "editor")
+    private static void editor(String name) {
+        new CodeEditor().openGui(name);
     }
 
     @SubCommand(description = "open config", aliases = "config")
@@ -90,6 +100,20 @@ public class HysentialsCommand {
                 case "getdisplayname": {
                     Hysentials.INSTANCE.sendMessage("§aTranslated Message: " + Minecraft.getMinecraft().getNetHandler().getPlayerInfoMap().stream().filter(playerInfo -> playerInfo.getGameProfile().getName().equalsIgnoreCase(args)).findFirst().get().getDisplayName().getFormattedText());
                     break;
+                }
+
+                case "htsl": {
+                    File file = new File("./config/hysentials/htsl/testing.htsl");
+                    try {
+                        new Compiler(FileUtils.readFileToString(file));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    break;
+                }
+
+                case "editor": {
+                    new CodeEditor().openGui("testing");
                 }
 
                 case "averagefps": {

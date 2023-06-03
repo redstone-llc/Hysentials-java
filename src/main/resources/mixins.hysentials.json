@@ -18,8 +18,12 @@
     "MinecraftMixin_LeftClickInteract",
     "MixinRenderManager",
     "NetHandlerPlayClientMixin_GameChecker",
+    "RenderItemMixin",
     "RenderMixin",
     "SimpleReloadableResourceManagerMixin",
     "TextureUtilMixin"
+  ],
+  "mixins": [
+    "ContainerMixin"
   ]
 }

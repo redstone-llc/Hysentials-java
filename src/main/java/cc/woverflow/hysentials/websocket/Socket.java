@@ -19,6 +19,8 @@
 package cc.woverflow.hysentials.websocket;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UMessage;
+import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.handlers.groupchats.GroupChat;
@@ -29,6 +31,8 @@ import cc.woverflow.hytils.config.HytilsConfig;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import kotlin.random.Random;
 import net.minecraft.client.Minecraft;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.event.HoverEvent;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONObject;
@@ -132,6 +136,26 @@ public class Socket {
                             case "groupInvite": {
                                 GroupChat.invite(json);
                                 break;
+                            }
+
+                            case "clubInvite": {
+                                JSONObject club = json.getJSONObject("club");
+                                UChat.chat("&b-----------------------------------------------------");
+                                new UTextComponent("§eYou have been invited to join the §6" + club.getString("name") + " §eclub. Type §6`/club join " + club.getString("name") + "` §eto join!")
+                                    .setHover(HoverEvent.Action.SHOW_TEXT, "§eClick to join!")
+                                    .setClick(ClickEvent.Action.RUN_COMMAND, "/club join " + club.getString("name"))
+                                    .chat();
+                                UChat.chat(HysentialsConfig.chatPrefix + " §eThis invite will expire in 5 minutes.");
+                                UChat.chat("&b-----------------------------------------------------");
+                                break;
+                            }
+
+                            case "clubAccept": {
+                                if (json.getBoolean("success")) {
+                                    UChat.chat(HysentialsConfig.chatPrefix + " §aSuccessfully joined club!");
+                                } else {
+                                    UChat.chat(HysentialsConfig.chatPrefix + " §cFailed to join club!");
+                                }
                             }
                         }
                     }

@@ -17,9 +17,9 @@ public class Actionbar {
         if (((int) event.type) != 2) return;
         if (HysentialsConfig.actionBar) {
             event.setCanceled(true);
+            actionBarMessage = event.message.getFormattedText();
+            lastUpdated = System.currentTimeMillis();
         }
-        actionBarMessage = event.message.getFormattedText();
-        lastUpdated = System.currentTimeMillis();
     }
 
     public static void actionBar() {
@@ -38,7 +38,7 @@ public class Actionbar {
             18,
             HysentialsConfig.boxColor,
             HysentialsConfig.boxShadows,
-            new Integer[]{0, 2, 4}[HysentialsConfig.actionBarBorderRadius]
+            2
         );
         Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(actionBarMessage, x, y, (int) Renderer.color(255, 255, 255, 255));
 

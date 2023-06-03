@@ -27,13 +27,14 @@ import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.event.events.HysentialsLoadedEvent;
 import cc.woverflow.hysentials.guis.ResolutionUtil;
 import cc.woverflow.hysentials.guis.actionLibrary.ActionLibrary;
+import cc.woverflow.hysentials.guis.club.ClubDashboard;
 import cc.woverflow.hysentials.guis.gameMenu.RevampedGameMenu;
 import cc.woverflow.hysentials.guis.sbBoxes.SBBoxesEditor;
 import cc.woverflow.hysentials.handlers.cache.HeightHandler;
 import cc.woverflow.hysentials.handlers.chat.ChatHandler;
 import cc.woverflow.hysentials.handlers.display.GuiDisplayHandler;
-import cc.woverflow.hysentials.handlers.groupchats.GroupChat;
 import cc.woverflow.hysentials.handlers.guis.GameMenuOpen;
+import cc.woverflow.hysentials.handlers.htsl.*;
 import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
 import cc.woverflow.hysentials.handlers.language.LanguageHandler;
 import cc.woverflow.hysentials.handlers.lobby.HousingLagReducer;
@@ -44,10 +45,7 @@ import cc.woverflow.hysentials.handlers.sbb.Actionbar;
 import cc.woverflow.hysentials.handlers.sbb.SbbRenderer;
 import cc.woverflow.hysentials.pets.cubit.CubitCompanion;
 import cc.woverflow.hysentials.pets.hamster.HamsterCompanion;
-import cc.woverflow.hysentials.util.HypixelAPIUtils;
-import cc.woverflow.hysentials.util.HypixelRanks;
-import cc.woverflow.hysentials.util.ImageIconRenderer;
-import cc.woverflow.hysentials.util.JsonData;
+import cc.woverflow.hysentials.util.*;
 import cc.woverflow.hysentials.util.blockw.OnlineCache;
 import cc.woverflow.hysentials.util.friends.FriendCache;
 import cc.woverflow.hysentials.util.skyblock.SkyblockChecker;
@@ -68,7 +66,12 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.File;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 @Mod(
     modid = Hysentials.MOD_ID,
@@ -122,12 +125,25 @@ public class Hysentials {
     public void init(FMLInitializationEvent event) {
         config = new HysentialsConfig();
         sbBoxes = new JsonData("./config/hysentials/lines.json", new JSONObject().put("lines", new JSONArray()));
+        try {
+            SSLStore store = new SSLStore();
+            store.load("/ssl/hysentials.der");
+            SSLContext context = store.finish();
+            SSLContext.setDefault(context);
+            HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
 
         CommandManager.INSTANCE.registerCommand(new HysentialsCommand());
         CommandManager.INSTANCE.registerCommand(new GroupChatCommand());
         ClientCommandHandler.instance.registerCommand(new GlobalChatCommand());
         ClientCommandHandler.instance.registerCommand(new HypixelChatCommand());
+        ClientCommandHandler.instance.registerCommand(new VisitCommand());
         CommandManager.INSTANCE.registerCommand(new SBBoxesCommand());
+        CommandManager.INSTANCE.registerCommand(new ActionLibraryCommand());
+        CommandManager.INSTANCE.registerCommand(new ClubCommand());
 
         HeightHandler.INSTANCE.initialize();
 
@@ -144,6 +160,8 @@ public class Hysentials {
 
         Socket.createSocket();
         registerImages();
+        cc.woverflow.hysentials.htsl.Loader.registerLoaders();
+
 //        doorbellBot = new DoorbellBot();
 
         MinecraftForge.EVENT_BUS.post(new HysentialsLoadedEvent());
@@ -168,6 +186,7 @@ public class Hysentials {
         imageIconRenderer = new ImageIconRenderer();
         Minecraft.getMinecraft().fontRendererObj = imageIconRenderer;
     }
+
     private void registerHandlers() {
         final EventBus eventBus = MinecraftForge.EVENT_BUS;
         final cc.woverflow.hysentials.event.EventBus hyBus = cc.woverflow.hysentials.event.EventBus.INSTANCE;
@@ -176,9 +195,9 @@ public class Hysentials {
 
         // general stuff
         eventBus.register(languageHandler);
-        if (isChatting) {
-            eventBus.register(new GroupChat());
-        }
+//        if (isChatting) {
+//            eventBus.register(new GroupChat());
+//        }
         // chat
         eventBus.register(chatHandler);
 
@@ -192,6 +211,12 @@ public class Hysentials {
         eventBus.register(new SbbRenderer());
         eventBus.register(new Actionbar());
         eventBus.register(new ActionLibrary());
+        eventBus.register(new Queue());
+        eventBus.register(new Navigator());
+        eventBus.register(new ActionGUIHandler());
+        eventBus.register(new Exporter());
+        eventBus.register(new HousingMenuHandler());
+        eventBus.register(new ClubDashboard());
 
         // height overlay
         EventManager.INSTANCE.register(HeightHandler.INSTANCE);
@@ -248,4 +273,27 @@ public class Hysentials {
     public OnlineCache getOnlineCache() {
         return onlineCache;
     }
+
+
+    public static InputStream post(String url, JSONObject json) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty("Accept", "application/json");
+        connection.setDoOutput(true);
+        connection.addRequestProperty("User-Agent", "Hysentials/" + VERSION);
+        connection.setReadTimeout(15000);
+        connection.setConnectTimeout(15000);
+
+        OutputStream outStream = connection.getOutputStream();
+        OutputStreamWriter outStreamWriter = new OutputStreamWriter(outStream, StandardCharsets.UTF_8);
+        outStreamWriter.write(json.toString());
+        outStreamWriter.flush();
+        outStreamWriter.close();
+        outStream.close();
+
+        return connection.getInputStream();
+    }
+
+
 }

@@ -22,7 +22,12 @@ public class ChangePlayerGroup extends Loader {
     }
 
     @Override
-    public void load(int index, List<String> args, List<String> compileErorrs) {
-        new ChangePlayerGroup(args.get(0), Boolean.parseBoolean(args.get(1)));
+    public Loader load(int index, List<String> args, List<String> compileErorrs) {
+        return new ChangePlayerGroup(args.get(0), Boolean.parseBoolean(args.get(1)));
+    }
+
+    @Override
+    public String export(List<String> args) {
+        return "changePlayerGroup \"" + args.get(0) + "\" " + args.get(1);
     }
 }

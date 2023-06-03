@@ -45,6 +45,7 @@ public class GuiItem {
         }
         return colored;
     }
+
     public static ItemStack makeColorfulItem(Material material, String displayName, int amount, int durability, List<String> lore) {
         ItemStack item = new ItemStack(Item.getItemById(material.getId()), amount, (short) durability);
         item.setStackDisplayName(colorize(displayName));
@@ -92,6 +93,31 @@ public class GuiItem {
 
         item.setTagCompound(nbtTag);
         return item;
+    }
+
+    public static List<String> getLore(ItemStack item) {
+        if (item.getTagCompound() == null) {
+            item.setTagCompound(new NBTTagCompound());
+        }
+
+        NBTTagCompound nbtTag = item.getTagCompound();
+        if (!nbtTag.hasKey("display")) {
+            nbtTag.setTag("display", new NBTTagCompound());
+        }
+
+        NBTTagCompound displayTag = nbtTag.getCompoundTag("display");
+        if (!displayTag.hasKey("Lore")) {
+            displayTag.setTag("Lore", new NBTTagList());
+        }
+
+        NBTTagList lore = displayTag.getTagList("Lore", 8);
+        List<String> loreLines = new ArrayList<>();
+
+        for (int i = 0; i < lore.tagCount(); i++) {
+            loreLines.add(lore.getStringTagAt(i));
+        }
+
+        return loreLines;
     }
 
     public static ItemStack hideFlag(ItemStack item, int flags) {

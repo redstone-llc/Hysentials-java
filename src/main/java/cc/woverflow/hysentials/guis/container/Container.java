@@ -3,6 +3,7 @@ package cc.woverflow.hysentials.guis.container;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.event.EventBus;
 import cc.woverflow.hysentials.event.events.GuiMouseClickEvent;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryBasic;
@@ -15,12 +16,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class Container extends InventoryBasic {
-    private String title;
-    private int rows = 1;
-    private final Map<Integer, GuiItem> guiItems;
+    protected String title;
+    protected int rows = 1;
+    protected final Map<Integer, GuiItem> guiItems;
     private static Map<Integer, GuiAction> slotActions;
     private static GuiChest guiChest;
-    private static boolean isOpen;
+    protected static boolean isOpen;
     private static GuiAction defaultAction;
 
     public Container(String title, int rows) {
@@ -36,6 +37,15 @@ public abstract class Container extends InventoryBasic {
         guiItems.put(slot, item);
     }
 
+    public void addItem(GuiItem item) {
+        for (int i = 0; i < rows*9; i++) {
+            if (!guiItems.containsKey(i)) {
+                setItem(i, item);
+                return;
+            }
+        }
+    }
+
     public void setAction(int slot, GuiAction action) {
         slotActions.put(slot, action);
     }
@@ -49,6 +59,24 @@ public abstract class Container extends InventoryBasic {
     public abstract void handleMenu(MouseEvent event);
 
     public abstract void setClickActions();
+
+    public void update() {
+        if (isOpen) {
+            guiItems.clear();
+            setItems();
+            for (Map.Entry<Integer, GuiItem> entry : guiItems.entrySet()) {
+                Integer slot = entry.getKey();
+                GuiItem item = entry.getValue();
+                setInventorySlotContents(slot, item.getItemStack());
+            }
+            slotActions.clear();
+            setClickActions();
+        }
+    }
+
+    public void open() {
+        open(Minecraft.getMinecraft().thePlayer);
+    }
 
     public void open(@NotNull EntityPlayer owner) {
         setItems();

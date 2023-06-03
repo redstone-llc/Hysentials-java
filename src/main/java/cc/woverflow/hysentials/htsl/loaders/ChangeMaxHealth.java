@@ -36,7 +36,7 @@ public class ChangeMaxHealth extends Loader {
     }
 
     @Override
-    public void load(int index, List<String> args, List<String> compileErorrs) {
+    public Loader load(int index, List<String> args, List<String> compileErorrs) {
         boolean heal = true;
         if (args.get(2).equalsIgnoreCase("false")) {
             heal = false;
@@ -44,8 +44,13 @@ public class ChangeMaxHealth extends Loader {
         String mode = validOperator(args.get(0));
         if (mode == null) {
             compileErorrs.add("&cUnknown operator on line &e" + (index + 1) + "&c!");
-            return;
+            return null;
         }
-        new ChangeMaxHealth(mode, args.get(1), heal);
+        return new ChangeMaxHealth(mode, args.get(1), heal);
+    }
+
+    @Override
+    public String export(List<String> args) {
+        return "maxHealth " + args.get(0) + " " + args.get(1) + " " + args.get(2);
     }
 }

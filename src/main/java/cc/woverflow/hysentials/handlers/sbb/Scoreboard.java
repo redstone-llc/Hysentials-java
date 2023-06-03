@@ -16,7 +16,7 @@ public class Scoreboard {
         ScaledResolution res = new ScaledResolution(Minecraft.getMinecraft());
         GuiIngameForge.renderObjective = false;
         int x = res.getScaledWidth();
-        int radius = new Integer[]{0, 2, 4}[HysentialsConfig.scoreboardBorderRadius];
+        int radius = 2;
         List<ScoreboardWrapper.ScoreWrapper> lines = ScoreboardWrapper.getLines(true);
         List<String[]> formattedLines = new ArrayList<>();
 

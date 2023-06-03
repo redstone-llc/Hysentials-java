@@ -33,10 +33,6 @@ public class GameMenuOpen {
                 if (field_lowerChestInventory.get(chest) instanceof IInventory) {
                     IInventory inventory = (IInventory) field_lowerChestInventory.get(chest);
                     if (inventory.getName().equals("Game Menu")) {
-                        InventoryBasic inventoryBasic = (InventoryBasic) inventory;
-                        ItemStack[] contents = (ItemStack[]) field_inventoryContents.get(inventoryBasic);
-                        List<ItemStack> items = Arrays.asList(contents);
-//                        new RevampedGameMenu(items).show();
                     }
                 }
             } catch (IllegalAccessException e) {

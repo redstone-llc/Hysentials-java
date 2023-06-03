@@ -1,5 +1,6 @@
 package cc.woverflow.hysentials.util;
 
+import cc.woverflow.hysentials.guis.ResolutionUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -26,10 +27,12 @@ public class Renderer {
     private static final WorldRenderer worldRenderer = tessellator.getWorldRenderer();
 
     public static void drawString(String text, float x, float y) {
+        text = text.replace("&", "§");
         Minecraft.getMinecraft().fontRendererObj.drawString(text, x, y, (int) color(255, 255, 255, 255), false);
     }
 
     public static void drawString(String text, int x, int y) {
+        text = text.replace("&", "§");
         Minecraft.getMinecraft().fontRendererObj.drawString(text, x, y, (int) color(255, 255, 255, 255), false);
     }
     public static void drawRect(long color, float x, float y, float width, float height) {
@@ -155,6 +158,15 @@ public class Renderer {
         public void click(int mouseX, int mouseY) {
             if (mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height)
                 callback.accept(0);
+        }
+    }
+
+    public static class screen {
+        public static int getWidth() {
+            return ResolutionUtil.current().getScaledWidth();
+        }
+        public static int getHeight() {
+            return ResolutionUtil.current().getScaledHeight();
         }
     }
 }

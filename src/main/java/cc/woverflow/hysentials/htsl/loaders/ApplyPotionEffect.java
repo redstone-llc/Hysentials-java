@@ -3,6 +3,7 @@ package cc.woverflow.hysentials.htsl.loaders;
 import cc.woverflow.hysentials.htsl.Loader;
 import cc.woverflow.hysentials.htsl.PotionEffect;
 import org.json.JSONObject;
+import scala.Int;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.anvil;
 import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.click;
 
 public class ApplyPotionEffect extends Loader {
-    public ApplyPotionEffect(String effect, double duration, double amplifier, boolean overrideExistingEffects) {
+    public ApplyPotionEffect(String effect, String duration, String amplifier, boolean overrideExistingEffects) {
         super("Apply Potion Effect", "applyPotion", effect, duration, amplifier, overrideExistingEffects);
 
         if (effect != null) {
@@ -22,14 +23,14 @@ public class ApplyPotionEffect extends Loader {
             add(click(potion.getSlot()));
         }
 
-        if (!Double.isNaN(duration) && duration > 60) {
+        if (!isNAN(duration) && Integer.parseInt(duration) > 60) {
             add(click(11));
-            add(anvil(String.valueOf(duration)));
+            add(anvil(duration));
         }
 
-        if (!Double.isNaN(amplifier) && amplifier != 1) {
+        if (!isNAN(amplifier) && Integer.parseInt(amplifier) != 1) {
             add(click(12));
-            add(anvil(String.valueOf(amplifier)));
+            add(anvil(amplifier));
         }
 
         if (overrideExistingEffects) {
@@ -38,17 +39,22 @@ public class ApplyPotionEffect extends Loader {
     }
 
     @Override
-    public void load(int index, List<String> args, List<String> errors) {
+    public Loader load(int index, List<String> args, List<String> errors) {
         boolean override = false;
         if (args.size() != 4) {
             errors.add("&cIncomplete arguments on line &e" + (index + 1) + "&c!");
-            return;
+            return null;
         }
         if (args.get(3).equalsIgnoreCase("true")) {
             override = true;
         } else {
             errors.add("&cInvalid argument on line &e" + (index + 1) + "&c!");
         }
-        new ApplyPotionEffect(args.get(0), Double.parseDouble(args.get(1)), Double.parseDouble(args.get(2)), override);
+        return new ApplyPotionEffect(args.get(0), args.get(1), args.get(2), override);
+    }
+
+    @Override
+    public String export(List<String> args) {
+        return "applyPotion \"" + args.get(0) + "\" " + args.get(1) + " " + args.get(2) + " " + args.get(3) + "";
     }
 }

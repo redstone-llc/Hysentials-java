@@ -5,5 +5,4 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(value = Minecraft.class, remap = false)
 public class MinecraftMixin {
-
 }

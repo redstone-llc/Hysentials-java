@@ -48,7 +48,7 @@ public enum PotionEffect {
     }
 
     public static PotionEffect fromString(String effect) {
-        switch (effect) {
+        switch (effect.toLowerCase().replace(" ", "_")) {
             case "speed": return SPEED;
             case "slowness": return SLOWNESS;
             case "haste": return HASTE;

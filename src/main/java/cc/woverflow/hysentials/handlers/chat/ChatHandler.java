@@ -44,9 +44,9 @@ public class ChatHandler {
     }
 
     public void init () {
-        if (Hysentials.INSTANCE.isChatting) {
-            this.registerModule(new GroupChatMessage());
-        }
+//        if (Hysentials.INSTANCE.isChatting) {
+//            this.registerModule(new GroupChatMessage());
+//        }
         this.registerModule(new GlobalChatStuff.GlobalInChannel());
         this.registerModule(new GlobalChatStuff.GlobalSendMessage());
         this.registerModule(new BWSReplace());

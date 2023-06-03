@@ -59,18 +59,18 @@ public class BwRanksUtils {
                 if (!checksColor) {
                     return rank.getColor() + name;
                 }
-                Matcher m1 = Pattern.compile(regex1).matcher(message);
+                Matcher m1 = Pattern.compile(regex1, Pattern.UNICODE_CASE).matcher(message);
                 if (m1.find(0)) {
                     message = message.replaceAll("\\[[A-Za-z§0-9+]+] " + name, replacement).replace("§7:", "§f:");
-                } else if (Pattern.compile(regex2).matcher(message.split("§7:")[0]).find(0)) {
+                } else if (Pattern.compile(regex2, Pattern.UNICODE_CASE).matcher(message.split("§7:")[0]).find(0)) {
                     message = message.replaceAll("(§r§7|§7)" + name, replacement).replace("§7:", "§f:");
-                } else if (Pattern.compile(regex3).matcher(message).find(0)) {
+                } else if (Pattern.compile(regex3, Pattern.UNICODE_CASE).matcher(message).find(0)) {
                     message = message.replaceAll("[a-f0-9§]{2}" + name, replacement).replace("§7:", "§f:");
                 }
             } else {
-                Matcher m1 = Pattern.compile(regex1).matcher(message);
-                Matcher m2 = Pattern.compile(regex2).matcher(message);
-                Matcher m3 = Pattern.compile(regex3).matcher(message);
+                Matcher m1 = Pattern.compile(regex1, Pattern.UNICODE_CASE).matcher(message);
+                Matcher m2 = Pattern.compile(regex2, Pattern.UNICODE_CASE).matcher(message);
+                Matcher m3 = Pattern.compile(regex3, Pattern.UNICODE_CASE).matcher(message);
                 if (m1.find(0) && checksColor) {
                     message = message.replaceAll("\\[[A-Za-z§0-9+]+] " + name, getReplacement(m1.group(0).split(" ")[0], name, uuid, false));
                 }

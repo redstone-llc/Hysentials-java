@@ -11,10 +11,10 @@ import java.util.List;
 import static cc.woverflow.hysentials.htsl.Loader.LoaderObject.*;
 
 public class Conditional extends Loader {
-    public Conditional(String condition, List<Object[]> conditions, boolean matchAnyCondition, List<Object[]> ifActions, List<Object[]> elseActions) {
-        super("Conditional", "condition", condition, conditions, matchAnyCondition, ifActions, elseActions);
+    public Conditional(List<Object[]> conditions, boolean matchAnyCondition, List<Object[]> ifActions, List<Object[]> elseActions) {
+        super("Conditional", "condition", conditions, matchAnyCondition, ifActions, elseActions);
 
-        if (condition != null) {
+        if (conditions != null) {
             add(click(10));
             conditions.forEach(c -> {
                 sequence.addAll(loadCondition(c));
@@ -28,36 +28,35 @@ public class Conditional extends Loader {
 
         if (ifActions != null && ifActions.size() > 0) {
             add(click(12));
-            ifActions.forEach(action -> {
-                sequence.addAll(loadAction((Object[]) action));
-            });
+            for (Object[] action : ifActions) {
+                sequence.addAll(loadAction(action));
+            }
             add(back());
         }
 
         if (elseActions != null && elseActions.size() > 0) {
             add(click(13));
-            elseActions.forEach(action -> {
-                sequence.addAll(loadAction((Object[]) action));
-            });
+            for (Object[] action : elseActions) {
+                sequence.addAll(loadAction(action));
+            }
             add(back());
         }
     }
 
 
-
     public List<LoaderObject> loadCondition(Object[] condition) {
         List<LoaderObject> sequence = new ArrayList<>();
         String conditionType = condition[0].toString();
-        JSONObject conditionData = (JSONObject) condition[1];
+        Object[] conditionData = (Object[]) condition[1];
 
         sequence.add(click(50));
         switch (conditionType) {
             case "has_potion_effect": {
                 sequence.add(setGuiContext("Condition -> Has Potion Effect"));
                 sequence.add(option("Has Potion Effect"));
-                if (conditionData.has("effect")) {
+                if (conditionData[0] != null) {
                     sequence.add(click(10));
-                    PotionEffect effect = PotionEffect.fromString(conditionData.getString("effect"));
+                    PotionEffect effect = PotionEffect.fromString(conditionData[0].toString());
                     if (effect.isOnSecondPage()) {
                         sequence.add(click(53));
                     }
@@ -73,17 +72,17 @@ public class Conditional extends Loader {
             case "has_item": {
                 sequence.add(setGuiContext("Condition -> Has Item"));
                 sequence.add(option("Has Item"));
-                if (conditionData.has("item")) {
+                if (conditionData[0] != null) {
                     sequence.add(click(10));
-                    sequence.add(item(conditionData.getString("item")));
+                    sequence.add(item(conditionData[0].toString()));
                 }
-                if (conditionData.getString("whatToCheck").equals("item_type")) {
+                if (conditionData[1].toString().equals("item_type")) {
                     sequence.add(click(11));
                     sequence.add(click(10));
                 }
-                if (conditionData.has("whereToCheck") && !conditionData.getString("whereToCheck").equals("anywhere")) {
+                if (conditionData[2] != null && !conditionData[2].toString().equals("anywhere")) {
                     sequence.add(click(12));
-                    switch (conditionData.getString("whereToCheck")) {
+                    switch (conditionData[2].toString()) {
                         case "Hand": {
                             sequence.add(click(10));
                             break;
@@ -103,7 +102,7 @@ public class Conditional extends Loader {
                     }
                 }
 
-                if (conditionData.has("requireAmount")) {
+                if ((boolean) conditionData[3]) {
                     sequence.add(click(13));
                     sequence.add(click(11));
                 }
@@ -113,9 +112,9 @@ public class Conditional extends Loader {
             case "within_region": {
                 sequence.add(setGuiContext("Condition -> Within Region"));
                 sequence.add(option("Within Region"));
-                if (conditionData.has("region")) {
+                if (conditionData[0] != null) {
                     sequence.add(click(10));
-                    sequence.add(option(conditionData.getString("region")));
+                    sequence.add(option(conditionData[0].toString()));
                 }
                 sequence.add(back());
                 break;
@@ -123,22 +122,22 @@ public class Conditional extends Loader {
             case "required_permission": {
                 sequence.add(setGuiContext("Condition -> Required Permission"));
                 sequence.add(option("Required Permission"));
-                if (conditionData.has("permission")) {
+                if (conditionData[0] != null) {
                     sequence.add(click(10));
-                    sequence.add(option(conditionData.getString("permission")));
+                    sequence.add(option(conditionData[0].toString()));
                 }
                 sequence.add(back());
                 break;
             }
             case "player_stat_requirement": {
                 sequence.add(option("Player Stat Requirement"));
-                if (conditionData.has("stat") && !conditionData.getString("stat").equals("Kills")) {
+                if (conditionData[0] != null && !conditionData[0].toString().equals("Kills")) {
                     sequence.add(click(10));
-                    sequence.add(chat(conditionData.getString("stat")));
+                    sequence.add(chat(conditionData[0].toString()));
                 }
-                if (conditionData.has("comparator") && !conditionData.getString("comparator").equals("equal_to")) {
+                if (conditionData[1] != null && !conditionData[1].equals("equal_to")) {
                     sequence.add(click(11));
-                    switch (conditionData.getString("comparator")) {
+                    switch (conditionData[1].toString()) {
                         case "less_than": {
                             sequence.add(click(10));
                             break;
@@ -158,22 +157,22 @@ public class Conditional extends Loader {
                     }
                 }
 
-                if (conditionData.has("compareValue")) {
+                if (conditionData[2] != null) {
                     sequence.add(click(12));
-                    sequence.add(anvil(conditionData.getString("compareValue")));
+                    sequence.add(anvil(conditionData[2].toString()));
                 }
                 sequence.add(back());
                 break;
             }
             case "global_stat_requirement": {
                 sequence.add(option("Global Stat Requirement"));
-                if (conditionData.has("stat") && !conditionData.getString("stat").equals("Kills")) {
+                if (conditionData[0] != null && !conditionData[0].toString().equals("Kills")) {
                     sequence.add(click(10));
-                    sequence.add(chat(conditionData.getString("stat")));
+                    sequence.add(chat(conditionData[0].toString()));
                 }
-                if (conditionData.has("comparator") && !conditionData.getString("comparator").equals("equal_to")) {
+                if (conditionData[1] != null && !conditionData[1].toString().equals("equal_to")) {
                     sequence.add(click(11));
-                    switch (conditionData.getString("comparator")) {
+                    switch (conditionData[1].toString()) {
                         case "less_than": {
                             sequence.add(click(10));
                             break;
@@ -193,9 +192,9 @@ public class Conditional extends Loader {
                     }
                 }
 
-                if (conditionData.has("compareValue")) {
+                if (conditionData[2] != null) {
                     sequence.add(click(12));
-                    sequence.add(anvil(conditionData.getString("compareValue")));
+                    sequence.add(anvil(conditionData[2].toString()));
                 }
                 sequence.add(back());
                 break;
@@ -203,11 +202,11 @@ public class Conditional extends Loader {
             case "required_group": {
                 sequence.add(setGuiContext("Condition -> Required Group"));
                 sequence.add(option("Required Group"));
-                if (conditionData.has("group")) {
+                if (conditionData[0] != null) {
                     sequence.add(click(10));
-                    sequence.add(option(conditionData.getString("group")));
+                    sequence.add(option(conditionData[0].toString()));
                 }
-                if (conditionData.getBoolean("includeHigherGroups")) {
+                if ((boolean) conditionData[1]) {
                     sequence.add(click(11));
                 }
                 sequence.add(back());
@@ -219,13 +218,13 @@ public class Conditional extends Loader {
             }
             case "placeholder_stat_requirement": {
                 sequence.add(option("Placeholder Number Requirement"));
-                if (conditionData.has("placeholder") && !conditionData.getString("placeholder").equals("Kills")) {
+                if (conditionData[0] != null && !conditionData[0].toString().equals("Kills")) {
                     sequence.add(click(10));
-                    sequence.add(anvil(conditionData.getString("placeholder")));
+                    sequence.add(anvil(conditionData[0].toString()));
                 }
-                if (conditionData.has("comparator") && !conditionData.getString("comparator").equals("equal_to")) {
+                if (conditionData[1] != null && !conditionData[1].toString().equals("equal_to")) {
                     sequence.add(click(11));
-                    switch (conditionData.getString("comparator")) {
+                    switch (conditionData[1].toString()) {
                         case "less_than": {
                             sequence.add(click(10));
                             break;
@@ -245,18 +244,18 @@ public class Conditional extends Loader {
                     }
                 }
 
-                if (conditionData.has("compareValue")) {
+                if (conditionData[2] != null) {
                     sequence.add(click(12));
-                    sequence.add(anvil(conditionData.getString("compareValue")));
+                    sequence.add(anvil(conditionData[2].toString()));
                 }
                 sequence.add(back());
                 break;
             }
             case "required_gamemode": {
                 sequence.add(option("Required Gamemode"));
-                if (conditionData.has("gameMode")) {
+                if (conditionData[0] != null) {
                     sequence.add(click(10));
-                    switch (conditionData.getString("gameMode")) {
+                    switch (conditionData[0].toString()) {
                         case "survival": {
                             sequence.add(option("Survival"));
                             break;
@@ -276,9 +275,9 @@ public class Conditional extends Loader {
             }
             case "player_health": {
                 sequence.add(option("Player Health"));
-                if (conditionData.has("comparator") && !conditionData.getString("comparator").equals("equal_to")) {
+                if (conditionData[0] != null && !conditionData[0].toString().equals("equal_to")) {
                     sequence.add(click(10));
-                    switch (conditionData.getString("comparator")) {
+                    switch (conditionData[0].toString()) {
                         case "less_than": {
                             sequence.add(click(10));
                             break;
@@ -298,18 +297,18 @@ public class Conditional extends Loader {
                     }
                 }
 
-                if (conditionData.has("compareValue")) {
+                if (conditionData[1] != null) {
                     sequence.add(click(11));
-                    sequence.add(anvil(conditionData.getString("compareValue")));
+                    sequence.add(anvil(conditionData[1].toString()));
                 }
                 sequence.add(back());
                 break;
             }
             case "max_player_health": {
                 sequence.add(option("Max Player Health"));
-                if (conditionData.has("comparator") && !conditionData.getString("comparator").equals("equal_to")) {
+                if (conditionData[0] != null && !conditionData[0].toString().equals("equal_to")) {
                     sequence.add(click(10));
-                    switch (conditionData.getString("comparator")) {
+                    switch (conditionData[0].toString()) {
                         case "less_than": {
                             sequence.add(click(10));
                             break;
@@ -329,9 +328,9 @@ public class Conditional extends Loader {
                     }
                 }
 
-                if (conditionData.has("compareValue")) {
+                if (conditionData[1] != null) {
                     sequence.add(click(11));
-                    sequence.add(anvil(conditionData.getString("compareValue")));
+                    sequence.add(anvil(conditionData[1].toString()));
                 }
 
                 sequence.add(back());
@@ -339,9 +338,9 @@ public class Conditional extends Loader {
             }
             case "player_hunger": {
                 sequence.add(option("Player Hunger"));
-                if (conditionData.has("comparator") && !conditionData.getString("comparator").equals("equal_to")) {
+                if (conditionData[0] != null && !conditionData[0].toString().equals("equal_to")) {
                     sequence.add(click(10));
-                    switch (conditionData.getString("comparator")) {
+                    switch (conditionData[0].toString()) {
                         case "less_than": {
                             sequence.add(click(10));
                             break;
@@ -361,9 +360,9 @@ public class Conditional extends Loader {
                     }
                 }
 
-                if (conditionData.has("compareValue")) {
+                if (conditionData[1] != null) {
                     sequence.add(click(11));
-                    sequence.add(anvil(conditionData.getString("compareValue")));
+                    sequence.add(anvil(conditionData[1].toString()));
                 }
                 sequence.add(back());
                 break;
@@ -371,9 +370,9 @@ public class Conditional extends Loader {
             case "damage_cause": {
                 sequence.add(setGuiContext("Condition -> Damage Cause"));
                 sequence.add(option("Damage Cause"));
-                if (conditionData.has("damageCause")) {
+                if (conditionData[0] != null) {
                     sequence.add(click(10));
-                    sequence.add(option(conditionData.getString("damageCause")));
+                    sequence.add(option(conditionData[0].toString()));
                 }
                 sequence.add(back());
                 break;
@@ -381,11 +380,11 @@ public class Conditional extends Loader {
             case "block_type": {
                 sequence.add(setGuiContext("Condition -> Block Type"));
                 sequence.add(option("Block Type"));
-                if (conditionData.has("blockType")) {
+                if (conditionData[0] != null) {
                     sequence.add(click(10));
-                    sequence.add(option(conditionData.getString("blockType")));
+                    sequence.add(option(conditionData[0].toString()));
                 }
-                if (conditionData.getBoolean("matchTypeOnly")) {
+                if (conditionData[1] != null && (boolean) conditionData[1]) {
                     sequence.add(click(11));
                 }
                 sequence.add(back());
@@ -394,5 +393,11 @@ public class Conditional extends Loader {
         }
 
         return sequence;
+    }
+
+    @Override
+    public String export(List<String> args) {
+        args.get(0);
+        return "conditional";
     }
 }

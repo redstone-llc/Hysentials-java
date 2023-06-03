@@ -22,23 +22,14 @@ import static cc.woverflow.hysentials.handlers.redworks.BwRanksUtils.getPlus;
 import static cc.woverflow.hysentials.handlers.redworks.BwRanksUtils.getReplacement;
 
 public class BWSReplace implements ChatReceiveModule {
+    HashMap<String, UUID> users = new HashMap<>();
     @Override
     public void onMessageReceived(@NotNull ClientChatReceivedEvent event) {
         if (!HypixelUtils.INSTANCE.isHypixel()) return;
         if (event.type != 0 && event.type != 1) return;
+        if (LocrawUtil.INSTANCE.isInGame()) return;
+        boolean didSomething = false;
         String message = event.message.getFormattedText();
-        if (BwRanks.hidingGuildList) {
-            if (message.equals("§b§m-----------------------------------------------------§r") && BwRanks.lines.size() > 1) {
-                for (String username : getUsernames(BwRanks.lines)) {
-                    Hysentials.INSTANCE.getOnlineCache().guildCache.put(username, null);
-                }
-                BwRanks.lines.clear();
-                BwRanks.hidingLastMessage = true;
-            } else {
-                BwRanks.lines.add(message);
-            }
-        }
-        HashMap<String, UUID> users = new HashMap<>(Hysentials.INSTANCE.getOnlineCache().guildCache);
         Minecraft.getMinecraft().getNetHandler().getPlayerInfoMap().forEach(playerInfo -> {
             users.put(playerInfo.getGameProfile().getName(), playerInfo.getGameProfile().getId());
         });
@@ -72,10 +63,13 @@ public class BWSReplace implements ChatReceiveModule {
                     }
                     Matcher m1 = Pattern.compile(regex1).matcher(message);
                     if (m1.find(0)) {
+                        didSomething = true;
                         message = message.replaceAll("\\[[A-Za-z§0-9+]+] " + name, replacement).replace("§7:", "§f:");
                     } else if (Pattern.compile(regex2).matcher(message.split("§7:")[0]).find(0)) {
+                        didSomething = true;
                         message = message.replaceAll("(§r§7|§7)" + name, replacement).replace("§7:", "§f:");
                     } else if (Pattern.compile(regex3).matcher(message).find(0)) {
+                        didSomething = true;
                         message = message.replaceAll("[a-f0-9§]{2}" + name, replacement).replace("§7:", "§f:");
                     }
                 } else {
@@ -83,12 +77,15 @@ public class BWSReplace implements ChatReceiveModule {
                     Matcher m2 = Pattern.compile(regex2).matcher(message);
                     Matcher m3 = Pattern.compile(regex3).matcher(message);
                     if (m1.find(0) && BwRanks.hasRank) {
+                        didSomething = true;
                         message = message.replaceAll("\\[[A-Za-z§0-9+]+] " + name, getReplacement(m1.group(0).split(" ")[0], name, uuid, false));
                     }
                     if (m2.find(0) && BwRanks.hasRank) {
+                        didSomething = true;
                         message = message.replaceAll("(§r§7|§7)" + name, getReplacement("§7", name, uuid, LocrawUtil.INSTANCE.getLocrawInfo().getGameType().equals(LocrawInfo.GameType.SKYBLOCK)));
                     }
                     if (m3.find(0) && (!BwRanks.hasRank)) {
+                        didSomething = true;
                         message = message.replaceAll("[a-f0-9§]{2}" + name, getReplacement(m3.group(0).substring(0, 2), name, uuid, true));
                     }
                 }
@@ -96,10 +93,10 @@ public class BWSReplace implements ChatReceiveModule {
                 e.printStackTrace();
             }
         }
-        event.setCanceled(true);
-        event.message = colorMessage(message);
-        event.setCanceled(true);
-        UChat.chat(message);
+        if (didSomething) {
+            event.setCanceled(true);
+            UChat.chat(message);
+        }
     }
 
     private static List<String> getUsernames(List<String> lines) {

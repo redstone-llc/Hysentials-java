@@ -1,7 +1,10 @@
 package cc.woverflow.hysentials.htsl;
 
-import cc.woverflow.hysentials.htsl.loaders.Conditional;
+import akka.actor.Kill;
+import cc.woverflow.hysentials.htsl.compiler.Compiler;
+import cc.woverflow.hysentials.htsl.loaders.*;
 import org.json.JSONObject;
+import scala.Int;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +21,46 @@ public class Loader {
     public JSONObject actionData;
     public Object[] args = new Object[0];
 
+    public static void registerLoaders() {
+        new ApplyInventoryLayout(null);
+        new ApplyPotionEffect(null, null, null, false);
+        new Cancel();
+        new ChangeGlobalStat(null, null, null);
+        new ChangeHealth(null, null);
+        new ChangeHungerLevel(null, null);
+        new ChangeMaxHealth(null, null, false);
+        new ChangePlayerGroup(null, false);
+        new ChangePlayerStat(null, null, null);
+        new ClearAllPotionEffects();
+        new Conditional(null, false, null, null);
+        new DisplayActionBar(null);
+        new DisplayTitle(null, null, null, null, null);
+        new EnchantHeldItem(null, null);
+        new Exit();
+        new FailParkour(null);
+        new FullHeal();
+        new GiveExperienceLevels(null);
+        new GiveItem(null, false);
+        new GoToHouseSpawn();
+        new KillPlayer();
+        new ParkourCheckpoint();
+        new PlaySound(null, null);
+        new RandomAction(null);
+        new RemoveItem(null);
+        new ResetInventory();
+        new SendAChatMessage(null);
+        new SendToLobby(null);
+        new SetCompassTarget(null, null);
+        new SetGamemode(null);
+        new TeleportPlayer(null, null);
+        new TriggerFunction(null, false);
+        new UseRemoveHeldItem();
+    }
+
+    public static boolean isNAN(String s) {
+        return s == null || s.equals("NaN");
+    }
+
     public Loader(JSONObject actionData, String name) {
         this.name = name;
         this.actionData = actionData;
@@ -31,11 +74,26 @@ public class Loader {
         loaders.add(this);
     }
 
-    public void load(int index, List<String> args, List<String> compileErorrs) {
+    public List<String> stringArgs = null;
 
+    public Loader load(int index, List<String> args, List<String> compileErorrs) {
+        return null;
     }
 
-    public JSONObject getActionData () {
+    public static boolean canExport(Loader loader) {
+        try {
+            loader.export(new ArrayList<>());
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public String export (List<String> args) {
+        return keyword;
+    }
+
+    public JSONObject getActionData() {
         return actionData;
     }
 
@@ -45,9 +103,9 @@ public class Loader {
     }
 
     public List<LoaderObject> loadAction(Object[] action) {
-        ArrayList<Loader> loaders = new ArrayList<>(Loader.loaders);
+        ArrayList<Loader> loaders = new ArrayList<>(Compiler.compiedActions);
         loaders.removeIf(loader -> loader instanceof Conditional);
-        Loader loader = loaders.stream().filter(l -> l.name.equals(action[0])).findFirst().orElse(null);
+        Loader loader = loaders.stream().filter(l -> l.equals(action[1])).findFirst().orElse(null);
         if (loader == null) {
             return new ArrayList<>();
         }
@@ -89,6 +147,29 @@ public class Loader {
                 break;
         }
         if (!Arrays.asList("increment", "decrement", "set", "multiply", "divide").contains(operator))
+            return null;
+        return operator;
+    }
+
+    public String undoValidOperator(String operator) {
+        switch (operator.toLowerCase()) {
+            case "increment":
+                operator = "inc";
+                break;
+            case "decrement":
+                operator = "dec";
+                break;
+            case "set":
+                operator = "=";
+                break;
+            case "multiply":
+                operator = "multi";
+                break;
+            case "divide":
+                operator = "div";
+                break;
+        }
+        if (!Arrays.asList("inc", "dec", "=", "multi", "div").contains(operator))
             return null;
         return operator;
     }

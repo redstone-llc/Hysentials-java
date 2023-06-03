@@ -11,7 +11,7 @@ public class ClearAllPotionEffects extends Loader {
     }
 
     @Override
-    public void load(int index, List<String> args, List<String> compileErorrs) {
-        new ClearAllPotionEffects();
+    public Loader load(int index, List<String> args, List<String> compileErorrs) {
+        return new ClearAllPotionEffects();
     }
 }

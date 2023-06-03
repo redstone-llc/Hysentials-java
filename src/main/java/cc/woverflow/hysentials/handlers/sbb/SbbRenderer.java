@@ -74,7 +74,7 @@ public class SbbRenderer {
                 (float) height,
                 HysentialsConfig.boxColor,
                 HysentialsConfig.boxShadows,
-                new int[]{0, 2, 4}[HysentialsConfig.scoreboardBoxesBorderRadius]
+                2
             );
             GL11.glPushMatrix();
             GL11.glScaled(lineData.getDouble("scale"), lineData.getDouble("scale"), 1);
@@ -127,17 +127,17 @@ public class SbbRenderer {
         width = (float) Math.round(width);
         height = (float) Math.round(height);
         long boxColor = Renderer.color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
-        Renderer.drawRect(boxColor, x + radius, y, width - radius * 2, height);
-        Renderer.drawRect(boxColor, x, y + radius, radius, height - 2 * radius);
-        Renderer.drawRect(boxColor, x + width - radius, y + radius, radius, height - 2 * radius);
+        Renderer.drawRect(boxColor, x + radius, y, width - (radius * 2), height);
+        Renderer.drawRect(boxColor, x, y + radius, radius, height - (2 * radius));
+        Renderer.drawRect(boxColor, x + width - radius, y + radius, radius, height - (2 * radius));
 
         if (boxShadows) {
             long shadowColor = Renderer.color(color.getRed(), color.getGreen(), color.getBlue(), (long) (color.getAlpha() * 0.42F));
-            Renderer.drawRect(shadowColor, x + width, y + 2 * radius, radius, height - 2 * radius);
+            Renderer.drawRect(shadowColor, x + width, y + (2 * radius), radius, height - (2 * radius));
             if (radius != 0) {
                 Renderer.drawRect(shadowColor, x + width - radius, y + height - radius, radius, radius);
             }
-            Renderer.drawRect(shadowColor, x + 2 * radius, y + height, width - 2 * radius, radius);
+            Renderer.drawRect(shadowColor, x + (2 * radius), y + height, width - (2 * radius), radius);
         }
     }
 

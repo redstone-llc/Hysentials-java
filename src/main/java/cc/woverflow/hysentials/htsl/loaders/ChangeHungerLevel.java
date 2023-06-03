@@ -1,4 +1,4 @@
-package main.java.cc.woverflow.hysentials.htsl.loaders;
+package cc.woverflow.hysentials.htsl.loaders;
 
 import cc.woverflow.hysentials.htsl.Loader;
 import org.json.JSONObject;
@@ -32,12 +32,17 @@ public class ChangeHungerLevel extends Loader {
     }
 
     @Override
-    public void load(int index, List<String> args, List<String> compileErorrs) {
+    public Loader load(int index, List<String> args, List<String> compileErorrs) {
         String mode = validOperator(args.get(0));
         if (mode == null) {
             compileErorrs.add("&cUnknown operator on line &e" + (index + 1) + "&c!");
-            return;
+            return null;
         }
-        new ChangeHungerLevel(mode, args.get(1));
+        return new ChangeHungerLevel(mode, args.get(1));
+    }
+
+    @Override
+    public String export(List<String> args) {
+        return "hungerLevel " + args.get(0) + " " + args.get(1);
     }
 }

@@ -19,7 +19,12 @@ public class ApplyInventoryLayout extends Loader {
     }
 
     @Override
-    public void load(int index, List<String> args, List<String> errors) {
-        new ApplyInventoryLayout(args.get(0));
+    public Loader load(int index, List<String> args, List<String> errors) {
+        return new ApplyInventoryLayout(args.get(0));
+    }
+
+    @Override
+    public String export(List<String> args) {
+        return "applyLayout \"" + args.get(0) + "\"";
     }
 }

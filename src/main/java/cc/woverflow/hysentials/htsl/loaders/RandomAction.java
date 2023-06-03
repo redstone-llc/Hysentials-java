@@ -9,8 +9,21 @@ public class RandomAction extends Loader {
         super("Random Action", "random", actions);
         if (actions != null) {
             add(LoaderObject.click(10));
-            actions.forEach(action -> sequence.addAll(loadAction(action)));
+            for (Object[] action : actions) {
+                sequence.addAll(loadAction(action));
+            }
             add(LoaderObject.back());
         }
+    }
+
+    @Override
+    public Loader load(int index, List<String> args, List<String> compileErorrs) {
+        return null;
+    }
+
+    @Override
+    public String export(List<String> args) {
+        args.get(0);
+        return "random";
     }
 }

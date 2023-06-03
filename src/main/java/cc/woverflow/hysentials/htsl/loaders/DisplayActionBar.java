@@ -11,12 +11,17 @@ public class DisplayActionBar extends Loader {
 
         if (message != null) {
             add(LoaderObject.click(10));
-            add(LoaderObject.option(message));
+            add(LoaderObject.chat(message));
         }
     }
 
     @Override
-    public void load(int index, List<String> args, List<String> compileErorrs) {
-        new DisplayActionBar(args.get(0));
+    public Loader load(int index, List<String> args, List<String> compileErorrs) {
+        return new DisplayActionBar(args.get(0));
+    }
+
+    @Override
+    public String export(List<String> args) {
+        return "actionBar \"" + args.get(0) + "\"";
     }
 }

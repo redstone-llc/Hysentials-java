@@ -35,6 +35,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.util.EnumChatFormatting;
 import org.json.JSONObject;
+import sun.nio.ch.Net;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -333,6 +334,18 @@ public class HypixelAPIUtils {
         return uuidResponse.get("id").getAsString();
     }
 
+    public static String getUsername(String uuid) {
+        JsonObject uuidResponse =
+            NetworkUtils.getJsonElement("https://api.mojang.com/user/profiles/" + uuid + "/names").getAsJsonObject();
+        if (uuidResponse.has("error")) {
+            Hysentials.INSTANCE.sendMessage(
+                EnumChatFormatting.RED + "Failed with error: " + uuidResponse.get("reason").getAsString()
+            );
+            return null;
+        }
+        return uuidResponse.get("name").getAsString();
+    }
+
     public static UUID getUUIDpdb(String username) {
         JsonObject uuidResponse =
             NetworkUtils.getJsonElement("https://api.mojang.com/users/profiles/minecraft/" + username).getAsJsonObject();
@@ -382,22 +395,10 @@ public class HypixelAPIUtils {
         } catch (IllegalArgumentException e) {
             return displayName;
         }
-        JsonElement request = NetworkUtils.getJsonElement("https://api.hypixel.net/player?key=" + HytilsConfig.apiKey + "&uuid=" + uuid.replace("-", ""));
+        JsonElement request = NetworkUtils.getJsonElement("https://api.slothpixel.me/api/players/" + username);
         if (request.isJsonNull()) return displayName;
-        if (request.getAsJsonObject().get("player").isJsonNull()) return displayName;
-        JsonObject player = request.getAsJsonObject().get("player").getAsJsonObject();
-        if (player.get("newPackageRank").isJsonNull()) return "&7" + player.get("displayname").getAsString();
-        String rank = player.get("newPackageRank").getAsString();
-        boolean isSuperStar = player.get("monthlyPackageRank").getAsString().equals("SUPERSTAR");
-        if (rank.equals("MVP_PLUS") && isSuperStar) {
-            displayName = String.format("&6[MVP%s++&6] ", HypixelAPIUtils.Colors.valueOf(player.get("rankPlusColor").getAsString()).getColor()) + player.get("displayname").getAsString();
-        } else {
-            if (rank.equals("MVP_PLUS")) {
-                displayName = String.format("&b[MVP%s+&6] ", HypixelAPIUtils.Colors.valueOf(player.get("rankPlusColor").getAsString()).getColor()) + player.get("displayname").getAsString();
-            } else {
-                displayName = String.format("%s %s", HypixelAPIUtils.Ranks.valueOf(rank).getPrefix(), player.get("displayname").getAsString());
-            }
-        }
+        JsonObject player = request.getAsJsonObject();
+        if (player.has("rank_formatted")) displayName = player.get("rank_formatted").getAsString() + " " + player.get("username").getAsString();
 
         for (Map.Entry<UUID, String> entry : Hysentials.INSTANCE.getOnlineCache().rankCache.entrySet()) {
             UUID p = entry.getKey();

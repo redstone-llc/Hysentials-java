@@ -20,9 +20,11 @@ package cc.woverflow.hysentials.config;
 
 import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.*;
+import cc.polyfrost.oneconfig.config.annotations.Number;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
+import cc.polyfrost.oneconfig.libs.checker.units.qual.N;
 import cc.woverflow.hytils.HytilsReborn;
 
 public class HysentialsConfig extends Config {
@@ -185,6 +187,43 @@ public class HysentialsConfig extends Config {
         options = {"0", "2", "4"}
     )
     public static int scoreboardBorderRadius = 1;
+
+    // HTSL
+    @Checkbox(
+        name = "HTSL Enabled",
+        category = "HTSL",
+        subcategory = "General",
+        description = "Enable HTSL. This will allow you to use the HTSL language."
+    )
+    public static boolean htslEnabled = true;
+
+    @Checkbox(
+        name = "Use Safemode",
+        category = "HTSL",
+        subcategory = "General",
+        description = "Will show you where to click while loading in an action, this requires manual input and is no longer considered a \"macro\".\n\n&aSafeMode is recommended if you want to be extra careful not to break the rules."
+    )
+    public static boolean htslSafeMode = false;
+
+    @Number(
+        name = "Gui Cooldown",
+        category = "HTSL",
+        subcategory = "Miscellaneous",
+        description = "Amount of cooldown between clicking an item in a GUI.\n\nvalues under 20 will result in more errors.",
+        min = 0,
+        max = 100
+    )
+    public static int guiCooldown = 20;
+
+    @Number(
+        name = "Gui Timeout",
+        category = "HTSL",
+        subcategory = "Miscellaneous",
+        description = "Amount of ticks after not clicking anything in the GUI before declaring an error and timing out.\n\n&eIf you have lots of lagspikes / slow internet and HTSL keeps timing out you should increase this",
+        min = 60,
+        max = 200
+    )
+    public static int guiTimeout = 60;
 
 
     public HysentialsConfig() {

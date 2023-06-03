@@ -23,4 +23,8 @@ public class DuoVariable<E, T> {
     public void setSecond(T second) {
         this.second = second;
     }
+
+    public static DuoVariable of(Object first, Object second) {
+        return new DuoVariable(first, second);
+    }
 }
