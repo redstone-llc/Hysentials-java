@@ -23,6 +23,7 @@ import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
 import com.google.gson.*;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 
 import javax.net.ssl.*;
 import java.security.KeyManagementException;
@@ -62,6 +63,9 @@ public class BlockWAPIUtils {
                         if (element.getAsJsonObject().get("name").getAsString().equals("Plus")) {
                             plusPlayers.add(UUID.fromString(uuid.getAsString()));
                         } else {
+                            Rank rank = Rank.valueOF(element.getAsJsonObject().get("name").getAsString().toUpperCase());
+                            Rank oldRank = Rank.valueOF(rankCache.get(UUID.fromString(uuid.getAsString())));
+                            if (oldRank != null && oldRank.index > rank.index) continue;
                             rankCache.put(UUID.fromString(uuid.getAsString()), element.getAsJsonObject().get("name").getAsString());
                         }
                     }
@@ -97,12 +101,13 @@ public class BlockWAPIUtils {
     }
 
     public enum Rank {
-        ADMIN("1", "§c[ADMIN] ", "§c", "#ff2f2e"),
-        MOD("2", "§2[MOD] ", "§2", "#f0fff0"),
-        CREATOR("3", "§3[§fCREATOR§3] ", "§3", "#fff7f0"),
-        TEAM("4", "§b[TEAM] ", "§b", "#00ffff"),
-        DEFAULT("replace", "", "", "", "");
+        ADMIN(5, "1", "§c[ADMIN] ", "§c", "admin"),
+        MOD(4, "2", "§2[MOD] ", "§2", "mod"),
+        CREATOR(5, "3", "§3[§fCREATOR§3] ", "§3", "creator"),
+        TEAM(2,"4", "§b[TEAM] ", "§b", "team"),
+        DEFAULT(1, "replace", "", "", "", "");
 
+        public final int index;
         private final String id;
         private final String prefix;
         private final String color;
@@ -110,13 +115,16 @@ public class BlockWAPIUtils {
 
         private String placeholder;
 
-        Rank(String id, String prefix, String color, String hex) {
+        Rank(int index, String id, String prefix, String color, String hex) {
+            this.index = index;
             this.id = id;
             this.prefix = prefix;
             this.color = color;
             this.hex = hex;
         }
-        Rank(String id, String prefix, String color, String placeholder, String hex) {
+
+        Rank(int index, String id, String prefix, String color, String placeholder, String hex) {
+            this.index = index;
             this.id = id;
             this.prefix = prefix;
             this.color = color;
@@ -136,15 +144,36 @@ public class BlockWAPIUtils {
             return color;
         }
 
+        public String getNametag() {
+            JSONObject colorGroup = Hysentials.INSTANCE.rankColors.jsonObject.getJSONObject(hex);
+            return "<" + colorGroup.getString("nametag_color") + ">";
+        }
+
+        public String getChat() {
+            JSONObject colorGroup = Hysentials.INSTANCE.rankColors.jsonObject.getJSONObject(hex);
+            return "<" + colorGroup.getString("chat_message_color") + ">";
+        }
+
         public String getHex() {
-            return "<" + hex + ">";
+            return getNametag();
         }
 
         public String getPlaceholder() {
             if (placeholder == null && ImageIcon.getIcon(name().toLowerCase()) != null) {
-                return "§f:" + ImageIcon.getIcon(name().toLowerCase()).getName() + ": " + (hex.isEmpty() ? color : "<" + hex + ">");
+                return "§f:" + ImageIcon.getIcon(name().toLowerCase()).getName() + ": " + (hex.isEmpty() ? color : getNametag());
             }
             return placeholder;
+        }
+
+
+        public static Rank valueOF(String s) {
+            if (s == null) return null;
+            for (Rank rank : values()) {
+                if (rank.name().equalsIgnoreCase(s)) {
+                    return rank;
+                }
+            }
+            return null;
         }
     }
 

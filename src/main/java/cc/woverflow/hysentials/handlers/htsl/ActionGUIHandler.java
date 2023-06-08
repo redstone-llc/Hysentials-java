@@ -1,5 +1,6 @@
 package cc.woverflow.hysentials.handlers.htsl;
 
+import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
@@ -7,9 +8,9 @@ import cc.woverflow.hysentials.event.events.GuiKeyboardEvent;
 import cc.woverflow.hysentials.event.events.GuiMouseClickEvent;
 import cc.woverflow.hysentials.guis.ResolutionUtil;
 import cc.woverflow.hysentials.guis.actionLibrary.ActionLibrary;
-import cc.woverflow.hysentials.guis.actionLibrary.ChooseOutput;
 import cc.woverflow.hysentials.guis.club.ClubDashboard;
 import cc.woverflow.hysentials.guis.container.GuiItem;
+import cc.woverflow.hysentials.handlers.redworks.BwRanks;
 import cc.woverflow.hysentials.htsl.compiler.Compiler;
 import cc.woverflow.hysentials.util.Input;
 import cc.woverflow.hysentials.util.Material;
@@ -21,6 +22,7 @@ import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -38,10 +40,16 @@ import static cc.woverflow.hysentials.handlers.guis.GameMenuOpen.field_lowerChes
 
 public class ActionGUIHandler {
     Field guiTopField;
+    Field guiLeftField;
     Field xSizeField;
 
     Input.Button button;
     Input input;
+    boolean showChoose;
+    Input.Button clipboard;
+    Input.Button file;
+    Input.Button club;
+    Input.Button library;
 
     public ActionGUIHandler() {
         try {
@@ -50,8 +58,15 @@ public class ActionGUIHandler {
             input.setEnabled(false);
             input.setText("Enter File Name");
             input.setMaxStringLength(24);
+            clipboard = new Input.Button(0, 0, 0, 20, "Clipboard");
+            file = new Input.Button(0, 0, 0, 20, "File");
+            club = new Input.Button(0, 0, 0, 20, "Club");
+            library = new Input.Button(0, 0, 0, 20, "Action Library");
+
             guiTopField = GuiContainer.class.getDeclaredField("field_147009_r");
             guiTopField.setAccessible(true);
+            guiLeftField = GuiContainer.class.getDeclaredField("field_147003_i");
+            guiLeftField.setAccessible(true);
             xSizeField = GuiContainer.class.getDeclaredField("field_146999_f");
             xSizeField.setAccessible(true);
         } catch (NoSuchFieldException e) {
@@ -61,7 +76,8 @@ public class ActionGUIHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onGuiRender(GuiScreenEvent.DrawScreenEvent.Post event) {
-        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null) return;
+        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
+            return;
         if (!isInActionGui()) return;
 
         File housingEditor = new File("./config/ChatTriggers/modules/HousingEditor");
@@ -69,21 +85,52 @@ public class ActionGUIHandler {
 //        if (htsl.exists()) return;
         int chestGuiTop;
         int chestWidth;
+        int chestGuiLeft;
         try {
             chestGuiTop = (int) guiTopField.get(Minecraft.getMinecraft().currentScreen);
+            chestGuiLeft = (int) guiLeftField.get(Minecraft.getMinecraft().currentScreen);
             chestWidth = (int) xSizeField.get(Minecraft.getMinecraft().currentScreen);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
+        }
+        GL11.glPopMatrix();
+
+        if (showChoose) {
+            int rightMost = chestGuiLeft + chestWidth;
+
+            clipboard.setWidth(chestWidth / 2 - 10);
+            clipboard.xPosition = rightMost + 10;
+            clipboard.yPosition = chestGuiTop + 1 + 25 - 5;
+
+            file.setWidth(chestWidth / 2 - 10);
+            file.xPosition = rightMost + 10;
+            file.yPosition = chestGuiTop + 1 + 50 - 5;
+
+            club.setWidth(chestWidth / 2 - 10);
+            club.xPosition = rightMost + 10;
+            club.yPosition = chestGuiTop + 1 + 75 - 5;
+
+            library.setWidth(chestWidth / 2 - 10);
+            library.xPosition = rightMost + 10;
+            library.yPosition = chestGuiTop + 1 + 100 - 5;
+
+            clipboard.drawButton(Minecraft.getMinecraft(), event.mouseX, event.mouseY);
+            file.drawButton(Minecraft.getMinecraft(), event.mouseX, event.mouseY);
+            club.drawButton(Minecraft.getMinecraft(), event.mouseX, event.mouseY);
+            library.drawButton(Minecraft.getMinecraft(), event.mouseX, event.mouseY);
         }
 
         int margin = (housingEditor.exists()) ? 5 : 30;
         int sizeDifference = 10;
 
-        GL11.glPopMatrix();
         Slot slot = Minecraft.getMinecraft().thePlayer.openContainer.getSlot(48);
+        Slot slot2 = Minecraft.getMinecraft().thePlayer.openContainer.getSlot(51);
         if (!slot.getHasStack()) {
             ItemStack item = GuiItem.makeColorfulItem(Material.STORAGE_MINECART, "&aUpload to Action Library", 1, 0, "&7Uploads your current function project", "&7to the Action Library.", "", "&eLeft-Click to upload!", "&bRight-click to upload more functions!");
             slot.putStack(item);
+        } else if (!slot2.getHasStack() && !slot.getStack().getDisplayName().equals("§aUpload to Action Library")) {
+            ItemStack item = GuiItem.makeColorfulItem(Material.STORAGE_MINECART, "&aUpload to Action Library", 1, 0, "&7Uploads your current function project", "&7to the Action Library.", "", "&eLeft-Click to upload!", "&bRight-click to upload more functions!");
+            slot2.putStack(item);
         }
         button.setWidth(chestWidth / 2 - sizeDifference);
         button.xPosition = ResolutionUtil.current().getScaledWidth() / 2 + sizeDifference;
@@ -100,7 +147,8 @@ public class ActionGUIHandler {
 
     @SubscribeEvent
     public void guiKey(GuiKeyboardEvent event) {
-        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null) return;
+        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
+            return;
         if (!isInActionGui()) return;
         File htsl = new File("./config/ChatTriggers/modules/HTSL");
         if (htsl.exists()) return;
@@ -116,7 +164,8 @@ public class ActionGUIHandler {
 
     @SubscribeEvent
     public void mouseClick(GuiMouseClickEvent event) {
-        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null) return;
+        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
+            return;
         if (!isInActionGui()) return;
         File htsl = new File("./config/ChatTriggers/modules/HTSL");
         if (htsl.exists()) return;
@@ -184,31 +233,97 @@ public class ActionGUIHandler {
             button.enabled = true;
         }
 
+        //over clipboard
+        if (!showChoose) return;
+
+        if (event.getX() > clipboard.xPosition && event.getX() < clipboard.xPosition + clipboard.width && event.getY() > clipboard.yPosition && event.getY() < clipboard.yPosition + clipboard.height) {
+            EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+            Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
+            Exporter.export = "clipboard";
+            showChoose = false;
+        }
+        if (event.getX() > file.xPosition && event.getX() < file.xPosition + file.width && event.getY() > file.yPosition && event.getY() < file.yPosition + file.height) {
+            EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+            Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
+            Exporter.export = "file";
+            showChoose = false;
+        }
+        if (event.getX() > club.xPosition && event.getX() < club.xPosition + club.width && event.getY() > club.yPosition && event.getY() < club.yPosition + club.height) {
+            EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+            Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
+            if (ClubDashboard.getClub() == null) {
+                UChat.chat("&cYou are not in a club!");
+                return;
+            }
+            Exporter.export = "club";
+            showChoose = false;
+        }
+        if (event.getX() > library.xPosition && event.getX() < library.xPosition + library.width && event.getY() > library.yPosition && event.getY() < library.yPosition + library.height) {
+            EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+            Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
+            Exporter.export = "library";
+            showChoose = false;
+        }
     }
 
+    public static ItemStack lastItem = null;
+    public static String lastContainer = null;
     @SubscribeEvent
     public void onGuiSlotClick(GuiMouseClickEvent event) {
-        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null) return;
-        if (!isInActionGui()) return;
+        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
+            return;
         GuiScreen screen = Minecraft.getMinecraft().currentScreen;
         if (screen == null) return;
         if (screen instanceof GuiChest) {
             Slot slot = ((GuiChest) screen).getSlotUnderMouse();
             if (slot == null) return;
-            if (slot.getSlotIndex() == 48) {
+
+            if (slot.getHasStack() && slot.getStack().hasDisplayName() && !isInActionGui()) {
+                lastItem = slot.getStack();
+                if (Navigator.getContainerName() != null) {
+                    lastContainer = Navigator.getContainerName();
+                }
+            }
+
+            if (!isInActionGui()) return;
+            if (slot.getHasStack() && slot.getStack().hasDisplayName()
+            && slot.getStack().getDisplayName().equals("§aUpload to Action Library")) {
                 event.getCi().cancel();
 
                 if (Navigator.getContainerName() != null && Navigator.getContainerName().startsWith("Actions: ")) {
                     if (ClubDashboard.getClub() != null) {
                         Exporter.name = Navigator.getContainerName().split("Actions: ")[1];
-                        Minecraft.getMinecraft().thePlayer.closeScreen();
-                        new ChooseOutput(Minecraft.getMinecraft().currentScreen).open(Minecraft.getMinecraft().thePlayer);
+                        Exporter.type = "function";
+                        showChoose = true;
                     }
                 } else {
-                    UChat.chat("&cThis has not been implemented yet!");
+                    Exporter.name = BwRanks.randomString(5);
+                    Exporter.type = getType((GuiChest) screen);
+                    showChoose = true;
                 }
             }
         }
+    }
+
+    public String getType(GuiChest chest) {
+        if (lastContainer != null && lastContainer.equals("Edit NPC")) {
+            return "npc";
+        }
+        if (lastContainer != null && lastContainer.equals("Event Actions")) {
+            return ChatColor.Companion.stripControlCodes(lastItem.getDisplayName());
+        }
+        Slot slot = chest.inventorySlots.getSlot(47);
+        if (slot == null) return "function";
+        if (slot.getHasStack() && slot.getStack().hasDisplayName()) {
+            int id = Item.getIdFromItem(slot.getStack().getItem());
+            if (id == 77 || id == 143) {
+                return "button";
+            }
+            if (id == 148 || id == 147 || id == 70 || id == 72) {
+                return "action pad";
+            }
+        }
+        return "function";
     }
 
     public static boolean isInActionGui() {

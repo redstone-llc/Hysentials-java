@@ -27,8 +27,10 @@ import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.guis.actionLibrary.ActionLibrary;
 import cc.woverflow.hysentials.handlers.htsl.CodeEditor;
+import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
 import cc.woverflow.hysentials.htsl.compiler.Compiler;
 import cc.woverflow.hysentials.util.HypixelAPIUtils;
+import cc.woverflow.hysentials.util.JsonData;
 import cc.woverflow.hysentials.websocket.Socket;
 import cc.woverflow.hytils.HytilsReborn;
 import cc.woverflow.hytils.config.HytilsConfig;
@@ -52,6 +54,13 @@ public class HysentialsCommand {
 
     static {
 
+    }
+
+    @SubCommand(aliases = {"reload"}, description = "Reloads the mod")
+    public void handleReload() {
+        ImageIcon.reloadIcons();
+        Hysentials.INSTANCE.rankColors = new JsonData("./config/hysentials/colors.json", new JSONObject());
+        UChat.chat("§aReloaded Hysentials!");
     }
 
     @Main

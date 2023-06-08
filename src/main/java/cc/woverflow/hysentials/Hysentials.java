@@ -103,7 +103,7 @@ public class Hysentials {
 
     public ImageIconRenderer imageIconRenderer;
     public JsonData sbBoxes;
-
+    public JsonData rankColors;
     public boolean isPatcher;
     public boolean isChatting;
     private boolean loadedCall;
@@ -125,6 +125,7 @@ public class Hysentials {
     public void init(FMLInitializationEvent event) {
         config = new HysentialsConfig();
         sbBoxes = new JsonData("./config/hysentials/lines.json", new JSONObject().put("lines", new JSONArray()));
+        rankColors = new JsonData("/assets/minecraft/textures/icons/colors.json", "./config/hysentials/color.jsonn", true);
         try {
             SSLStore store = new SSLStore();
             store.load("/ssl/hysentials.der");
@@ -175,13 +176,21 @@ public class Hysentials {
 
     private void registerImages() {
         new ImageIcon("front", new ResourceLocation("textures/icons/front.png"));
+        new ImageIcon("back", new ResourceLocation("textures/icons/back.png"));
         new ImageIcon("globalchat", new ResourceLocation("textures/icons/globalchat.png"));
+        new ImageIcon("creator", new ResourceLocation("textures/icons/creator.png"));
+        new ImageIcon("guild", new ResourceLocation("textures/icons/guild.png"));
+        new ImageIcon("party", new ResourceLocation("textures/icons/party.png"));
 
         for (HypixelRanks rank : HypixelRanks.values()) {
             try {
                 new ImageIcon(rank.getIconName(), new ResourceLocation("textures/icons/" + rank.getIconName() + ".png"));
             } catch (Exception ignored) {
             }
+        }
+
+        for (int i = 0; i < 10; i++) {
+            new ImageIcon(String.valueOf(i), new ResourceLocation("textures/icons/" + i + ".png"));
         }
         imageIconRenderer = new ImageIconRenderer();
         Minecraft.getMinecraft().fontRendererObj = imageIconRenderer;
@@ -294,6 +303,4 @@ public class Hysentials {
 
         return connection.getInputStream();
     }
-
-
 }

@@ -2,6 +2,7 @@ package cc.woverflow.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.polyfrost.oneconfig.utils.StringUtils;
@@ -17,9 +18,11 @@ import cc.woverflow.hysentials.util.DuoVariable;
 import cc.woverflow.hysentials.util.TriVariable;
 import kotlinx.coroutines.AwaitKt;
 import net.minecraft.client.Minecraft;
+import net.minecraft.event.ClickEvent;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.registry.GameData;
@@ -39,10 +42,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -53,48 +58,42 @@ import static cc.woverflow.hysentials.htsl.compiler.ConditionCompiler.undoValidC
 public class Exporter {
     public static String name;
     public static String export;
-    List<TriVariable<String, Integer, Integer>> actions = new ArrayList<>();
-    List<TriVariable<String, Integer, Integer>> ifActions = new ArrayList<>();
-    List<TriVariable<String, Integer, Integer>> elseActions = new ArrayList<>();
-    List<TriVariable<String, Integer, Integer>> conditions = new ArrayList<>();
-    List<TriVariable<String, Integer, Integer>> randomActions = new ArrayList<>();
-    List<String> conditionsExported = new ArrayList<>();
-    List<String> ifExported = new ArrayList<>();
-    List<String> elseExported = new ArrayList<>();
-    List<String> randomActionsExported = new ArrayList<>();
+    public static String type;
+    public static List<TriVariable<String, Integer, Integer>> actions = new ArrayList<>();
+    public static List<TriVariable<String, Integer, Integer>> ifActions = new ArrayList<>();
+    public static List<TriVariable<String, Integer, Integer>> elseActions = new ArrayList<>();
+    public static List<TriVariable<String, Integer, Integer>> conditions = new ArrayList<>();
+    public static List<TriVariable<String, Integer, Integer>> randomActions = new ArrayList<>();
+    public static List<String> conditionsExported = new ArrayList<>();
+    public static List<String> ifExported = new ArrayList<>();
+    public static List<String> elseExported = new ArrayList<>();
+    public static List<String> randomActionsExported = new ArrayList<>();
 
-    List<String> conditionsExportedTotal = new ArrayList<>();
-    List<String> ifExportedTotal = new ArrayList<>();
-    List<String> elseExportedTotal = new ArrayList<>();
-    List<String> randomActionsExportedTotal = new ArrayList<>();
-    List<String> actionsExportedTotal = new ArrayList<>();
-    boolean actionsDone = false;
-    boolean actionsDoneSearch = false;
-    boolean conditionsDone = false;
-    boolean ifDone = false;
-    boolean ifDoneExported = false;
-    boolean elseDone = false;
-    boolean startRandomActions = false;
-    boolean randomActionsDone = false;
-    int stage = 0;
-    boolean startElse = false;
-    TriVariable<String, Integer, Integer> currentAction = null;
-    TriVariable<String, Integer, Integer> condition = null;
-    TriVariable<String, Integer, Integer> ifAction = null;
-    TriVariable<String, Integer, Integer> elseAction = null;
-    TriVariable<String, Integer, Integer> randomAction = null;
-    boolean orEnabled = false;
+    public static List<String> conditionsExportedTotal = new ArrayList<>();
+    public static List<String> ifExportedTotal = new ArrayList<>();
+    public static List<String> elseExportedTotal = new ArrayList<>();
+    public static List<String> randomActionsExportedTotal = new ArrayList<>();
+    public static List<String> actionsExportedTotal = new ArrayList<>();
+    public static int stage = 0;
+    public static TriVariable<String, Integer, Integer> currentAction = null;
+    public static TriVariable<String, Integer, Integer> condition = null;
+    public static TriVariable<String, Integer, Integer> ifAction = null;
+    public static TriVariable<String, Integer, Integer> elseAction = null;
+    public static TriVariable<String, Integer, Integer> randomAction = null;
+    public static boolean orEnabled = false;
 
-    int timeWithoutOperation = 0;
-    List<String> fails = new ArrayList<>();
+    public static int timeWithoutOperation = 0;
+    public static List<String> fails = new ArrayList<>();
 
-    String code = "";
+    public static String code = "";
 
     @SubscribeEvent()
     public void tick(TickEvent event) {
         if (event.phase != TickEvent.Phase.START) return;
+        if (event.type != TickEvent.Type.CLIENT) return;
         if (name == null || export == null) return;
         if (Queue.queue.size() != 0) return;
+        timeWithoutOperation++;
         if ((greaterThan(timeWithoutOperation, HysentialsConfig.guiTimeout)) && !HysentialsConfig.htslSafeMode) {
             fails.add("&cOperation timed out. &f(too long without GUI click)");
             finish();
@@ -222,6 +221,7 @@ public class Exporter {
         }
         if (currentAction != null && currentAction.getFirst().equals("Conditional")) {
             if (stage == 2) {
+                if (getSlots(true, 5).size() == 0) return;
                 orEnabled = Boolean.parseBoolean(undoValidOperator(getSlots(true, 5).get(0).getFirst()));
                 try {
                     TriVariable<String, Integer, Integer> button = getSlots(false, 0).get(0);
@@ -268,17 +268,21 @@ public class Exporter {
             }
             if (stage == 5) {
                 if (condition != null) {
-                    List<String> args = getSlots(true, 2).stream()
-                        .map(TriVariable::getFirst).collect(Collectors.toList());
-                    if (args.size() == 0) return;
-                    conditionsExported.add(ConditionCompiler.export(condition.getFirst(), args));
-                    condition = null;
-                    Navigator.goBack();
-                    stage = 4;
+                    try {
+                        List<String> args = getSlots(true, 2).stream()
+                            .map(TriVariable::getFirst).collect(Collectors.toList());
+                        if (args.size() == 0) return;
+                        conditionsExported.add(ConditionCompiler.export(condition.getFirst(), args));
+                        condition = null;
+                        Navigator.goBack();
+                        stage = 4;
+                    } catch (Exception e) {
+                    }
                 }
                 return;
             }
             if (stage == 6) {
+                if (getSlots(false, 0).size() < 3) return;
                 TriVariable<String, Integer, Integer> button = getSlots(false, 0).get(2);
                 if (button.getFirst().equals("If Actions") && button.getSecond() == 12) {
                     Navigator.click(12);
@@ -336,6 +340,7 @@ public class Exporter {
             }
 
             if (stage == 10) {
+                if (getSlots(false, 0).size() < 4) return;
                 TriVariable<String, Integer, Integer> button = getSlots(false, 0).get(3);
                 if (button.getFirst().equals("Else Actions") && button.getSecond() == 13) {
                     Navigator.click(13);
@@ -413,211 +418,6 @@ public class Exporter {
             stage = 1;
             return;
         }
-        if (containerName.equals("Action Settings")) {
-            if (currentAction != null && currentAction.getFirst().equals("Random Action")) {
-                if (randomAction != null) {
-                    List<String> args = getSlots(true, 2).stream()
-                        .map(TriVariable::getFirst).collect(Collectors.toList());
-                    if (args.size() == 0) return;
-                    Loader.loaders.stream().filter(l -> l.name.equals(randomAction.getFirst())).findFirst()
-                        .ifPresent(loader -> randomActionsExported.add(loader.export(args)));
-                    randomAction = null;
-                    Navigator.goBack();
-                    Navigator.goBack();
-                    return;
-                }
-                Navigator.click(10);
-                startRandomActions = true;
-                return;
-            } else if (currentAction != null && currentAction.getFirst().equals("Conditional")) {
-                stage = 2;
-                if (elseAction != null) {
-                    List<String> args = getSlots(true, 2).stream()
-                        .map(TriVariable::getFirst).collect(Collectors.toList());
-                    if (args.size() == 0) return;
-                    Loader.loaders.stream().filter(l -> l.name.equals(elseAction.getFirst())).findFirst()
-                        .ifPresent(loader -> elseExported.add(loader.export(args)));
-                    elseAction = null;
-                    Navigator.goBack();
-                    return;
-                }
-
-                if (ifAction != null) {
-                    List<String> args = getSlots(true, 2).stream()
-                        .map(TriVariable::getFirst).collect(Collectors.toList());
-                    if (args.size() == 0) return;
-                    Loader.loaders.stream().filter(l -> l.name.equals(ifAction.getFirst())).findFirst()
-                        .ifPresent(loader -> ifExported.add(loader.export(args)));
-                    ifAction = null;
-                    ifDoneExported = true;
-                    Navigator.goBack();
-                    return;
-                }
-
-                if (ifActions.size() == 0 & ifDone & ifExported.size() != 0 && ifDoneExported) {
-                    Navigator.click(13);
-                    startElse = true;
-                    return;
-                }
-
-                if (conditions.size() == 0 && conditionsDone && conditionsExported.size() != 0) {
-                    orEnabled = getSlots(true, 3).stream().anyMatch(t -> t.getFirst().equals("Enabled"));
-                    Navigator.click(12);
-                    return;
-                }
-                Navigator.click(10);
-                return;
-            } else {
-                if (currentAction == null) {
-                    Navigator.goBack();
-                    return;
-                }
-                List<String> args = getSlots(true, 2).stream()
-                    .map(TriVariable::getFirst).collect(Collectors.toList());
-                if (args.size() == 0) return;
-                Loader.loaders.stream().filter(l -> l.name.equals(currentAction.getFirst())).findFirst()
-                    .ifPresent(loader -> code += loader.export(args) + "\n");
-                currentAction = null;
-                Navigator.goBack();
-                return;
-            }
-        }
-        if (containerName.equals("Edit Actions")) {
-            if (currentAction != null && currentAction.getFirst().equals("Random Action")) {
-                if (!randomActionsDone) {
-                    randomActions.addAll(getSlots(false, 0));
-                    ItemStack item = container.getSlot(53).getStack();
-                    if (item != null && GameData.getItemRegistry().getId(item.getItem()) == 262) {
-                        Navigator.click(53);
-                        return;
-                    } else {
-                        stage = 2;
-                        randomActionsDone = true;
-                    }
-                } else {
-                    if (randomActions.size() == 0) {
-                        code += "random {\n" + String.join("\n", randomActionsExported) + "\n}\n";
-                        currentAction = null;
-                        Navigator.goBack();
-                        return;
-                    }
-                    randomAction = randomActions.get(0);
-                    Navigator.click(randomAction.getSecond());
-                    randomActions.remove(0);
-                    return;
-                }
-            }
-            if (currentAction != null && currentAction.getFirst().equals("Conditional")) {
-                if (stage == 7 && elseDone && elseActions.size() != 0) {
-                    elseAction = elseActions.get(0);
-                    Navigator.click(elseAction.getSecond());
-                    elseActions.remove(0);
-                    return;
-                }
-
-                if (stage == 7 && elseActions.size() == 0 && elseDone) {
-                    Navigator.goBack();
-
-                    if (elseExported.size() == 0) {
-                        code += "if " + (orEnabled ? "or (" : "(") + String.join(", ", conditionsExported) + ") {\n" + String.join("\n", ifExported) + "\n}\n";
-                    } else {
-                        code += "if " + (orEnabled ? "or (" : "(") + String.join(", ", conditionsExported) + ") {\n" + String.join("\n", ifExported) + "} else {\n" + String.join("\n", elseExported) + "\n}\n";
-                    }
-
-                    currentAction = null;
-                    elseExported.clear();
-                    elseActions.clear();
-                    elseDone = false;
-                    elseAction = null;
-                    ifAction = null;
-                    condition = null;
-                    ifExported.clear();
-                    ifActions.clear();
-                    ifDone = false;
-                    conditionsExported.clear();
-                    conditions.clear();
-                    conditionsDone = false;
-                    stage = 1;
-                    return;
-                }
-
-                if (stage == 6) {
-                    elseActions.addAll(getSlots(false, 0));
-
-                    ItemStack item = container.getSlot(53).getStack();
-                    if (item != null && GameData.getItemRegistry().getId(item.getItem()) == 262) {
-                        Navigator.click(53);
-                        return;
-                    } else {
-                        stage = 7;
-                        elseDone = true;
-                    }
-                }
-
-                if (stage == 5 && ifActions.size() == 0 && ifDone) {
-                    Navigator.goBack();
-                    stage = 6;
-                    return;
-                }
-                if (stage == 5) {
-                    ifAction = ifActions.get(0);
-                    Navigator.click(ifAction.getSecond());
-                    ifActions.remove(0);
-                    return;
-                }
-
-
-                if (stage == 4) {
-                    ifActions.addAll(getSlots(false, 0));
-
-                    ItemStack item = container.getSlot(53).getStack();
-                    if (item != null && GameData.getItemRegistry().getId(item.getItem()) == 262) {
-                        Navigator.click(53);
-                        return;
-                    } else {
-                        ifDone = true;
-                        stage = 5;
-                        return;
-                    }
-                }
-                return;
-            }
-        }
-        if (containerName.equals("Edit Conditions")) {
-            if (conditionsDone && conditions.size() != 0) {
-                condition = conditions.get(0);
-                Navigator.click(condition.getSecond());
-                conditions.remove(0);
-                return;
-            } else if (conditions.size() == 0 && conditionsDone && conditionsExported.size() != 0) {
-                Navigator.goBack();
-                stage = 4;
-                return;
-            }
-            conditions.addAll(getSlots(false, 0));
-
-            ItemStack item = container.getSlot(53).getStack();
-            if (item != null && GameData.getItemRegistry().getId(item.getItem()) == 262) {
-                Navigator.click(53);
-                return;
-            } else {
-                conditionsDone = true;
-                stage = 3;
-            }
-        }
-        if (containerName.equals("Settings")) {
-            if (currentAction != null && currentAction.getFirst().equals("Conditional")) {
-                if (condition != null) {
-                    List<String> args = getSlots(true, 2).stream()
-                        .map(TriVariable::getFirst).collect(Collectors.toList());
-                    if (args.size() == 0) return;
-                    conditionsExported.add(ConditionCompiler.export(condition.getFirst(), args));
-                    condition = null;
-                    Navigator.goBack();
-                }
-                return;
-            }
-        }
     }
 
     private void finish() {
@@ -633,7 +433,7 @@ public class Exporter {
             JSONObject json = new JSONObject();
             json.put("name", name);
             json.put("code", code);
-            json.put("type", "function");
+            json.put("type", type);
             json.put("creator", Minecraft.getMinecraft().thePlayer.getName());
             json.put("description", "Exported from Hysentials");
             JSONObject codespace = new JSONObject();
@@ -647,6 +447,7 @@ public class Exporter {
                     JSONObject object = new JSONObject(s);
                     if (object.getBoolean("success")) {
                         UChat.chat("&3[HTSL] &fExported successfully to &bAction Library!");
+                        new UTextComponent("&3[HTSL] &fClick here to edit your action.").setClick(ClickEvent.Action.OPEN_URL, "https://redstone.llc/actions/manage/" + id).chat();
                     } else {
                         UChat.chat("&cFailed to export!");
                     }
@@ -664,7 +465,7 @@ public class Exporter {
                     if (!file.exists()) file.mkdir();
                     file = new File(file, "exported");
                     if (!file.exists()) file.mkdir();
-                    file = new File(file, name + ".json");
+                    file = new File(file, name + ".htsl");
                     if (!file.exists()) file.createNewFile();
                     FileWriter writer = new FileWriter(file);
                     writer.write(json.toString());
@@ -685,11 +486,40 @@ public class Exporter {
         }
 
         System.out.println(code);
-        name = null;
-        actions.clear();
-        currentAction = null;
+        for (Field field : this.getClass().getFields()) {
+            try {
+                if (field.get(this) instanceof List)
+                    ((List) field.get(this)).clear();
+                else if (field.get(this) instanceof Map)
+                    ((Map) field.get(this)).clear();
+                else if (field.get(this) instanceof Integer)
+                    field.set(this, 0);
+                else if (field.get(this) instanceof Boolean)
+                    field.set(this, false);
+                else
+                    field.set(this, null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         code = "";
-        stage = 0;
+    }
+
+    @SubscribeEvent
+    public void onOverlayDraw (RenderGameOverlayEvent event) {
+        if (event.type != RenderGameOverlayEvent.ElementType.TEXT) {
+            return;
+        }
+        if (name == null || export == null) return;
+        String[] lines = code.split("\n");
+        int y = 50;
+        for (String line : lines) {
+            Minecraft.getMinecraft().fontRendererObj.drawString(line, 50, y, 0xFFFFFF);
+            y += 10;
+        }
+        Minecraft.getMinecraft().fontRendererObj.drawString("Tick: " + timeWithoutOperation, 50, y + 20, 0xFFFFFF);
+        Minecraft.getMinecraft().fontRendererObj.drawString("Stage: " + stage, 50, y + 30, 0xFFFFFF);
+        Minecraft.getMinecraft().fontRendererObj.drawString("Action: " + (currentAction == null ? "" : currentAction.getFirst()), 50, y + 40, 0xFFFFFF);
     }
 
     public String undoValidOperator(String operator) {

@@ -1,0 +1,46 @@
+{
+  "default": {
+    "nametag_color": "#7d838e",
+    "chat_message_color": "#cbd3e0"
+  },
+  "vips": {
+    "nametag_color": "#80c415",
+    "chat_message_color": "#e8f8c8"
+  },
+  "bluemvps": {
+    "nametag_color": "#0fa2e5",
+    "chat_message_color": "#dceefb"
+  },
+  "goldmvp": {
+    "nametag_color": "#e4b108",
+    "chat_message_color": "#edebba"
+  },
+  "pc": {
+    "nametag_color": "#916fec",
+    "chat_message_color": "#cfc0f5"
+  },
+  "creator": {
+    "nametag_color": "#13b9a7",
+    "chat_message_color": "#baf5ee"
+  },
+  "mod": {
+    "nametag_color": "#00AA00",
+    "chat_message_color": "#cfc0f5"
+  },
+  "admin": {
+    "nametag_color": "#ea323c",
+    "chat_message_color": "#f5c0c0"
+  },
+  "youtube": {
+    "nametag_color": "#ff2f2e",
+    "chat_message_color": "#fff7f7"
+  },
+  "npc": {
+    "nametag_color": "#555555",
+    "chat_message_color": "#555555"
+  },
+  "team": {
+    "nametag_color": "#00ffff",
+    "chat_message_color": "#fff7f0"
+  }
+}

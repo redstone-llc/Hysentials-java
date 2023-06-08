@@ -1,15 +1,19 @@
 package cc.woverflow.hysentials.handlers.imageicons;
 
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.util.ImageIconRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -23,7 +27,8 @@ public class ImageIcon {
     public static HashMap<String, ImageIcon> imageIcons = new HashMap<>();
     public static Random random = new Random();
 
-    private final ResourceLocation resourceLocation;
+    private ResourceLocation resourceLocation;
+    private DynamicTexture dynamicTexture;
     private final String name;
     public int width;
     public int height;
@@ -32,17 +37,35 @@ public class ImageIcon {
         this.name = name;
         this.resourceLocation = resourceLocation;
         try {
-            InputStream stream = Minecraft.getMinecraft().mcDefaultResourcePack.getInputStream(resourceLocation);
-            if (stream == null) {
-                throw new RuntimeException("ImageIcon " + name + " does not exist in the resource pack!");
+            File file = new File("./config/hysentials/imageicons/" + name + ".png");
+            if (!file.exists()) {
+                if (!file.getParentFile().exists()) {
+                    file.getParentFile().mkdirs();
+                }
+                InputStream stream = Minecraft.getMinecraft().mcDefaultResourcePack.getInputStream(resourceLocation);
+                if (stream == null) {
+                    throw new RuntimeException("ImageIcon " + name + " does not exist in the resource pack!");
+                }
+                BufferedImage image = javax.imageio.ImageIO.read(stream);
+                this.width = image.getWidth();
+                this.height = image.getHeight();
+                if (height != 9) {
+                    throw new RuntimeException("ImageIcon " + name + " has an invalid size! Expected height to be 9");
+                }
+                this.dynamicTexture = new DynamicTexture(image);
+                stream.close();
+                ImageIO.write(image, "png", file);
+                this.resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(this.name, this.dynamicTexture);
+            } else {
+                BufferedImage image = javax.imageio.ImageIO.read(file);
+                this.width = image.getWidth();
+                this.height = image.getHeight();
+                if (height != 9) {
+                    throw new RuntimeException("ImageIcon " + name + " has an invalid size! Expected height to be 9");
+                }
+                this.dynamicTexture = new DynamicTexture(image);
+                this.resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(this.name, this.dynamicTexture);
             }
-            BufferedImage image = javax.imageio.ImageIO.read(stream);
-            this.width = image.getWidth();
-            this.height = image.getHeight();
-            if (height != 9) {
-                throw new RuntimeException("ImageIcon " + name + " has an invalid size! Expected height to be 9");
-            }
-            stream.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -51,18 +74,20 @@ public class ImageIcon {
 
     public static void reloadIcons() {
         try {
-            for (ImageIcon imageIcon : ImageIcon.imageIcons.values()) {
-                InputStream stream = Minecraft.getMinecraft().mcDefaultResourcePack.getInputStream(new ResourceLocation(imageIcon.resourceLocation.getResourceDomain(), imageIcon.resourceLocation.getResourcePath()));
-                if (stream == null) {
-                    throw new RuntimeException("ImageIcon " + imageIcon.name + " does not exist in the resource pack!");
+            for (ImageIcon icon : ImageIcon.imageIcons.values()) {
+                File file = new File("./config/hysentials/imageicons/" + icon.name + ".png");
+                if (file.exists()) {
+                    BufferedImage image = javax.imageio.ImageIO.read(file);
+                    if (image.getHeight() != 9) {
+                        UChat.chat("&cImageIcon " + icon.name + " has an invalid size! Expected height to be 9");
+                        ImageIcon.imageIcons.remove(icon.name);
+                        continue;
+                    }
+                    icon.width = image.getWidth();
+                    icon.height = image.getHeight();
+                    icon.dynamicTexture = new DynamicTexture(image);
+                    icon.resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(icon.name, icon.dynamicTexture);
                 }
-                BufferedImage image = ImageIO.read(stream);
-                imageIcon.width = image.getWidth();
-                imageIcon.height = image.getHeight();
-                if (imageIcon.height != 9) {
-                    throw new RuntimeException("ImageIcon " + imageIcon.name + " has an invalid size! Expected height to be 9");
-                }
-                stream.close();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -102,77 +127,9 @@ public class ImageIcon {
     }
 
     public int renderImage(float x, float y) {
-        Minecraft.getMinecraft().getTextureManager().bindTexture(getResourceLocation());
+        Minecraft.getMinecraft().getTextureManager().bindTexture(this.resourceLocation);
         drawModalRectWithCustomSizedTexture((x), y, 0, 0, getWidth(), getHeight(), getWidth(), getHeight());
         return getWidth();
-    }
-
-    public static String shiftRenderText(ImageIconRenderer instance, String text, float x, float y, int color, boolean shadow) {
-        Matcher matcher = stringPattern.matcher(text);
-        if (matcher.find()) {
-            String group = matcher.group(1);
-            ImageIcon imageIcon = getIcon(group);
-            if (imageIcon == null) {
-                if (shadow) {
-                    instance.drawStringWithShadow(text, x, y, color);
-                } else {
-                    instance.drawString(text, (int) x, (int) y, color);
-                }
-                return text;
-            }
-            int i = imageIcon.getWidth();
-
-            String first = text.substring(0, text.indexOf(":" + group + ":"));
-            String second = text.substring(text.indexOf(":" + group + ":") + group.length() + 2);
-
-            int i1 = (instance.getStringWidth(first));
-            instance.drawStringWithShadow(first, x, y, color);
-
-            Minecraft.getMinecraft().getTextureManager().bindTexture(imageIcon.getResourceLocation());
-            if (shadow) {
-                int c = (color & 16579836) >> 2 | color & -16777216;
-                GlStateManager.color((float) (c >> 16 & 255) / 255.0F, (float) (c >> 8 & 255) / 255.0F, (float) (c & 255) / 255.0F, (float) (c >> 24 & 255) / 255.0F);
-                drawModalRectWithCustomSizedTexture((x + i1) + 1, y, 0, 0, imageIcon.getWidth(), imageIcon.getHeight(), imageIcon.getWidth(), imageIcon.getHeight());
-            }
-            if (color != -1) {
-                GlStateManager.color((float) (color >> 16 & 255) / 255.0F, (float) (color >> 8 & 255) / 255.0F, (float) (color & 255) / 255.0F, (float) (color >> 24 & 255) / 255.0F);
-            } else {
-                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            }
-            drawModalRectWithCustomSizedTexture((x + i1), y - 1, 0, 0, imageIcon.getWidth(), imageIcon.getHeight(), imageIcon.getWidth(), imageIcon.getHeight());
-
-            Matcher nextMatcher = stringPattern.matcher(second);
-            String chatColor = first.lastIndexOf("§") != -1 ? first.substring(first.lastIndexOf("§"), first.lastIndexOf("§") + 2) : "";
-            String lastHex = "";
-            int j = first.lastIndexOf('<');
-            char c0 = j > -1 ? first.charAt(j) : 0;
-            if (c0 == '<' && j + 8 < text.length()) {
-                String s = text.substring(j, j + 9);
-                if (s.matches("<#([0-9a-fA-F]){6}>")) {
-                    lastHex = s;
-                }
-            }
-            if (chatColor.isEmpty() || first.indexOf(lastHex) > first.indexOf(chatColor)) {
-                chatColor = lastHex;
-            }
-            if (nextMatcher.find()) {
-                return shiftRenderText(instance, chatColor + second, x + i1 + i, y, color, shadow);
-            } else {
-                if (shadow) {
-                    instance.drawStringWithShadow(chatColor + second, x + i1 + i, y, color);
-                } else {
-                    instance.drawString(chatColor + second, (int) (x + i1 + i), (int) y, color);
-                }
-            }
-            return chatColor + second;
-        } else {
-            if (shadow) {
-                instance.drawStringWithShadow(text, x, y, color);
-            } else {
-                instance.drawString(text, (int) x, (int) y, color);
-            }
-            return text;
-        }
     }
 
     public static void drawModalRectWithCustomSizedTexture(double x, double y, float u, float v, int width, int height, float textureWidth, float textureHeight) {

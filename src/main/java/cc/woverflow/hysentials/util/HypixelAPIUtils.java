@@ -336,7 +336,7 @@ public class HypixelAPIUtils {
 
     public static String getUsername(String uuid) {
         JsonObject uuidResponse =
-            NetworkUtils.getJsonElement("https://api.mojang.com/user/profiles/" + uuid + "/names").getAsJsonObject();
+            NetworkUtils.getJsonElement("https://api.mojang.com/user/profile/" + uuid).getAsJsonObject();
         if (uuidResponse.has("error")) {
             Hysentials.INSTANCE.sendMessage(
                 EnumChatFormatting.RED + "Failed with error: " + uuidResponse.get("reason").getAsString()
@@ -355,7 +355,9 @@ public class HypixelAPIUtils {
             );
             return null;
         }
-        return UUID.fromString(uuidResponse.get("id").getAsString());
+        return UUID.fromString(uuidResponse.get("id").getAsString().replaceFirst(
+            "(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"
+        ));
     }
 
     public static String getUUIDs(String username) throws IOException {

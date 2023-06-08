@@ -20,12 +20,18 @@ package cc.woverflow.hysentials.config;
 
 import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.*;
+import cc.polyfrost.oneconfig.config.annotations.Button;
+import cc.polyfrost.oneconfig.config.annotations.Checkbox;
+import cc.polyfrost.oneconfig.config.annotations.Color;
 import cc.polyfrost.oneconfig.config.annotations.Number;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.libs.checker.units.qual.N;
 import cc.woverflow.hytils.HytilsReborn;
+
+import java.awt.*;
+import java.io.File;
 
 public class HysentialsConfig extends Config {
     // GENERAL
@@ -60,6 +66,22 @@ public class HysentialsConfig extends Config {
         description = "Enable futuristic channels. This will allow you to see an image as a chat channel"
     )
     public static boolean futuristicChannels = true;
+
+    @Button(
+        name = "Rank Image Config",
+        category = "General",
+        subcategory = "Ranks",
+        description = "Opens the rank image config directory.",
+        text = "Open Folder")
+    public void openRankImageConfig() {
+        Desktop desktop = Desktop.getDesktop();
+        File directory = new File("./config/hysentials/imageicons");
+        try {
+            desktop.open(directory);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Button(
             name = "Additional Configs",

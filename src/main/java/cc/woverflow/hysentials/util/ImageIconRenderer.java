@@ -42,7 +42,8 @@ public class ImageIconRenderer extends FontRenderer {
                     }
                 }
             }
-        }catch (ConcurrentModificationException ignored){}
+        } catch (ConcurrentModificationException ignored) {
+        }
         for (int i = 0; i < text.length(); ++i) {
             char c0 = text.charAt(i);
             int i1;
@@ -171,7 +172,6 @@ public class ImageIconRenderer extends FontRenderer {
                 this.doDraw(f);
             }
         }
-
     }
 
 
@@ -185,7 +185,8 @@ public class ImageIconRenderer extends FontRenderer {
                     }
                 }
             }
-        }catch (ConcurrentModificationException ignored){}
+        } catch (ConcurrentModificationException ignored) {
+        }
         if (text == null) {
             return 0;
         } else {
@@ -245,6 +246,26 @@ public class ImageIconRenderer extends FontRenderer {
             }
 
             return i;
+        }
+    }
+
+    public int getCharWidth(char character) {
+        if (character == 167) {
+            return -1;
+        } else if (character == ' ') {
+            return 4;
+        } else {
+            int i = "ÀÁÂÈÊËÍÓÔÕÚßãõğİıŒœŞşŴŵžȇ\u0000\u0000\u0000\u0000\u0000\u0000\u0000 !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\u0000ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αβΓπΣσμτΦΘΩδ∞∅∈∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■\u0000".indexOf(character);
+            if (character > 0 && i != -1 && !getUnicodeFlag()) {
+                return this.charWidth[i];
+            } else if (this.glyphWidth[character] != 0) {
+                int j = this.glyphWidth[character] >>> 4;
+                int k = this.glyphWidth[character] & 15;
+                ++k;
+                return (k - j) / 2 + 1;
+            } else {
+                return 0;
+            }
         }
     }
 
@@ -332,4 +353,107 @@ public class ImageIconRenderer extends FontRenderer {
             return text;
         }
     }
+
+    private static boolean isFormatColor(char colorChar) {
+        return colorChar >= '0' && colorChar <= '9' || colorChar >= 'a' && colorChar <= 'f' || colorChar >= 'A' && colorChar <= 'F';
+    }
+
+    private static boolean isFormatSpecial(char formatChar) {
+        return formatChar >= 'k' && formatChar <= 'o' || formatChar >= 'K' && formatChar <= 'O' || formatChar == 'r' || formatChar == 'R';
+    }
+
+    public static String getFormatFromString(String text) {
+        String s = "";
+        int i = -1;
+        int j = text.length();
+
+        while ((i = text.indexOf(167, i + 1)) != -1) {
+            if (i < j - 1) {
+                char c0 = text.charAt(i + 1);
+                if (isFormatColor(c0)) {
+                    s = "§" + c0;
+                } else if (isFormatSpecial(c0)) {
+                    s = s + "§" + c0;
+                }
+            }
+        }
+
+        while ((i = text.indexOf('<', i + 7)) != -1) {
+            String hex = text.substring(i + 2, i + 8);
+            if (text.charAt(i + 1) == '#' && hex.matches("[0-9a-fA-F]+")) {
+                s = "<#" + hex + ">";
+            }
+        }
+
+        return s;
+    }
+
+//    public String trimStringToWidth(String text, int width, boolean reverse) {
+//        StringBuilder stringbuilder = new StringBuilder();
+//        int i = 0;
+//        int j = reverse ? text.length() - 1 : 0;
+//        int k = reverse ? -1 : 1;
+//        boolean flag = false;
+//        boolean flag1 = false;
+//
+//        for (int l = j; l >= 0 && l < text.length() && i < width; l += k) {
+//            char c0 = text.charAt(l);
+//            try {
+//                String sub = text.substring(l + 1);
+//                if (c0 == ':' && sub.contains(":") && sub.substring(0, sub.indexOf(":")).matches("[a-z_\\-0-9]+")) {
+//                    Matcher matcher = stringPattern.matcher(text);
+//                    if (matcher.find(l)) {
+//                        String str = matcher.group(1);
+//                        if (str != null) {
+//                            ImageIcon icon = ImageIcon.getIcon(str);
+//                            if (icon != null) {
+//                                l += str.length() + 2;
+//                                i += icon.getWidth() + 4;
+//                                continue;
+//                            }
+//                        }
+//                    }
+//                }
+//                if (c0 == 60 && l + 7 < text.length()) {
+//                    String s = text.substring(l, l + 9);
+//                    if (s.matches("<#([0-9a-fA-F]){6}>")) {
+//                        l += 7;
+//                        i -= 5;
+//                        continue;
+//                    }
+//                }
+//            } catch (Exception ignored) {
+//            }
+//            int i1 = getCharWidth(c0);
+//            if (flag) {
+//                flag = false;
+//                if (c0 != 'l' && c0 != 'L') {
+//                    if (c0 == 'r' || c0 == 'R') {
+//                        flag1 = false;
+//                    }
+//                } else {
+//                    flag1 = true;
+//                }
+//            } else if (i1 < 0) {
+//                flag = true;
+//            } else {
+//                i += i1;
+//                if (flag1) {
+//                    ++i;
+//                }
+//            }
+//
+//            if (i > width) {
+//                break;
+//            }
+//
+//            if (reverse) {
+//                stringbuilder.insert(0, c0);
+//            } else {
+//                stringbuilder.append(c0);
+//            }
+//        }
+//
+//        return stringbuilder.toString();
+//    }
 }

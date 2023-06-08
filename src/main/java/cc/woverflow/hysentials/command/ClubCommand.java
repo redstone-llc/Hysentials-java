@@ -23,10 +23,23 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static cc.woverflow.hysentials.guis.club.ClubDashboard.update;
 import static cc.woverflow.hysentials.handlers.redworks.BwRanks.randomString;
 
-@Command(value = "club", description = "Club Commands")
+@Command(value = "club", description = "Club Commands",
+customHelpMessage = {
+    "§9-----------------------------------------------------",
+    "&aClub Commands: &c[BETA]",
+    "&e/club create <name> &7- &bCreate a club with the specified name",
+    "&e/club invite <player> &7- &bInvite a player to your club",
+    "&e/club join <name> &7- &bUsed to accept a club invite",
+    "&e/club leave &7- &bLeave your current club",
+    "&e/club dashboard &7- &bOpen the club dashboard",
+    "&e/club list &7- &bList all players in your club",
+    "§9-----------------------------------------------------"
+})
 public class ClubCommand {
     @SubCommand(aliases = {"create"}, description = "Create a club")
     public void create(String name) {
@@ -61,10 +74,10 @@ public class ClubCommand {
             "club", name,
             "uuid", Minecraft.getMinecraft().getSession().getProfile().getId(),
             "serverId", Socket.serverId
-            ).toString());
+        ).toString());
     }
 
-    @SubCommand(aliases = {"list"}, description = "Leave a club")
+    @SubCommand(aliases = {"list"})
     public void list() {
         try {
             String s = NetworkUtils.getString("https://hysentials.redstone.llc/api/club?uuid="
@@ -75,7 +88,8 @@ public class ClubCommand {
                 UChat.chat(HysentialsConfig.chatPrefix + " &c" + clubData.getString("message"));
                 return;
             }
-            JSONArray members = clubData.getJSONArray("members");
+            JSONObject club = clubData.getJSONObject("club");
+            JSONArray members = club.getJSONArray("members");
             Multithreading.runAsync(() -> {
                 HashMap<String, String> userMap = new HashMap<>();
                 for (int i = 0; i < members.length(); i++) {
@@ -84,25 +98,39 @@ public class ClubCommand {
                     userMap.put(uuid, name);
                 }
 
-                List<String> displayNames = new ArrayList<>();
-                for (int i = 0; i < members.length(); i++) {
-                    String uuid = members.getString(i);
-                    String name = userMap.get(uuid);
-                    displayNames.add(HypixelAPIUtils.getDisplayName(name, uuid));
-                }
-
                 UChat.chat(HysentialsConfig.chatPrefix + " &aClub Members:");
-                for (String displayName : displayNames) {
-                    UChat.chat("   - &a" + displayName);
+                for (Map.Entry<String, String> displayName : userMap.entrySet()) {
+                    String uuid = displayName.getKey();
+                    String name = displayName.getValue();
+                    UChat.chat("   - &a" + name + (club.getString("owner").equals(uuid) ? " &8(Owner)" : ""));
                 }
             });
         } catch (Exception e) {
 
         }
     }
+    @SubCommand(aliases = {"invite"}, description = "Invite a player to your club")
+    public void invite(String name) {
+        Multithreading.runAsync(() -> {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("invitee", name);
+            ClubDashboard.clubData = ClubDashboard.getClub();
+            update(jsonObject);
+        });
+    }
 
-    @Main()
-    public void main() {
+    @SubCommand(aliases = {"leave"}, description = "Leave a club")
+    public void leave() {
+        Multithreading.runAsync(() -> {
+            JSONObject json = new JSONObject();
+            json.put("leave", true);
+            ClubDashboard.clubData = ClubDashboard.getClub();
+            update(json);
+        });
+    }
+
+    @SubCommand(aliases = {"dashboard", "db"}, description = "Open the club dashboard")
+    public void dashboard() {
         try {
             String s = NetworkUtils.getString("https://hysentials.redstone.llc/api/club?uuid="
                 + Minecraft.getMinecraft().getSession().getProfile().getId().toString()

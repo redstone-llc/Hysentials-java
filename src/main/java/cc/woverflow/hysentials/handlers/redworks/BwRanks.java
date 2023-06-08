@@ -95,7 +95,7 @@ public class BwRanks {
                         }
                     }
 
-                    if (rank != null && !customTeamMap.containsKey(player.getGameProfile().getId())) {
+                    if (rank != null && !rank.equals(BlockWAPIUtils.Rank.DEFAULT) && !customTeamMap.containsKey(player.getGameProfile().getId())) {
                         ScorePlayerTeam customTeam = Minecraft.getMinecraft().theWorld.getScoreboard().createTeam("AA" + randomString(10));
                         customTeam.setNamePrefix(displayMap.get(player).substring(0, displayMap.get(player).indexOf(player.getGameProfile().getName())));
                         customTeam.setNameSuffix(displayMap.get(player).substring(displayMap.get(player).indexOf(player.getGameProfile().getName()) + player.getGameProfile().getName().length()));

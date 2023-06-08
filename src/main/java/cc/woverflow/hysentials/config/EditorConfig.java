@@ -31,7 +31,8 @@ public class EditorConfig extends Config {
         description = "The regex to match the line. Don't edit this unless you know regex",
         category = "editor",
         subcategory = "general",
-        size = 1
+        size = 1,
+        multiline = true
     )
     public String regex = "";
 
@@ -39,7 +40,9 @@ public class EditorConfig extends Config {
         name = "display",
         description = "The text that will be displayed",
         category = "editor",
-        subcategory = "general"
+        subcategory = "general",
+        size = 1,
+        multiline = true
     )
     public String display = "";
 
