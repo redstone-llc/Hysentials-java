@@ -31,6 +31,7 @@ import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
 import cc.woverflow.hysentials.htsl.compiler.Compiler;
 import cc.woverflow.hysentials.util.HypixelAPIUtils;
 import cc.woverflow.hysentials.util.JsonData;
+import cc.woverflow.hysentials.util.ScoreboardWrapper;
 import cc.woverflow.hysentials.websocket.Socket;
 import cc.woverflow.hytils.HytilsReborn;
 import cc.woverflow.hytils.config.HytilsConfig;
@@ -111,20 +112,6 @@ public class HysentialsCommand {
                     break;
                 }
 
-                case "htsl": {
-                    File file = new File("./config/hysentials/htsl/testing.htsl");
-                    try {
-                        new Compiler(FileUtils.readFileToString(file));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    break;
-                }
-
-                case "editor": {
-                    new CodeEditor().openGui("testing");
-                }
-
                 case "averagefps": {
                     Hysentials.INSTANCE.sendMessage("&aGetting average FPS...");
                     Multithreading.runAsync(() -> {
@@ -143,6 +130,12 @@ public class HysentialsCommand {
                 }
 
                 case "locraw": {
+                    System.out.println(ScoreboardWrapper.getLines(true).get(1));
+                    System.out.println(ScoreboardWrapper.getLines(true).get(2));
+
+                    System.out.println(ScoreboardWrapper.getLines(false).get(2));
+                    System.out.println(ScoreboardWrapper.getLines(false).get(3));
+
                     Hysentials.INSTANCE.sendMessage("&a" + LocrawUtil.INSTANCE.getLocrawInfo().toString());
                     break;
                 }

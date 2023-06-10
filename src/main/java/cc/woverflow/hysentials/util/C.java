@@ -32,4 +32,12 @@ public class C {
 
     private C() {
     }
+
+    public static String translate(String text) {
+        return text.replace("&", "§");
+    }
+
+    public static String removeColor(String text) {
+        return text.replaceAll("§[0-9a-fA-Fk-oK-ORr]", "");
+    }
 }

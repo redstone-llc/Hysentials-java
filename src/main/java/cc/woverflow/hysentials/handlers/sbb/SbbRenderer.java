@@ -6,6 +6,7 @@ import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.guis.sbBoxes.SBBoxesEditor;
+import cc.woverflow.hysentials.handlers.redworks.HousingScoreboard;
 import cc.woverflow.hysentials.util.Renderer;
 import cc.woverflow.hysentials.util.ScoreboardWrapper;
 import net.minecraft.client.gui.ScaledResolution;
@@ -32,6 +33,11 @@ import java.util.stream.Collectors;
 import static net.minecraft.client.Minecraft.getMinecraft;
 
 public class SbbRenderer {
+    public static HousingScoreboard housingScoreboard;
+    public SbbRenderer () {
+        housingScoreboard = new HousingScoreboard();
+    }
+
     @SubscribeEvent
     public void renderOverlay(RenderGameOverlayEvent.Pre event) {
         if (event.type != RenderGameOverlayEvent.ElementType.TEXT) return;

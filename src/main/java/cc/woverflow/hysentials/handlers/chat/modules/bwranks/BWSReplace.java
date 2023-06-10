@@ -2,7 +2,10 @@ package cc.woverflow.hysentials.handlers.chat.modules.bwranks;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UMessage;
+import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
+import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
@@ -11,17 +14,23 @@ import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.handlers.chat.ChatReceiveModule;
 import cc.woverflow.hysentials.handlers.redworks.BwRanks;
 import cc.woverflow.hysentials.util.BlockWAPIUtils;
+import cc.woverflow.hysentials.util.C;
 import cc.woverflow.hysentials.util.HypixelAPIUtils;
 import cc.woverflow.hysentials.util.HypixelRanks;
 import net.minecraft.client.Minecraft;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.event.HoverEvent;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.lwjgl.Sys;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static cc.woverflow.hysentials.guis.actionLibrary.ActionViewer.toList;
 import static cc.woverflow.hysentials.handlers.redworks.BwRanksUtils.*;
 
 public class BWSReplace implements ChatReceiveModule {
@@ -31,6 +40,10 @@ public class BWSReplace implements ChatReceiveModule {
         if (event.type != 0 && event.type != 1) return;
         if (LocrawUtil.INSTANCE.isInGame()) return;
         boolean didSomething = false;
+        if (checkRegexes(event)) {
+            event.setCanceled(true);
+            return;
+        }
         String message = event.message.getFormattedText();
         HashMap<String, UUID> users = new HashMap<>();
 
@@ -40,13 +53,6 @@ public class BWSReplace implements ChatReceiveModule {
         for (Map.Entry<String, UUID> user : users.entrySet()) {
             String name = user.getKey();
             UUID uuid = user.getValue();
-
-            if (message.contains(name)) {
-                if (checkRegexes(event)) {
-                    event.setCanceled(true);
-                    return;
-                }
-            }
             if (uuid.equals(UUID.fromString("00000000-0000-0000-0000-000000000000"))) continue;
             try {
                 BlockWAPIUtils.Rank rank = null;
@@ -75,13 +81,13 @@ public class BWSReplace implements ChatReceiveModule {
                     Matcher m1 = Pattern.compile(regex1).matcher(message);
                     if (m1.find(0)) {
                         didSomething = true;
-                        message = message.replaceAll("\\[[A-Za-z§0-9+]+] " + name, replacement).replaceAll("§[7f]:", rank.getChat() + ":");
+                        message = message.replaceAll("\\[[A-Za-z§0-9+]+] " + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": ");
                     } else if (Pattern.compile(regex2).matcher(message.split("§7:")[0]).find(0)) {
                         didSomething = true;
-                        message = message.replaceAll("(§r§7|§7)" + name, replacement).replaceAll("§[7f]:", rank.getChat() + ":");
+                        message = message.replaceAll("(§r§7|§7)" + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": ");
                     } else if (Pattern.compile(regex3).matcher(message).find(0)) {
                         didSomething = true;
-                        message = message.replaceAll("[a-f0-9§]{2}" + name, replacement).replaceAll("§[7f]:", rank.getChat() + ":");
+                        message = message.replaceAll("[a-f0-9§]{2}" + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": ");
                     }
                 } else {
                     Matcher m1 = Pattern.compile(regex1).matcher(message);
@@ -111,13 +117,49 @@ public class BWSReplace implements ChatReceiveModule {
             }
         }
         if (didSomething) {
+            Pattern actionRegex = Pattern.compile("<(.+):(.+)>");
+            Matcher actionMatcher = actionRegex.matcher(message.replaceAll("§r", ""));
+            if (actionMatcher.find()) {
+                String name = actionMatcher.group(1);
+                int i = name.lastIndexOf("<");
+                name = name.substring(i + 1);
+                int start = message.indexOf("<" + name + ":" + actionMatcher.group(2) + ">");
+                String s = NetworkUtils.getString("https://hysentials.redstone.llc/api/actions");
+                JSONObject json = new JSONObject(s);
+                JSONArray actions = json.getJSONArray("actions");
+                String finalName = name;
+                JSONObject action = (JSONObject) toList(actions).stream().filter(o -> {
+                    JSONObject object = ((JSONObject) o);
+                    return object.getJSONObject("action").getString("creator").equals(finalName) && object.getString("id").equals(actionMatcher.group(2));
+                }).findFirst().orElse(null);
+
+                if (action != null) {
+                    String mes = message.substring(0, start);
+                    String mes2 = message.substring(start + ("<" + name + ":" + actionMatcher.group(2) + ">").length());
+                    boolean isFunction = action.getJSONObject("action").getString("type").equals("function");
+                    UTextComponent messageComponent = new UTextComponent("&b" + action.getJSONObject("action").getString("creator") + "'s " + capitalizeFirst(action.getJSONObject("action").getString("type")) + (isFunction? " " : " Action ") + "&7(Copy)");
+                    messageComponent.setHover(HoverEvent.Action.SHOW_TEXT, "§eClick to copy the action");
+                    messageComponent.setClick(ClickEvent.Action.SUGGEST_COMMAND, action.getString("id"));
+                    UTextComponent all = new UTextComponent("");
+                    all.appendSibling(new UTextComponent(mes)).appendSibling(messageComponent).appendSibling(new UTextComponent(mes2));
+                    all.chat();
+                    event.setCanceled(true);
+                    return;
+                }
+            }
+
             event.setCanceled(true);
             UChat.chat(message);
         }
     }
 
+    public static String capitalizeFirst(String string) {
+        return string.substring(0, 1).toUpperCase() + string.substring(1);
+    }
+
 
     public boolean checkRegexes(ClientChatReceivedEvent event) {
+
         Pattern partyPattern = Pattern.compile("§9Party §8> (§[0-9a-fk-or].+ |§[0-9a-fk-or])(.+)§[f7]: (.+)");
 
         Matcher partyMatcher = partyPattern.matcher(event.message.getFormattedText().replaceAll("§r", ""));
@@ -153,14 +195,14 @@ public class BWSReplace implements ChatReceiveModule {
                 try {
                     String name = m.group(2);
                     String prefix = m.group(1);
-                    prefix = prefix;
+                    String tag = m.group(3);
                     String message = m.group(4);
                     UUID uuid = HypixelAPIUtils.getUUIDpdb(name);
                     Object[] replacement = getStuff(prefix + name, name, uuid, true, true);
                     String chat = (replacement[1] instanceof HypixelRanks) ? ((HypixelRanks) replacement[1]).getChat() : ((BlockWAPIUtils.Rank) replacement[1]).getChat();
                     event.setCanceled(true);
 //                    UChat.chat(":guild: " + replacement[0].toString() + chat + ": " + message);
-                    UChat.chat(":guild: &2" + name + "<#c6f5c0>" + ": " + message);
+                    UChat.chat(":guild: &2" + name + tag + "<#c6f5c0>" + ": " + message);
                 } catch (Exception e) {
                     System.out.println("Error in guild chat\n" + e.getMessage());
                     e.printStackTrace();
@@ -168,6 +210,32 @@ public class BWSReplace implements ChatReceiveModule {
             });
             return true;
         }
+
+        Pattern messageRegex = Pattern.compile("§d(To|From) (§[0-9a-fk-or].+ |§[0-9a-fk-or])(.+)§7: (.+)");
+        Matcher messageMatcher = messageRegex.matcher(event.message.getFormattedText().replaceAll("§r", ""));
+
+        if (messageMatcher.find()) {
+            Multithreading.runAsync(() -> {
+                try {
+                    String toFrom = messageMatcher.group(1);
+                    String name = messageMatcher.group(3);
+                    String prefix = messageMatcher.group(2);
+                    String message = C.removeColor(messageMatcher.group(4));
+
+                    if (toFrom.equals("To")) {
+                        UChat.chat(":to: <#d96cb2>" + name + "<#e3a8ce>" + ": " + message);
+                    } else {
+                        UChat.chat(":from: <#d96cb2>" + name + "<#e3a8ce>" + ": " + message);
+                    }
+                    event.setCanceled(true);
+
+                } catch (Exception e) {
+                    System.out.println("Error in message chat\n" + e.getMessage());
+                }
+            });
+            return true;
+        }
+
         return false;
     }
 

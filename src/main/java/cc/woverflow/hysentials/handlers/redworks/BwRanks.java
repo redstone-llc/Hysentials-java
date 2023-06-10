@@ -18,13 +18,16 @@
 
 package cc.woverflow.hysentials.handlers.redworks;
 
+import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.util.BlockWAPIUtils;
+import cc.woverflow.hysentials.util.DiscordRPC;
 import cc.woverflow.hysentials.util.DuoVariable;
+import cc.woverflow.hysentials.util.ScoreboardWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.scoreboard.ScorePlayerTeam;
@@ -32,6 +35,7 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -55,6 +59,7 @@ public class BwRanks {
     public static List<String> lines = new ArrayList<>();
 
     public boolean debug = false;
+    public static boolean initializedRpc = false;
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         final LocrawInfo locraw = LocrawUtil.INSTANCE.getLocrawInfo();
@@ -68,6 +73,11 @@ public class BwRanks {
             });
             this.tick = 0;
         }
+        if (!initializedRpc && HypixelUtils.INSTANCE.isHypixel()) {
+            Hysentials.INSTANCE.discordRPC.register();
+            initializedRpc = true;
+        }
+        Hysentials.INSTANCE.discordRPC.updateRPC();
         if (tick % 5 == 0) {
             Multithreading.runAsync(() -> {
                 HashMap<NetworkPlayerInfo, String> displayMap = Minecraft.getMinecraft().getNetHandler().getPlayerInfoMap().stream().collect(HashMap::new, (map, playerInfo) -> {
@@ -95,7 +105,8 @@ public class BwRanks {
                         }
                     }
 
-                    if (rank != null && !rank.equals(BlockWAPIUtils.Rank.DEFAULT) && !customTeamMap.containsKey(player.getGameProfile().getId())) {
+                    String scoreboardTitle = ChatColor.Companion.stripControlCodes(ScoreboardWrapper.getTitle());
+                    if (rank != null && !rank.equals(BlockWAPIUtils.Rank.DEFAULT) && !customTeamMap.containsKey(player.getGameProfile().getId()) && !Objects.equals(scoreboardTitle, "Housing")) {
                         ScorePlayerTeam customTeam = Minecraft.getMinecraft().theWorld.getScoreboard().createTeam("AA" + randomString(10));
                         customTeam.setNamePrefix(displayMap.get(player).substring(0, displayMap.get(player).indexOf(player.getGameProfile().getName())));
                         customTeam.setNameSuffix(displayMap.get(player).substring(displayMap.get(player).indexOf(player.getGameProfile().getName()) + player.getGameProfile().getName().length()));

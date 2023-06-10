@@ -98,7 +98,7 @@ public class Socket {
                                     displayName = HysentialsConfig.chatPrefix;
                                 } else {
                                     String sDisplay = json.getString("displayName");
-                                    displayName = BwRanksUtils.getMessage(json.getString("displayName"), json.getString("username"), UUID.fromString(json.getString("uuid")), true, false);
+                                    displayName = BwRanksUtils.getStuff(json.getString("displayName"), json.getString("username"), UUID.fromString(json.getString("uuid")), true, false)[0].toString();
                                 }
                                 displayName = displayName.replace("§r§a■ §r", "");
 

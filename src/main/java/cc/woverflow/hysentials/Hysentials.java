@@ -29,6 +29,8 @@ import cc.woverflow.hysentials.guis.ResolutionUtil;
 import cc.woverflow.hysentials.guis.actionLibrary.ActionLibrary;
 import cc.woverflow.hysentials.guis.club.ClubDashboard;
 import cc.woverflow.hysentials.guis.gameMenu.RevampedGameMenu;
+import cc.woverflow.hysentials.guis.misc.PlayerInvHandler;
+import cc.woverflow.hysentials.guis.misc.PlayerInventory;
 import cc.woverflow.hysentials.guis.sbBoxes.SBBoxesEditor;
 import cc.woverflow.hysentials.handlers.cache.HeightHandler;
 import cc.woverflow.hysentials.handlers.chat.ChatHandler;
@@ -108,6 +110,8 @@ public class Hysentials {
     public boolean isChatting;
     private boolean loadedCall;
 
+    public DiscordRPC discordRPC;
+
     public String rank;
 
     public HamsterCompanion hamsterCompanion;
@@ -142,9 +146,24 @@ public class Hysentials {
         ClientCommandHandler.instance.registerCommand(new GlobalChatCommand());
         ClientCommandHandler.instance.registerCommand(new HypixelChatCommand());
         ClientCommandHandler.instance.registerCommand(new VisitCommand());
+        ClientCommandHandler.instance.registerCommand(new RemoveGlowCommand());
+        ClientCommandHandler.instance.registerCommand(new GlowCommand());
+        ClientCommandHandler.instance.registerCommand(new SetLoreLineCommand());
+        ClientCommandHandler.instance.registerCommand(new RenameCommand());
+        ClientCommandHandler.instance.registerCommand(new RemoveNameCommand());
+        ClientCommandHandler.instance.registerCommand(new InsertLoreLineCommand());
+        ClientCommandHandler.instance.registerCommand(new RemoveLoreLineCommand());
+        ClientCommandHandler.instance.registerCommand(new OpenInvCommand());
         CommandManager.INSTANCE.registerCommand(new SBBoxesCommand());
         CommandManager.INSTANCE.registerCommand(new ActionLibraryCommand());
         CommandManager.INSTANCE.registerCommand(new ClubCommand());
+
+        try {
+            DiscordCore.init();
+            discordRPC = new DiscordRPC();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         HeightHandler.INSTANCE.initialize();
 
@@ -181,6 +200,8 @@ public class Hysentials {
         new ImageIcon("creator", new ResourceLocation("textures/icons/creator.png"));
         new ImageIcon("guild", new ResourceLocation("textures/icons/guild.png"));
         new ImageIcon("party", new ResourceLocation("textures/icons/party.png"));
+        new ImageIcon("to", new ResourceLocation("textures/icons/to.png"));
+        new ImageIcon("from", new ResourceLocation("textures/icons/from.png"));
 
         for (HypixelRanks rank : HypixelRanks.values()) {
             try {
@@ -226,6 +247,7 @@ public class Hysentials {
         eventBus.register(new Exporter());
         eventBus.register(new HousingMenuHandler());
         eventBus.register(new ClubDashboard());
+        eventBus.register(new PlayerInvHandler());
 
         // height overlay
         EventManager.INSTANCE.register(HeightHandler.INSTANCE);

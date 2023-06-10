@@ -1,6 +1,7 @@
 package cc.woverflow.hysentials.handlers.sbb;
 
 import cc.woverflow.hysentials.config.HysentialsConfig;
+import cc.woverflow.hysentials.handlers.redworks.HousingScoreboard;
 import cc.woverflow.hysentials.util.Renderer;
 import cc.woverflow.hysentials.util.ScoreboardWrapper;
 import net.minecraft.client.Minecraft;
@@ -29,6 +30,10 @@ public class Scoreboard {
         Collections.reverse(lines);
         if (lines.size() == 0) return;
         String title = ScoreboardWrapper.getTitle();
+        String housingName = SbbRenderer.housingScoreboard.getHousingName();
+        if (housingName != null) {
+            title = "§e§l" + SbbRenderer.housingScoreboard.removeFormatting(housingName).toUpperCase();
+        }
         int titleWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(title);
         int width = Math.max(titleWidth, formattedLines.stream()
             .mapToInt(line ->
