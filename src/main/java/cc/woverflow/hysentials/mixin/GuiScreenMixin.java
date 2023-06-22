@@ -5,6 +5,7 @@ import cc.woverflow.hysentials.event.events.GuiMouseClickEvent;
 import cc.woverflow.hysentials.handlers.sbb.SbbRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -14,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = GuiScreen.class)
+@Mixin(value = GuiScreen.class, priority = Integer.MAX_VALUE)
 public class GuiScreenMixin {
     @Inject(method = "handleMouseInput", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiScreen;mouseClicked(III)V"), cancellable = true)
     public void handleMouseInput(CallbackInfo ci) {
@@ -28,5 +29,15 @@ public class GuiScreenMixin {
         if (event.isCanceled()) {
             ci.cancel();
         }
+    }
+    @Shadow
+    public void drawWorldBackground(int tint) {}
+
+    @Inject(method = "drawDefaultBackground", at = @At("HEAD"), cancellable = true)
+    public void drawDefaultBackground(CallbackInfo ci) {
+        this.drawWorldBackground(0);
+
+        MinecraftForge.EVENT_BUS.post(new GuiScreenEvent.BackgroundDrawnEvent((GuiScreen) (Object) this));
+        ci.cancel();
     }
 }

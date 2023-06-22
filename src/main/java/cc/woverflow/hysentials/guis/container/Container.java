@@ -3,16 +3,25 @@ package cc.woverflow.hysentials.guis.container;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.event.EventBus;
 import cc.woverflow.hysentials.event.events.GuiMouseClickEvent;
+import cc.woverflow.hysentials.util.MUtils;
+import cc.woverflow.hysentials.websocket.Socket;
+import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInvBasic;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class Container extends InventoryBasic {
@@ -23,11 +32,13 @@ public abstract class Container extends InventoryBasic {
     private static GuiChest guiChest;
     protected static boolean isOpen;
     private static GuiAction defaultAction;
+    private ItemStack[] inventoryContents;
 
     public Container(String title, int rows) {
-        super(title, true, rows * 9);
+        super(title, true, rows*9);
         this.title = title;
         this.rows = rows;
+        this.inventoryContents = new ItemStack[rows*9];
         guiItems = new HashMap<>();
         slotActions = new HashMap<>();
         EventBus.INSTANCE.register(this);
@@ -79,6 +90,10 @@ public abstract class Container extends InventoryBasic {
     }
 
     public void open(@NotNull EntityPlayer owner) {
+        if (!Socket.linked) {
+            MUtils.chat("&cYou must be linked to a discord account to use this feature.");
+            return;
+        }
         setItems();
         for (Map.Entry<Integer, GuiItem> entry : guiItems.entrySet()) {
             Integer slot = entry.getKey();

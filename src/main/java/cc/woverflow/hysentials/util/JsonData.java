@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class JsonData {
@@ -18,9 +19,9 @@ public class JsonData {
                 file.getParentFile().mkdirs();
             }
             if (!file.exists()) {
-                FileUtils.writeStringToFile(file, defaultData.toString());
+                FileUtils.writeStringToFile(file, defaultData.toString(), StandardCharsets.UTF_8, false);
             }
-            String data = FileUtils.readFileToString(file);
+            String data = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
             jsonObject = new JSONObject(data);
 
         } catch (Exception e) {
@@ -61,7 +62,7 @@ public class JsonData {
 
     public void save() {
         try {
-            FileUtils.writeStringToFile(new File(path), jsonObject.toString(4));
+            FileUtils.writeStringToFile(new File(path), jsonObject.toString(4), StandardCharsets.UTF_8, false);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

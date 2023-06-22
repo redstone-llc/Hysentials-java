@@ -1,6 +1,6 @@
 package cc.woverflow.hysentials.guis.actionLibrary;
 
-import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.guis.container.Container;
@@ -137,7 +137,7 @@ public class ActionViewer extends Container {
                 if (response.getBoolean("success")) {
                     update();
                 } else {
-                    UChat.chat("&cYou have already upvoted this action.");
+                    MUtils.chat("&cYou have already upvoted this action.");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -153,7 +153,7 @@ public class ActionViewer extends Container {
                 if (response.getBoolean("success")) {
                     update();
                 } else {
-                    UChat.chat("&cYou have already downvoted this action.");
+                    MUtils.chat("&cYou have already downvoted this action.");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -163,7 +163,7 @@ public class ActionViewer extends Container {
         setAction(48, (event) -> {
             event.getEvent().cancel();
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(action.getString("id")), null);
-            UChat.chat("&aCopied action ID to clipboard.");
+            MUtils.chat("&aCopied action ID to clipboard.");
         });
 
         setAction(49, (event) -> {
@@ -173,7 +173,7 @@ public class ActionViewer extends Container {
         });
 
         setAction(50, (event -> {
-            UChat.chat("&cThis feature is not yet implemented.");
+            MUtils.chat("&cThis feature is not yet implemented.");
         }));
 
         setAction(47, (event) -> {

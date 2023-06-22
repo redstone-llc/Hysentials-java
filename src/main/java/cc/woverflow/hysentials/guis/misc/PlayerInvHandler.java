@@ -19,7 +19,7 @@ public class PlayerInvHandler {
     @SubscribeEvent
     public void onPlayerInteract(PlayerInteractEvent event) {
         ItemStack item = Minecraft.getMinecraft().thePlayer.getHeldItem();
-        if (item.getTagCompound() != null) {
+        if (item != null && item.getTagCompound() != null) {
             NBTTagCompound tag = item.getTagCompound();
             NBTTagCompound extraAttributes = tag.getCompoundTag("ExtraAttributes");
             if (extraAttributes != null && extraAttributes.hasKey("HOUSING_MENU")) {

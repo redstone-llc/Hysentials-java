@@ -39,6 +39,9 @@ public class ConditionCompiler {
 
         for (int i = 0; i < args.length; i++) {
             List<String> argsList = Compiler.getArgs(args[i]);
+            if (argsList.size() < 2) {
+                continue;
+            }
             String condition = new String(argsList.get(0));
             argsList.remove(0);
 

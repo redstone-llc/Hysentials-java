@@ -1,5 +1,6 @@
 package cc.woverflow.hysentials.mixin;
 
+import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.util.ImageIconRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -17,8 +18,6 @@ public class GuiUtilRCMixin {
 
 @Redirect(method = "splitText", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;trimStringToWidth(Ljava/lang/String;IZ)Ljava/lang/String;"))
     private static String onTrimStringToWidth(FontRenderer fr, String c0, int c1, boolean c2) {
-        String s = Minecraft.getMinecraft().fontRendererObj.trimStringToWidth(c0, c1, c2);
-        System.out.println(s);
-        return s;
+        return Hysentials.INSTANCE.imageIconRenderer.trimStringToWidth(c0, c1, c2);
     }
 }

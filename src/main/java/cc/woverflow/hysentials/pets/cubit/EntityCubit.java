@@ -1,22 +1,8 @@
-/*
- *       Copyright (C) 2018-present Hyperium <https://hyperium.cc/>
- *
- *       This program is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published
- *       by the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       This program is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package cc.woverflow.hysentials.pets.cubit;
 
+import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.util.C;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityAgeable;
@@ -24,25 +10,50 @@ import net.minecraft.entity.ai.EntityAIFollowOwner;
 import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.entity.passive.EntityWolf;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
-public class EntityCubit extends EntityTameable {
+import java.util.UUID;
 
-    public EntityCubit(World worldIn) {
+import static cc.woverflow.hysentials.pets.cubit.CubitCompanion.getDialog;
+
+public class EntityCubit extends EntityTameable {
+    EntityArmorStand armorStand;
+    public String ownerName;
+    public EntityCubit(World worldIn, String name) {
         super(worldIn);
         setSize(0.6F, 1.2F);
         ((PathNavigateGround) getNavigator()).setAvoidsWater(true);
-        tasks.addTask(1, new EntityAIFollowOwner(this, 1f, 10f, 2f));
-        tasks.addTask(2, new EntityAIWander(this, 1));
+        tasks.addTask(1, new EntityAIFollowOwner(this, 0.5f, 10f, 2f));
+        tasks.addTask(2, new EntityAIWander(this, 0.5));
         tasks.addTask(3, new EntityAIWatchClosest(this, EntityPlayerSP.class, 8f));
         tasks.addTask(3, new EntityAILookIdle(this));
         setTamed(true);
         preventEntitySpawning = false;
+        ownerName = name;
+        armorStand = new EntityArmorStand(worldObj);
+        armorStand.setInvisible(true);
+        armorStand.noClip = true;
+        armorStand.setAlwaysRenderNameTag(true);
+        armorStand.setCustomNameTag(C.AQUA + name + "'s Cubit Companion");
+        armorStand.setPosition(posX, posY - 1.2, posZ);
+        worldIn.spawnEntityInWorld(armorStand);
+    }
+
+    public static long cooldown = 0;
+    @Override
+    public boolean interact(EntityPlayer player) {
+        if (System.currentTimeMillis() < cooldown) return false;
+        UChat.chat("§b[PET] " + ownerName + "'s Cubit§f: " + getDialog(ownerName));
+        cooldown = System.currentTimeMillis() + 1000*2;
+        return true;
     }
 
     @Override
@@ -131,7 +142,7 @@ public class EntityCubit extends EntityTameable {
                 motionY = 0.30000001192092896D;
             }
         }
-
+        armorStand.setPosition(posX, posY - 1.2, posZ);
         super.moveEntityWithHeading(strafe, forward);
     }
 

@@ -1,6 +1,6 @@
 package cc.woverflow.hysentials.htsl;
 
-import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.util.MUtils;
 
 public enum Enchantment {
     PROTECTION(10),
@@ -74,7 +74,7 @@ public enum Enchantment {
             case "flame": return FLAME;
             case "infinity": return INFINITY;
             default: {
-                UChat.chat("&3[HTSL] &6Warning: Unknown enchantment \"" + enchantment + "\"");
+                MUtils.chat("&3[HTSL] &6Warning: Unknown enchantment \"" + enchantment + "\"");
                 return PROTECTION;
             }
         }

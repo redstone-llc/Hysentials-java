@@ -21,9 +21,7 @@
     "RenderItemMixin",
     "RenderMixin",
     "SimpleReloadableResourceManagerMixin",
-    "TextureUtilMixin"
-  ],
-  "mixins": [
+    "TextureUtilMixin",
     "ContainerMixin"
   ]
 }

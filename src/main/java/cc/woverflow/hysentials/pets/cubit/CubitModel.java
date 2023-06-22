@@ -1,153 +1,123 @@
 package cc.woverflow.hysentials.pets.cubit;
 
+import cc.woverflow.hysentials.util.BUtils;
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.model.ModelBox;
 import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 
-public class CubitModel extends ModelBase
-{
-    //fields
-    ModelRenderer cube;
-    ModelRenderer cube1;
-    ModelRenderer cube2;
-    ModelRenderer Shape5;
-    ModelRenderer Shape6;
-    ModelRenderer Shape7;
-    ModelRenderer Shape8;
-    ModelRenderer Shape1;
-    ModelRenderer Shape2;
-    ModelRenderer Shape3;
-    ModelRenderer Shape4;
-    ModelRenderer Shape9;
-    ModelRenderer Shape10;
+public class CubitModel extends ModelBase {
+    private final ModelRenderer head;
+    private final ModelRenderer bill;
+    private final ModelRenderer chin;
+    private final ModelRenderer body;
+    private final ModelRenderer cubit;
+    private final ModelRenderer left_wing;
+    private final ModelRenderer right_wing;
+    private final ModelRenderer cubit2;
+    private final ModelRenderer left_leg;
+    private final ModelRenderer right_leg;
 
-    public CubitModel()
-    {
+    public CubitModel() {
         textureWidth = 32;
         textureHeight = 32;
 
-        cube = new ModelRenderer(this, 0, 0);
-        cube.addBox(0F, 0F, 0F, 7, 7, 7);
-        cube.setRotationPoint(-4F, 4F, -5F);
-        cube.setTextureSize(32, 32);
-        cube.mirror = true;
-        setRotation(cube, 1.570796F, 0F, 0F);
-        cube1 = new ModelRenderer(this, 0, 0);
-        cube1.addBox(0F, 0F, 0F, 1, 1, 2);
-        cube1.setRotationPoint(-1F, -3F, -2F);
-        cube1.setTextureSize(32, 32);
-        cube1.mirror = true;
-        setRotation(cube1, 1.570796F, 0F, 0F);
-        cube2 = new ModelRenderer(this, 0, 21);
-        cube2.addBox(0F, 0F, 0F, 3, 3, 3);
-        cube2.setRotationPoint(-2F, -8F, -3F);
-        cube2.setTextureSize(32, 32);
-        cube2.mirror = true;
-        setRotation(cube2, 0F, 0F, 0F);
-        Shape5 = new ModelRenderer(this, 0, 14);
-        Shape5.addBox(0F, 0F, 0F, 1, 2, 5);
-        Shape5.setRotationPoint(3F, 4F, -2F);
-        Shape5.setTextureSize(32, 32);
-        Shape5.mirror = true;
-        setRotation(Shape5, 1.570796F, 0F, 0F);
-        Shape6 = new ModelRenderer(this, 21, 0);
-        Shape6.addBox(0F, 0F, 0F, 1, 4, 1);
-        Shape6.setRotationPoint(3F, 5F, -3F);
-        Shape6.setTextureSize(32, 32);
-        Shape6.mirror = true;
-        setRotation(Shape6, 1.570796F, 0F, 0F);
-        Shape7 = new ModelRenderer(this, 21, 5);
-        Shape7.addBox(0F, 0F, 0F, 1, 1, 1);
-        Shape7.setRotationPoint(3F, 6F, -3F);
-        Shape7.setTextureSize(32, 32);
-        Shape7.mirror = true;
-        setRotation(Shape7, 1.570796F, 0F, 0F);
-        Shape8 = new ModelRenderer(this, 0, 5);
-        Shape8.addBox(0F, 0F, 0F, 1, 1, 1);
-        Shape8.setRotationPoint(3F, 6F, 0F);
-        Shape8.setTextureSize(32, 32);
-        Shape8.mirror = true;
-        setRotation(Shape8, 1.570796F, 0F, 0F);
-        Shape1 = new ModelRenderer(this, 12, 14);
-        Shape1.addBox(0F, 0F, 0F, 1, 2, 5);
-        Shape1.setRotationPoint(-5F, -1F, -6F);
-        Shape1.setTextureSize(32, 32);
-        Shape1.mirror = true;
-        setRotation(Shape1, 0F, 0F, 0F);
-        Shape2 = new ModelRenderer(this, 21, 0);
-        Shape2.addBox(0F, 0F, 0F, 1, 4, 1);
-        Shape2.setRotationPoint(-5F, -2F, -7F);
-        Shape2.setTextureSize(32, 32);
-        Shape2.mirror = true;
-        setRotation(Shape2, 0F, 0F, 0F);
-        Shape3 = new ModelRenderer(this, 21, 5);
-        Shape3.addBox(0F, 0F, 0F, 1, 1, 1);
-        Shape3.setRotationPoint(-5F, -2F, -8F);
-        Shape3.setTextureSize(32, 32);
-        Shape3.mirror = true;
-        setRotation(Shape3, 0F, 0F, 0F);
-        Shape4 = new ModelRenderer(this, 0, 5);
-        Shape4.addBox(0F, 0F, 0F, 1, 1, 1);
-        Shape4.setRotationPoint(-5F, 1F, -8F);
-        Shape4.setTextureSize(32, 32);
-        Shape4.mirror = true;
-        setRotation(Shape4, 0F, 0F, 0F);
-        Shape9 = new ModelRenderer(this, 7, 14);
-        Shape9.addBox(0F, 0F, 0F, 2, 2, 3);
-        Shape9.setRotationPoint(-3F, 7F, -3F);
-        Shape9.setTextureSize(32, 32);
-        Shape9.mirror = true;
-        setRotation(Shape9, 1.570796F, 0F, 0F);
-        Shape10 = new ModelRenderer(this, 19, 14);
-        Shape10.addBox(0F, 0F, 0F, 2, 2, 3);
-        Shape10.setRotationPoint(0F, 7F, -3F);
-        Shape10.setTextureSize(32, 32);
-        Shape10.mirror = true;
-        setRotation(Shape10, 1.570796F, 0F, 0F);
-    }
+        head = new ModelRenderer(this);
+        head.setRotationPoint(0.0F, 15.0F, -4.0F);
 
-    public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5)
-    {
-        super.render(entity, f, f1, f2, f3, f4, f5);
-        setRotationAngles(f, f1, f2, f3, f4, f5, entity);
 
-        GlStateManager.pushMatrix();
-        GlStateManager.scale(2, 2, 2);
-        GlStateManager.translate(0, 0.3, 0);
-        cube.render(f5);
-        cube1.render(f5);
-        cube2.render(f5);
-        Shape5.render(f5);
-        Shape6.render(f5);
-        Shape7.render(f5);
-        Shape8.render(f5);
-        Shape1.render(f5);
-        Shape2.render(f5);
-        Shape3.render(f5);
-        Shape4.render(f5);
-        Shape9.render(f5);
-        Shape10.render(f5);
+        bill = new ModelRenderer(this);
+        bill.setRotationPoint(0.0F, 15.0F, -4.0F);
 
-        GlStateManager.popMatrix();
-    }
 
-    private void setRotation(ModelRenderer model, float x, float y, float z)
-    {
-        model.rotateAngleX = x;
-        model.rotateAngleY = y;
-        model.rotateAngleZ = z;
+        chin = new ModelRenderer(this);
+        chin.setRotationPoint(0.0F, 15.0F, -4.0F);
+
+
+        body = new ModelRenderer(this);
+        body.setRotationPoint(0.0F, 16.0F, 0.0F);
+        setRotationAngle(body, 1.5708F, 0.0F, 0.0F);
+
+
+        cubit = new ModelRenderer(this);
+        cubit.setRotationPoint(0.0F, 0.0F, 0.0F);
+        body.addChild(cubit);
+        cubit.cubeList.add(new ModelBox(cubit, 0, 0, -3.0F, -3.0F, -4.0F, 7, 7, 7, 0.0F, false));
+        cubit.cubeList.add(new ModelBox(cubit, 0, 0, 0.0F, 0.0F, 3.0F, 1, 1, 2, 0.0F, false));
+        cubit.cubeList.add(new ModelBox(cubit, 0, 21, -1.0F, -1.0F, 5.0F, 3, 3, 3, 0.0F, false));
+
+        left_wing = new ModelRenderer(this);
+        left_wing.setRotationPoint(4.0F, 16.0F, -3.0F);
+        setRotationAngle(left_wing, 1.5708F, 0.0F, 0.0F);
+        left_wing.cubeList.add(new ModelBox(left_wing, 12, 14, 0.0F, 2.0F, -3.0F, 1, 2, 5, 0.0F, false));
+        left_wing.cubeList.add(new ModelBox(left_wing, 21, 0, 0.0F, 1.0F, -4.0F, 1, 4, 1, 0.0F, false));
+        left_wing.cubeList.add(new ModelBox(left_wing, 21, 5, 0.0F, 1.0F, -5.0F, 1, 1, 1, 0.0F, false));
+        left_wing.cubeList.add(new ModelBox(left_wing, 0, 5, 0.0F, 4.0F, -5.0F, 1, 1, 1, 0.0F, false));
+
+        right_wing = new ModelRenderer(this);
+        right_wing.setRotationPoint(-4.0F, 13.0F, 0.0F);
+
+
+        cubit2 = new ModelRenderer(this);
+        cubit2.setRotationPoint(8.0F, 16.0F, 0.0F);
+        cubit2.cubeList.add(new ModelBox(cubit2, 0, 14, -12.0F, -2.0F, -4.0F, 1, 4, 1, 0.0F, false));
+        cubit2.cubeList.add(new ModelBox(cubit2, 3, 4, -12.0F, 1.0F, -5.0F, 1, 1, 1, 0.0F, false));
+        cubit2.cubeList.add(new ModelBox(cubit2, 0, 3, -12.0F, -2.0F, -5.0F, 1, 1, 1, 0.0F, false));
+        cubit2.cubeList.add(new ModelBox(cubit2, 0, 14, -12.0F, -1.0F, -3.0F, 1, 2, 5, 0.0F, false));
+
+        left_leg = new ModelRenderer(this);
+        left_leg.setRotationPoint(1.0F, 19.0F, -2.0F);
+        setRotationAngle(left_leg, 1.5708F, 0.0F, 0.0F);
+        left_leg.cubeList.add(new ModelBox(left_leg, 7, 14, 0.0F, 1.0F, -4.0F, 2, 2, 3, 0.0F, false));
+
+        right_leg = new ModelRenderer(this);
+        right_leg.setRotationPoint(-2.0F, 19.0F, -3.0F);
+        setRotationAngle(right_leg, 1.5708F, 0.0F, 0.0F);
+        right_leg.cubeList.add(new ModelBox(right_leg, 19, 14, 0.0F, 2.0F, -4.0F, 2, 2, 3, 0.0F, false));
     }
 
     @Override
-    public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float p_78086_2_, float p_78086_3_, float partialTickTime) {
-
+    public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5) {
+        head.render(f5);
+        bill.render(f5);
+        chin.render(f5);
+        body.render(f5);
+        left_wing.render(f5);
+        right_wing.render(f5);
+        cubit2.render(f5);
+        left_leg.render(f5);
+        right_leg.render(f5);
     }
 
-    public void setRotationAngles(float f, float f1, float f2, float f3, float f4, float f5, Entity entity)
-    {
-        super.setRotationAngles(f, f1, f2, f3, f4, f5, entity);
+    public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
+        modelRenderer.rotateAngleX = x;
+        modelRenderer.rotateAngleY = y;
+        modelRenderer.rotateAngleZ = z;
     }
 
+    //Add an animation of the left wing to rotate 360 degrees on the Y axis in 2 seconds
+    float wingRotation = 0.0F;
+    boolean animationStarted = false;
+    int animationDelayTicks = 20;
+
+    @Override
+    public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTickTime) {
+        if(!animationStarted) {
+            animationDelayTicks--;
+
+            if (animationDelayTicks <= 0) {
+                animationStarted = true;
+            }
+        }
+        if (animationStarted) {
+            wingRotation += 0.015F;
+            if (wingRotation >= Math.PI*4F) {
+                wingRotation = 0.0F;
+                animationDelayTicks = BUtils.randomInt(4000, 12000);
+                animationStarted = false;
+            }
+        }
+        setRotationAngle(cubit2, wingRotation, 0.0F, 0.0F);
+    }
 }

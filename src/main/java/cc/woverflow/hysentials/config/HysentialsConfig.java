@@ -1,21 +1,3 @@
-/*
- * Hytils Reborn - Hypixel focused Quality of Life mod.
- * Copyright (C) 2022  W-OVERFLOW
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package cc.woverflow.hysentials.config;
 
 import cc.polyfrost.oneconfig.config.Config;
@@ -28,6 +10,7 @@ import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.libs.checker.units.qual.N;
+import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hytils.HytilsReborn;
 
 import java.awt.*;
@@ -67,6 +50,14 @@ public class HysentialsConfig extends Config {
     )
     public static boolean futuristicChannels = true;
 
+    @Switch(
+        name = "Chat Limit 256",
+        category = "General",
+        subcategory = "Chat",
+        description = "Enable chat limit 256. This will allow you to send messages up to 256 characters long. (This will only work on Hypixel)"
+    )
+    public static boolean chatLimit256 = true;
+
     @Button(
         name = "Rank Image Config",
         category = "General",
@@ -90,8 +81,22 @@ public class HysentialsConfig extends Config {
             description = "Opens the Hytils config page.",
             text = "OPEN")
     public void openHytilsConfig() {
-        HytilsReborn.INSTANCE.getConfig().openGui();
+        if (Hysentials.INSTANCE.isHytils) {
+            HytilsReborn.INSTANCE.getConfig().openGui();
+        } else {
+            Hysentials.INSTANCE.getLogger().error("Hytils Reborn is not installed!");
+        }
     }
+
+
+    @Switch(
+        name = "Remove Asterisk",
+        category = "Housing",
+        subcategory = "General",
+        description = "Removes the asterisk from chat messages sent to the player."
+    )
+    public static boolean removeAsterisk = true;
+
 
 //    // PETS
 //    @Button(
@@ -251,5 +256,6 @@ public class HysentialsConfig extends Config {
     public HysentialsConfig() {
         super(new Mod("Hysentials", ModType.HYPIXEL), "hysentials.json");
         this.initialize();
+        this.hideIf("openHytilsConfig", () -> !Hysentials.INSTANCE.isHytils);
     }
 }

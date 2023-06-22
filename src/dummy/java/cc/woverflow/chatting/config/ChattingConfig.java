@@ -14,9 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
-package cc.woverflow.chatting.config;
+ */package cc.woverflow.chatting.config;
 
 public class ChattingConfig {
     public static ChattingConfig INSTANCE = new ChattingConfig();

@@ -114,7 +114,7 @@ public class EditorConfig extends Config {
             line.put("enabled", enabled);
         });
         this.addListener("regex", () -> {
-            line.put("regex", regex);
+            regex = line.getString("regex");
         });
         this.addListener("display", () -> {
             line.put("display", display);

@@ -1,6 +1,6 @@
 package cc.woverflow.hysentials.handlers.imageicons;
 
-import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.util.MUtils;
 import cc.woverflow.hysentials.util.ImageIconRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -79,7 +79,7 @@ public class ImageIcon {
                 if (file.exists()) {
                     BufferedImage image = javax.imageio.ImageIO.read(file);
                     if (image.getHeight() != 9) {
-                        UChat.chat("&cImageIcon " + icon.name + " has an invalid size! Expected height to be 9");
+                        MUtils.chat("&cImageIcon " + icon.name + " has an invalid size! Expected height to be 9");
                         ImageIcon.imageIcons.remove(icon.name);
                         continue;
                     }

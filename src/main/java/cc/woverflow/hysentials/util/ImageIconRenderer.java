@@ -9,7 +9,15 @@ import com.ibm.icu.text.Bidi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.S45PacketTitle;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.Sys;
 
 import java.util.ConcurrentModificationException;
 import java.util.Locale;
@@ -364,96 +372,142 @@ public class ImageIconRenderer extends FontRenderer {
 
     public static String getFormatFromString(String text) {
         String s = "";
-        int i = -1;
         int j = text.length();
 
-        while ((i = text.indexOf(167, i + 1)) != -1) {
-            if (i < j - 1) {
-                char c0 = text.charAt(i + 1);
-                if (isFormatColor(c0)) {
-                    s = "§" + c0;
-                } else if (isFormatSpecial(c0)) {
-                    s = s + "§" + c0;
+        for (int i = 0; i < text.length(); ++i) {
+            char c0 = text.charAt(i);
+            int i1;
+            int j1;
+            if (c0 == 60 && i + 8 < text.length()) {
+                String hex = text.substring(i + 2, i + 8);
+                if (text.charAt(i + 1) == '#' && hex.matches("[0-9a-fA-F]+")) {
+                    s = "<#" + hex + ">";
+                }
+                i += 8;
+                continue;
+            }
+            if (c0 == 167 && i + 1 < text.length()) {
+                char c1 = text.charAt(i + 1);
+                i1 = "0123456789abcdefklmnor".indexOf(text.toLowerCase(Locale.ENGLISH).charAt(i + 1));
+                if (isFormatColor(c1)) {
+                    s = "§" + c1;
+                } else if (isFormatSpecial(c1)) {
+                    s = s + "§" + c1;
                 }
             }
         }
 
-        while ((i = text.indexOf('<', i + 7)) != -1) {
-            String hex = text.substring(i + 2, i + 8);
-            if (text.charAt(i + 1) == '#' && hex.matches("[0-9a-fA-F]+")) {
-                s = "<#" + hex + ">";
-            }
-        }
+//        int i = -1;
+//
+//        while ((i = text.indexOf(167, i + 1)) != -1 || (i = text.indexOf('<', i + 1)) != -1) {
+//            if ((i = text.indexOf('<', i+ 7)) != -1) {
+//                String hex = text.substring(i + 2, i + 8);
+//                if (text.charAt(i + 1) == '#' && hex.matches("[0-9a-fA-F]+")) {
+//                    s = "<#" + hex + ">";
+//                }
+//                continue;
+//            }
+//            if (i < j - 1) {
+//                char c0 = text.charAt(i + 1);
+//                if (isFormatColor(c0)) {
+//                    s = "§" + c0;
+//                } else if (isFormatSpecial(c0)) {
+//                    s = s + "§" + c0;
+//                }
+//            }
+//        }
 
         return s;
     }
 
-//    public String trimStringToWidth(String text, int width, boolean reverse) {
-//        StringBuilder stringbuilder = new StringBuilder();
-//        int i = 0;
-//        int j = reverse ? text.length() - 1 : 0;
-//        int k = reverse ? -1 : 1;
-//        boolean flag = false;
-//        boolean flag1 = false;
-//
-//        for (int l = j; l >= 0 && l < text.length() && i < width; l += k) {
-//            char c0 = text.charAt(l);
-//            try {
-//                String sub = text.substring(l + 1);
-//                if (c0 == ':' && sub.contains(":") && sub.substring(0, sub.indexOf(":")).matches("[a-z_\\-0-9]+")) {
-//                    Matcher matcher = stringPattern.matcher(text);
-//                    if (matcher.find(l)) {
-//                        String str = matcher.group(1);
-//                        if (str != null) {
-//                            ImageIcon icon = ImageIcon.getIcon(str);
-//                            if (icon != null) {
-//                                l += str.length() + 2;
-//                                i += icon.getWidth() + 4;
-//                                continue;
-//                            }
-//                        }
-//                    }
-//                }
-//                if (c0 == 60 && l + 7 < text.length()) {
-//                    String s = text.substring(l, l + 9);
-//                    if (s.matches("<#([0-9a-fA-F]){6}>")) {
-//                        l += 7;
-//                        i -= 5;
-//                        continue;
-//                    }
-//                }
-//            } catch (Exception ignored) {
-//            }
-//            int i1 = getCharWidth(c0);
-//            if (flag) {
-//                flag = false;
-//                if (c0 != 'l' && c0 != 'L') {
-//                    if (c0 == 'r' || c0 == 'R') {
-//                        flag1 = false;
-//                    }
-//                } else {
-//                    flag1 = true;
-//                }
-//            } else if (i1 < 0) {
-//                flag = true;
-//            } else {
-//                i += i1;
-//                if (flag1) {
-//                    ++i;
-//                }
-//            }
-//
-//            if (i > width) {
-//                break;
-//            }
-//
-//            if (reverse) {
-//                stringbuilder.insert(0, c0);
-//            } else {
-//                stringbuilder.append(c0);
-//            }
-//        }
-//
-//        return stringbuilder.toString();
-//    }
+    public String trimStringToWidth(String text, int width, boolean reverse) {
+        StringBuilder stringbuilder = new StringBuilder();
+        int i = 0;
+        int j = reverse ? text.length() - 1 : 0;
+        int k = reverse ? -1 : 1;
+        boolean flag = false;
+        boolean flag1 = false;
+//        System.out.println("Text: " + text + " With max: " + width);
+
+        for (int l = j; l >= 0 && l < text.length() && i < width; l += k) {
+            char c0 = text.charAt(l);
+            try {
+                String sub = text.substring(l + 1);
+                if (c0 == ':' && sub.contains(":") && sub.substring(0, sub.indexOf(":")).matches("[a-z_\\-0-9]+")) {
+                    Matcher matcher = stringPattern.matcher(text);
+                    if (matcher.find(l)) {
+                        String str = matcher.group(1);
+//                        System.out.println(str);
+                        if (str != null) {
+                            ImageIcon icon = ImageIcon.getIcon(str);
+                            if (icon != null) {
+                                l += (str.length() + 2)*k;
+                                i += icon.getWidth() + 4;
+                                if (i > width) {
+                                    break;
+                                }
+
+                                if (reverse) {
+                                    stringbuilder.insert(0, ":" + str + ":");
+                                } else {
+                                    stringbuilder.append(":" + str + ":");
+                                }
+                                continue;
+                            }
+                        }
+                    }
+                }
+                if (c0 == 60 && l + 7 < text.length()) {
+                    String s = text.substring(l, l + 9);
+//                    System.out.println(s);
+//                    System.out.println(text);
+                    if (s.matches("<#([0-9a-fA-F]){6}>")) {
+                        l += 8 * k;
+                        i -= 5;
+                        if (i > width) {
+                            break;
+                        }
+
+                        if (reverse) {
+                            stringbuilder.insert(0, s);
+                        } else {
+                            stringbuilder.append(s);
+                        }
+                        continue;
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+            int i1 = getCharWidth(c0);
+            if (flag) {
+                flag = false;
+                if (c0 != 'l' && c0 != 'L') {
+                    if (c0 == 'r' || c0 == 'R') {
+                        flag1 = false;
+                    }
+                } else {
+                    flag1 = true;
+                }
+            } else if (i1 < 0) {
+                flag = true;
+            } else {
+                i += i1;
+                if (flag1) {
+                    ++i;
+                }
+            }
+
+            if (i > width) {
+                break;
+            }
+
+            if (reverse) {
+                stringbuilder.insert(0, c0);
+            } else {
+                stringbuilder.append(c0);
+            }
+        }
+//        System.out.println("Result: " + stringbuilder.toString());
+        return stringbuilder.toString();
+    }
 }

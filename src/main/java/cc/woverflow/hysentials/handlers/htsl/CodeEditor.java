@@ -1,6 +1,6 @@
 package cc.woverflow.hysentials.handlers.htsl;
 
-import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.util.MUtils;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.guis.ResolutionUtil;
 import cc.woverflow.hysentials.util.Renderer;
@@ -122,7 +122,7 @@ public class CodeEditor extends GuiScreen {
             File file = new File("./config/hysentials/htsl/" + fileNameSave + ".htsl");
             try {
                 FileUtils.write(file, String.join("\n", guiText), "UTF-8");
-                UChat.chat("&3[HTSL] &fSaved text to " + fileNameSave + ".htsl");
+                MUtils.chat("&3[HTSL] &fSaved text to " + fileNameSave + ".htsl");
                 Minecraft.getMinecraft().thePlayer.closeScreen();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -200,19 +200,19 @@ public class CodeEditor extends GuiScreen {
         File file2 = new File("./config/hysentials/htsl" + fileName + ".txt");
         if (!(file.exists() ||
             file2.exists())) {
-            UChat.chat("&3[HTSL] &cCouldn't find the file \"" + fileName + "\", please make sure it exists!");
+            MUtils.chat("&3[HTSL] &cCouldn't find the file \"" + fileName + "\", please make sure it exists!");
             return;
         }
 
         if (!file.exists()) {
-            UChat.chat("&3[HTSL] &fCreated new file \"" + fileName + ".htsl\"");
+            MUtils.chat("&3[HTSL] &fCreated new file \"" + fileName + ".htsl\"");
             try {
                 FileUtils.write(file, "", "UTF-8");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         } else {
-            UChat.chat("&3[HTSL] &fLoading " + fileName + ".htsl . . .");
+            MUtils.chat("&3[HTSL] &fLoading " + fileName + ".htsl . . .");
         }
 
         this.fileNameSave = fileName;
@@ -231,9 +231,9 @@ public class CodeEditor extends GuiScreen {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            UChat.chat("&3[HTSL] &eThe .txt file extension won't be supported in future updates. Please change your file extensions to be .htsl");
+            MUtils.chat("&3[HTSL] &eThe .txt file extension won't be supported in future updates. Please change your file extensions to be .htsl");
         } else {
-            UChat.chat("&3[HTSL] &cCouldn't find the file \"" + fileName + "\", please make sure it exists!");
+            MUtils.chat("&3[HTSL] &cCouldn't find the file \"" + fileName + "\", please make sure it exists!");
             return;
         }
 

@@ -1,6 +1,6 @@
 package cc.woverflow.hysentials.command;
 
-import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
 import cc.woverflow.hysentials.guis.misc.PlayerInventory;
@@ -40,11 +40,11 @@ public class OpenInvCommand extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
         if (SbbRenderer.housingScoreboard.getHousingName() == null) {
-            UChat.chat("&cYou must be in a housing to use this command!");
+            MUtils.chat("&cYou must be in a housing to use this command!");
             return;
         }
         if (args.length == 0) {
-            UChat.chat("&cUsage: /openinv <player>");
+            MUtils.chat("&cUsage: /openinv <player>");
             return;
         }
         for (EntityPlayer player : Minecraft.getMinecraft().theWorld.playerEntities) {
@@ -53,6 +53,6 @@ public class OpenInvCommand extends CommandBase {
                 return;
             }
         }
-        UChat.chat("&cCouldn't find a player by " + args[0] + ", make sure they are within your render distance to view their inventory!");
+        MUtils.chat("&cCouldn't find a player by " + args[0] + ", make sure they are within your render distance to view their inventory!");
     }
 }

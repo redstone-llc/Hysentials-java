@@ -1,6 +1,6 @@
 package cc.woverflow.hysentials.command;
 
-import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.util.MUtils;
 import cc.woverflow.hysentials.guis.container.GuiItem;
 import cc.woverflow.hysentials.util.Material;
 import net.minecraft.client.Minecraft;
@@ -30,9 +30,10 @@ public class GlowCommand extends CommandBase {
     public void processCommand(ICommandSender sender, String[] args) {
         ItemStack item = Minecraft.getMinecraft().thePlayer.getHeldItem();
         if (item == null || item.getItem() == null) {
-            UChat.chat("§cYou must be holding an item!");
+            MUtils.chat("§cYou must be holding an item!");
             return;
         }
+        item = item.copy();
         if (Material.FISHING_ROD.getId() == Item.getIdFromItem(item.getItem())) {
             item.addEnchantment(Enchantment.infinity, 10);
             GuiItem.hideFlag(item, 1);
@@ -42,6 +43,6 @@ public class GlowCommand extends CommandBase {
             GuiItem.hideFlag(item, 1);
             RenameCommand.setCreativeAction(item, Minecraft.getMinecraft().thePlayer.inventory.currentItem);
         }
-        UChat.chat("§aAdded glow to the item successfully!");
+        MUtils.chat("§aAdded glow to the item successfully!");
     }
 }

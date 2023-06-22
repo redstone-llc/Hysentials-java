@@ -1,25 +1,8 @@
-/*
- * Hytils Reborn - Hypixel focused Quality of Life mod.
- * Copyright (C) 2022  W-OVERFLOW
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package cc.woverflow.hysentials.util;
 
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
 import com.google.gson.*;
 import org.jetbrains.annotations.NotNull;
@@ -40,9 +23,11 @@ public class BlockWAPIUtils {
         try {
             JsonElement online = null;
             JsonElement ranks = null;
+            JsonElement cosmetics = null;
             try {
                 online = NetworkUtils.getJsonElement("https://hysentials.redstone.llc/api/online");
                 ranks = NetworkUtils.getJsonElement("https://hysentials.redstone.llc/api/ranks");
+                cosmetics = NetworkUtils.getJsonElement("https://hysentials.redstone.llc/api/cosmetic");
             } catch (Exception ignored) {
             }
             if (online == null || online.isJsonNull()) return new HashMap<>();
@@ -55,7 +40,17 @@ public class BlockWAPIUtils {
             }
             Hysentials.INSTANCE.getOnlineCache().setOnlinePlayers(onlinePlayers);
             HashMap<UUID, String> rankCache = new HashMap<>();
+            HashMap<UUID, List<String>> cosmeticCache = new HashMap<>();
             ArrayList<UUID> plusPlayers = new ArrayList<>();
+            for (JsonElement element : cosmetics.getAsJsonObject().get("cosmetics").getAsJsonArray()) {
+                JsonArray uuids = element.getAsJsonObject().get("users").getAsJsonArray();
+                for (JsonElement uuid : uuids) {
+                    if (onlinePlayers.containsKey(UUID.fromString(uuid.getAsString()))) {
+                        cosmeticCache.putIfAbsent(UUID.fromString(uuid.getAsString()), new ArrayList<>());
+                        cosmeticCache.get(UUID.fromString(uuid.getAsString())).add(element.getAsJsonObject().get("name").getAsString());
+                    }
+                }
+            }
             for (JsonElement element : ranks.getAsJsonObject().get("ranks").getAsJsonArray()) {
                 JsonArray uuids = element.getAsJsonObject().get("users").getAsJsonArray();
                 for (JsonElement uuid : uuids) {
@@ -73,6 +68,7 @@ public class BlockWAPIUtils {
             }
             Hysentials.INSTANCE.getOnlineCache().rankCache = rankCache;
             Hysentials.INSTANCE.getOnlineCache().plusPlayers = plusPlayers;
+            Hysentials.INSTANCE.getOnlineCache().cosmeticsCache = cosmeticCache;
 
             return onlinePlayers;
         } catch (Exception e) {
@@ -102,9 +98,9 @@ public class BlockWAPIUtils {
 
     public enum Rank {
         ADMIN(5, "1", "§c[ADMIN] ", "§c", "admin"),
-        MOD(4, "2", "§2[MOD] ", "§2", "mod"),
-        CREATOR(5, "3", "§3[§fCREATOR§3] ", "§3", "creator"),
-        TEAM(2,"4", "§b[TEAM] ", "§b", "team"),
+        MOD(3, "2", "§2[MOD] ", "§2", "mod"),
+        CREATOR(2, "3", "§3[§fCREATOR§3] ", "§3", "creator"),
+        TEAM(4,"4", "§6[TEAM] ", "§6", "team"),
         DEFAULT(1, "replace", "", "", "", "");
 
         public final int index;
@@ -141,6 +137,9 @@ public class BlockWAPIUtils {
         }
 
         public String getColor() {
+            if (HysentialsConfig.futuristicRanks) {
+                return getNametag();
+            }
             return color;
         }
 

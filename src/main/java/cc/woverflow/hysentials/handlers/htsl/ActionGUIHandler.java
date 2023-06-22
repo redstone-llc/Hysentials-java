@@ -1,7 +1,7 @@
 package cc.woverflow.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
-import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.woverflow.hysentials.event.events.GuiKeyboardEvent;
@@ -20,6 +20,7 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
@@ -39,9 +40,9 @@ import java.lang.reflect.Field;
 import static cc.woverflow.hysentials.handlers.guis.GameMenuOpen.field_lowerChestInventory;
 
 public class ActionGUIHandler {
-    Field guiTopField;
-    Field guiLeftField;
-    Field xSizeField;
+    public static Field guiTopField;
+    public static Field guiLeftField;
+    public static Field xSizeField;
 
     Input.Button button;
     Input input;
@@ -75,10 +76,11 @@ public class ActionGUIHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void onGuiRender(GuiScreenEvent.DrawScreenEvent.Post event) {
+    public void onGuiRender(GuiScreenEvent.BackgroundDrawnEvent event) {
         if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
             return;
         if (!isInActionGui()) return;
+        GlStateManager.pushMatrix();
 
         File housingEditor = new File("./config/ChatTriggers/modules/HousingEditor");
 //        File htsl = new File("./config/ChatTriggers/modules/HTSL");
@@ -93,7 +95,6 @@ public class ActionGUIHandler {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-        GL11.glPopMatrix();
 
         if (showChoose) {
             int rightMost = chestGuiLeft + chestWidth;
@@ -114,10 +115,10 @@ public class ActionGUIHandler {
             library.xPosition = rightMost + 10;
             library.yPosition = chestGuiTop + 1 + 100 - 5;
 
-            clipboard.drawButton(Minecraft.getMinecraft(), event.mouseX, event.mouseY);
-            file.drawButton(Minecraft.getMinecraft(), event.mouseX, event.mouseY);
-            club.drawButton(Minecraft.getMinecraft(), event.mouseX, event.mouseY);
-            library.drawButton(Minecraft.getMinecraft(), event.mouseX, event.mouseY);
+            clipboard.drawButton(Minecraft.getMinecraft(), event.getMouseX(), event.getMouseY());
+            file.drawButton(Minecraft.getMinecraft(), event.getMouseX(), event.getMouseY());
+            club.drawButton(Minecraft.getMinecraft(), event.getMouseX(), event.getMouseY());
+            library.drawButton(Minecraft.getMinecraft(), event.getMouseX(), event.getMouseY());
         }
 
         int margin = (housingEditor.exists()) ? 5 : 30;
@@ -140,9 +141,9 @@ public class ActionGUIHandler {
         input.xPosition = ResolutionUtil.current().getScaledWidth() / 2 - input.width + sizeDifference - margin;
         input.yPosition = chestGuiTop - input.height - margin;
 
-        button.drawButton(Minecraft.getMinecraft(), event.mouseX, event.mouseY);
+        button.drawButton(Minecraft.getMinecraft(), event.getMouseX(), event.getMouseY());
         input.drawTextBox();
-        GL11.glPushMatrix();
+        GlStateManager.popMatrix();
     }
 
     @SubscribeEvent
@@ -208,7 +209,9 @@ public class ActionGUIHandler {
                             } else {
                                 String code = NetworkUtils.getString("https://hysentials.redstone.llc/api/action?id=" + input.getText());
                                 JSONObject json = new JSONObject(code);
-                                codeToBeCompiled = json.getJSONObject("action").getJSONObject("action").getString("code");
+                                if (json.has("action")) {
+                                    codeToBeCompiled = json.getJSONObject("action").getJSONObject("action").getString("code");
+                                }
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -252,7 +255,7 @@ public class ActionGUIHandler {
             EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
             Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
             if (ClubDashboard.getClub() == null) {
-                UChat.chat("&cYou are not in a club!");
+                MUtils.chat("&cYou are not in a club!");
                 return;
             }
             Exporter.export = "club";
@@ -268,6 +271,7 @@ public class ActionGUIHandler {
 
     public static ItemStack lastItem = null;
     public static String lastContainer = null;
+
     @SubscribeEvent
     public void onGuiSlotClick(GuiMouseClickEvent event) {
         if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
@@ -287,17 +291,15 @@ public class ActionGUIHandler {
 
             if (!isInActionGui()) return;
             if (slot.getHasStack() && slot.getStack().hasDisplayName()
-            && slot.getStack().getDisplayName().equals("§aUpload to Action Library")) {
+                && slot.getStack().getDisplayName().equals("§aUpload to Action Library")) {
                 event.getCi().cancel();
 
                 if (Navigator.getContainerName() != null && Navigator.getContainerName().startsWith("Actions: ")) {
-                    if (ClubDashboard.getClub() != null) {
-                        Exporter.name = Navigator.getContainerName().split("Actions: ")[1];
-                        Exporter.type = "function";
-                        showChoose = true;
-                    }
+                    Exporter.names.add(Navigator.getContainerName().split("Actions: ")[1]);
+                    Exporter.type = "function";
+                    showChoose = true;
                 } else {
-                    Exporter.name = BwRanks.randomString(5);
+                    Exporter.names.add(BwRanks.randomString(5));
                     Exporter.type = getType((GuiChest) screen);
                     showChoose = true;
                 }
@@ -305,12 +307,32 @@ public class ActionGUIHandler {
         }
     }
 
-    public String getType(GuiChest chest) {
+    public static String getType(GuiChest chest, boolean e) {
+        if (Navigator.getContainerName() != null) {
+            if (Navigator.getContainerName().equals("Edit NPC")) {
+                return "npc";
+            }
+            Slot slot = chest.inventorySlots.getSlot(47);
+            if (slot == null) return "function";
+            if (slot.getHasStack() && slot.getStack().hasDisplayName()) {
+                int id = Item.getIdFromItem(slot.getStack().getItem());
+                if (id == 77 || id == 143) {
+                    return "button";
+                }
+                if (id == 148 || id == 147 || id == 70 || id == 72) {
+                    return "pad";
+                }
+            }
+        }
+        return "function";
+    }
+
+    public static String getType(GuiChest chest) {
         if (lastContainer != null && lastContainer.equals("Edit NPC")) {
             return "npc";
         }
         if (lastContainer != null && lastContainer.equals("Event Actions")) {
-            return ChatColor.Companion.stripControlCodes(lastItem.getDisplayName());
+            return ChatColor.Companion.stripControlCodes(lastItem.getDisplayName()).replace(" ", "_").toLowerCase();
         }
         Slot slot = chest.inventorySlots.getSlot(47);
         if (slot == null) return "function";
@@ -320,7 +342,7 @@ public class ActionGUIHandler {
                 return "button";
             }
             if (id == 148 || id == 147 || id == 70 || id == 72) {
-                return "action pad";
+                return "pad";
             }
         }
         return "function";

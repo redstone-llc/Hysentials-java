@@ -1,24 +1,6 @@
-/*
- * Hytils Reborn - Hypixel focused Quality of Life mod.
- * Copyright (C) 2022  W-OVERFLOW
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package cc.woverflow.hysentials.command;
 
-import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.commands.annotations.*;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
@@ -72,7 +54,7 @@ public class GroupChatCommand {
         ).toString());
         Socket.awaiting.add(new DuoVariable<>("groupChat", jsonObject -> {
             if (jsonObject.has("displayName")) return;
-            UChat.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
+            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
         }));
     }
 
@@ -85,7 +67,7 @@ public class GroupChatCommand {
             "serverId", Socket.serverId
         ).toString());
         Socket.awaiting.add(new DuoVariable<>("groupCreate", jsonObject -> {
-            UChat.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
+            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
         }));
     }
 
@@ -100,7 +82,7 @@ public class GroupChatCommand {
             "serverId", Socket.serverId
         ).toString());
         Socket.awaiting.add(new DuoVariable<>("groupSettings", jsonObject -> {
-            UChat.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
+            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
         }));
     }
 
@@ -114,7 +96,7 @@ public class GroupChatCommand {
             "serverId", Socket.serverId
         ).toString());
         Socket.awaiting.add(new DuoVariable<>("groupDemote", jsonObject -> {
-            UChat.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
+            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
         }));
     }
 
@@ -127,7 +109,7 @@ public class GroupChatCommand {
             "serverId", Socket.serverId
         ).toString());
         Socket.awaiting.add(new DuoVariable<>("groupDisband", jsonObject -> {
-            UChat.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
+            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
         }));
     }
 
@@ -141,7 +123,7 @@ public class GroupChatCommand {
             "serverId", Socket.serverId
         ).toString());
         Socket.awaiting.add(new DuoVariable<>("groupInvite", jsonObject -> {
-            UChat.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
+            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
         }));
     }
 
@@ -156,7 +138,7 @@ public class GroupChatCommand {
             "serverId", Socket.serverId
         ).toString());
         Socket.awaiting.add(new DuoVariable<>("groupKick", jsonObject -> {
-            UChat.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
+            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
         }));
     }
 
@@ -169,7 +151,7 @@ public class GroupChatCommand {
             "serverId", Socket.serverId
         ).toString());
         Socket.awaiting.add(new DuoVariable<>("groupLeave", jsonObject -> {
-            UChat.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
+            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
         }));
     }
 
@@ -183,7 +165,7 @@ public class GroupChatCommand {
             "serverId", Socket.serverId
         ).toString());
         Socket.awaiting.add(new DuoVariable<>("groupPromote", jsonObject -> {
-            UChat.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
+            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
         }));
     }
 
@@ -196,7 +178,7 @@ public class GroupChatCommand {
             "serverId", Socket.serverId
         ).toString());
         Socket.awaiting.add(new DuoVariable<>("groupOnline", jsonObject -> {
-            UChat.chat(jsonObject.getString("message"));
+            MUtils.chat(jsonObject.getString("message"));
         }));
     }
 
@@ -210,7 +192,7 @@ public class GroupChatCommand {
             "serverId", Socket.serverId
         ).toString());
         Socket.awaiting.add(new DuoVariable<>("groupRename", jsonObject -> {
-            UChat.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
+            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
         }));
     }
 
@@ -224,7 +206,7 @@ public class GroupChatCommand {
             "serverId", Socket.serverId
         ).toString());
         Socket.awaiting.add(new DuoVariable<>("groupTransfer", jsonObject -> {
-            UChat.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
+            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
         }));
     }
 
@@ -237,7 +219,7 @@ public class GroupChatCommand {
             "serverId", Socket.serverId
         ).toString());
         Socket.awaiting.add(new DuoVariable<>("groupHide", jsonObject -> {
-            UChat.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
+            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
             if (Hysentials.INSTANCE.isChatting) {
                 GroupChat.hideTab(name);
             }
@@ -253,7 +235,7 @@ public class GroupChatCommand {
             "serverId", Socket.serverId
         ).toString());
         Socket.awaiting.add(new DuoVariable<>("groupUnhide", jsonObject -> {
-            UChat.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
+            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
         }));
     }
 
@@ -267,7 +249,7 @@ public class GroupChatCommand {
             "serverId", Socket.serverId
         ).toString());
         Socket.awaiting.add(new DuoVariable<>("groupColor", jsonObject -> {
-            UChat.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
+            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
         }));
     }
 }

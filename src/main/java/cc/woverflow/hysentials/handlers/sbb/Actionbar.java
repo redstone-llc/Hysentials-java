@@ -38,7 +38,7 @@ public class Actionbar {
             18,
             HysentialsConfig.boxColor,
             HysentialsConfig.boxShadows,
-            2
+            new Integer[]{0, 2, 4}[HysentialsConfig.actionBarBorderRadius]
         );
         Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(actionBarMessage, x, y, (int) Renderer.color(255, 255, 255, 255));
 

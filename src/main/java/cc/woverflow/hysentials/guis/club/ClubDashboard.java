@@ -1,7 +1,7 @@
 package cc.woverflow.hysentials.guis.club;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
-import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.woverflow.hysentials.Hysentials;
@@ -34,6 +34,7 @@ import static cc.woverflow.hysentials.guis.container.GuiItem.setLore;
 
 public class ClubDashboard extends Container {
     public static JSONObject clubData;
+    public static ClubDashboard instance;
 
     public ClubDashboard() {
         super("Club Dashboard", 3);
@@ -41,6 +42,7 @@ public class ClubDashboard extends Container {
             + Minecraft.getMinecraft().getSession().getProfile().getId().toString()
             + "&key=" + Socket.serverId);
         clubData = new JSONObject(s);
+        instance = this;
         if (!clubData.getBoolean("success")) {
             return;
         }
@@ -133,14 +135,14 @@ public class ClubDashboard extends Container {
             event.getEvent().cancel();
             Minecraft.getMinecraft().thePlayer.closeScreen();
             selectingName = true;
-            UChat.chat("&7Please type your new club name in chat!");
-            UChat.chat("&7You can only change your club name once every 30d!");
+            MUtils.chat("&7Please type your new club name in chat!");
+            MUtils.chat("&7You can only change your club name once every 30d!");
             Multithreading.schedule(() -> {
                 if (!selectingName) {
                     return;
                 }
                 selectingName = false;
-                UChat.chat("&7Club name change request has expired!");
+                MUtils.chat("&7Club name change request has expired!");
             }, 5, TimeUnit.MINUTES);
         });
 
@@ -148,14 +150,14 @@ public class ClubDashboard extends Container {
             event.getEvent().cancel();
             Minecraft.getMinecraft().thePlayer.closeScreen();
             selectingAlias = true;
-            UChat.chat("&7Please type your new club alias in chat!");
+            MUtils.chat("&7Please type your new club alias in chat!");
 
             Multithreading.schedule(() -> {
                 if (!selectingAlias) {
                     return;
                 }
                 selectingAlias = false;
-                UChat.chat("&7Club alias change request has expired!");
+                MUtils.chat("&7Club alias change request has expired!");
             }, 5, TimeUnit.MINUTES);
         });
 
@@ -164,14 +166,14 @@ public class ClubDashboard extends Container {
             if (clubData.getBoolean("isOwner")) {
                 Minecraft.getMinecraft().thePlayer.closeScreen();
                 invitePlayers = true;
-                UChat.chat("\n&ePlease send the username of the user you want to invite in chat!");
+                MUtils.chat("\n&ePlease send the username of the user you want to invite in chat!");
 
                 Multithreading.schedule(() -> {
                     if (!invitePlayers) {
                         return;
                     }
                     invitePlayers = false;
-                    UChat.chat("&cInvite request has expired!");
+                    MUtils.chat("&cInvite request has expired!");
                 }, 5, TimeUnit.MINUTES);
             } else {
                 Minecraft.getMinecraft().thePlayer.closeScreen();
@@ -189,13 +191,13 @@ public class ClubDashboard extends Container {
             event.getEvent().cancel();
             Minecraft.getMinecraft().thePlayer.closeScreen();
             clubhouseSelect = true;
-            UChat.chat("&ePlease do &b/visit <player name> &eand select the house you want to use!");
+            MUtils.chat("&ePlease do &b/visit <player name> &eand select the house you want to use!");
             Multithreading.schedule(() -> {
                 if (!clubhouseSelect) {
                     return;
                 }
                 clubhouseSelect = false;
-                UChat.chat("&cClubhouse selection request has expired!");
+                MUtils.chat("&cClubhouse selection request has expired!");
                 Minecraft.getMinecraft().thePlayer.closeScreen();
             }, 5, TimeUnit.MINUTES);
         });
@@ -248,7 +250,7 @@ public class ClubDashboard extends Container {
             String s = IOUtils.toString(input);
             JSONObject object = new JSONObject(s);
             if (!object.getBoolean("success")) {
-                UChat.chat("&c" + object.getString("message"));
+                MUtils.chat("&c" + object.getString("message"));
                 return;
             }
         } catch (Exception e) {
@@ -265,49 +267,6 @@ public class ClubDashboard extends Container {
             return null;
         }
         return clubData.getJSONObject("club");
-    }
-
-    @SubscribeEvent
-    public void onMouseClick(GuiMouseClickEvent event) {
-        if (!clubhouseSelect) return;
-        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null) return;
-        if (Minecraft.getMinecraft().currentScreen instanceof GuiChest) {
-            if (Navigator.getContainerName() == null || !Navigator.getContainerName().endsWith("Houses")) return;
-            GuiChest chest = (GuiChest) Minecraft.getMinecraft().currentScreen;
-            if (chest.getSlotUnderMouse().getHasStack()) {
-                event.getCi().cancel();
-                String name = chest.getSlotUnderMouse().getStack().getDisplayName();
-                List<String> lore = new ArrayList<>(getLore(chest.getSlotUnderMouse().getStack()));
-                List<String> newLore = new ArrayList<>();
-                for (String line : lore) {
-                    line = line.replace("§r", "");
-                    if (line.startsWith("§7Cookies: ") || line.startsWith("§7Players: ")
-                    || line.equals("§eRight Click to Manage!") || line.startsWith("§7Created: ")) {
-                        continue;
-                    }
-                    newLore.add(line);
-                }
-                ItemStack itemStack = chest.getSlotUnderMouse().getStack();
-                setLore(itemStack, newLore);
-                String username = Minecraft.getMinecraft().thePlayer.getName();
-                if (Navigator.getContainerName().split("'").length == 2) {
-                    username = Navigator.getContainerName().split("'")[0];
-                }
-                String nbt = itemStack.serializeNBT().toString();
-                JSONObject jsonObject = new JSONObject();
-                JSONObject jsonObject1 = new JSONObject();
-                jsonObject1.put("name", ChatColor.Companion.stripControlCodes(name));
-                jsonObject1.put("username", username);
-                jsonObject1.put("nbt", nbt);
-
-                jsonObject.put("houses", jsonObject1);
-                Multithreading.runAsync(() -> {
-                    update(jsonObject);
-                    clubhouseSelect = false;
-                    new ClubDashboard().open();
-                });
-            }
-        }
     }
 
     public static ItemStack getItemfromNBT(String nbt) {

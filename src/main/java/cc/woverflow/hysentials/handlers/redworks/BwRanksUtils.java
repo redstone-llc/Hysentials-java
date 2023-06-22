@@ -1,21 +1,3 @@
-/*
- * Hytils Reborn - Hypixel focused Quality of Life mod.
- * Copyright (C) 2022  W-OVERFLOW
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package cc.woverflow.hysentials.handlers.redworks;
 
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
@@ -38,6 +20,11 @@ public class BwRanksUtils {
     static HashMap<UUID, String> previousNames = new HashMap<>();
 
     public static String getMessage(String message, String name, UUID uuid, boolean plus, boolean checksColor) {
+        String s = checkRegexes(message, name, uuid);
+        if (s != null) {
+            return s;
+        }
+
         try {
             BlockWAPIUtils.Rank rank = null;
             if (Hysentials.INSTANCE.getOnlineCache().getOnlinePlayers().containsKey(uuid)) {
@@ -67,7 +54,7 @@ public class BwRanksUtils {
                     }
                 }
 
-                if (LocrawUtil.INSTANCE.isInGame()) {
+                if (LocrawUtil.INSTANCE.isInGame() && (!LocrawUtil.INSTANCE.getLocrawInfo().getGameType().equals(LocrawInfo.GameType.SKYBLOCK) || !LocrawUtil.INSTANCE.getLocrawInfo().getGameType().equals(LocrawInfo.GameType.HOUSING))) {
                     if (!(sline1.startsWith("Players: ") || sline2.startsWith("Players: ") || sline1.startsWith("Map: ") || sline2.startsWith("Map: "))) {
                         return message;
                     }
@@ -96,8 +83,9 @@ public class BwRanksUtils {
                     message = message.replaceAll("\\[[A-Za-z§0-9+]+] " + name, replacement).replace("§7:", "§f:");
                 } else if (Pattern.compile(regex2, Pattern.UNICODE_CASE).matcher(message.split("§7:")[0]).find(0)) {
                     message = message.replaceAll("(§r§7|§7)" + name, replacement).replace("§7:", "§f:");
-                } else if (Pattern.compile(regex3, Pattern.UNICODE_CASE).matcher(message).find(0)) {
-                    message = message.replaceAll("[a-f0-9§]{2}" + name, replacement).replace("§7:", "§f:");
+//                } else if (Pattern.compile(regex3, Pattern.UNICODE_CASE).matcher(message).find(0)) {
+//                    message = message.replaceAll("[a-f0-9§]{2}" + name, replacement).replace("§7:", "§f:");
+//                }
                 }
             } else {
                 Matcher m1 = Pattern.compile(regex1, Pattern.UNICODE_CASE).matcher(message);
@@ -140,15 +128,42 @@ public class BwRanksUtils {
                     HypixelRanks r = (HypixelRanks) replacement[1];
                     message = message.replaceAll("(§r§7|§7)" + name, replacement[0].toString()).replaceAll("§[7f]: ", r.getChat() + ": ");
                 }
-                if (m3.find(0) && !checksColor) {
-                    Object[] replacement = getReplacement(m3.group(0).substring(0, 2), name, uuid, true);
-                    HypixelRanks r = (HypixelRanks) replacement[1];
-                    message = message.replaceAll("[a-f0-9§]{2}" + name, replacement[0].toString()).replaceAll("§[7f]: ", r.getChat() + ": ");
-                }
+//                if (m3.find(0) && !checksColor) {
+//                    Object[] replacement = getReplacement(m3.group(0).substring(0, 2), name, uuid, true);
+//                    HypixelRanks r = (HypixelRanks) replacement[1];
+//                    message = message.replaceAll("[a-f0-9§]{2}" + name, replacement[0].toString()).replaceAll("§[7f]: ", r.getChat() + ": ");
+//                }
             }
         } catch (Exception e) {
         }
         return message;
+    }
+
+    public static String checkRegexes(String message, String name, UUID uuid) {
+        Pattern teamsP = Pattern.compile("(§[8efacd9b]§l[SYWGRPBA]) §[8efacd9b](.+)");
+        Matcher teamsM = teamsP.matcher(message.replaceAll("§r", ""));
+
+        if (teamsM.find()) {
+            switch (teamsM.group(1)) {
+                case "§8§lS":
+                    return ":gray: <#d9d9d9>" + teamsM.group(2);
+                case "§e§lY":
+                    return ":yellow: <#ebd028>" + teamsM.group(2);
+                case "§a§lW":
+                    return ":white: <#d9d9d9>" + teamsM.group(2);
+                case "§9§lG":
+                    return ":green: <#56e656>" + teamsM.group(2);
+                case "§c§lR":
+                    return ":red: &c" + teamsM.group(2);
+                case "§d§lP":
+                    return ":pink: <#e070e0>" + teamsM.group(2);
+                case "§b§lB":
+                    return ":blue: &9" + teamsM.group(2);
+                case "§7§lA":
+                    return ":aqua: <#67e9e9>" + teamsM.group(2);
+            }
+        }
+        return null;
     }
 
 

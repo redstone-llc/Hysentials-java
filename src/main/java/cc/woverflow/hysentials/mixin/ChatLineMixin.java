@@ -1,9 +1,7 @@
 /*
  * This file is from chat_heads is licensed under MPL-2.0, which can be found at https://www.mozilla.org/en-US/MPL/2.0/
  * See: https://github.com/dzwdz/chat_heads/blob/fabric-1.16.x/LICENSE
- */
-
-package cc.woverflow.hysentials.mixin;
+ */package cc.woverflow.hysentials.mixin;
 
 import cc.woverflow.hysentials.hook.ChatLineHook;
 import net.minecraft.client.Minecraft;

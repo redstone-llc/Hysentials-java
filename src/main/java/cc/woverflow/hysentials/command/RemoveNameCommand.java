@@ -1,6 +1,6 @@
 package cc.woverflow.hysentials.command;
 
-import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.util.MUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.item.ItemStack;
@@ -28,11 +28,12 @@ public class RemoveNameCommand extends CommandBase {
     public void processCommand(net.minecraft.command.ICommandSender sender, String[] args) {
         ItemStack item = Minecraft.getMinecraft().thePlayer.getHeldItem();
         if (item == null || item.getItem() == null) {
-            UChat.chat("§cYou must be holding an item!");
+            MUtils.chat("§cYou must be holding an item!");
             return;
         }
+        item = item.copy();
         item.clearCustomName();
         setCreativeAction(item, Minecraft.getMinecraft().thePlayer.inventory.currentItem);
-        UChat.chat("§aRemoved name from item successfully!");
+        MUtils.chat("§aRemoved name from item successfully!");
     }
 }

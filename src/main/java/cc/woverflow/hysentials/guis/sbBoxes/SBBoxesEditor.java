@@ -13,6 +13,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
@@ -61,6 +62,7 @@ public class SBBoxesEditor extends HysentialsGui {
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         super.drawScreen(mouseX, mouseY, partialTicks);
+        GlStateManager.pushMatrix();
         ScaledResolution res = new ScaledResolution(mc);
         int radius = new Integer[]{0, 2, 4}[HysentialsConfig.scoreboardBoxesBorderRadius];
         drawRect(0, 0, res.getScaledWidth(), res.getScaledHeight(), (int) Renderer.color(0, 0, 0, 75));
@@ -72,7 +74,7 @@ public class SBBoxesEditor extends HysentialsGui {
             JSONArray lines = data.getJSONArray("lines");
             for (int i = 0; i < lines.length(); i++) {
                 JSONObject line = (JSONObject) lines.get(i);
-                drawRect(0, 15 + 30 * i + this.scrollAmount, 200, 30, (int) Renderer.color(0, 0, 0, 150));
+                drawRect(0, 15 + 30 * i + 3 * i + this.scrollAmount, 200, 30, (int) Renderer.color(0, 0, 0, 150));
                 if (mouseX > 0 && mouseX < 200 && mouseY > 15 + 30 * i + 3 * i + this.scrollAmount && mouseY < 15 + 30 * i + 3 * i + 30 + this.scrollAmount) {
                     drawRect(0, 15 + 30 * i + 3 * i + this.scrollAmount, 200, 30, (int) Renderer.color(0, 0, 0, 175));
                     fontRendererObj.drawString("§eClick to edit", mouseX + 5, mouseY - 10, (int) Renderer.color(255, 255, 255, 255));
@@ -112,6 +114,7 @@ public class SBBoxesEditor extends HysentialsGui {
                 }
             }
         }
+        GlStateManager.popMatrix();
     }
 
     static boolean dragging = false;

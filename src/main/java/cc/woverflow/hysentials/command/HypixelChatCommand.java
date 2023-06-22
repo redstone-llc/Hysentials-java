@@ -1,6 +1,6 @@
 package cc.woverflow.hysentials.command;
 
-import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.StringUtils;
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
@@ -38,35 +38,35 @@ public class HypixelChatCommand extends CommandBase {
         List<String> chats = Arrays.asList("All", "Global", "Party", "Guild", "Officer", "Skyblock-Coop");
         List<String> chatAliases = Arrays.asList("a", "gl", "p", "g", "o", "coop");
         if (args.length == 0) {
-            UChat.chat("&cInvalid usage! /chat <channel>");
-            UChat.chat("&cValid channels: " + String.join(", ", chats));
+            MUtils.chat("&cInvalid usage! /chat <channel>");
+            MUtils.chat("&cValid channels: " + String.join(", ", chats));
         }
         if (!HysentialsConfig.globalChatEnabled) {
             chats.remove(1);
             chatAliases.remove(1);
         }
         if (!HypixelUtils.INSTANCE.isHypixel()) {
-            UChat.chat("&cYou are not in a Hypixel server!");
+            MUtils.chat("&cYou are not in a Hypixel server!");
             return;
         }
         String command = args[0].toLowerCase();
         if (command.equals("global") || command.equals("gl") && HysentialsConfig.globalChatEnabled) {
             if (isInGlobalChat) {
-                UChat.chat("&cYou're already in this channel!");
+                MUtils.chat("&cYou're already in this channel!");
             } else {
                 isInGlobalChat = true;
-                UChat.chat("&aYou are now in the &6GLOBAL &achat!");
+                MUtils.chat("&aYou are now in the &6GLOBAL &achat!");
             }
         } else {
             String finalCommand = command;
             if (chats.stream().noneMatch(c -> c.toLowerCase().equals(finalCommand)) && !chatAliases.contains(command)) {
-                UChat.chat("&cInvalid Channel! Valid channels: " + String.join(", ", chats));
+                MUtils.chat("&cInvalid Channel! Valid channels: " + String.join(", ", chats));
             } else {
                 if (isInGlobalChat) {
                     if (chatAliases.contains(command)) {
                         command = chats.get(chatAliases.indexOf(command));
                     }
-                    UChat.chat("&aYou are now in the &6" + command.toUpperCase() + " &achat!");
+//                    MUtils.chat("&aYou are now in the &6" + command.toUpperCase() + " &achat!");
                 }
                 Minecraft.getMinecraft().thePlayer.sendChatMessage("/chat " + command);
             }

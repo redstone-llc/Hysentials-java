@@ -25,7 +25,7 @@
   },
   "mod": {
     "nametag_color": "#00AA00",
-    "chat_message_color": "#cfc0f5"
+    "chat_message_color": "#d4ffdf"
   },
   "admin": {
     "nametag_color": "#ea323c",
@@ -40,7 +40,7 @@
     "chat_message_color": "#555555"
   },
   "team": {
-    "nametag_color": "#00ffff",
+    "nametag_color": "#ec6f19",
     "chat_message_color": "#fff7f0"
   }
 }

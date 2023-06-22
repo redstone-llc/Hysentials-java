@@ -1,24 +1,7 @@
-/*
- * Hytils Reborn - Hypixel focused Quality of Life mod.
- * Copyright (C) 2022  W-OVERFLOW
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package cc.woverflow.hysentials.handlers.groupchats;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
@@ -153,7 +136,9 @@ public class GroupChat {
     }
 
     public static void chat(JSONObject json) {
-        UChat.chat(json.getString("message"));
+        if (HysentialsConfig.globalChatEnabled) {
+            MUtils.chat(json.getString("message"));
+        }
     }
 
     public static void invite(JSONObject json) {
@@ -161,10 +146,10 @@ public class GroupChat {
             UTextComponent component = new UTextComponent("§bClick here §ato accept or type §b/group join " + json.getString("name"));
             component.setClick(ClickEvent.Action.RUN_COMMAND, "/group join " + json.getString("name"));
             component.setHover(HoverEvent.Action.SHOW_TEXT, "§e/group join " + json.getString("name"));
-            UChat.chat(getDividerAqua());
-            UChat.chat(json.getString("message"));
+            MUtils.chat(getDividerAqua());
+            MUtils.chat(json.getString("message"));
             UChat.chat(component);
-            UChat.chat(getDividerAqua());
+            MUtils.chat(getDividerAqua());
         }
     }
 

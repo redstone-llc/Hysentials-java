@@ -32,6 +32,6 @@ public class GiveItem extends Loader {
 
     @Override
     public String export(List<String> args) {
-        return "giveItem \"" + args.get(0) + "\" " + args.get(1);
+        return "giveItem '" + args.get(0) + "' " + args.get(1);
     }
 }

@@ -22,9 +22,7 @@
  * have also received a copy of the Additional Terms Applicable
  * to OneConfig, as published by Polyfrost. If not, see
  * <https://polyfrost.cc/legal/oneconfig/additional-terms>
- */
-
-package cc.woverflow.hysentials.util;
+ */package cc.woverflow.hysentials.util;
 
 import cc.polyfrost.oneconfig.utils.JsonUtils;
 import com.google.gson.JsonElement;

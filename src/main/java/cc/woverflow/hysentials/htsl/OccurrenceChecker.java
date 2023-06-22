@@ -51,7 +51,7 @@ public class OccurrenceChecker {
             // Check if the first element is a string and if it has a hardcoded limit
             if (firstElement != null && limits.containsKey(firstElement)) {
                 // Increment the occurrences of the string
-                int count = occurrences.getOrDefault(firstElement, 0) + 1;
+                int count = occurrences.getOrDefault(firstElement, 0);
                 occurrences.put(firstElement, count);
 
                 // Check if the number of occurrences goes over the hardcoded limit

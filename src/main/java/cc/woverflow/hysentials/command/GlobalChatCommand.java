@@ -1,24 +1,6 @@
-/*
- * Hytils Reborn - Hypixel focused Quality of Life mod.
- * Copyright (C) 2022  W-OVERFLOW
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package cc.woverflow.hysentials.command;
 
-import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.websocket.Socket;
@@ -55,15 +37,15 @@ public class GlobalChatCommand extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
         if (!HypixelUtils.INSTANCE.isHypixel()) {
-            UChat.chat(HysentialsConfig.chatPrefix + "&cYou are not in a Hypixel server!");
+            MUtils.chat(HysentialsConfig.chatPrefix + "&cYou are not in a Hypixel server!");
             return;
         }
         if (!HysentialsConfig.globalChatEnabled) {
-            UChat.chat(HysentialsConfig.chatPrefix + "&cGlobal chat is disabled!");
+            MUtils.chat(HysentialsConfig.chatPrefix + "&cGlobal chat is disabled!");
             return;
         }
         if (args.length == 0) {
-            UChat.chat(HysentialsConfig.chatPrefix + "&cInvalid usage! /globalchat <message>");
+            MUtils.chat(HysentialsConfig.chatPrefix + "&cInvalid usage! /globalchat <message>");
             return;
         }
 

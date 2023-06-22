@@ -68,67 +68,6 @@ public class Player {
         this.displayName = displayName;
     }
 
-    /*
-    This method is only supposed to be used occasionally, as it is very slow. It is recommended to use the cache instead. (OnlineCache)
-
-    Should be used in an async thread.
-     */
-    public String getDisplayName(boolean cache) {
-        if (cache && displayName != null && !displayName.isEmpty()) return displayName;
-
-        String displayName = username;
-        if (uuid == null) return displayName;
-        try {
-            UUID.fromString(uuid);
-        } catch (IllegalArgumentException e) {
-            return displayName;
-        }
-        JsonElement request = NetworkUtils.getJsonElement("https://api.hypixel.net/player?key=" + HytilsConfig.apiKey + "&uuid=" + uuid.replace("-", ""));
-        if (request.isJsonNull()) return displayName;
-        if (request.getAsJsonObject().get("player").isJsonNull()) return displayName;
-        JsonObject player = request.getAsJsonObject().get("player").getAsJsonObject();
-        if (player.get("newPackageRank").isJsonNull()) return "&7" + player.get("displayname").getAsString();
-        String rank = player.get("newPackageRank").getAsString();
-        boolean isSuperStar = player.get("monthlyPackageRank").getAsString().equals("SUPERSTAR");
-        if (rank.equals("MVP_PLUS") && isSuperStar) {
-            displayName = String.format("&6[MVP%s++&6] ", HypixelAPIUtils.Colors.valueOf(player.get("rankPlusColor").getAsString()).getColor()) + player.get("displayname").getAsString();
-        } else {
-            if (rank.equals("MVP_PLUS")) {
-                displayName = String.format("&b[MVP%s+&6] ", HypixelAPIUtils.Colors.valueOf(player.get("rankPlusColor").getAsString()).getColor()) + player.get("displayname").getAsString();
-            } else {
-                displayName = String.format("%s %s", HypixelAPIUtils.Ranks.valueOf(rank).getPrefix(), player.get("displayname").getAsString());
-            }
-        }
-
-        for (Map.Entry<UUID, String> entry : Hysentials.INSTANCE.getOnlineCache().rankCache.entrySet()) {
-            UUID p = entry.getKey();
-            String r = entry.getValue();
-            if (p.toString().equals(uuid)) {
-                switch (r.toLowerCase()) {
-                    case "admin": {
-                        displayName = "&c[ADMIN] " + player.get("displayname").getAsString();
-                        break;
-                    }
-                    case "mod": {
-                        displayName = "&9[MOD] " + player.get("displayname").getAsString();
-                        break;
-                    }
-                    case "creator": {
-                        displayName = "&3[&fCREATOR&3] " + player.get("displayname").getAsString();
-                        break;
-                    }
-                    case "plus": {
-                        displayName += " &6[+]";
-                        break;
-                    }
-                }
-            }
-        }
-        Hysentials.INSTANCE.getOnlineCache().playerDisplayNames.put(UUID.fromString(uuid), displayName);
-        this.displayName = displayName;
-        return displayName;
-    }
-
     public boolean isPlus() {
         return isPlus;
     }

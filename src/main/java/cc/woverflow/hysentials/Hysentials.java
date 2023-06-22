@@ -1,26 +1,11 @@
-/*
- * Hytils Reborn - Hypixel focused Quality of Life mod.
- * Copyright (C) 2022  W-OVERFLOW
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package cc.woverflow.hysentials;
 
 import cc.polyfrost.oneconfig.events.EventManager;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.guis.club.ClubDashboardHandler;
+import cc.woverflow.hysentials.handlers.chat.modules.misc.Limit256;
+import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.commands.CommandManager;
 import cc.woverflow.hysentials.command.*;
 import cc.woverflow.hysentials.config.HysentialsConfig;
@@ -30,10 +15,10 @@ import cc.woverflow.hysentials.guis.actionLibrary.ActionLibrary;
 import cc.woverflow.hysentials.guis.club.ClubDashboard;
 import cc.woverflow.hysentials.guis.gameMenu.RevampedGameMenu;
 import cc.woverflow.hysentials.guis.misc.PlayerInvHandler;
-import cc.woverflow.hysentials.guis.misc.PlayerInventory;
 import cc.woverflow.hysentials.guis.sbBoxes.SBBoxesEditor;
 import cc.woverflow.hysentials.handlers.cache.HeightHandler;
 import cc.woverflow.hysentials.handlers.chat.ChatHandler;
+import cc.woverflow.hysentials.handlers.chat.modules.bwranks.BWSReplace;
 import cc.woverflow.hysentials.handlers.display.GuiDisplayHandler;
 import cc.woverflow.hysentials.handlers.guis.GameMenuOpen;
 import cc.woverflow.hysentials.handlers.htsl.*;
@@ -41,18 +26,20 @@ import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
 import cc.woverflow.hysentials.handlers.language.LanguageHandler;
 import cc.woverflow.hysentials.handlers.lobby.HousingLagReducer;
 import cc.woverflow.hysentials.handlers.lobby.LobbyChecker;
+import cc.woverflow.hysentials.handlers.npc.QuestNPC;
 import cc.woverflow.hysentials.handlers.redworks.BwRanks;
 import cc.woverflow.hysentials.handlers.redworks.NeighborInstall;
 import cc.woverflow.hysentials.handlers.sbb.Actionbar;
 import cc.woverflow.hysentials.handlers.sbb.SbbRenderer;
+import cc.woverflow.hysentials.htsl.Cluster;
 import cc.woverflow.hysentials.pets.cubit.CubitCompanion;
 import cc.woverflow.hysentials.pets.hamster.HamsterCompanion;
 import cc.woverflow.hysentials.util.*;
 import cc.woverflow.hysentials.util.blockw.OnlineCache;
-import cc.woverflow.hysentials.util.friends.FriendCache;
-import cc.woverflow.hysentials.util.skyblock.SkyblockChecker;
 import cc.woverflow.hysentials.websocket.Socket;
+import cc.woverflow.hytils.util.friends.FriendCache;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -71,8 +58,10 @@ import org.json.JSONObject;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import java.io.*;
+import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 @Mod(
@@ -91,11 +80,9 @@ public class Hysentials {
     public File modDir = new File("OVERFLOW", MOD_NAME);
 
     private HysentialsConfig config;
-    private final Logger logger = LogManager.getLogger("Hytils Reborn");
+    private final Logger logger = LogManager.getLogger("Hysentials");
 
     private final LanguageHandler languageHandler = new LanguageHandler();
-    private final SkyblockChecker skyblockChecker = new SkyblockChecker();
-    private final FriendCache friendCache = new FriendCache();
     private final OnlineCache onlineCache = new OnlineCache();
 
     private final LobbyChecker lobbyChecker = new LobbyChecker();
@@ -108,6 +95,7 @@ public class Hysentials {
     public JsonData rankColors;
     public boolean isPatcher;
     public boolean isChatting;
+    public boolean isHytils;
     private boolean loadedCall;
 
     public DiscordRPC discordRPC;
@@ -128,8 +116,22 @@ public class Hysentials {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         config = new HysentialsConfig();
+        File file = new File(modDir, "./config/hysentials");
+        if (!file.exists() && !file.mkdirs()) {
+            throw new RuntimeException("Failed to create config directory! Please report this to sinender on Discord");
+        }
         sbBoxes = new JsonData("./config/hysentials/lines.json", new JSONObject().put("lines", new JSONArray()));
         rankColors = new JsonData("/assets/minecraft/textures/icons/colors.json", "./config/hysentials/color.jsonn", true);
+
+        try {
+            System.setProperty("file.encoding", "UTF-8");
+            Field charset = Charset.class.getDeclaredField("defaultCharset");
+            charset.setAccessible(true);
+            charset.set(null, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         try {
             SSLStore store = new SSLStore();
             store.load("/ssl/hysentials.der");
@@ -158,11 +160,13 @@ public class Hysentials {
         CommandManager.INSTANCE.registerCommand(new ActionLibraryCommand());
         CommandManager.INSTANCE.registerCommand(new ClubCommand());
 
-        try {
-            DiscordCore.init();
-            discordRPC = new DiscordRPC();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (Socket.cachedServerData.has("rpc") && Socket.cachedServerData.getBoolean("rpc")) {
+            try {
+                DiscordCore.init();
+                discordRPC = new DiscordRPC();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         HeightHandler.INSTANCE.initialize();
@@ -174,15 +178,13 @@ public class Hysentials {
     public void postInit(FMLPostInitializationEvent event) {
         isPatcher = Loader.isModLoaded("patcher");
         isChatting = Loader.isModLoaded("chatting");
+        isHytils = Loader.isModLoaded("hytils-reborn");
         chatHandler.init();
-
-        rank = HypixelAPIUtils.getRank(Minecraft.getMinecraft().getSession().getUsername());
 
         Socket.createSocket();
         registerImages();
         cc.woverflow.hysentials.htsl.Loader.registerLoaders();
-
-//        doorbellBot = new DoorbellBot();
+        Cluster.registerClusters();
 
         MinecraftForge.EVENT_BUS.post(new HysentialsLoadedEvent());
     }
@@ -192,7 +194,7 @@ public class Hysentials {
         this.loadedCall = true;
     }
 
-
+    public static FontRenderer minecraftFont;
     private void registerImages() {
         new ImageIcon("front", new ResourceLocation("textures/icons/front.png"));
         new ImageIcon("back", new ResourceLocation("textures/icons/back.png"));
@@ -202,6 +204,8 @@ public class Hysentials {
         new ImageIcon("party", new ResourceLocation("textures/icons/party.png"));
         new ImageIcon("to", new ResourceLocation("textures/icons/to.png"));
         new ImageIcon("from", new ResourceLocation("textures/icons/from.png"));
+        new ImageIcon("team", new ResourceLocation("textures/icons/team.png"));
+        new ImageIcon("friend", new ResourceLocation("textures/icons/friend.png"));
 
         for (HypixelRanks rank : HypixelRanks.values()) {
             try {
@@ -214,6 +218,7 @@ public class Hysentials {
             new ImageIcon(String.valueOf(i), new ResourceLocation("textures/icons/" + i + ".png"));
         }
         imageIconRenderer = new ImageIconRenderer();
+        minecraftFont = Minecraft.getMinecraft().fontRendererObj;
         Minecraft.getMinecraft().fontRendererObj = imageIconRenderer;
     }
 
@@ -244,10 +249,17 @@ public class Hysentials {
         eventBus.register(new Queue());
         eventBus.register(new Navigator());
         eventBus.register(new ActionGUIHandler());
+        eventBus.register(new FunctionsGUIHandler());
         eventBus.register(new Exporter());
         eventBus.register(new HousingMenuHandler());
-        eventBus.register(new ClubDashboard());
+        eventBus.register(new ClubDashboardHandler());
         eventBus.register(new PlayerInvHandler());
+        eventBus.register(new BWSReplace());
+        eventBus.register(new QuestNPC());
+        eventBus.register(new MUtils());
+        eventBus.register(new Limit256());
+        eventBus.register(cubitCompanion = new CubitCompanion());
+        new Renderer();
 
         // height overlay
         EventManager.INSTANCE.register(HeightHandler.INSTANCE);
@@ -262,7 +274,7 @@ public class Hysentials {
     }
 
     public void sendMessage(String message) {
-        UChat.chat(ChatColor.GOLD + "[" + MOD_NAME + "] " + ChatColor.Companion.translateAlternateColorCodes('&', message));
+        UChat.chat(HysentialsConfig.chatPrefix + " " + ChatColor.Companion.translateAlternateColorCodes('&', message));
     }
 
     public HysentialsConfig getConfig() {
@@ -291,14 +303,6 @@ public class Hysentials {
 
     public Logger getLogger() {
         return logger;
-    }
-
-    public SkyblockChecker getSkyblockChecker() {
-        return skyblockChecker;
-    }
-
-    public FriendCache getFriendCache() {
-        return friendCache;
     }
 
     public OnlineCache getOnlineCache() {

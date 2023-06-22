@@ -1,5 +1,6 @@
 package cc.woverflow.hysentials.util;
 
+import cc.woverflow.hysentials.Hysentials;
 import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -55,8 +56,24 @@ public class ScoreboardWrapper {
 
         scoreboardTitle = sidebarObjective.getDisplayName();
 
-        Collection<ScoreWrapper> scores = scoreboard.getSortedScores(sidebarObjective).stream().map(ScoreWrapper::new).collect(Collectors.toCollection(ArrayList::new));
-
+        List<ScoreWrapper> scores = scoreboard.getSortedScores(sidebarObjective).stream().map(ScoreWrapper::new).collect(Collectors.toCollection(ArrayList::new));
+        for (ScoreWrapper score : scores) {
+            if (score.getName().startsWith("Rank: ")) {
+                BlockWAPIUtils.Rank rank = null;
+                if (Hysentials.INSTANCE.getOnlineCache().getOnlinePlayers().containsKey(Minecraft.getMinecraft().thePlayer.getGameProfile().getId())) {
+                    try {
+                        rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().getRankCache().get(Minecraft.getMinecraft().thePlayer.getGameProfile().getId()).toUpperCase());
+                    } catch (Exception ignored) {
+                        rank = BlockWAPIUtils.Rank.DEFAULT;
+                    }
+                }
+                if (rank != null && !rank.equals(BlockWAPIUtils.Rank.DEFAULT)) {
+                    Score score1 = new Score(scoreboard, sidebarObjective, "Rank: " + rank.getColor() + rank.name());
+                    score1.setScorePoints(score.getPoints());
+                    scores.set(scores.indexOf(score), new ScoreWrapper(score1));
+                }
+            }
+        }
 
         scoreboardNames.addAll(scores);
     }

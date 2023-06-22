@@ -205,9 +205,6 @@ public class DiscordRPC {
                     discordRPC.close();
                 } catch (Throwable ignored) {
                 }
-            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
-                + EnumChatFormatting.RED + "A problem has repeatedly occurred and HyCord has automatically been disabled," +
-                " to attempt to enable HyCord please do /hycord reconnect."));
         }
     }
 

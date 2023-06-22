@@ -12,14 +12,14 @@ public class RegexCreator {
         regexes = new ArrayList<>();
 
         // <Name>: <!color><Value>
-        regexes.add(Pattern.compile("(.+:§[0-9a-fk-or] §[0-9a-fk-or]|.+: |.+: §[0-9a-fk-or])(.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE));
+        regexes.add(Pattern.compile("(.+:§[0-9a-fk-or] §[0-9a-fk-or]|.+: |.+: §[0-9a-fk-or])(.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.UNICODE_CASE | Pattern.UNICODE_CHARACTER_CLASS));
         // <Name> <!color><Value> THIS WAS ANNOYING TO MAKE
-        regexes.add(Pattern.compile("(.+ §[0-9a-fk-or]|.+ )((?:[0-9]+,{1}?)+[0-9]+|[0-9]+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE));
+        regexes.add(Pattern.compile("(.+ §[0-9a-fk-or]|.+ )((?:[0-9]+,{1}?)+[0-9]+|[0-9]+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.UNICODE_CASE | Pattern.UNICODE_CHARACTER_CLASS));
         // <color><Month>/<Day>/<Year> <Server>
-        regexes.add(Pattern.compile("(\\d.)\\/(\\d.)\\/(\\d.) (.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE));
+        regexes.add(Pattern.compile("(\\d.)\\/(\\d.)\\/(\\d.) (.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.UNICODE_CASE | Pattern.UNICODE_CHARACTER_CLASS));
         // [◆⏣] <!color><Value>
-        regexes.add(Pattern.compile("([◆⏣] §[0-9a-fk-or]|[◆⏣] )(.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE));
-        regexes.add(Pattern.compile("§[0-9a-fk-or]([0-9]{0,2}):([0-9]{0,2})(.+) ", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE));
+        regexes.add(Pattern.compile("([◆⏣] §[0-9a-fk-or]|[◆⏣] )(.+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.UNICODE_CASE | Pattern.UNICODE_CHARACTER_CLASS));
+        regexes.add(Pattern.compile("§[0-9a-fk-or]([0-9]{0,2}):([0-9]{0,2})(.+) ", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.UNICODE_CASE | Pattern.UNICODE_CHARACTER_CLASS));
     }
 
     public String[] createRegex(String text) {

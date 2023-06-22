@@ -2,6 +2,7 @@ package cc.woverflow.hysentials.handlers.sbb;
 
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
+import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
@@ -20,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
+import scala.Int;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,11 +32,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static cc.woverflow.hysentials.guis.actionLibrary.ClubActionViewer.toList;
 import static net.minecraft.client.Minecraft.getMinecraft;
 
 public class SbbRenderer {
     public static HousingScoreboard housingScoreboard;
-    public SbbRenderer () {
+
+    public SbbRenderer() {
         housingScoreboard = new HousingScoreboard();
     }
 
@@ -48,55 +52,68 @@ public class SbbRenderer {
         } else {
             GuiIngameForge.renderObjective = true;
         }
-
         ArrayList<ScoreboardWrapper.ScoreWrapper> lines = ScoreboardWrapper.getScoreboard().getSortedScores(ScoreboardWrapper.getSidebar()).stream().map(ScoreboardWrapper.ScoreWrapper::new).collect(Collectors.toCollection(ArrayList::new));
         for (ScoreboardWrapper.ScoreWrapper line : lines) {
+
             JSONArray ls = Hysentials.INSTANCE.sbBoxes.jsonObject.getJSONArray("lines");
             String s = SBBoxesEditor.removeHiddenCharacters(line.toString());
             Optional<Object> l = ls.toList().stream().filter(o -> s.matches((String) ((HashMap<String, Object>) o).get("regex"))).findFirst();
             if (!l.isPresent()) continue;
             JSONObject lineData = new JSONObject((Map) l.get());
-            Matcher matcher = Pattern.compile(lineData.getString("regex")).matcher(s);
-            String display = lineData.getString("display");
-            if (matcher.find()) {
-                for (int i = 1; i <= matcher.groupCount(); i++) {
-                    display = display.replace("{$" + i + "}", matcher.group(i));
+            try {
+                Matcher matcher = Pattern.compile(lineData.getString("regex")).matcher(s);
+                String display = lineData.getString("display");
+                if (matcher.find()) {
+                    for (int i = 1; i <= matcher.groupCount(); i++) {
+                        display = display.replace("{$" + i + "}", matcher.group(i));
+                    }
                 }
+                if (!lineData.getBoolean("enabled")) continue;
+                if (!lineData.getString("title").equals("") && !ChatColor.Companion.stripControlCodes(ScoreboardWrapper.getTitle()).equals(lineData.getString("title")))
+                    continue;
+                lineData.put("text", display);
+                ls.put(ls.toList().indexOf(l.get()), lineData);
+
+                double scale = lineData.getDouble("scale");
+                double width = (getMinecraft().fontRendererObj.getStringWidth(display)) * scale;
+                double height = 15 * scale;
+
+                double scaledX = lineData.getInt("x") + (10 * scale) / 2;
+                double scaledY = lineData.getInt("y") + (6 * scale) / 2;
+
+                drawBox(
+                    lineData.getInt("x"),
+                    lineData.getInt("y"),
+                    (float) (width + 10 * scale),
+                    (float) height,
+                    HysentialsConfig.boxColor,
+                    HysentialsConfig.boxShadows,
+                    new Integer[]{0, 2, 4}[HysentialsConfig.scoreboardBoxesBorderRadius]
+                );
+                GL11.glPushMatrix();
+                GL11.glScaled(lineData.getDouble("scale"), lineData.getDouble("scale"), 1);
+                Renderer.drawString(display, (float) (scaledX / scale), (float) (scaledY / scale));
+                GL11.glScalef(1, 1, 1);
+                GL11.glPopMatrix();
+            } catch (Exception e) {
+                MUtils.chat("&cError occured while rendering scoreboard box: &e" + e.getMessage());
+                MUtils.chat("&cRemoving this line from the config file to prevent further issues...");
+                MUtils.chat("&cPlease report this issue to the developer if it continues!");
+                int i = toList(Hysentials.INSTANCE.sbBoxes.jsonObject.getJSONArray("lines")).indexOf(lineData);
+                Hysentials.INSTANCE.sbBoxes.jsonObject.getJSONArray("lines").remove(i);
             }
-            if (!lineData.getBoolean("enabled")) continue;
-            if (!lineData.getString("title").equals("") && !ChatColor.Companion.stripControlCodes(ScoreboardWrapper.getTitle()).equals(lineData.getString("title"))) continue;
-
-            double scale = lineData.getDouble("scale");
-            double width = (getMinecraft().fontRendererObj.getStringWidth(display)) * scale;
-            double height = 15 * scale;
-
-            double scaledX = lineData.getInt("x") + (10 * scale) / 2;
-            double scaledY = lineData.getInt("y") + (6 * scale) / 2;
-
-            drawBox(
-                lineData.getInt("x"),
-                lineData.getInt("y"),
-                (float) (width + 10 * scale),
-                (float) height,
-                HysentialsConfig.boxColor,
-                HysentialsConfig.boxShadows,
-                2
-            );
-            GL11.glPushMatrix();
-            GL11.glScaled(lineData.getDouble("scale"), lineData.getDouble("scale"), 1);
-            Renderer.drawString(display, (float) (scaledX / scale), (float) (scaledY / scale));
-            GL11.glScalef(1, 1, 1);
-            GL11.glPopMatrix();
         }
         GL11.glPopMatrix();
     }
 
     int tick = 0;
+
     @SubscribeEvent
     public void onTick(TickEvent event) {
         if (event.phase == TickEvent.Phase.END) return;
+        if (event.type != TickEvent.Type.CLIENT) return;
         ScoreboardWrapper.resetCache();
-        if (++tick % 60*20*5 == 0) {
+        if (++tick % (60 * 20 * 5) == 0) {
             Hysentials.INSTANCE.sbBoxes.save();
         }
 

@@ -1,20 +1,3 @@
-/*
- *       Copyright (C) 2018-present Hyperium <https://hyperium.cc/>
- *
- *       This program is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published
- *       by the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       This program is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package cc.woverflow.hysentials.pets.hamster;
 
 import cc.polyfrost.oneconfig.events.event.TickEvent;
@@ -25,6 +8,7 @@ import cc.woverflow.hysentials.event.world.WorldChangeEvent;
 import cc.woverflow.hysentials.pets.AbstractCosmetic;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
@@ -38,13 +22,13 @@ public class HamsterCompanion extends AbstractCosmetic {
         super(false);
     }
 
-    @InvokeEvent
+//    @InvokeEvent
     public void renderEntities(RenderEntitiesEvent entitiesEvent) {
         renderPlayer(new RenderPlayerEvent(Minecraft.getMinecraft().thePlayer, Minecraft.getMinecraft().getRenderManager(), 0, 0, 0,
             entitiesEvent.getPartialTicks()));
     }
 
-    @InvokeEvent
+//    @InvokeEvent
     public void renderPlayer(RenderPlayerEvent e) {
         if (Minecraft.getMinecraft().theWorld == null) return;
         UUID uuid = e.getEntity().getUniqueID();
@@ -52,7 +36,7 @@ public class HamsterCompanion extends AbstractCosmetic {
         toAdd.add(e.getEntity());
     }
 
-    @InvokeEvent
+//    @InvokeEvent
     public void onTick(TickEvent e) {
         WorldClient theWorld = Minecraft.getMinecraft().theWorld;
         if (theWorld == null) return;
@@ -72,13 +56,28 @@ public class HamsterCompanion extends AbstractCosmetic {
         }
     }
 
-    @InvokeEvent
+//    @InvokeEvent
     public void onWorldChange(WorldChangeEvent e) {
         hamsters.clear();
     }
 
     public boolean worldHasEntityWithUUID(World world, UUID id) {
         return world.loadedEntityList.stream().anyMatch(entity -> entity.getUniqueID().equals(id));
+    }
+
+    @Override
+    public Map<UUID, EntityHamster> getEntities() {
+        return hamsters;
+    }
+
+    @Override
+    public boolean canUse(EntityPlayer player) {
+        return false;
+    }
+
+    @Override
+    public void interact(Entity entity) {
+
     }
 
     public void spawnPet(EntityPlayer player) {

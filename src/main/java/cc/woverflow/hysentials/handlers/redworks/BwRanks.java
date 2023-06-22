@@ -1,21 +1,3 @@
-/*
- * Hytils Reborn - Hypixel focused Quality of Life mod.
- * Copyright (C) 2022  W-OVERFLOW
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package cc.woverflow.hysentials.handlers.redworks;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
@@ -24,10 +6,9 @@ import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.woverflow.hysentials.Hysentials;
-import cc.woverflow.hysentials.util.BlockWAPIUtils;
-import cc.woverflow.hysentials.util.DiscordRPC;
-import cc.woverflow.hysentials.util.DuoVariable;
-import cc.woverflow.hysentials.util.ScoreboardWrapper;
+import cc.woverflow.hysentials.handlers.sbb.SbbRenderer;
+import cc.woverflow.hysentials.util.*;
+import cc.woverflow.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.scoreboard.ScorePlayerTeam;
@@ -60,6 +41,7 @@ public class BwRanks {
 
     public boolean debug = false;
     public static boolean initializedRpc = false;
+    int tick2 = 0;
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         final LocrawInfo locraw = LocrawUtil.INSTANCE.getLocrawInfo();
@@ -69,17 +51,32 @@ public class BwRanks {
         if (++this.tick == 80) {
             Multithreading.runAsync(() -> {
                 BlockWAPIUtils.getOnline(); // Update online cache
-
+                if (++tick2 == 30) {
+                    replacementMap.clear();
+                    tick2 = 0;
+                }
             });
             this.tick = 0;
         }
-        if (!initializedRpc && HypixelUtils.INSTANCE.isHypixel()) {
-            Hysentials.INSTANCE.discordRPC.register();
-            initializedRpc = true;
-        }
-        Hysentials.INSTANCE.discordRPC.updateRPC();
         if (tick % 5 == 0) {
             Multithreading.runAsync(() -> {
+                //Discord RPC
+                if (Socket.cachedServerData.has("rpc") && Socket.cachedServerData.getBoolean("rpc")) {
+                    if (!initializedRpc && HypixelUtils.INSTANCE.isHypixel()) {
+                        if (Hysentials.INSTANCE.discordRPC == null) {
+                            try {
+                                DiscordCore.init();
+                                Hysentials.INSTANCE.discordRPC = new DiscordRPC();
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        Hysentials.INSTANCE.discordRPC.register();
+                        initializedRpc = true;
+                    }
+                    Hysentials.INSTANCE.discordRPC.updateRPC();
+                }
+
                 HashMap<NetworkPlayerInfo, String> displayMap = Minecraft.getMinecraft().getNetHandler().getPlayerInfoMap().stream().collect(HashMap::new, (map, playerInfo) -> {
                     String display = playerInfo.getDisplayName() == null ? "" : playerInfo.getDisplayName().getFormattedText();
                     if (display.equals("") && playerInfo.getPlayerTeam() != null) {
@@ -105,8 +102,7 @@ public class BwRanks {
                         }
                     }
 
-                    String scoreboardTitle = ChatColor.Companion.stripControlCodes(ScoreboardWrapper.getTitle());
-                    if (rank != null && !rank.equals(BlockWAPIUtils.Rank.DEFAULT) && !customTeamMap.containsKey(player.getGameProfile().getId()) && !Objects.equals(scoreboardTitle, "Housing")) {
+                    if (rank != null && !rank.equals(BlockWAPIUtils.Rank.DEFAULT) && !customTeamMap.containsKey(player.getGameProfile().getId()) && SbbRenderer.housingScoreboard.getHousingName() == null) {
                         ScorePlayerTeam customTeam = Minecraft.getMinecraft().theWorld.getScoreboard().createTeam("AA" + randomString(10));
                         customTeam.setNamePrefix(displayMap.get(player).substring(0, displayMap.get(player).indexOf(player.getGameProfile().getName())));
                         customTeam.setNameSuffix(displayMap.get(player).substring(displayMap.get(player).indexOf(player.getGameProfile().getName()) + player.getGameProfile().getName().length()));

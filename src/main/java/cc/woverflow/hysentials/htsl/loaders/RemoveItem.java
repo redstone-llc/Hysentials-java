@@ -24,6 +24,6 @@ public class RemoveItem extends Loader {
 
     @Override
     public String export(List<String> args) {
-        return "removeItem \"" + args.get(0) + "\"";
+        return "removeItem '" + args.get(0) + "'";
     }
 }

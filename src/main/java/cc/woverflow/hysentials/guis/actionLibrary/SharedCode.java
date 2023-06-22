@@ -1,6 +1,6 @@
 package cc.woverflow.hysentials.guis.actionLibrary;
 
-import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.woverflow.hysentials.guis.container.Container;
 import cc.woverflow.hysentials.guis.container.GuiItem;
@@ -99,7 +99,7 @@ public class SharedCode extends Container {
                         StringSelection stringSelection = new StringSelection(action.getString("id"));
                         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                         clipboard.setContents(stringSelection, null);
-                        UChat.chat("&aCopied action ID to clipboard.");
+                        MUtils.chat("&aCopied action ID to clipboard.");
                     }
                 }
             }

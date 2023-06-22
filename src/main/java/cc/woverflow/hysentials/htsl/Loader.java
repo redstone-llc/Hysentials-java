@@ -89,7 +89,7 @@ public class Loader {
         }
     }
 
-    public String export (List<String> args) {
+    public String export(List<String> args) {
         return keyword;
     }
 
@@ -212,6 +212,22 @@ public class Loader {
 
         public static LoaderObject chat(String value) {
             return new LoaderObject("chat", "text", value);
+        }
+
+        public static LoaderObject command(String value) {
+            return new LoaderObject("command", "command", value);
+        }
+
+        public static LoaderObject selectOrClick(String value, Integer slot) {
+            return new LoaderObject("selectOrClick", value, String.valueOf(slot));
+        }
+
+        public static LoaderObject manualOpen(String value, String msg) {
+            return new LoaderObject("manualOpen", value, msg);
+        }
+
+        public static LoaderObject close() {
+            return new LoaderObject("close");
         }
 
         public static LoaderObject setGuiContext(String value) {
