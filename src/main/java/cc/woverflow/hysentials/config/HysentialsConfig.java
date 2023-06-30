@@ -26,6 +26,16 @@ public class HysentialsConfig extends Config {
     )
     public static String chatPrefix = "&b[HYSENTIALS]";
 
+    @Dropdown(
+        name = "Update Channel",
+        category = "General",
+        subcategory = "General",
+        description = "The update channel you want to use.",
+        options = {"Release", "Beta", "Dev"}
+    )
+    public static int updateChannel = 1;
+
+
     @Switch(
         name = "Global Chat Enabled",
         category = "General",

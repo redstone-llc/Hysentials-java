@@ -50,7 +50,9 @@ public class FriendReplace implements ChatReceiveModule {
                         s = s.replaceAll(color + name, rank.getNametag() + name);
                     }
                 }
-                siblings.set(siblings.indexOf(comp), new UTextComponent(s));
+                UTextComponent component1 = new UTextComponent(comp);
+                component1.setText(s);
+                siblings.set(siblings.indexOf(comp), component1);
             }
         }
         Minecraft.getMinecraft().thePlayer.addChatMessage(component);

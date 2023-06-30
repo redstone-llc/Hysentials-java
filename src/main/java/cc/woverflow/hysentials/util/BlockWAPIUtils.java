@@ -8,10 +8,6 @@ import com.google.gson.*;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
-import javax.net.ssl.*;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

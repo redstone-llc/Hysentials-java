@@ -24,6 +24,9 @@ public class MUtils {
         if (messages.size() == 0) {
             return;
         }
+        if (messages.size() > 5) {
+            messages = messages.subList(messages.size() - 5, messages.size());
+        }
         UChat.chat(messages.get(0));
         messages.remove(0);
     }

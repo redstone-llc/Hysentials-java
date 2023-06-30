@@ -40,7 +40,9 @@ public class Socket {
     public static JSONObject data = null;
     public static List<DuoVariable<String, Consumer<JSONObject>>> awaiting = new ArrayList<>();
 
+    public static int relogAttempts = 0;
     public static void createSocket() {
+        if (relogAttempts > 2) return;
         try {
             serverId = randomString(Random.Default.nextInt(3, 16));
             String hash = hash("Hysentials_" + serverId);
@@ -51,8 +53,9 @@ public class Socket {
                 hash
             );
 
+            WebSocketClient ws = new WebSocketClient(new URI("wss://socket.redstone.llc")) {
 //            WebSocketClient ws = new WebSocketClient(new URI("ws://localhost:8443")) {
-            WebSocketClient ws = new WebSocketClient(new URI("ws://5.161.201.11:8443")) {
+//            WebSocketClient ws = new WebSocketClient(new URI("ws://5.161.201.11:8443")) {
                 @Override
                 public void onOpen(ServerHandshake handshakedata) {
                     System.out.println("Connected to websocket server");
@@ -69,6 +72,7 @@ public class Socket {
                     if (json.has("method")) {
                         switch (json.getString("method")) {
                             case "login": {
+                                relogAttempts = 0;
                                 if (json.has("success") && json.getBoolean("success")) {
                                     MUtils.chat(HysentialsConfig.chatPrefix + " §aLogged in successfully!");
                                     CLIENT = this;
@@ -158,6 +162,11 @@ public class Socket {
                 public void onClose(int code, String reason, boolean remote) {
                     linking = false;
                     data = null;
+                    relogAttempts++;
+                    if (relogAttempts > 2) {
+                        MUtils.chat(HysentialsConfig.chatPrefix + " §cFailed to connect to websocket server. This is probably because it is offline. Please try again later with `/hs reconnect`.");
+                        return;
+                    }
                     MUtils.chat(HysentialsConfig.chatPrefix + " §cDisconnected from websocket server. Attempting to reconnect in 5 seconds");
                     Multithreading.schedule(Socket::createSocket, 5, TimeUnit.SECONDS);
                 }

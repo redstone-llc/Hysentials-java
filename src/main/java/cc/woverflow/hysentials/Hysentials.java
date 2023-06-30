@@ -3,6 +3,7 @@ package cc.woverflow.hysentials;
 import cc.polyfrost.oneconfig.events.EventManager;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.gui.UpdateChecker;
 import cc.woverflow.hysentials.guis.club.ClubDashboardHandler;
 import cc.woverflow.hysentials.handlers.chat.modules.misc.Limit256;
 import cc.woverflow.hysentials.util.MUtils;
@@ -76,8 +77,9 @@ public class Hysentials {
 
     @Mod.Instance(MOD_ID)
     public static Hysentials INSTANCE;
+    public static File jarFile;
 
-    public File modDir = new File("OVERFLOW", MOD_NAME);
+    public static String modDir = "./config/hysentials";
 
     private HysentialsConfig config;
     private final Logger logger = LogManager.getLogger("Hysentials");
@@ -106,11 +108,13 @@ public class Hysentials {
     public CubitCompanion cubitCompanion;
 
 
+
     @Mod.EventHandler
     public void onFMLPreInitialization(FMLPreInitializationEvent event) {
-        if (!modDir.exists() && !modDir.mkdirs()) {
+        if (!new File(modDir).exists() && !new File(modDir).mkdirs()) {
             throw new RuntimeException("Failed to create mod directory! Please report this to Ender#9967");
         }
+        jarFile = event.getSourceFile();
     }
 
     @Mod.EventHandler
@@ -122,6 +126,8 @@ public class Hysentials {
         }
         sbBoxes = new JsonData("./config/hysentials/lines.json", new JSONObject().put("lines", new JSONArray()));
         rankColors = new JsonData("/assets/minecraft/textures/icons/colors.json", "./config/hysentials/color.jsonn", true);
+
+        HysentialsKt.Companion.init();
 
         try {
             System.setProperty("file.encoding", "UTF-8");
@@ -135,6 +141,7 @@ public class Hysentials {
         try {
             SSLStore store = new SSLStore();
             store.load("/ssl/hysentials.der");
+            store.load("/ssl/socket.der");
             SSLContext context = store.finish();
             SSLContext.setDefault(context);
             HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
