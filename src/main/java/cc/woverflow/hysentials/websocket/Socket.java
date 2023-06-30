@@ -9,29 +9,29 @@ import cc.woverflow.hysentials.handlers.groupchats.GroupChat;
 import cc.woverflow.hysentials.handlers.redworks.BwRanksUtils;
 import cc.woverflow.hysentials.util.BlockWAPIUtils;
 import cc.woverflow.hysentials.util.DuoVariable;
+import cc.woverflow.hysentials.util.SSLStore;
 import com.mojang.authlib.exceptions.AuthenticationException;
+import com.neovisionaries.ws.client.*;
 import kotlin.random.Random;
 import net.minecraft.client.Minecraft;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONObject;
 
+import javax.net.ssl.SSLContext;
 import java.math.BigInteger;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class Socket {
-    public static WebSocketClient CLIENT;
+    public static WebSocket CLIENT;
     public static JSONObject cachedData = new JSONObject();
     public static JSONObject cachedServerData = new JSONObject();
     public static String serverId;
@@ -41,6 +41,7 @@ public class Socket {
     public static List<DuoVariable<String, Consumer<JSONObject>>> awaiting = new ArrayList<>();
 
     public static int relogAttempts = 0;
+
     public static void createSocket() {
         if (relogAttempts > 2) return;
         try {
@@ -53,11 +54,30 @@ public class Socket {
                 hash
             );
 
-            WebSocketClient ws = new WebSocketClient(new URI("wss://socket.redstone.llc")) {
-//            WebSocketClient ws = new WebSocketClient(new URI("ws://localhost:8443")) {
-//            WebSocketClient ws = new WebSocketClient(new URI("ws://5.161.201.11:8443")) {
+            WebSocketFactory factory = new WebSocketFactory();
+            SSLStore store = new SSLStore();
+            store.load("/ssl/socket.der");
+            SSLContext context = store.finish();
+            factory.setSSLContext(context);
+            factory.setServerName("socket.redstone.llc");
+            factory.getProxySettings().setSocketFactory(context.getSocketFactory());
+            factory.getProxySettings().setServerName("socket.redstone.llc");
+            factory.getProxySettings().setPort(443);
+            factory.getProxySettings().setSSLContext(context);
+            WebSocket socket = factory.createSocket("ws://socket.redstone.llc");
+
+            socket.addListener(new WebSocketListener() {
+                public void send(String message) {
+                    socket.sendText(message);
+                }
+
                 @Override
-                public void onOpen(ServerHandshake handshakedata) {
+                public void onStateChanged(WebSocket websocket, WebSocketState newState) throws Exception {
+
+                }
+
+                @Override
+                public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
                     System.out.println("Connected to websocket server");
                     JSONObject obj = new JSONObject();
                     obj.put("method", "login");
@@ -67,15 +87,68 @@ public class Socket {
                 }
 
                 @Override
-                public void onMessage(String message) {
-                    JSONObject json = new JSONObject(message);
+                public void onConnectError(WebSocket websocket, WebSocketException cause) throws Exception {
+
+                }
+
+                @Override
+                public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
+                    linking = false;
+                    data = null;
+                    relogAttempts++;
+                    if (relogAttempts > 2) {
+                        MUtils.chat(HysentialsConfig.chatPrefix + " §cFailed to connect to websocket server. This is probably because it is offline. Please try again later with `/hs reconnect`.");
+                        return;
+                    }
+                    MUtils.chat(HysentialsConfig.chatPrefix + " §cDisconnected from websocket server. Attempting to reconnect in 5 seconds");
+                    Multithreading.schedule(Socket::createSocket, 5, TimeUnit.SECONDS);
+                }
+
+                @Override
+                public void onFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
+
+                }
+
+                @Override
+                public void onContinuationFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
+
+                }
+
+                @Override
+                public void onTextFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
+
+                }
+
+                @Override
+                public void onBinaryFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
+
+                }
+
+                @Override
+                public void onCloseFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
+
+                }
+
+                @Override
+                public void onPingFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
+
+                }
+
+                @Override
+                public void onPongFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
+
+                }
+
+                @Override
+                public void onTextMessage(WebSocket websocket, String text) throws Exception {
+                    JSONObject json = new JSONObject(text);
                     if (json.has("method")) {
                         switch (json.getString("method")) {
                             case "login": {
                                 relogAttempts = 0;
                                 if (json.has("success") && json.getBoolean("success")) {
                                     MUtils.chat(HysentialsConfig.chatPrefix + " §aLogged in successfully!");
-                                    CLIENT = this;
+                                    CLIENT = websocket;
                                     Multithreading.runAsync(BlockWAPIUtils::getOnline);
                                 }
                                 if (!json.getBoolean("linked")) {
@@ -97,10 +170,17 @@ public class Socket {
                                         MUtils.chat(HysentialsConfig.chatPrefix + " §c" + json.getString("message"));
                                         break;
                                     }
-                                    MUtils.chat(":globalchat: "
-                                        + "&6" + json.getString("username")
-                                        + "<#fff1d4>: "
-                                        + json.getString("message"));
+                                    if (HysentialsConfig.futuristicRanks) {
+                                        MUtils.chat(":globalchat: "
+                                            + "&6" + json.getString("username")
+                                            + "<#fff1d4>: "
+                                            + json.getString("message"));
+                                    } else {
+                                        MUtils.chat("&6Global > "
+                                            + json.getString("username")
+                                            + ": "
+                                            + json.getString("message"));
+                                    }
                                 }
                                 break;
                             }
@@ -154,31 +234,100 @@ public class Socket {
                             awaiting.remove(i);
                         }
                     }
+                }
 
+                @Override
+                public void onTextMessage(WebSocket websocket, byte[] data) throws Exception {
 
                 }
 
                 @Override
-                public void onClose(int code, String reason, boolean remote) {
-                    linking = false;
-                    data = null;
-                    relogAttempts++;
-                    if (relogAttempts > 2) {
-                        MUtils.chat(HysentialsConfig.chatPrefix + " §cFailed to connect to websocket server. This is probably because it is offline. Please try again later with `/hs reconnect`.");
-                        return;
-                    }
-                    MUtils.chat(HysentialsConfig.chatPrefix + " §cDisconnected from websocket server. Attempting to reconnect in 5 seconds");
-                    Multithreading.schedule(Socket::createSocket, 5, TimeUnit.SECONDS);
+                public void onBinaryMessage(WebSocket websocket, byte[] binary) throws Exception {
+
                 }
 
                 @Override
-                public void onError(Exception ex) {
-                    ex.printStackTrace();
+                public void onSendingFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
+
                 }
-            };
-            ws.connect();
-        } catch (URISyntaxException | AuthenticationException e) {
+
+                @Override
+                public void onFrameSent(WebSocket websocket, WebSocketFrame frame) throws Exception {
+
+                }
+
+                @Override
+                public void onFrameUnsent(WebSocket websocket, WebSocketFrame frame) throws Exception {
+
+                }
+
+                @Override
+                public void onThreadCreated(WebSocket websocket, ThreadType threadType, Thread thread) throws Exception {
+
+                }
+
+                @Override
+                public void onThreadStarted(WebSocket websocket, ThreadType threadType, Thread thread) throws Exception {
+
+                }
+
+                @Override
+                public void onThreadStopping(WebSocket websocket, ThreadType threadType, Thread thread) throws Exception {
+
+                }
+
+                @Override
+                public void onError(WebSocket websocket, WebSocketException cause) throws Exception {
+
+                }
+
+                @Override
+                public void onFrameError(WebSocket websocket, WebSocketException cause, WebSocketFrame frame) throws Exception {
+
+                }
+
+                @Override
+                public void onMessageError(WebSocket websocket, WebSocketException cause, List<WebSocketFrame> frames) throws Exception {
+
+                }
+
+                @Override
+                public void onMessageDecompressionError(WebSocket websocket, WebSocketException cause, byte[] compressed) throws Exception {
+
+                }
+
+                @Override
+                public void onTextMessageError(WebSocket websocket, WebSocketException cause, byte[] data) throws Exception {
+
+                }
+
+                @Override
+                public void onSendError(WebSocket websocket, WebSocketException cause, WebSocketFrame frame) throws Exception {
+
+                }
+
+                @Override
+                public void onUnexpectedError(WebSocket websocket, WebSocketException cause) throws Exception {
+
+                }
+
+                @Override
+                public void handleCallbackError(WebSocket websocket, Throwable cause) throws Exception {
+
+                }
+
+                @Override
+                public void onSendingHandshake(WebSocket websocket, String requestLine, List<String[]> headers) throws Exception {
+
+                }
+            });
+
+            socket.connect();
+        } catch (AuthenticationException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            MUtils.chat("&cAn error occurred whilst connecting to the Hysentials websocket. Please contact @sinender on Discord if this issue persists.");
         }
     }
 

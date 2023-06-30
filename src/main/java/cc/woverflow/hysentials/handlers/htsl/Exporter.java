@@ -1,6 +1,7 @@
 package cc.woverflow.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.guis.ResolutionUtil;
 import cc.woverflow.hysentials.util.Input;
 import cc.woverflow.hysentials.util.MUtils;
@@ -531,12 +532,12 @@ public class Exporter {
 
     private void finish(boolean partial) {
         if (fails.size() > 0) {
-            MUtils.chat("&cFailed to load: &f(" + fails.size() + " error" + (fails.size() > 1 ? "s" : "") + ")");
+            UChat.chat("&cFailed to load: &f(" + fails.size() + " error" + (fails.size() > 1 ? "s" : "") + ")");
             for (String fail : fails) {
-                MUtils.chat("   > " + fail);
+                UChat.chat("   > " + fail);
             }
             fails.clear();
-            MUtils.chat("&f" + actions.size() + " &coperation" + (actions.size() != 1 ? "s" : "") + " left in queue.");
+            UChat.chat("&f" + actions.size() + " &coperation" + (actions.size() != 1 ? "s" : "") + " left in queue.");
         } else {
             if (!partial) {
                 String id = BwRanks.randomString(15);
@@ -555,10 +556,10 @@ public class Exporter {
                         String s = IOUtils.toString(input);
                         JSONObject object = new JSONObject(s);
                         if (object.getBoolean("success")) {
-                            MUtils.chat("&3[HTSL] &fExported successfully to &bAction Library!");
+                            UChat.chat("&3[HTSL] &fExported successfully to &bAction Library!");
                             new UTextComponent("&3[HTSL] &fClick here to edit your action.").setClick(ClickEvent.Action.OPEN_URL, "https://redstone.llc/actions/manage/" + id).chat();
                         } else {
-                            MUtils.chat("&cFailed to export!");
+                            UChat.chat("&cFailed to export!");
                         }
                     } catch (Exception e) {
                         e.printStackTrace();

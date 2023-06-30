@@ -1,5 +1,6 @@
 package cc.woverflow.hysentials.guis.container;
 
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.event.EventBus;
 import cc.woverflow.hysentials.event.events.GuiMouseClickEvent;
@@ -91,7 +92,7 @@ public abstract class Container extends InventoryBasic {
 
     public void open(@NotNull EntityPlayer owner) {
         if (!Socket.linked) {
-            MUtils.chat("&cYou must be linked to a discord account to use this feature.");
+            UChat.chat("&cYou must be linked to a discord account to use this feature.");
             return;
         }
         setItems();

@@ -6,6 +6,7 @@ import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.handlers.sbb.SbbRenderer;
 import cc.woverflow.hysentials.util.*;
 import cc.woverflow.hysentials.websocket.Socket;
@@ -59,6 +60,13 @@ public class BwRanks {
             this.tick = 0;
         }
         if (tick % 5 == 0) {
+            if (Minecraft.getMinecraft().fontRendererObj instanceof ImageIconRenderer && !HysentialsConfig.futuristicRanks) {
+                Minecraft.getMinecraft().fontRendererObj = Hysentials.minecraftFont;
+            } else if (!(Minecraft.getMinecraft().fontRendererObj instanceof ImageIconRenderer) && HysentialsConfig.futuristicRanks) {
+                Minecraft.getMinecraft().fontRendererObj = Hysentials.INSTANCE.imageIconRenderer;
+            }
+
+
             Multithreading.runAsync(() -> {
                 //Discord RPC
                 if (Socket.cachedServerData.has("rpc") && Socket.cachedServerData.getBoolean("rpc")) {

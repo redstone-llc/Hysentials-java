@@ -1,6 +1,7 @@
 package cc.woverflow.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
@@ -255,7 +256,7 @@ public class ActionGUIHandler {
             EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
             Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
             if (ClubDashboard.getClub() == null) {
-                MUtils.chat("&cYou are not in a club!");
+                UChat.chat("&cYou are not in a club!");
                 return;
             }
             Exporter.export = "club";

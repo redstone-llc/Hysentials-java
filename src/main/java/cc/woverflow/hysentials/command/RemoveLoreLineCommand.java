@@ -1,5 +1,6 @@
 package cc.woverflow.hysentials.command;
 
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.util.MUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
@@ -37,18 +38,18 @@ public class RemoveLoreLineCommand extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
         if (args.length == 0) {
-            MUtils.chat("&cUsage: /removeloreline <line>");
+            UChat.chat("&cUsage: /removeloreline <line>");
             return;
         }
         int line;
         try {
             line = Integer.parseInt(args[0]);
         } catch (NumberFormatException e) {
-            MUtils.chat("&cInvalid line number!");
+            UChat.chat("&cInvalid line number!");
             return;
         }
         if (line < 1) {
-            MUtils.chat("&cInvalid line number!");
+            UChat.chat("&cInvalid line number!");
             return;
         }
 

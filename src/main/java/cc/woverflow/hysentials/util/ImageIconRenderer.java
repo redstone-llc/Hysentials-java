@@ -463,7 +463,7 @@ public class ImageIconRenderer extends FontRenderer {
 //                    System.out.println(text);
                     if (s.matches("<#([0-9a-fA-F]){6}>")) {
                         l += 8 * k;
-                        i -= 5;
+//                        i += 5;
                         if (i > width) {
                             break;
                         }

@@ -106,7 +106,7 @@ public class QuestNPC {
 
                     JSONObject obj1 = new JSONObject();
                     obj1.put("interacted", true);
-                    Socket.CLIENT.send(new Request(
+                    Socket.CLIENT.sendText(new Request(
                         "method", "updateData",
                         "uuid", Minecraft.getMinecraft().thePlayer.getUniqueID().toString(),
                         "questNPC", obj1.toString()

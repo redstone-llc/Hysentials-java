@@ -2,6 +2,7 @@ package cc.woverflow.hysentials.handlers.sbb;
 
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.Hysentials;
@@ -96,9 +97,9 @@ public class SbbRenderer {
                 GL11.glScalef(1, 1, 1);
                 GL11.glPopMatrix();
             } catch (Exception e) {
-                MUtils.chat("&cError occured while rendering scoreboard box: &e" + e.getMessage());
-                MUtils.chat("&cRemoving this line from the config file to prevent further issues...");
-                MUtils.chat("&cPlease report this issue to the developer if it continues!");
+                UChat.chat("&cError occured while rendering scoreboard box: &e" + e.getMessage());
+                UChat.chat("&cRemoving this line from the config file to prevent further issues...");
+                UChat.chat("&cPlease report this issue to the developer if it continues!");
                 int i = toList(Hysentials.INSTANCE.sbBoxes.jsonObject.getJSONArray("lines")).indexOf(lineData);
                 Hysentials.INSTANCE.sbBoxes.jsonObject.getJSONArray("lines").remove(i);
             }

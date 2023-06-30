@@ -1,9 +1,8 @@
 package cc.woverflow.hysentials.command;
 
-import cc.woverflow.hysentials.util.MUtils;
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.guis.container.GuiItem;
 import cc.woverflow.hysentials.util.C;
-import cc.woverflow.hysentials.util.MUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
@@ -37,24 +36,24 @@ public class InsertLoreLineCommand extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
         if (args.length < 2) {
-            MUtils.chat("§cUsage: /insertloreline <line> <value>");
+            UChat.chat("§cUsage: /insertloreline <line> <value>");
             return;
         }
         int line;
         try {
             line = Integer.parseInt(args[0]);
         } catch (NumberFormatException e) {
-            MUtils.chat("§cInvalid line number!");
+            UChat.chat("§cInvalid line number!");
             return;
         }
         if (line < 1) {
-            MUtils.chat("§cInvalid line number!");
+            UChat.chat("§cInvalid line number!");
             return;
         }
 
         ItemStack item = Minecraft.getMinecraft().thePlayer.getHeldItem();
         if (item == null || item.getItem() == null) {
-            MUtils.chat("§cYou must be holding an item!");
+            UChat.chat("§cYou must be holding an item!");
             return;
         }
         item = item.copy();
@@ -74,7 +73,7 @@ public class InsertLoreLineCommand extends CommandBase {
             List<String> oldLore = GuiItem.getLore(item);
 
             if (oldLore.size() < line) {
-                MUtils.chat("§cLine number is too high!");
+                UChat.chat("§cLine number is too high!");
                 return;
             }
 
@@ -91,9 +90,9 @@ public class InsertLoreLineCommand extends CommandBase {
 
             GuiItem.setLore(item, newLore);
             RenameCommand.setCreativeAction(item, Minecraft.getMinecraft().thePlayer.inventory.currentItem);
-            MUtils.chat("§aSuccessfully inserted line §e" + (line + 1) + "§a!");
+            UChat.chat("§aSuccessfully inserted line §e" + (line + 1) + "§a!");
         } else {
-            MUtils.chat("§cItem must have lore!");
+            UChat.chat("§cItem must have lore!");
         }
     }
 }

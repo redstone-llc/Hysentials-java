@@ -47,7 +47,7 @@ public class HysentialsCommand {
         ImageIcon.reloadIcons();
         Hysentials.INSTANCE.sbBoxes = new JsonData("./config/hysentials/lines.json", new JSONObject().put("lines", new JSONArray()));
         Hysentials.INSTANCE.rankColors = new JsonData("./config/hysentials/colors.json", new JSONObject());
-        MUtils.chat("§aReloaded Hysentials!");
+        UChat.chat("§aReloaded Hysentials!");
     }
 
     @SubCommand(aliases = {"online"}, description = "Shows online players")
@@ -228,7 +228,7 @@ public class HysentialsCommand {
     @SubCommand(aliases = "reconnect")
     private static void reconnect() {
         if (Socket.CLIENT != null && Socket.CLIENT.isOpen())
-            Socket.CLIENT.close();
+            Socket.CLIENT.sendClose();
         Socket.createSocket();
     }
 
@@ -264,7 +264,7 @@ public class HysentialsCommand {
             Multithreading.runAsync(() -> {
                 JSONObject response = Socket.data;
                 response.put("server", false);
-                Socket.CLIENT.send(response.toString());
+                Socket.CLIENT.sendText(response.toString());
                 Socket.linking = false;
                 Socket.data = null;
                 Socket.linked = true;

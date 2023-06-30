@@ -4,37 +4,34 @@ import cc.woverflow.hysentials.Hysentials
 import gg.essential.elementa.ElementaVersion
 import gg.essential.elementa.WindowScreen
 import gg.essential.elementa.components.ScrollComponent
+import gg.essential.elementa.components.UIImage
 import gg.essential.elementa.components.UIText
 import gg.essential.elementa.constraints.CenterConstraint
 import gg.essential.elementa.constraints.RelativeConstraint
 import gg.essential.elementa.constraints.SiblingConstraint
-import gg.essential.elementa.dsl.basicHeightConstraint
-import gg.essential.elementa.dsl.childOf
-import gg.essential.elementa.dsl.constrain
-import gg.essential.elementa.dsl.pixels
+import gg.essential.elementa.dsl.*
 import gg.essential.elementa.markdown.MarkdownComponent
 import net.minecraft.client.gui.GuiMainMenu
+import java.net.URL
 
-class RequestUpdateGui : WindowScreen(ElementaVersion.V2, newGuiScale = 2) {
+class RequestUpdateGui : WindowScreen(ElementaVersion.V2, newGuiScale = 2, drawDefaultBackground = true) {
 
     init {
         val updateObj = UpdateChecker.updateGetter.updateObj ?: error("Update object is null")
-        UIText("Skytils ${updateObj.tagName} is available!")
+//        UIImage.ofURL(URL("https://redstone.llc/apps/main/public/assets/img/uploads/729e713c6a2a972e6bd70774aa23a252.png")).constrain {
+//            width = 100.percent()
+//            height = 100.percent()
+//        } childOf window
+        UIText("${updateObj.name} is available!")
             .constrain {
                 x = CenterConstraint()
                 y = RelativeConstraint(0.1f)
             } childOf window
-        UIText("You are currently on version ${Hysentials.VERSION}.")
+        val authorText = UIText("You are currently on version ${Hysentials.VERSION}.")
             .constrain {
                 x = CenterConstraint()
                 y = SiblingConstraint()
             } childOf window
-        val authorText =
-            UIText("Uploaded by: ${UpdateChecker.updateAsset.uploader.username}")
-                .constrain {
-                    x = CenterConstraint()
-                    y = SiblingConstraint()
-                } childOf window
         val changelogWrapper = ScrollComponent()
             .constrain {
                 x = CenterConstraint()
@@ -42,7 +39,7 @@ class RequestUpdateGui : WindowScreen(ElementaVersion.V2, newGuiScale = 2) {
                 height = basicHeightConstraint { window.getHeight() - 90 - authorText.getBottom() }
                 width = RelativeConstraint(0.7f)
             } childOf window
-        MarkdownComponent(updateObj.body.replace("*", ""))
+        MarkdownComponent("This will eventually be a changelog.")
             .constrain {
                 height = RelativeConstraint()
                 width = RelativeConstraint()

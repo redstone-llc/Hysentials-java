@@ -1,6 +1,7 @@
 package cc.woverflow.hysentials.guis.club;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
@@ -135,14 +136,14 @@ public class ClubDashboard extends Container {
             event.getEvent().cancel();
             Minecraft.getMinecraft().thePlayer.closeScreen();
             selectingName = true;
-            MUtils.chat("&7Please type your new club name in chat!");
-            MUtils.chat("&7You can only change your club name once every 30d!");
+            UChat.chat("&7Please type your new club name in chat!");
+            UChat.chat("&7You can only change your club name once every 30d!");
             Multithreading.schedule(() -> {
                 if (!selectingName) {
                     return;
                 }
                 selectingName = false;
-                MUtils.chat("&7Club name change request has expired!");
+                UChat.chat("&7Club name change request has expired!");
             }, 5, TimeUnit.MINUTES);
         });
 
@@ -150,14 +151,14 @@ public class ClubDashboard extends Container {
             event.getEvent().cancel();
             Minecraft.getMinecraft().thePlayer.closeScreen();
             selectingAlias = true;
-            MUtils.chat("&7Please type your new club alias in chat!");
+            UChat.chat("&7Please type your new club alias in chat!");
 
             Multithreading.schedule(() -> {
                 if (!selectingAlias) {
                     return;
                 }
                 selectingAlias = false;
-                MUtils.chat("&7Club alias change request has expired!");
+                UChat.chat("&7Club alias change request has expired!");
             }, 5, TimeUnit.MINUTES);
         });
 
@@ -166,14 +167,14 @@ public class ClubDashboard extends Container {
             if (clubData.getBoolean("isOwner")) {
                 Minecraft.getMinecraft().thePlayer.closeScreen();
                 invitePlayers = true;
-                MUtils.chat("\n&ePlease send the username of the user you want to invite in chat!");
+                UChat.chat("\n&ePlease send the username of the user you want to invite in chat!");
 
                 Multithreading.schedule(() -> {
                     if (!invitePlayers) {
                         return;
                     }
                     invitePlayers = false;
-                    MUtils.chat("&cInvite request has expired!");
+                    UChat.chat("&cInvite request has expired!");
                 }, 5, TimeUnit.MINUTES);
             } else {
                 Minecraft.getMinecraft().thePlayer.closeScreen();
@@ -191,13 +192,13 @@ public class ClubDashboard extends Container {
             event.getEvent().cancel();
             Minecraft.getMinecraft().thePlayer.closeScreen();
             clubhouseSelect = true;
-            MUtils.chat("&ePlease do &b/visit <player name> &eand select the house you want to use!");
+            UChat.chat("&ePlease do &b/visit <player name> &eand select the house you want to use!");
             Multithreading.schedule(() -> {
                 if (!clubhouseSelect) {
                     return;
                 }
                 clubhouseSelect = false;
-                MUtils.chat("&cClubhouse selection request has expired!");
+                UChat.chat("&cClubhouse selection request has expired!");
                 Minecraft.getMinecraft().thePlayer.closeScreen();
             }, 5, TimeUnit.MINUTES);
         });
@@ -250,7 +251,7 @@ public class ClubDashboard extends Container {
             String s = IOUtils.toString(input);
             JSONObject object = new JSONObject(s);
             if (!object.getBoolean("success")) {
-                MUtils.chat("&c" + object.getString("message"));
+                UChat.chat("&c" + object.getString("message"));
                 return;
             }
         } catch (Exception e) {

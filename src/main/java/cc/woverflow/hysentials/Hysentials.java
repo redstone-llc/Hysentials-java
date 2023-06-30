@@ -127,8 +127,6 @@ public class Hysentials {
         sbBoxes = new JsonData("./config/hysentials/lines.json", new JSONObject().put("lines", new JSONArray()));
         rankColors = new JsonData("/assets/minecraft/textures/icons/colors.json", "./config/hysentials/color.jsonn", true);
 
-        HysentialsKt.Companion.init();
-
         try {
             System.setProperty("file.encoding", "UTF-8");
             Field charset = Charset.class.getDeclaredField("defaultCharset");
@@ -141,7 +139,6 @@ public class Hysentials {
         try {
             SSLStore store = new SSLStore();
             store.load("/ssl/hysentials.der");
-            store.load("/ssl/socket.der");
             SSLContext context = store.finish();
             SSLContext.setDefault(context);
             HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
@@ -149,6 +146,7 @@ public class Hysentials {
             throw new RuntimeException(e);
         }
 
+        Socket.createSocket();
 
         CommandManager.INSTANCE.registerCommand(new HysentialsCommand());
         CommandManager.INSTANCE.registerCommand(new GroupChatCommand());
@@ -188,12 +186,12 @@ public class Hysentials {
         isHytils = Loader.isModLoaded("hytils-reborn");
         chatHandler.init();
 
-        Socket.createSocket();
         registerImages();
         cc.woverflow.hysentials.htsl.Loader.registerLoaders();
         Cluster.registerClusters();
 
         MinecraftForge.EVENT_BUS.post(new HysentialsLoadedEvent());
+        HysentialsKt.Companion.postInit();
     }
 
     @Mod.EventHandler
@@ -274,6 +272,8 @@ public class Hysentials {
 
         eventBus.register(new HypixelAPIUtils());
         eventBus.register(new NeighborInstall());
+
+        HysentialsKt.Companion.init();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             sbBoxes.save();

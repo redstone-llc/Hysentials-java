@@ -1,5 +1,6 @@
 package cc.woverflow.hysentials.command;
 
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
@@ -44,7 +45,7 @@ public class ClubCommand {
     @SubCommand(aliases = {"create"}, description = "Create a club")
     public void create(String name) {
         if (!Socket.linked) {
-            MUtils.chat("&cYou must be linked to a discord account to use this feature.");
+            UChat.chat("&cYou must be linked to a discord account to use this feature.");
             return;
         }
         Multithreading.runAsync(() -> {
@@ -60,10 +61,10 @@ public class ClubCommand {
                 String s = IOUtils.toString(input);
                 JSONObject object = new JSONObject(s);
                 if (object.getBoolean("success")) {
-                    MUtils.chat(HysentialsConfig.chatPrefix + " &aClub successfully created!");
+                    UChat.chat(HysentialsConfig.chatPrefix + " &aClub successfully created!");
                 } else {
-                    MUtils.chat(HysentialsConfig.chatPrefix + " &cClub failed to create!");
-                    MUtils.chat("   - &c" + object.getString("message"));
+                    UChat.chat(HysentialsConfig.chatPrefix + " &cClub failed to create!");
+                    UChat.chat("   - &c" + object.getString("message"));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -77,7 +78,7 @@ public class ClubCommand {
             MUtils.chat("&cYou must be linked to a discord account to use this feature.");
             return;
         }
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "clubAccept",
             "club", name,
             "uuid", Minecraft.getMinecraft().getSession().getProfile().getId(),

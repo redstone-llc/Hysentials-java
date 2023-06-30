@@ -1,5 +1,6 @@
 package cc.woverflow.hysentials.guis.actionLibrary;
 
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.Hysentials;
@@ -111,7 +112,7 @@ public class ClubActionViewer extends Container {
         setAction(48 - 18, (event) -> {
             event.getEvent().cancel();
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(action.getString("id")), null);
-            MUtils.chat("&aCopied action ID to clipboard.");
+            UChat.chat("&aCopied action ID to clipboard.");
         });
 
         setAction(49 - 18, (event) -> {
@@ -121,7 +122,7 @@ public class ClubActionViewer extends Container {
         });
 
         setAction(50 - 18, (event -> {
-            MUtils.chat("&cThis feature is not yet implemented.");
+            UChat.chat("&cThis feature is not yet implemented.");
         }));
 
         setAction(47 - 18, (event) -> {

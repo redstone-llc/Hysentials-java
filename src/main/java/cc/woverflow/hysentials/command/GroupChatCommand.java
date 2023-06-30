@@ -35,7 +35,7 @@ import net.minecraft.client.Minecraft;
 public class GroupChatCommand {
     @SubCommand(description = "Join a group chat", aliases = "join")
     public void join(String name) {
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "groupJoin",
             "name", name,
             "username", Minecraft.getMinecraft().thePlayer.getName(),
@@ -45,7 +45,7 @@ public class GroupChatCommand {
 
     @SubCommand(description = "Chat in a group chat", aliases = "chat")
     public void chat(String group, @Greedy String message) {
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "groupChat",
             "name", group,
             "username", Minecraft.getMinecraft().thePlayer.getName(),
@@ -60,7 +60,7 @@ public class GroupChatCommand {
 
     @SubCommand(description = "Create a group chat", aliases = "create")
     public void create(String name) {
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "groupCreate",
             "name", name,
             "owner", Minecraft.getMinecraft().thePlayer.getName(),
@@ -73,7 +73,7 @@ public class GroupChatCommand {
 
     @SubCommand(description = "Set the settings of the group", aliases = {"settings", "s"})
     public void settings( String name, @Description(autoCompletesTo = {"allInvite", "silence", "filter", "private"}) String setting, @Description(autoCompletesTo = {"true", "false"}) String value) {
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "groupSettings",
             "name", name,
             "username", Minecraft.getMinecraft().thePlayer.getName(),
@@ -88,7 +88,7 @@ public class GroupChatCommand {
 
     @SubCommand(description = "Demote a player in the group", aliases = {"demote", "d"})
     public void demote(String name, String player) {
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "groupDemote",
             "name", name,
             "username", Minecraft.getMinecraft().thePlayer.getName(),
@@ -102,7 +102,7 @@ public class GroupChatCommand {
 
     @SubCommand(description = "Disband a group", aliases = {"disband", "dis"})
     public void disband(String name) {
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "groupDisband",
             "name", name,
             "username", Minecraft.getMinecraft().thePlayer.getName(),
@@ -115,7 +115,7 @@ public class GroupChatCommand {
 
     @SubCommand(description = "Invite a player to a group chat", aliases = {"invite", "i"})
     public void invite(String name, String player) {
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "groupInvite",
             "name", name,
             "username", Minecraft.getMinecraft().thePlayer.getName(),
@@ -129,7 +129,7 @@ public class GroupChatCommand {
 
     @SubCommand(description = "Kick a player from a group chat", aliases = {"kick", "k"})
     public void kick(String name, String player, String reason) {
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "groupKick",
             "name", name,
             "username", Minecraft.getMinecraft().thePlayer.getName(),
@@ -144,7 +144,7 @@ public class GroupChatCommand {
 
     @SubCommand(description = "Leave a group chat", aliases = {"leave", "l"})
     public void leave(String name) {
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "groupLeave",
             "name", name,
             "username", Minecraft.getMinecraft().thePlayer.getName(),
@@ -157,7 +157,7 @@ public class GroupChatCommand {
 
     @SubCommand(description = "Promote a player in the group", aliases = {"promote", "p"})
     public void promote(String name, String player) {
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "groupPromote",
             "name", name,
             "username", Minecraft.getMinecraft().thePlayer.getName(),
@@ -171,7 +171,7 @@ public class GroupChatCommand {
 
     @SubCommand(description = "Display online players in a group", aliases = {"online", "o"})
     public void online(String name) {
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "groupOnline",
             "name", name,
             "username", Minecraft.getMinecraft().thePlayer.getName(),
@@ -184,7 +184,7 @@ public class GroupChatCommand {
 
     @SubCommand(description = "Renames a group", aliases = {"rename", "r"})
     public void rename(String name, String newName) {
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "groupRename",
             "name", name,
             "username", Minecraft.getMinecraft().thePlayer.getName(),
@@ -198,7 +198,7 @@ public class GroupChatCommand {
 
     @SubCommand(aliases = {"transfer", "t"})
     public void transfer(String name, String player) {
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "groupTransfer",
             "name", name,
             "username", Minecraft.getMinecraft().thePlayer.getName(),
@@ -212,7 +212,7 @@ public class GroupChatCommand {
 
     @SubCommand(aliases = {"hide", "h"})
     public void hide(String name) {
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "groupHide",
             "name", name,
             "username", Minecraft.getMinecraft().thePlayer.getName(),
@@ -228,7 +228,7 @@ public class GroupChatCommand {
 
     @SubCommand(aliases = {"unhide", "uh"})
     public void unhide(String name) {
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "groupUnhide",
             "name", name,
             "username", Minecraft.getMinecraft().thePlayer.getName(),
@@ -241,7 +241,7 @@ public class GroupChatCommand {
 
     @SubCommand(description = "Set the color of the groups prefix", aliases = "color")
     public void color( String name, String color) {
-        Socket.CLIENT.send(new Request(
+        Socket.CLIENT.sendText(new Request(
             "method", "groupColor",
             "name", name,
             "username", Minecraft.getMinecraft().thePlayer.getName(),

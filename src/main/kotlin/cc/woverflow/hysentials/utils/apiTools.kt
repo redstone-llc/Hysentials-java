@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package gg.skytils.skytilsmod.utils
+package cc.woverflow.hysentials.utils
 
-import cc.woverflow.hysentials.utils.toDashedUUID
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.builtins.IntArraySerializer
 import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.*
@@ -74,6 +74,16 @@ data class GithubRelease(
     val tagName: String,
     val assets: List<GithubAsset>,
     val body: String
+)
+
+@Serializable
+data class RedstoneRepo(
+    val name: String,
+    val contentType: String,
+    val contentLength: Long,
+    var type: String,
+    @Transient
+    var downloadUrl: String? = null,
 )
 
 @Serializable

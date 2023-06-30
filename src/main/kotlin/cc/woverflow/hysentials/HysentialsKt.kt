@@ -3,8 +3,8 @@ package cc.woverflow.hysentials
 import cc.woverflow.hysentials.gui.UpdateChecker
 import cc.woverflow.hysentials.gui.UpdateChecker.downloadDeleteTask
 import cc.woverflow.hysentials.utils.CustomColor
-import gg.skytils.skytilsmod.utils.RegexAsString
-import gg.skytils.skytilsmod.utils.UUIDAsString
+import cc.woverflow.hysentials.utils.RegexAsString
+import cc.woverflow.hysentials.utils.UUIDAsString
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
@@ -12,14 +12,10 @@ import io.ktor.client.plugins.cache.*
 import io.ktor.client.plugins.compression.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.fml.common.eventhandler.EventBus
 import java.util.*
 
 class HysentialsKt {
@@ -68,9 +64,11 @@ class HysentialsKt {
         }
 
         fun init() {
-            downloadDeleteTask()
-
             MinecraftForge.EVENT_BUS.register(UpdateChecker)
+        }
+
+        fun postInit() {
+            downloadDeleteTask()
         }
     }
 }

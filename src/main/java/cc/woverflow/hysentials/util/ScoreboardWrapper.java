@@ -1,6 +1,7 @@
 package cc.woverflow.hysentials.util;
 
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.config.HysentialsConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -58,7 +59,7 @@ public class ScoreboardWrapper {
 
         List<ScoreWrapper> scores = scoreboard.getSortedScores(sidebarObjective).stream().map(ScoreWrapper::new).collect(Collectors.toCollection(ArrayList::new));
         for (ScoreWrapper score : scores) {
-            if (score.getName().startsWith("Rank: ")) {
+            if (score.getName().startsWith("Rank: ") && HysentialsConfig.futuristicRanks) {
                 BlockWAPIUtils.Rank rank = null;
                 if (Hysentials.INSTANCE.getOnlineCache().getOnlinePlayers().containsKey(Minecraft.getMinecraft().thePlayer.getGameProfile().getId())) {
                     try {

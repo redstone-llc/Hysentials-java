@@ -30,7 +30,7 @@ public class GlobalChatStuff {
         public @Nullable String onMessageSend(@NotNull String message) {
             if (message.startsWith("/")) return message;
             if (HypixelChatCommand.isInGlobalChat) {
-                Socket.CLIENT.send(new Request(
+                Socket.CLIENT.sendText(new Request(
                     "method", "chat",
                     "message", message,
                     "username", Minecraft.getMinecraft().thePlayer.getName(),

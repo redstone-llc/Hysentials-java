@@ -2,32 +2,11 @@ package cc.woverflow.hysentials.utils
 
 import cc.woverflow.hysentials.utils.ColorFactory.web
 import cc.woverflow.hysentials.utils.RainbowColor.Companion.fromString
-import gg.essential.universal.UResolution
-import gg.essential.universal.wrappers.message.UMessage
-import gg.essential.universal.wrappers.message.UTextComponent
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import net.minecraft.client.gui.ChatLine
-import net.minecraft.client.gui.GuiNewChat
-import net.minecraft.client.settings.GameSettings
-import net.minecraft.entity.Entity
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.entity.SharedMonsterAttributes
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.event.HoverEvent
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagList
-import net.minecraft.network.play.server.S02PacketChat
-import net.minecraft.network.play.server.S2APacketParticles
 import net.minecraft.util.*
-import net.minecraftforge.client.event.ClientChatReceivedEvent
-import net.minecraftforge.common.MinecraftForge
-import org.objectweb.asm.tree.MethodInsnNode
 import java.awt.Color
 import java.io.File
 import java.io.IOException
 import java.util.*
-import kotlin.math.floor
 
 
 object Utils {

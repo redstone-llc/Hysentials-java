@@ -5,7 +5,8 @@ import cc.woverflow.hysentials.HysentialsKt
 import cc.woverflow.hysentials.HysentialsKt.Companion.client
 import cc.woverflow.hysentials.config.HysentialsConfig
 import cc.woverflow.hysentials.utils.Utils
-import gg.skytils.skytilsmod.utils.GithubRelease
+import cc.woverflow.hysentials.websocket.Socket
+import cc.woverflow.hysentials.utils.RedstoneRepo
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -15,6 +16,7 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiMainMenu
 import net.minecraft.util.Util
 import net.minecraftforge.client.event.GuiOpenEvent
@@ -27,9 +29,9 @@ import java.io.File
 object UpdateChecker {
     val updateGetter = UpdateGetter()
     val updateAsset
-        get() = updateGetter.updateObj!!.assets.first { it.name.endsWith(".jar") }
+        get() = updateGetter.updateObj!!
     val updateDownloadURL: String
-        get() = updateAsset.downloadUrl
+        get() = updateGetter.updateObj!!.downloadUrl!!
 
     fun getJarNameFromUrl(url: String): String {
         return url.split(Regex("/")).last()
@@ -38,7 +40,7 @@ object UpdateChecker {
     fun scheduleCopyUpdateAtShutdown(jarName: String) {
         Runtime.getRuntime().addShutdownHook(Thread {
             try {
-                println("Attempting to apply Skytils update.")
+                println("Attempting to apply Hysentials update.")
                 val oldJar = Hysentials.jarFile
                 if (oldJar == null || !oldJar.exists() || oldJar.isDirectory) {
                     println("Old jar file not found.")
@@ -79,9 +81,9 @@ object UpdateChecker {
                 }
                 println("Using runtime $runtime")
                 Runtime.getRuntime().exec("\"$runtime\" -jar \"${taskFile.absolutePath}\" \"${oldJar.absolutePath}\"")
-                println("Successfully applied Skytils update.")
+                println("Successfully applied Hysentials update.")
             } catch (ex: Throwable) {
-                println("Failed to apply Skytils Update.")
+                println("Failed to apply Hysentials Update.")
                 ex.printStackTrace()
             }
         })
@@ -89,7 +91,7 @@ object UpdateChecker {
 
     fun downloadDeleteTask() {
         HysentialsKt.IO.launch {
-            println("Checking for Skytils install task...")
+            println("Checking for Hysentials install task...")
             val taskDir = File(File(Hysentials.modDir, "updates"), "tasks")
             // TODO Make this dynamic and fetch latest one or something
             val url =
@@ -98,12 +100,12 @@ object UpdateChecker {
             if (taskDir.mkdirs() || withContext(Dispatchers.IO) {
                     taskFile.createNewFile()
                 }) {
-                println("Downloading Skytils delete task.")
+                println("Downloading Hysentials delete task.")
                 val req = client.get(url)
                 if (req.status != HttpStatusCode.OK) {
                     println("Downloading delete task failed!")
                 } else {
-                    println("Writing Skytils delete task.")
+                    println("Writing Hysentials delete task.")
                     req.bodyAsChannel().copyAndClose(taskFile.writeChannel())
                     println("Delete task successfully downloaded!")
                 }
@@ -131,23 +133,46 @@ object UpdateChecker {
 
     class UpdateGetter {
         @Volatile
-        var updateObj: GithubRelease? = null
+        var updateObj: RedstoneRepo? = null
 
         suspend fun run() {
             println("Checking for updates...")
             val latestRelease = when (HysentialsConfig.updateChannel) {
-                0 -> client.get( //release
-                    "https://api.github.com/repos/Skytils/SkytilsMod/releases/latest"
-                ).body()
+                1 -> let {
+                    val req = client.get( //beta
+                        "https://hysentials.redstone.llc/api/update?type=beta"
+                    )
+                    if (req.status != HttpStatusCode.OK) {
+                        println("Failed to get dev update")
+                        return@let null
+                    }
+                    val body = req.body<RedstoneRepo>()
+                    body.type = "beta"
+                    body.downloadUrl = "https://hysentials.redstone.llc/api/update/file?type=beta&uuid=${Minecraft.getMinecraft().session.profile.id.toString()}&key=${Socket.serverId}"
+                    body
+                }
 
-                1 -> client.get( //beta
-                    "https://api.github.com/repos/Skytils/SkytilsMod/releases"
-                ).body<List<GithubRelease>>().maxByOrNull { SkytilsVersion(it.tagName.substringAfter("v")) }
+                2 -> {
+                    let {
+                        val req = client.get( //dev
+                            "https://hysentials.redstone.llc/api/update?type=dev"
+                        )
+                        if (req.status != HttpStatusCode.OK) {
+                            println("Failed to get dev update")
+                            return@let null
+                        }
+                        val body = req.body<RedstoneRepo>()
+                        body.type = "dev"
+                        body.downloadUrl = "https://hysentials.redstone.llc/api/update/file?type=dev&uuid=${Minecraft.getMinecraft().session.profile.id.toString()}&key=${Socket.serverId}"
+                        body
+                    }
+                }
 
                 else -> return println("Update Channel set as none")
-            }
-            val latestTag = latestRelease!!.tagName
-            val currentTag = Hysentials.VERSION.substringBefore("-dev")
+            } ?: return println("Failed to get update")
+            val latestTag = latestRelease.name.substringAfter("Hysentials-").substringBefore(".jar")
+            val currentTag = Hysentials.VERSION
+            println("Current version: $currentTag Latest version: $latestTag")
 
             val currentVersion = SkytilsVersion(currentTag)
             val latestVersion = SkytilsVersion(latestTag.substringAfter("v"))
@@ -209,7 +234,7 @@ object UpdateChecker {
     enum class UpdateType(val prefix: String) {
         UNKNOWN("unknown"),
         RELEASE(""),
-        RELEASECANDIDATE("RC"),
-        PRERELEASE("pre"),
+        BETA("beta"),
+        DEV("dev"),
     }
 }

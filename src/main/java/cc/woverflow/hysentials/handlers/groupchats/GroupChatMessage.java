@@ -20,7 +20,7 @@ public class GroupChatMessage implements ChatSendModule {
             if (message.startsWith("/")) return message;
             ChatTab tab = ChatTabs.INSTANCE.getCurrentTab();
             if (tab.getName().equals("GLOBAL")) {
-                Socket.CLIENT.send(new Request(
+                Socket.CLIENT.sendText(new Request(
                     "method", "chat",
                     "message", message,
                     "username", Minecraft.getMinecraft().thePlayer.getName(),
@@ -32,7 +32,7 @@ public class GroupChatMessage implements ChatSendModule {
             }
             for (BlockWAPIUtils.Group group : Hysentials.INSTANCE.getOnlineCache().groups) {
                 if (group.getName().equalsIgnoreCase(tab.getName())) {
-                    Socket.CLIENT.send(
+                    Socket.CLIENT.sendText(
                         new Request(
                             "method", "groupChat",
                             "name", group.getName(),

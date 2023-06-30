@@ -1,5 +1,6 @@
 package cc.woverflow.hysentials.htsl;
 
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.util.MUtils;
 
 public enum PotionEffect {
@@ -72,7 +73,7 @@ public enum PotionEffect {
             case "health_boost": return HEALTH_BOOST;
             case "absorption": return ABSORPTION;
             default: {
-                MUtils.chat("&3[HTSL] &6Warning: Unknown effect \"" + effect + "\"");
+                UChat.chat("&3[HTSL] &6Warning: Unknown effect \"" + effect + "\"");
                 return SPEED;
             }
         }

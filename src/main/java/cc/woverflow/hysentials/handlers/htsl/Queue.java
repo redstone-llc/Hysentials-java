@@ -1,6 +1,7 @@
 package cc.woverflow.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.checker.units.qual.N;
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.event.events.GuiMouseClickEvent;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
@@ -190,14 +191,14 @@ public class Queue {
 
     public void doneLoading() {
         if (fails.size() > 0) {
-            MUtils.chat("&cFailed to load: &f(" + fails.size() + " error" + (fails.size() > 1 ? "s" : "") + ")");
+            UChat.chat("&cFailed to load: &f(" + fails.size() + " error" + (fails.size() > 1 ? "s" : "") + ")");
             for (String fail : fails) {
-                MUtils.chat("   > " + fail);
+                UChat.chat("   > " + fail);
             }
             fails.clear();
-            MUtils.chat("&f" + queue.size() + " &coperation" + (queue.size() != 1 ? "s" : "") + " left in queue.");
+            UChat.chat("&f" + queue.size() + " &coperation" + (queue.size() != 1 ? "s" : "") + " left in queue.");
         } else {
-            MUtils.chat("&3[HTSL] &fImported successfully!");
+            UChat.chat("&3[HTSL] &fImported successfully!");
         }
 
         timeWithoutOperation = 0;

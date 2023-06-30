@@ -40,9 +40,9 @@ class UpdateGui(restartNow: Boolean) : GuiScreen() {
             val directory = File(Hysentials.modDir, "updates")
             directory.mkdirs()
             val url = UpdateChecker.updateDownloadURL
-            val jarName = UpdateChecker.getJarNameFromUrl(url)
-            thread(name = "Skytils-update-downloader-thread") {
-                downloadUpdate(url, directory)
+            val jarName = UpdateChecker.updateAsset.name
+            thread(name = "Hysentials-update-downloader-thread") {
+                downloadUpdate(url, directory, jarName)
                 if (!failed) {
                     UpdateChecker.scheduleCopyUpdateAtShutdown(jarName)
                     if (restartNow) {
@@ -61,7 +61,7 @@ class UpdateGui(restartNow: Boolean) : GuiScreen() {
         backButton!!.displayString = if (failed || complete) "Back" else "Cancel"
     }
 
-    private fun downloadUpdate(url: String, directory: File) {
+    private fun downloadUpdate(url: String, directory: File, name: String) {
         try {
             val st = URL(url).openConnection() as HttpURLConnection
             st.setRequestProperty(
@@ -69,7 +69,7 @@ class UpdateGui(restartNow: Boolean) : GuiScreen() {
                 "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2"
             )
             st.connect()
-            if (st.responseCode != HttpURLConnection.HTTP_OK) {
+            if (st.responseCode != HttpURLConnection.HTTP_OK && st.contentType != "application/java-archive") {
                 failed = true
                 updateText()
                 println("$url returned status code ${st.responseCode}")
@@ -81,9 +81,9 @@ class UpdateGui(restartNow: Boolean) : GuiScreen() {
                 println("Couldn't create update file directory")
                 return
             }
-            val urlParts = url.split("/".toRegex()).toTypedArray()
             val fileLength = st.contentLength.toFloat()
-            val fileSaved = File(directory, URLDecoder.decode(urlParts[urlParts.size - 1], "UTF-8"))
+            println(fileLength)
+            val fileSaved = File(directory, name)
             val fis = st.inputStream
             val fos: OutputStream = FileOutputStream(fileSaved)
             val data = ByteArray(1024)

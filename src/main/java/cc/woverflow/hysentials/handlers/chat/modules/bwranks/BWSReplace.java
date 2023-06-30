@@ -111,24 +111,26 @@ public class BWSReplace implements ChatReceiveModule {
 //                        s = s.replaceAll("[a-f0-9§]{2}" + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": ");
 //                    }
                         } else {
-                            Matcher m1 = Pattern.compile(regex1).matcher(s);
-                            Matcher m2 = Pattern.compile(regex2).matcher(s);
-                            if (m1.find(0)) {
-                                Object[] replacement = getReplacement(m1.group(0).split(" ")[0], name, uuid, false);
-                                HypixelRanks r = (HypixelRanks) replacement[1];
-                                hRank = r;
-                                s = s.replace(m1.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":");
-                                HysentialsCommand.messages.add(sibling.getFormattedText() + " -> " + s);
+                            if (HysentialsConfig.futuristicRanks) {
+                                Matcher m1 = Pattern.compile(regex1).matcher(s);
+                                Matcher m2 = Pattern.compile(regex2).matcher(s);
+                                if (m1.find(0)) {
+                                    Object[] replacement = getReplacement(m1.group(0).split(" ")[0], name, uuid, false);
+                                    HypixelRanks r = (HypixelRanks) replacement[1];
+                                    hRank = r;
+                                    s = s.replace(m1.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":");
+                                    HysentialsCommand.messages.add(sibling.getFormattedText() + " -> " + s);
 
-                            }
-                            if (m2.find(0)) {
-                                Object[] replacement = getReplacement("§7", name, uuid, LocrawUtil.INSTANCE.getLocrawInfo().getGameType().equals(LocrawInfo.GameType.SKYBLOCK));
-                                HypixelRanks r = (HypixelRanks) replacement[1];
-                                hRank = r;
+                                }
+                                if (m2.find(0)) {
+                                    Object[] replacement = getReplacement("§7", name, uuid, LocrawUtil.INSTANCE.getLocrawInfo().getGameType().equals(LocrawInfo.GameType.SKYBLOCK));
+                                    HypixelRanks r = (HypixelRanks) replacement[1];
+                                    hRank = r;
 
-                                s = s.replace(m2.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":");
-                                HysentialsCommand.messages.add(sibling.getFormattedText() + " -> " + s);
+                                    s = s.replace(m2.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":");
+                                    HysentialsCommand.messages.add(sibling.getFormattedText() + " -> " + s);
 
+                                }
                             }
 //                    if (m3.find(0) && (!BwRanks.hasRank)) {
 //                        didSomething = true;
@@ -193,6 +195,7 @@ public class BWSReplace implements ChatReceiveModule {
     List<UTextComponent> components = new ArrayList<>();
 
     public boolean checkRegexes(ClientChatReceivedEvent event) {
+        if (!HysentialsConfig.futuristicRanks) return false;
 //        HysentialsCommand.messages.add(event.message.getFormattedText().replaceAll("§r", ""));
         String msg = event.message.getFormattedText().replaceAll("§r", "");
         if (!lineSeperator && msg.equals("§9§m-----------------------------------------------------")) {
@@ -207,11 +210,11 @@ public class BWSReplace implements ChatReceiveModule {
         if (lineSeperator && msg.equals("§9§m-----------------------------------------------------")) {
             lineSeperator = false;
             if (middle.size() == 0) {
-                MUtils.chat("§9§m-----------------------------------------------------");
-                MUtils.chat("§9§m-----------------------------------------------------");
+                UChat.chat("§9§m-----------------------------------------------------");
+                UChat.chat("§9§m-----------------------------------------------------");
             }
             if (middle.get(0).equals("§cThe party was disbanded because all invites expired and the party was empty.")) {
-                MUtils.chat(":party: &9Party &ewas disbanded because all invites expired and the party was empty.");
+                UChat.chat(":party: &9Party &ewas disbanded because all invites expired and the party was empty.");
                 event.setCanceled(true);
                 middle.clear();
                 return true;
@@ -222,29 +225,29 @@ public class BWSReplace implements ChatReceiveModule {
             Pattern partyInvite = Pattern.compile("(§[0-9a-fk-or].+ |§[0-9a-fk-or])(.+) §einvited (§[0-9a-fk-or].+ |§[0-9a-fk-or])(.+) §eto the party! They have §c60 §eseconds to accept.");
             Matcher pIMatcher = partyInvite.matcher(middle.get(0));
             if (pIMatcher.find()) {
-                MUtils.chat(":party: &9" + pIMatcher.group(2) + " &einvited &9" + pIMatcher.group(4) + " &eto the party! &7(60s to accept)");
+                UChat.chat(":party: &9" + pIMatcher.group(2) + " &einvited &9" + pIMatcher.group(4) + " &eto the party! &7(60s to accept)");
             } else if (pNMatcher.find()) {
                 switch (pNMatcher.group(3)) {
                     case "§ehas been removed from the party.": {
-                        MUtils.chat(":party: &9" + pNMatcher.group(2) + " &ehas been removed from the party.");
+                        UChat.chat(":party: &9" + pNMatcher.group(2) + " &ehas been removed from the party.");
                         break;
                     }
                     case "§ejoined the party.": {
-                        MUtils.chat(":party: &9" + pNMatcher.group(2) + " &ejoined the party.");
+                        UChat.chat(":party: &9" + pNMatcher.group(2) + " &ejoined the party.");
                         break;
                     }
                     case "§chas already been invited to the party.": {
-                        MUtils.chat(":party: &c" + pNMatcher.group(2) + " &ehas already been invited to the party.");
+                        UChat.chat(":party: &c" + pNMatcher.group(2) + " &ehas already been invited to the party.");
                         break;
                     }
                     case "§ehas disconnected, they have §c5 §eminutes to rejoin before they are removed from the party.": {
-                        MUtils.chat(":party: &9" + pNMatcher.group(2) + " &edisconnected. &7(5 mins until kick)");
+                        UChat.chat(":party: &9" + pNMatcher.group(2) + " &edisconnected. &7(5 mins until kick)");
                     }
                     case "§ewas removed from your party because they disconnected.": {
-                        MUtils.chat(":party: &9" + pNMatcher.group(2) + " &ewas removed from your party because they disconnected.");
+                        UChat.chat(":party: &9" + pNMatcher.group(2) + " &ewas removed from your party because they disconnected.");
                     }
                     case "§ehas disbanded the party!": {
-                        MUtils.chat(":party: &9" + pNMatcher.group(2) + " &ehas disbanded the party!");
+                        UChat.chat(":party: &9" + pNMatcher.group(2) + " &ehas disbanded the party!");
                     }
                 }
             } else {
@@ -347,34 +350,5 @@ public class BWSReplace implements ChatReceiveModule {
 
 
         return false;
-    }
-
-    private static List<String> getUsernames(List<String> lines) {
-        List<String> usernames = new ArrayList<>();
-        for (String line : lines) {
-            String[] split = line.split("● ");
-            if (split.length > 1) {
-                for (String s : split) {
-                    if (s.contains("]")) {
-                        String username = s.split("]")[1];
-                        if (username.startsWith(" ")) {
-                            username = username.substring(1);
-                        }
-                        usernames.add(ChatColor.Companion.stripControlCodes(username));
-                    } else {
-                        String[] split2 = s.split(" §r§7");
-                        if (split2.length == 1) {
-                            continue;
-                        }
-                        String username = split2[1];
-                        if (username.startsWith(" ")) {
-                            username = username.substring(1);
-                        }
-                        usernames.add(ChatColor.Companion.stripControlCodes(username));
-                    }
-                }
-            }
-        }
-        return usernames;
     }
 }

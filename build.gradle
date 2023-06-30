@@ -9,9 +9,12 @@ plugins {
     id "net.kyori.blossom" version "1.3.0"
     id "java"
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
+    id 'maven-publish'
 }
 
-version = mod_version
+long time = System.currentTimeSeconds()
+boolean dev = dev == "true"
+version = (dev ? dev_version + time : mod_version)
 group = "net.sinender"
 archivesBaseName = mod_name
 
@@ -86,7 +89,13 @@ dependencies {
         exclude module: 'lwjgl'
     }
     include('com.github.JnCrMx:discord-game-sdk4j:v0.5.5')
-    include("gg.essential:elementa-1.8.9-forge:590")
+    include('com.neovisionaries:nv-websocket-client:2.14')
+    compileOnly("gg.essential:elementa-1.8.9-forge:590") {
+        exclude module: "asm"
+        exclude module: "asm-commons"
+        exclude module: "asm-tree"
+        exclude module: "gson"
+    }
 
     compileOnly('org.spongepowered:mixin:0.7.11-SNAPSHOT')
 
@@ -104,16 +113,16 @@ dependencies {
     include(ktorClient("content-negotiation", null))
     include(ktorClient("encoding", null))
 
-    include(ktorServer("core", null))
-    include(ktorServer("cio", null))
-    include(ktorServer("content-negotiation", null))
-    include(ktorServer("compression", null))
-    include(ktorServer("cors", null))
-    include(ktorServer("conditional-headers", null))
-    include(ktorServer("auto-head-response", null))
-    include(ktorServer("default-headers", null))
-    include(ktorServer("host-common", null))
-    include(ktorServer("auth", null))
+//    include(ktorServer("core", null))
+//    include(ktorServer("cio", null))
+//    include(ktorServer("content-negotiation", null))
+//    include(ktorServer("compression", null))
+//    include(ktorServer("cors", null))
+//    include(ktorServer("conditional-headers", null))
+//    include(ktorServer("auto-head-response", null))
+//    include(ktorServer("default-headers", null))
+//    include(ktorServer("host-common", null))
+//    include(ktorServer("auth", null))
 
 }
 
@@ -174,5 +183,37 @@ compileKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
         freeCompilerArgs = ['-Xjvm-default=compatibility']
+    }
+}
+
+publishing {
+    repositories {
+        if (dev) {
+            maven {
+                name = "devRepo"
+                url = "https://repo.redstone.llc/dev"
+                credentials(PasswordCredentials)
+                authentication {
+                    basic(BasicAuthentication)
+                }
+            }
+        } else {
+            maven {
+                name = "betaRepo"
+                url = "https://repo.redstone.llc/beta"
+                credentials(PasswordCredentials)
+                authentication {
+                    basic(BasicAuthentication)
+                }
+            }
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            groupId = "llc.redstone"
+            artifactId = mod_name
+            version = version
+            from components.java
+        }
     }
 }
