@@ -31,7 +31,6 @@ public class ChatHandler {
 //            this.registerModule(new GroupChatMessage());
 //        }
         this.registerModule(new GlobalChatStuff.GlobalInChannel());
-        this.registerModule(new GlobalChatStuff.GlobalSendMessage());
         this.registerModule(new FriendReplace());
 //        this.registerModule(new ExecuteGatherer());
 //        this.registerModule(new GuildBridge());

@@ -1,7 +1,6 @@
 package cc.woverflow.hysentials.guis.actionLibrary;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
-import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.guis.container.Container;
@@ -19,10 +18,8 @@ import java.awt.datatransfer.StringSelection;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static cc.woverflow.hysentials.handlers.sbb.SbbRenderer.getMouseX;
-import static cc.woverflow.hysentials.handlers.sbb.SbbRenderer.getMouseY;
 
 public class ActionViewer extends Container {
     JSONObject action;
@@ -202,7 +199,7 @@ public class ActionViewer extends Container {
         });
     }
 
-    public static ArrayList<Object> toList(JSONArray array) {
+    public static List<Object> toList(JSONArray array) {
         ArrayList<Object> list = new ArrayList<>();
         for (int i = 0; i < array.length(); i++) {
             if (array.get(i) instanceof JSONArray) {

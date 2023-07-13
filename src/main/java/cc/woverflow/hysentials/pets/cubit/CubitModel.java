@@ -4,8 +4,10 @@ import cc.woverflow.hysentials.util.BUtils;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBox;
 import net.minecraft.client.model.ModelRenderer;
+import net.minecraft.client.model.ModelWolf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.MathHelper;
 
 public class CubitModel extends ModelBase {
     private final ModelRenderer head;
@@ -103,7 +105,8 @@ public class CubitModel extends ModelBase {
 
     @Override
     public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTickTime) {
-        if(!animationStarted) {
+        EntityCubit cubit = (EntityCubit) entitylivingbaseIn;
+        if (!animationStarted) {
             animationDelayTicks--;
 
             if (animationDelayTicks <= 0) {
@@ -112,12 +115,26 @@ public class CubitModel extends ModelBase {
         }
         if (animationStarted) {
             wingRotation += 0.015F;
-            if (wingRotation >= Math.PI*4F) {
+            if (wingRotation >= Math.PI * 4F) {
                 wingRotation = 0.0F;
                 animationDelayTicks = BUtils.randomInt(4000, 12000);
                 animationStarted = false;
             }
         }
         setRotationAngle(cubit2, wingRotation, 0.0F, 0.0F);
+        float legRotation = (MathHelper.cos((float) (limbSwing * 0.6662F)) * limbSwingAmount * 1.4F) / 2;
+        setRotationAngle(left_leg, legRotation + 1.5708F, 0.0F, 0.0F);
+        setRotationAngle(right_leg, -legRotation + 1.5708F, 0.0F, 0.0F);
+
+    }
+
+    @Override
+    public void setRotationAngles(float par1, float par2, float par3,
+                                  float par4, float par5, float par6, Entity par7Entity) {
+
+        super.setRotationAngles(par1, par2, par3, par4, par5, par6, par7Entity);
+
+        body.rotateAngleX = par5 / (180F / (float) Math.PI) + 1.5708F;
+        body.rotateAngleY = par4 / (180F / (float) Math.PI);
     }
 }

@@ -7,11 +7,15 @@ import cc.polyfrost.oneconfig.config.annotations.Checkbox;
 import cc.polyfrost.oneconfig.config.annotations.Color;
 import cc.polyfrost.oneconfig.config.annotations.Number;
 import cc.polyfrost.oneconfig.config.core.OneColor;
+import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.libs.checker.units.qual.N;
+import cc.polyfrost.oneconfig.libs.universal.UKeyboard;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.cosmetic.CosmeticGui;
 import cc.woverflow.hytils.HytilsReborn;
+import net.minecraft.client.Minecraft;
 
 import java.awt.*;
 import java.io.File;
@@ -34,6 +38,15 @@ public class HysentialsConfig extends Config {
         options = {"Release", "Beta", "Dev"}
     )
     public static int updateChannel = 1;
+
+    @KeyBind(
+        name = "Open Cosmetics",
+        category = "General",
+        subcategory = "Keybinds",
+        description = "The keybind to open the cosmetics menu."
+    )
+    public static OneKeyBind keyBind = new OneKeyBind(UKeyboard.KEY_K);
+
 
 
     @Switch(
@@ -129,6 +142,13 @@ public class HysentialsConfig extends Config {
 //    )
 //    public void cubitEnabled() {
 //    }
+    @Switch(
+        name = "Show Pets in game",
+        category = "Pets",
+        subcategory = "General",
+        description = "Will allow pets to be shown in game."
+    )
+    public static boolean showPets = false;
 
     // LOBBY
 
@@ -267,5 +287,9 @@ public class HysentialsConfig extends Config {
         super(new Mod("Hysentials", ModType.HYPIXEL), "hysentials.json");
         this.initialize();
         this.hideIf("openHytilsConfig", () -> !Hysentials.INSTANCE.isHytils);
+        this.registerKeyBind(keyBind, () -> {
+            Minecraft.getMinecraft().thePlayer.closeScreen();
+            Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(new CosmeticGui());
+        });
     }
 }

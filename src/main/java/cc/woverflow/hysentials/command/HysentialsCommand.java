@@ -1,6 +1,9 @@
 package cc.woverflow.hysentials.command;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.cosmetic.CosmeticGui;
+import cc.woverflow.hysentials.guis.misc.HysentialsLevel;
+import cc.woverflow.hysentials.profileViewer.DefaultProfileGui;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
@@ -28,8 +31,11 @@ import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +64,11 @@ public class HysentialsCommand {
         }
     }
 
+    @SubCommand(aliases = {"level"}, description = "Opens the menu to view your level")
+    public void handleLevel() {
+        new HysentialsLevel(0).open();
+    }
+
     @SubCommand(description = "HTSL Editor", aliases = "editor")
     private static void editor(String name) {
         new CodeEditor().openGui(name);
@@ -72,6 +83,16 @@ public class HysentialsCommand {
     private static void test(String command, @Greedy String args) {
         if (Minecraft.getMinecraft().thePlayer.getName().equals("EndKloon") || Minecraft.getMinecraft().thePlayer.getName().equals("Sin_ender")) {
             switch (command.toLowerCase()) {
+                case "cosmetic": {
+                    Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(new CosmeticGui());
+                    break;
+                }
+
+                case "profile": {
+                    Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(new DefaultProfileGui(Minecraft.getMinecraft().thePlayer));
+                    break;
+                }
+
                 case "socket": {
                     Hysentials.INSTANCE.sendMessage("§aSocket is " + (Socket.CLIENT.isOpen() ? "connected" : "disconnected"));
                     break;
@@ -218,6 +239,28 @@ public class HysentialsCommand {
                                 e.printStackTrace();
                             }
                         }
+                    }
+                    break;
+                }
+
+                case "capetexture": {
+                    //save mc resource location to file
+                    ResourceLocation location = Minecraft.getMinecraft().thePlayer.getLocationCape();
+                    InputStream stream = null;
+                    try {
+                        stream = Minecraft.getMinecraft().mcDefaultResourcePack.getInputStream(location);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    if (stream == null) {
+                        throw new RuntimeException("Couldn't find resource: " + location);
+                    }
+                    try {
+                        BufferedImage image = javax.imageio.ImageIO.read(stream);
+                        File file = new File("./cape.png");
+                        ImageIO.write(image, "png", file);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
                     }
                     break;
                 }

@@ -22,12 +22,14 @@
  * have also received a copy of the Additional Terms Applicable
  * to OneConfig, as published by Polyfrost. If not, see
  * <https://polyfrost.cc/legal/oneconfig/additional-terms>
- */package cc.woverflow.hysentials.util;
+ */
+package cc.woverflow.hysentials.util;
 
 import cc.polyfrost.oneconfig.utils.JsonUtils;
 import com.google.gson.JsonElement;
 import cc.polyfrost.oneconfig.libs.universal.UDesktop;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -70,6 +72,31 @@ public final class NetworkUtils {
         return getString(url, "OneConfig/1.0.0", 5000, false);
     }
 
+    public static String postString(String url, String userAgent, int timeout, boolean useCaches, String data) {
+        try {
+            HttpURLConnection connection = ((HttpURLConnection) new URL(url).openConnection());
+            connection.setRequestMethod("POST");
+            connection.setUseCaches(useCaches);
+            connection.addRequestProperty("User-Agent", userAgent);
+            connection.setReadTimeout(timeout);
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type", "application/json");
+            if (data != null) {
+                connection.setRequestProperty("Content-Length", Integer.toString(data.getBytes().length));
+                connection.getOutputStream().write(data.getBytes());
+            }
+            return IOUtils.toString(connection.getInputStream());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    public static String postString(String url) {
+        return postString(url, "Hysentials/1.0.0", 5000, false, null);
+    }
+
     /**
      * Gets the contents of a URL as a JsonElement.
      *
@@ -93,7 +120,7 @@ public final class NetworkUtils {
      * @see NetworkUtils#getJsonElement(String, String, int, boolean)
      */
     public static JsonElement getJsonElement(String url) {
-        return getJsonElement(url, "OneConfig/1.0.0", 5000, false);
+        return getJsonElement(url, "Hysentials/1.0.0", 5000, false);
     }
 
     /**

@@ -16,10 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */package cc.woverflow.hysentials.mixin;
 
+import cc.polyfrost.oneconfig.utils.Multithreading;
+import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;

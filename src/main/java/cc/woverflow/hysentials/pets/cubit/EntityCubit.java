@@ -2,15 +2,20 @@ package cc.woverflow.hysentials.pets.cubit;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.util.BUtils;
 import cc.woverflow.hysentials.util.C;
+import cc.woverflow.hysentials.util.Renderer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.ai.EntityAIFollowOwner;
 import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.monster.EntityIronGolem;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.passive.EntityWolf;
@@ -19,6 +24,8 @@ import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.UUID;
 
@@ -29,13 +36,14 @@ public class EntityCubit extends EntityTameable {
     public String ownerName;
     public EntityCubit(World worldIn, String name) {
         super(worldIn);
-        setSize(0.6F, 1.2F);
+        setSize(0.6F, 1F);
         ((PathNavigateGround) getNavigator()).setAvoidsWater(true);
         tasks.addTask(1, new EntityAIFollowOwner(this, 0.5f, 10f, 2f));
         tasks.addTask(2, new EntityAIWander(this, 0.5));
         tasks.addTask(3, new EntityAIWatchClosest(this, EntityPlayerSP.class, 8f));
         tasks.addTask(3, new EntityAILookIdle(this));
         setTamed(true);
+        setCustomNameTag(C.AQUA + name + "'s Cubit Companion");
         preventEntitySpawning = false;
         ownerName = name;
         armorStand = new EntityArmorStand(worldObj);
@@ -47,13 +55,14 @@ public class EntityCubit extends EntityTameable {
         worldIn.spawnEntityInWorld(armorStand);
     }
 
-    public static long cooldown = 0;
+    static {
+        EntityList.addMapping(EntityCubit.class, "Cubit", 201, (int) Renderer.color(138,142,151), (int) Renderer.color(189,65,59));
+    }
+
     @Override
-    public boolean interact(EntityPlayer player) {
-        if (System.currentTimeMillis() < cooldown) return false;
-        UChat.chat("§b[PET] " + ownerName + "'s Cubit§f: " + getDialog(ownerName));
-        cooldown = System.currentTimeMillis() + 1000*2;
-        return true;
+    public void setDead() {
+        super.setDead();
+        armorStand.setDead();
     }
 
     @Override

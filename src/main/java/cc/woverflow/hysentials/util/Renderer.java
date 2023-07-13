@@ -4,10 +4,12 @@ import cc.woverflow.hysentials.guis.ResolutionUtil;
 import cc.woverflow.hysentials.user.Player;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.ResourceLocation;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -21,8 +23,6 @@ import java.util.function.Consumer;
 
 public class Renderer {
     public Renderer() {
-        slimCTRenderPlayer = new CTRenderPlayer(Minecraft.getMinecraft().getRenderManager(), true);
-        normalCTRenderPlayer = new CTRenderPlayer(Minecraft.getMinecraft().getRenderManager(), false);
     }
 
     private static Long colorized = null;
@@ -37,9 +37,24 @@ public class Renderer {
         Minecraft.getMinecraft().fontRendererObj.drawString(text, x, y, (int) color(255, 255, 255, 255), false);
     }
 
+    public static void drawString(FontRenderer renderer, String text, float x, float y) {
+        text = text.replace("&", "§");
+        renderer.drawString(text, x, y, (int) color(255, 255, 255, 255), false);
+    }
+
     public static void drawString(String text, int x, int y) {
         text = text.replace("&", "§");
         Minecraft.getMinecraft().fontRendererObj.drawString(text, x, y, (int) color(255, 255, 255, 255), false);
+    }
+
+    public static void drawString(FontRenderer renderer, String text, float x, float y, boolean shadow) {
+        text = text.replace("&", "§");
+        renderer.drawString(text, x, y, (int) color(255, 255, 255, 255), shadow);
+    }
+
+    public static void drawString(String text, int x, int y, boolean shadow) {
+        text = text.replace("&", "§");
+        Minecraft.getMinecraft().fontRendererObj.drawString(text, x, y, (int) color(255, 255, 255, 255), shadow);
     }
 
     public static void drawRect(long color, float x, float y, float width, float height) {
@@ -75,6 +90,29 @@ public class Renderer {
         GlStateManager.enableBlend();
         GlStateManager.scale(1f, 1f, 50f);
         GlStateManager.bindTexture(image.getGlTextureId());
+        GlStateManager.enableTexture2D();
+
+        worldRenderer.begin(drawMode != null ? Math.toIntExact(drawMode) : 7, DefaultVertexFormats.POSITION_TEX);
+
+        worldRenderer.pos(x, y + height, 0.0).tex(0.0, 1.0).endVertex();
+        worldRenderer.pos(x + width, y + height, 0.0).tex(1.0, 1.0).endVertex();
+        worldRenderer.pos(x + width, y, 0.0).tex(1.0, 0.0).endVertex();
+        worldRenderer.pos(x, y, 0.0).tex(0.0, 0.0).endVertex();
+        tessellator.draw();
+
+        finishDraw();
+    }
+
+    public static void drawImage(ResourceLocation image, int x, int y, int width, int height) {
+        drawImage(image, x, y, width, Double.valueOf(height));
+    }
+
+    public static void drawImage(ResourceLocation image, double x, double y, double width, double height) {
+        if (colorized == null)
+            GlStateManager.color(1f, 1f, 1f, 1f);
+        GlStateManager.enableBlend();
+        GlStateManager.scale(1f, 1f, 50f);
+        Minecraft.getMinecraft().getTextureManager().bindTexture(image);
         GlStateManager.enableTexture2D();
 
         worldRenderer.begin(drawMode != null ? Math.toIntExact(drawMode) : 7, DefaultVertexFormats.POSITION_TEX);
@@ -137,82 +175,6 @@ public class Renderer {
         conn.setRequestMethod("GET");
         conn.setDoOutput(true);
         return ImageIO.read(conn.getInputStream());
-    }
-
-    private static CTRenderPlayer slimCTRenderPlayer;
-    private static CTRenderPlayer normalCTRenderPlayer;
-    public static void drawPlayer(
-        Object player,
-        int x,
-        int y,
-        boolean rotate,
-        boolean showNametag,
-        boolean showArmor,
-        boolean showCape,
-        boolean showHeldItem,
-        boolean showArrows
-    ) {
-        float mouseX = -30f;
-        float mouseY = 0f;
-
-        AbstractClientPlayer entity;
-        if (player instanceof AbstractClientPlayer) {
-            entity = (AbstractClientPlayer) player;
-        } else {
-            entity = Minecraft.getMinecraft().thePlayer;
-        }
-
-        GlStateManager.enableColorMaterial();
-        RenderHelper.enableStandardItemLighting();
-
-        float f = entity.renderYawOffset;
-        float f1 = entity.rotationYaw;
-        float f2 = entity.rotationPitch;
-        float f3 = entity.prevRotationYawHead;
-        float f4 = entity.rotationYawHead;
-
-        translate(x, y, 50.0f);
-        GlStateManager.rotate(180.0f, 0.0f, 0.0f, 1.0f);
-        GlStateManager.rotate(45.0f, 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotate(-45.0f, 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotate((float) (-Math.atan(mouseY / 40.0f) * 20.0f), 1.0f, 0.0f, 0.0f);
-        scale(-1f, 1f);
-        if (!rotate) {
-            entity.renderYawOffset = (float) Math.atan(mouseX / 40.0f) * 20.0f;
-            entity.rotationYaw = (float) Math.atan(mouseX / 40.0f) * 40.0f;
-            entity.rotationPitch = -(float) Math.atan(mouseY / 40.0f) * 20.0f;
-            entity.rotationYawHead = entity.rotationYaw;
-            entity.prevRotationYawHead = entity.rotationYaw;
-        }
-
-        RenderManager renderManager = Minecraft.getMinecraft().getRenderManager();
-        renderManager.playerViewY = 180.0f;
-        renderManager.setRenderShadow(false);
-
-
-        if (entity.getSkinType().equals("slim")) {
-            slimCTRenderPlayer.setOptions(showNametag, showArmor, showCape, showHeldItem, showArrows);
-            slimCTRenderPlayer.doRender(entity, 0.0, 0.0, 0.0, 0.0f, 1.0f);
-        } else {
-            normalCTRenderPlayer.setOptions(showNametag, showArmor, showCape, showHeldItem, showArrows);
-            normalCTRenderPlayer.doRender(entity, 0.0, 0.0, 0.0, 0.0f, 1.0f);
-        }
-
-        renderManager.setRenderShadow(true);
-
-        entity.renderYawOffset = f;
-        entity.rotationYaw = f1;
-        entity.rotationPitch = f2;
-        entity.prevRotationYawHead = f3;
-        entity.rotationYawHead = f4;
-
-        RenderHelper.disableStandardItemLighting();
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-        GlStateManager.disableTexture2D();
-        GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
-
-        finishDraw();
     }
 
     private static void translate(int x, int y, float z) {

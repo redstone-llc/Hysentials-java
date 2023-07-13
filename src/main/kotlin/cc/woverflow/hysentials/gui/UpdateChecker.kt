@@ -2,20 +2,19 @@ package cc.woverflow.hysentials.gui
 
 import cc.woverflow.hysentials.Hysentials
 import cc.woverflow.hysentials.HysentialsKt
-import cc.woverflow.hysentials.HysentialsKt.Companion.client
 import cc.woverflow.hysentials.config.HysentialsConfig
+import cc.woverflow.hysentials.util.NetworkUtils
 import cc.woverflow.hysentials.utils.Utils
 import cc.woverflow.hysentials.websocket.Socket
 import cc.woverflow.hysentials.utils.RedstoneRepo
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.util.cio.*
-import io.ktor.utils.io.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiMainMenu
 import net.minecraft.util.Util
@@ -101,12 +100,10 @@ object UpdateChecker {
                     taskFile.createNewFile()
                 }) {
                 println("Downloading Hysentials delete task.")
-                val req = client.get(url)
-                if (req.status != HttpStatusCode.OK) {
+
+                if (!NetworkUtils.downloadFile(url, taskFile)) {
                     println("Downloading delete task failed!")
                 } else {
-                    println("Writing Hysentials delete task.")
-                    req.bodyAsChannel().copyAndClose(taskFile.writeChannel())
                     println("Delete task successfully downloaded!")
                 }
             }
@@ -139,14 +136,14 @@ object UpdateChecker {
             println("Checking for updates...")
             val latestRelease = when (HysentialsConfig.updateChannel) {
                 1 -> let {
-                    val req = client.get( //beta
+                    val req = NetworkUtils.getString( //beta
                         "https://hysentials.redstone.llc/api/update?type=beta"
                     )
-                    if (req.status != HttpStatusCode.OK) {
-                        println("Failed to get dev update")
+                    if (req == null) {
+                        println("Failed to get beta update")
                         return@let null
                     }
-                    val body = req.body<RedstoneRepo>()
+                    val body = Json.decodeFromString<RedstoneRepo>(req)
                     body.type = "beta"
                     body.downloadUrl = "https://hysentials.redstone.llc/api/update/file?type=beta&uuid=${Minecraft.getMinecraft().session.profile.id.toString()}&key=${Socket.serverId}"
                     body
@@ -154,14 +151,14 @@ object UpdateChecker {
 
                 2 -> {
                     let {
-                        val req = client.get( //dev
+                        val req = NetworkUtils.getString( //dev
                             "https://hysentials.redstone.llc/api/update?type=dev"
                         )
-                        if (req.status != HttpStatusCode.OK) {
+                        if (req == null) {
                             println("Failed to get dev update")
                             return@let null
                         }
-                        val body = req.body<RedstoneRepo>()
+                        val body = Json.decodeFromString<RedstoneRepo>(req)
                         body.type = "dev"
                         body.downloadUrl = "https://hysentials.redstone.llc/api/update/file?type=dev&uuid=${Minecraft.getMinecraft().session.profile.id.toString()}&key=${Socket.serverId}"
                         body
@@ -175,9 +172,10 @@ object UpdateChecker {
             println("Current version: $currentTag Latest version: $latestTag")
 
             val currentVersion = SkytilsVersion(currentTag)
-            val latestVersion = SkytilsVersion(latestTag.substringAfter("v"))
+            val latestVersion = SkytilsVersion(latestTag)
             if (currentVersion < latestVersion) {
                 updateObj = latestRelease
+                println("Update available!")
             }
         }
     }
@@ -234,7 +232,7 @@ object UpdateChecker {
     enum class UpdateType(val prefix: String) {
         UNKNOWN("unknown"),
         RELEASE(""),
-        BETA("beta"),
         DEV("dev"),
+        BETA("beta"),
     }
 }

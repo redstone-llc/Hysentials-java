@@ -239,7 +239,7 @@ public class ClubDashboard extends Container {
             new ClubDashboard().open();
             return null;
         }
-        return "";
+        return message;
     }
 
     public static void update(JSONObject json) {

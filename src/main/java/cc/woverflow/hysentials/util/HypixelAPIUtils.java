@@ -137,46 +137,6 @@ public class HypixelAPIUtils {
         return false;
     }
 
-    public static String getDisplayName(String username, String uuid) {
-        String displayName = username;
-        if (uuid == null) return displayName;
-        try {
-            UUID.fromString(uuid);
-        } catch (IllegalArgumentException e) {
-            return displayName;
-        }
-        JsonElement request = NetworkUtils.getJsonElement("https://api.slothpixel.me/api/players/" + username);
-        if (request.isJsonNull()) return displayName;
-        JsonObject player = request.getAsJsonObject();
-        if (player.has("rank_formatted")) displayName = player.get("rank_formatted").getAsString() + " " + player.get("username").getAsString();
-
-        for (Map.Entry<UUID, String> entry : Hysentials.INSTANCE.getOnlineCache().rankCache.entrySet()) {
-            UUID p = entry.getKey();
-            String r = entry.getValue();
-            if (p.toString().equals(uuid)) {
-                switch (r.toLowerCase()) {
-                    case "admin": {
-                        displayName = "&c[ADMIN] " + player.get("displayname").getAsString();
-                        break;
-                    }
-                    case "mod": {
-                        displayName = "&9[MOD] " + player.get("displayname").getAsString();
-                        break;
-                    }
-                    case "creator": {
-                        displayName = "&3[&fCREATOR&3] " + player.get("displayname").getAsString();
-                        break;
-                    }
-                    case "plus": {
-                        displayName += " &6[+]";
-                        break;
-                    }
-                }
-            }
-        }
-        return displayName;
-    }
-
     public enum Ranks {
         OWNER("&c[OWNER]"),
         ADMIN("&c[ADMIN]"),

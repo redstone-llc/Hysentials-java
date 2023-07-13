@@ -1,6 +1,8 @@
 package cc.woverflow.hysentials.pets;
 
+import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.pets.cubit.EntityCubit;
 import cc.woverflow.hysentials.user.Player;
 import cc.woverflow.hysentials.util.UUIDUtil;
@@ -61,6 +63,18 @@ public abstract class AbstractCosmetic <E extends Entity>{
     public void onTick(TickEvent event) {
         WorldClient theWorld = Minecraft.getMinecraft().theWorld;
         if (theWorld == null) return;
+        if (LocrawUtil.INSTANCE.getLocrawInfo() == null) return;
+        if (!LocrawUtil.INSTANCE.getLocrawInfo().getGameMode().equals("lobby") && !HysentialsConfig.showPets) {
+            for (EntityPlayer player : theWorld.playerEntities) {
+                if (player == null) continue;
+                if (player.isDead) continue;
+                if (getEntities().containsKey(player.getUniqueID())) {
+                    getEntities().get(player.getUniqueID()).setDead();
+                    getEntities().remove(player.getUniqueID());
+                }
+            }
+            return;
+        }
 
         if (ticks++ % 20 == 0) {
             for (EntityPlayer player : theWorld.playerEntities) {

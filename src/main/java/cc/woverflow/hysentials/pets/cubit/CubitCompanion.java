@@ -2,10 +2,12 @@ package cc.woverflow.hysentials.pets.cubit;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.cosmetic.CosmeticGui;
 import cc.woverflow.hysentials.handlers.npc.QuestNPC;
 import cc.woverflow.hysentials.pets.AbstractCosmetic;
 import cc.woverflow.hysentials.user.Player;
 import cc.woverflow.hysentials.util.BUtils;
+import cc.woverflow.hysentials.util.BlockWAPIUtils;
 import cc.woverflow.hysentials.util.UUIDUtil;
 import cc.woverflow.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
@@ -26,7 +28,7 @@ import java.util.Random;
 import java.util.UUID;
 
 public class CubitCompanion extends AbstractCosmetic<EntityCubit> {
-    private Map<UUID, EntityCubit> hamsters = new HashMap<>();
+    private Map<UUID, EntityCubit> cubits = new HashMap<>();
 
     public CubitCompanion() {
         super(false);
@@ -34,13 +36,13 @@ public class CubitCompanion extends AbstractCosmetic<EntityCubit> {
 
     @Override
     public Map<UUID, EntityCubit> getEntities() {
-        return hamsters;
+        return cubits;
     }
 
     @Override
     public boolean canUse(EntityPlayer player) {
-        if (Hysentials.INSTANCE.getOnlineCache().cosmeticsCache == null || !Hysentials.INSTANCE.getOnlineCache().cosmeticsCache.containsKey(player.getUniqueID())) return false;
-        return Hysentials.INSTANCE.getOnlineCache().cosmeticsCache.get(player.getUniqueID()).contains("cubit");
+        return CosmeticGui.Companion.equippedCosmetic(player.getUniqueID(), "cubit")
+            && CosmeticGui.Companion.hasCosmetic(player.getUniqueID(), "cubit");
     }
 
     public static long cooldown = 0;
@@ -54,7 +56,7 @@ public class CubitCompanion extends AbstractCosmetic<EntityCubit> {
     @Override
     public EntityCubit getEntity(Entity entity) {
         if (entity instanceof EntityArmorStand) {
-            return hamsters.values().stream().filter(e -> e.armorStand.getUniqueID().equals(entity.getUniqueID())).findFirst().orElse(null);
+            return cubits.values().stream().filter(e -> e.armorStand.getUniqueID().equals(entity.getUniqueID())).findFirst().orElse(null);
         }
         return super.getEntity(entity);
     }
@@ -94,6 +96,6 @@ public class CubitCompanion extends AbstractCosmetic<EntityCubit> {
         hamster.setCustomNameTag(player.getName() + "'s Cubit");
         hamster.setAlwaysRenderNameTag(true);
         theWorld.spawnEntityInWorld(hamster);
-        hamsters.put(player.getUniqueID(), hamster);
+        cubits.put(player.getUniqueID(), hamster);
     }
 }

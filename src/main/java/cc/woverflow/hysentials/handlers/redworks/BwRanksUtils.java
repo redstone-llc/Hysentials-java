@@ -251,6 +251,42 @@ public class BwRanksUtils {
         return new Object[]{replacement, r};
     }
 
+    public static String getReplace(String prefix, String name, UUID uuid) {
+        BlockWAPIUtils.Rank rank = null;
+        if (Hysentials.INSTANCE.getOnlineCache().getOnlinePlayers().containsKey(uuid)) {
+            try {
+                rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().getRankCache().get(uuid).toUpperCase());
+            } catch (Exception ignored) {
+                rank = BlockWAPIUtils.Rank.DEFAULT;
+            }
+        }
+
+        if (rank != null && rank != BlockWAPIUtils.Rank.DEFAULT) {
+            String replacement = (rank.getPrefix(name));
+            if (HysentialsConfig.futuristicRanks) {
+                replacement = (rank.getPlaceholder());
+            }
+            return replacement;
+        }
+
+        if (prefix.equals("§7")) {
+            if (HysentialsConfig.futuristicRanks) {
+                return HypixelRanks.DEFAULT.getAsPlaceholder();
+            }
+            return HypixelRanks.DEFAULT.getPrefix();
+        } else {
+            for (HypixelRanks r : HypixelRanks.values()) {
+                if ((r.getColor() + r.getPrefix()).replace(" ", "").equals(prefix.replace("§r", ""))) {
+                    if (HysentialsConfig.futuristicRanks) {
+                        return r.getAsPlaceholder();
+                    }
+                    return r.getPrefix();
+                }
+            }
+        }
+        return prefix;
+    }
+
 
     public static String getPlus(UUID id) {
         return Hysentials.INSTANCE.getOnlineCache().getPlusPlayers().contains(id) ? " §6[+]§r" : "";

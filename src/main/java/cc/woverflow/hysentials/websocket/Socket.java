@@ -1,5 +1,8 @@
 package cc.woverflow.hysentials.websocket;
 
+import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.handlers.chat.modules.bwranks.BWSReplace;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UMessage;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
@@ -16,6 +19,7 @@ import kotlin.random.Random;
 import net.minecraft.client.Minecraft;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
+import net.minecraft.util.IChatComponent;
 import org.json.JSONObject;
 
 import javax.net.ssl.SSLContext;
@@ -27,12 +31,17 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+
+import static cc.woverflow.hysentials.guis.actionLibrary.ActionViewer.toList;
+import static cc.woverflow.hysentials.util.HypixelAPIUtils.getUsername;
 
 public class Socket {
     public static WebSocket CLIENT;
     public static JSONObject cachedData = new JSONObject();
+    public static List<JSONObject> cachedUsers = new ArrayList<>();
     public static JSONObject cachedServerData = new JSONObject();
     public static String serverId;
     public static boolean linking = false;
@@ -162,6 +171,10 @@ public class Socket {
                             case "data": {
                                 cachedData = json.getJSONObject("data");
                                 cachedServerData = json.getJSONObject("server");
+                                cachedUsers = new ArrayList<>();
+                                for (Object o : toList(json.getJSONArray("users"))) {
+                                    cachedUsers.add((JSONObject) o);
+                                }
                                 break;
                             }
                             case "chat": {
@@ -171,15 +184,53 @@ public class Socket {
                                         break;
                                     }
                                     if (HysentialsConfig.futuristicRanks) {
-                                        MUtils.chat(":globalchat: "
-                                            + "&6" + json.getString("username")
-                                            + "<#fff1d4>: "
-                                            + json.getString("message"));
+                                        BlockWAPIUtils.Rank rank = BlockWAPIUtils.getRank(json.getString("uuid"));
+                                        IChatComponent comp = new UTextComponent("")
+                                            .appendSibling(
+                                                new UTextComponent(
+                                                    ":globalchat: "
+                                                )
+                                            )
+                                            .appendSibling(
+                                                new UTextComponent(
+                                                    "&6" + json.getString("username")
+                                                )
+                                                    .setHover(
+                                                        HoverEvent.Action.SHOW_TEXT,
+                                                        rank.getPlaceholder() + BlockWAPIUtils.getUsername(UUID.fromString(json.getString("uuid")))
+                                                    )
+                                            )
+                                            .appendSibling(
+                                                new UTextComponent(
+                                                    "<#fff1d4>: "
+                                                        + json.getString("message")
+                                                )
+                                            );
+                                        Minecraft.getMinecraft().thePlayer.addChatMessage(comp);
                                     } else {
-                                        MUtils.chat("&6Global > "
-                                            + json.getString("username")
-                                            + ": "
-                                            + json.getString("message"));
+                                        BlockWAPIUtils.Rank rank = BlockWAPIUtils.getRank(json.getString("uuid"));
+                                        IChatComponent comp = new UTextComponent("")
+                                            .appendSibling(
+                                                new UTextComponent(
+                                                    ":globalchat: "
+                                                )
+                                            )
+                                            .appendSibling(
+                                                new UTextComponent(
+                                                    "&6" + json.getString("username")
+                                                )
+                                                    .setHover(
+                                                        HoverEvent.Action.SHOW_TEXT,
+                                                        rank.getPrefix("") + BlockWAPIUtils.getUsername(UUID.fromString(json.getString("uuid")))
+                                                    )
+                                            )
+                                            .appendSibling(
+                                                new UTextComponent(
+                                                    "&f: "
+                                                        + json.getString("message")
+                                                )
+                                            );
+                                        Minecraft.getMinecraft().thePlayer.addChatMessage(comp);
                                     }
                                 }
                                 break;
@@ -194,6 +245,12 @@ public class Socket {
                                     linking = false;
                                     data = null;
                                 }, 5, TimeUnit.MINUTES);
+                            }
+
+                            case "diagnose": {
+                                JSONObject data = new JSONObject().put("ram", Runtime.getRuntime().maxMemory() / 1024 / 1024).put("cpu", Runtime.getRuntime().availableProcessors()).put("diagnoses", BWSReplace.diagnostics);
+                                json.put("data", data);
+                                send(json.toString());
                             }
 
                             case "groupChat": {

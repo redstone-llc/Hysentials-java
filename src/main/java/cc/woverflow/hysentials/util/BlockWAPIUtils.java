@@ -4,18 +4,31 @@ import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
+import cc.woverflow.hysentials.websocket.Socket;
 import com.google.gson.*;
+import net.minecraft.client.Minecraft;
+import org.jetbrains.annotations.Async;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONPointer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import static cc.woverflow.hysentials.guis.actionLibrary.ActionViewer.toList;
+import static cc.woverflow.hysentials.handlers.chat.modules.bwranks.BWSReplace.diagnostics;
+
 public class BlockWAPIUtils {
+    public static JSONArray actions;
+    public static JSONArray cosmetics;
+
     @NotNull
     public static HashMap<UUID, String> getOnline() {
+        diagnostics.add("Starting cache refresh");
+        long start = System.currentTimeMillis();
         try {
             JsonElement online = null;
             JsonElement ranks = null;
@@ -24,11 +37,18 @@ public class BlockWAPIUtils {
                 online = NetworkUtils.getJsonElement("https://hysentials.redstone.llc/api/online");
                 ranks = NetworkUtils.getJsonElement("https://hysentials.redstone.llc/api/ranks");
                 cosmetics = NetworkUtils.getJsonElement("https://hysentials.redstone.llc/api/cosmetic");
+                String a = NetworkUtils.getString("https://hysentials.redstone.llc/api/actions");
+                JSONObject json = new JSONObject(a);
+                actions = json.getJSONArray("actions");
+                BlockWAPIUtils.cosmetics = new JSONObject(cosmetics.toString()).getJSONArray("cosmetics");
             } catch (Exception ignored) {
             }
+            diagnostics.add("API calls took " + (System.currentTimeMillis() - start) + "ms");
             if (online == null || online.isJsonNull()) return new HashMap<>();
             if (ranks == null || ranks.isJsonNull()) return new HashMap<>();
-
+            diagnostics.add("API calls were not null");
+            diagnostics.add("Starting to parse data");
+            long start2 = System.currentTimeMillis();
             JsonArray users = online.getAsJsonObject().get("uuids").getAsJsonArray();
             HashMap<UUID, String> onlinePlayers = new HashMap<>();
             for (JsonElement element : users) {
@@ -38,6 +58,8 @@ public class BlockWAPIUtils {
             HashMap<UUID, String> rankCache = new HashMap<>();
             HashMap<UUID, List<String>> cosmeticCache = new HashMap<>();
             ArrayList<UUID> plusPlayers = new ArrayList<>();
+
+            //TODO: Replace this with a better backend system
             for (JsonElement element : cosmetics.getAsJsonObject().get("cosmetics").getAsJsonArray()) {
                 JsonArray uuids = element.getAsJsonObject().get("users").getAsJsonArray();
                 for (JsonElement uuid : uuids) {
@@ -47,6 +69,7 @@ public class BlockWAPIUtils {
                     }
                 }
             }
+
             for (JsonElement element : ranks.getAsJsonObject().get("ranks").getAsJsonArray()) {
                 JsonArray uuids = element.getAsJsonObject().get("users").getAsJsonArray();
                 for (JsonElement uuid : uuids) {
@@ -65,11 +88,70 @@ public class BlockWAPIUtils {
             Hysentials.INSTANCE.getOnlineCache().rankCache = rankCache;
             Hysentials.INSTANCE.getOnlineCache().plusPlayers = plusPlayers;
             Hysentials.INSTANCE.getOnlineCache().cosmeticsCache = cosmeticCache;
+            diagnostics.add("Parsing took " + (System.currentTimeMillis() - start2) + "ms");
 
             return onlinePlayers;
         } catch (Exception e) {
             return new HashMap<>();
         }
+    }
+
+    public static boolean hasCosmetic(UUID uuid, String cosmetic) {
+        if (cosmetics == null) return false;
+        List<Object> list = toList(cosmetics);
+        return list.stream().anyMatch(o -> ((JSONObject) o).getString("name").equals(cosmetic) && ((JSONObject) o).getJSONArray("users").toList().contains(uuid.toString()));
+    }
+
+    public static boolean equippedCosmetic(UUID uuid, String cosmetic) {
+        if (cosmetics == null) return false;
+        List<Object> list = toList(cosmetics);
+        return list.stream().anyMatch(o -> ((JSONObject) o).getString("name").equals(cosmetic) && ((JSONObject) o).getJSONArray("users").toList().contains(uuid.toString()));
+    }
+
+    public static List<JSONObject> getCosmetics() {
+        if (cosmetics == null) return new ArrayList<>();
+        List<JSONObject> list = new ArrayList<>();
+        for (Object o : toList(cosmetics)) {
+            JSONObject object = (JSONObject) o;
+            list.add(object);
+        }
+        return list;
+    }
+
+    public static String getRequest(String endpoint) {
+        return "https://hysentials.redstone.llc/api/" + endpoint + "?key=" + Socket.serverId + "&uuid=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString();
+    }
+
+    public static JSONObject getAction(String id, String creator) {
+        if (actions == null) return null;
+        return (JSONObject) toList(actions).stream().filter(o -> {
+            JSONObject object = ((JSONObject) o);
+            return object.getJSONObject("action").getString("creator").equals(creator) && object.getString("id").equals(id);
+        }).findFirst().orElse(null);
+    }
+
+    public static Rank getRank(String uuid) {
+        BlockWAPIUtils.Rank rank;
+        try {
+            rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().rankCache.get(UUID.fromString(uuid)));
+        } catch (Exception e) {
+            rank = BlockWAPIUtils.Rank.DEFAULT;
+        }
+        return rank;
+    }
+
+    public static Rank getRank(UUID uuid) {
+        BlockWAPIUtils.Rank rank;
+        try {
+            rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().rankCache.get(uuid));
+        } catch (Exception e) {
+            rank = BlockWAPIUtils.Rank.DEFAULT;
+        }
+        return rank;
+    }
+
+    public static String getUsername(UUID uuid) {
+        return Hysentials.INSTANCE.getOnlineCache().onlinePlayers.get(uuid);
     }
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -96,7 +178,7 @@ public class BlockWAPIUtils {
         ADMIN(5, "1", "§c[ADMIN] ", "§c", "admin"),
         MOD(3, "2", "§2[MOD] ", "§2", "mod"),
         CREATOR(2, "3", "§3[§fCREATOR§3] ", "§3", "creator"),
-        TEAM(4,"4", "§6[TEAM] ", "§6", "team"),
+        TEAM(4, "4", "§6[TEAM] ", "§6", "team"),
         DEFAULT(1, "replace", "", "", "", "");
 
         public final int index;

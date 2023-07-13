@@ -63,18 +63,6 @@ repositories {
     maven { url 'https://repo.essential.gg/repository/maven-public' }
 }
 
-static String ktor(String module, String version, boolean addSuffix) {
-    return "io.ktor:ktor-" + module + (addSuffix ? "-jvm" : "") + (version != null ? ":" + version : "");
-}
-
-static String ktorClient(String module, String version) {
-    return ktor("client-" + module, version, true);
-}
-
-static String ktorServer(String module, String version) {
-    return ktor("server-" + module, version, true);
-}
-
 dependencies {
     minecraft("com.mojang:minecraft:1.8.9")
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
@@ -102,28 +90,6 @@ dependencies {
 
     compileOnly(files('libs/Hytils-Reborn-1.6.0-beta4.jar'))
     compileOnly("me.djtheredstoner:DevAuth-forge-legacy:1.1.0")
-
-    include(platform(ktor("bom", "2.2.4", false)))
-
-    include(ktor("serialization-kotlinx-json", null, true))
-    include(ktor("serialization-gson", null, true))
-
-    include(ktorClient("core", null))
-    include(ktorClient("cio", null))
-    include(ktorClient("content-negotiation", null))
-    include(ktorClient("encoding", null))
-
-//    include(ktorServer("core", null))
-//    include(ktorServer("cio", null))
-//    include(ktorServer("content-negotiation", null))
-//    include(ktorServer("compression", null))
-//    include(ktorServer("cors", null))
-//    include(ktorServer("conditional-headers", null))
-//    include(ktorServer("auto-head-response", null))
-//    include(ktorServer("default-headers", null))
-//    include(ktorServer("host-common", null))
-//    include(ktorServer("auth", null))
-
 }
 
 processResources {

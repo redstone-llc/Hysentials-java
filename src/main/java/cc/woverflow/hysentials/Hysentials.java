@@ -3,8 +3,10 @@ package cc.woverflow.hysentials;
 import cc.polyfrost.oneconfig.events.EventManager;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.cosmetic.CosmeticManager;
 import cc.woverflow.hysentials.gui.UpdateChecker;
 import cc.woverflow.hysentials.guis.club.ClubDashboardHandler;
+import cc.woverflow.hysentials.guis.container.ContainerHandler;
 import cc.woverflow.hysentials.handlers.chat.modules.misc.Limit256;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.commands.CommandManager;
@@ -34,13 +36,13 @@ import cc.woverflow.hysentials.handlers.sbb.Actionbar;
 import cc.woverflow.hysentials.handlers.sbb.SbbRenderer;
 import cc.woverflow.hysentials.htsl.Cluster;
 import cc.woverflow.hysentials.pets.cubit.CubitCompanion;
-import cc.woverflow.hysentials.pets.hamster.HamsterCompanion;
 import cc.woverflow.hysentials.util.*;
 import cc.woverflow.hysentials.util.blockw.OnlineCache;
 import cc.woverflow.hysentials.websocket.Socket;
 import cc.woverflow.hytils.util.friends.FriendCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -91,6 +93,7 @@ public class Hysentials {
     private final ChatHandler chatHandler = new ChatHandler();
 
     public final GuiDisplayHandler guiDisplayHandler = new GuiDisplayHandler();
+    public final CosmeticManager cosmeticManager = new CosmeticManager();
 
     public ImageIconRenderer imageIconRenderer;
     public JsonData sbBoxes;
@@ -104,7 +107,6 @@ public class Hysentials {
 
     public String rank;
 
-    public HamsterCompanion hamsterCompanion;
     public CubitCompanion cubitCompanion;
 
 
@@ -212,6 +214,12 @@ public class Hysentials {
         new ImageIcon("team", new ResourceLocation("textures/icons/team.png"));
         new ImageIcon("friend", new ResourceLocation("textures/icons/friend.png"));
 
+        new ImageIcon("common", new ResourceLocation("textures/icons/common.png"));
+        new ImageIcon("rare", new ResourceLocation("textures/icons/rare.png"));
+        new ImageIcon("epic", new ResourceLocation("textures/icons/epic.png"));
+        new ImageIcon("legendary", new ResourceLocation("textures/icons/legendary.png"));
+        new ImageIcon("exclusive", new ResourceLocation("textures/icons/exclusive.png"));
+
         for (HypixelRanks rank : HypixelRanks.values()) {
             try {
                 new ImageIcon(rank.getIconName(), new ResourceLocation("textures/icons/" + rank.getIconName() + ".png"));
@@ -264,6 +272,8 @@ public class Hysentials {
         eventBus.register(new MUtils());
         eventBus.register(new Limit256());
         eventBus.register(cubitCompanion = new CubitCompanion());
+        eventBus.register(new ContainerHandler());
+
         new Renderer();
 
         // height overlay

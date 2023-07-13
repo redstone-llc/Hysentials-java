@@ -37,6 +37,9 @@ import static cc.woverflow.hysentials.guis.actionLibrary.ActionViewer.toList;
 import static cc.woverflow.hysentials.handlers.redworks.BwRanksUtils.*;
 
 public class BWSReplace implements ChatReceiveModule {
+    public static List<String> diagnostics = new ArrayList<>();
+    public Pattern pattern = Pattern.compile("<(.+):(.+)>");
+
     @SubscribeEvent()
     public void onMessageReceived(@NotNull ClientChatReceivedEvent event) {
         if (!HypixelUtils.INSTANCE.isHypixel()) return;
@@ -45,145 +48,153 @@ public class BWSReplace implements ChatReceiveModule {
             event.setCanceled(true);
             return;
         }
+        long start0 = System.currentTimeMillis();
         String message = event.message.getFormattedText();
+        diagnostics.add("New message received: " + message);
         IChatComponent chatComponent = event.message;
         List<IChatComponent> siblings = event.message.getSiblings();
         HysentialsCommand.messages.add(chatComponent.toString());
 
+        diagnostics.add("Looking for players in the map...");
+        long start1 = System.currentTimeMillis();
         HashMap<String, UUID> users = new HashMap<>();
 
         Minecraft.getMinecraft().getNetHandler().getPlayerInfoMap().forEach(playerInfo -> {
             users.put(playerInfo.getGameProfile().getName(), playerInfo.getGameProfile().getId());
         });
-        Multithreading.runAsync(() -> {
-            HypixelRanks hRank = null;
-            BlockWAPIUtils.Rank blockwRank = null;
-            for (IChatComponent sibling : siblings) {
-                String s = sibling.getFormattedText();
+        diagnostics.add("Took " + (System.currentTimeMillis() - start1) + "ms to find players in the map.");
 
-                if (HysentialsConfig.removeAsterisk && (s.startsWith("§r§7* ") || s.startsWith("§7* "))) {
-                    s = s.replaceFirst("(§7|§r§7)\\* ", "");
-                }
-                if (hRank != null && (s.startsWith("§7: ") || s.startsWith("§f: "))) {
-                    s = s.replaceFirst("§7: ", hRank.getChat() + ": ").replaceFirst("§f: ", hRank.getChat() + ": ");
-                    hRank = null;
-                }
-                if (blockwRank != null && (s.startsWith("§7: ") || s.startsWith("§f: "))) {
-                    s = s.replaceFirst("§7: ", blockwRank.getChat() + ": ").replaceFirst("§f: ", blockwRank.getChat() + ": ");
-                    blockwRank = null;
-                }
-                for (Map.Entry<String, UUID> user : users.entrySet()) {
-                    String name = user.getKey();
-                    UUID uuid = user.getValue();
-                    if (uuid.equals(UUID.fromString("00000000-0000-0000-0000-000000000000"))) continue;
-                    try {
-                        BlockWAPIUtils.Rank rank = null;
-                        if (Hysentials.INSTANCE.getOnlineCache().getOnlinePlayers().containsKey(uuid)) {
-                            try {
-                                rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().getRankCache().get(uuid).toUpperCase());
-                            } catch (Exception ignored) {
-                                rank = BlockWAPIUtils.Rank.DEFAULT;
+
+        HypixelRanks hRank = null;
+        BlockWAPIUtils.Rank blockwRank = null;
+        for (IChatComponent sibling : siblings) {
+            String s = sibling.getFormattedText();
+            diagnostics.add("Checking sibling: " + s);
+
+            if (HysentialsConfig.removeAsterisk && (s.startsWith("§r§7* ") || s.startsWith("§7* "))) {
+                s = s.replaceFirst("(§7|§r§7)\\* ", "");
+            }
+            if (hRank != null && (s.startsWith("§7: ") || s.startsWith("§f: "))) {
+                s = s.replaceFirst("§7: ", hRank.getChat() + ": ").replaceFirst("§f: ", hRank.getChat() + ": ");
+                hRank = null;
+                diagnostics.add("Added chat formatting to sibling. (Hypixel)");
+            }
+            if (blockwRank != null && (s.startsWith("§7: ") || s.startsWith("§f: "))) {
+                s = s.replaceFirst("§7: ", blockwRank.getChat() + ": ").replaceFirst("§f: ", blockwRank.getChat() + ": ");
+                blockwRank = null;
+                diagnostics.add("Added chat formatting to sibling. (BlockW)");
+            }
+            diagnostics.add("Starting loop for players...");
+            long start2 = System.currentTimeMillis();
+            for (Map.Entry<String, UUID> user : users.entrySet()) {
+                String name = user.getKey();
+                UUID uuid = user.getValue();
+                if (uuid.equals(UUID.fromString("00000000-0000-0000-0000-000000000000"))) continue;
+                try {
+                    BlockWAPIUtils.Rank rank = null;
+                    if (Hysentials.INSTANCE.getOnlineCache().getOnlinePlayers().containsKey(uuid)) {
+                        try {
+                            rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().getRankCache().get(uuid).toUpperCase());
+                        } catch (Exception ignored) {
+                            rank = BlockWAPIUtils.Rank.DEFAULT;
+                        }
+                    }
+                    String regex1 = "\\[[A-Za-z§0-9+]+] " + name;
+                    String regex2 = "(§r§7|§7)" + name;
+                    if (rank != null && rank != BlockWAPIUtils.Rank.DEFAULT) {
+                        String replacement = (rank.getPrefix(name) + name + (getPlus(uuid)));
+                        if (HysentialsConfig.futuristicRanks) {
+                            replacement = (rank.getPlaceholder() + name + (getPlus(uuid)));
+                            if (!BwRanks.hasRank) {
+                                replacement = (rank.getPlaceholder() + name);
                             }
                         }
-                        String regex1 = "\\[[A-Za-z§0-9+]+] " + name;
-                        String regex2 = "(§r§7|§7)" + name;
-                        if (rank != null && rank != BlockWAPIUtils.Rank.DEFAULT) {
-                            String replacement = (rank.getPrefix(name) + name + (getPlus(uuid)));
-                            if (HysentialsConfig.futuristicRanks) {
-                                replacement = (rank.getPlaceholder() + name + (getPlus(uuid)));
-                                if (!BwRanks.hasRank) {
-                                    replacement = (rank.getPlaceholder() + name);
-                                }
-                            }
-                            if (!BwRanks.hasRank) {
-                                replacement = (rank.getColor() + name);
-                            }
-                            Matcher m1 = Pattern.compile(regex1).matcher(s);
-                            if (m1.find(0)) {
-                                blockwRank = rank;
-                                s = s.replaceAll("\\[[A-Za-z§0-9+]+] " + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": ");
-                            } else if (Pattern.compile(regex2).matcher(s).find(0)) {
-                                blockwRank = rank;
-                                s = s.replaceAll("(§r§7|§7)" + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": ");
-                            }
+                        if (!BwRanks.hasRank) {
+                            replacement = (rank.getColor() + name);
+                        }
+                        Matcher m1 = Pattern.compile(regex1).matcher(s);
+                        if (m1.find(0)) {
+                            blockwRank = rank;
+                            s = s.replaceAll("\\[[A-Za-z§0-9+]+] " + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": ");
+                            diagnostics.add("Used regex1 to replace " + name + " with " + replacement + " (BlockW)");
+                        } else if (Pattern.compile(regex2).matcher(s).find(0)) {
+                            blockwRank = rank;
+                            s = s.replaceAll("(§r§7|§7)" + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": ");
+                            diagnostics.add("Used regex2 to replace " + name + " with " + replacement + " (BlockW)");
+                        }
 //                  else if (Pattern.compile(regex3).matcher(s).find(0)) {
 //                        didSomething = true;
 //                        s = s.replaceAll("[a-f0-9§]{2}" + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": ");
 //                    }
-                        } else {
-                            if (HysentialsConfig.futuristicRanks) {
-                                Matcher m1 = Pattern.compile(regex1).matcher(s);
-                                Matcher m2 = Pattern.compile(regex2).matcher(s);
-                                if (m1.find(0)) {
-                                    Object[] replacement = getReplacement(m1.group(0).split(" ")[0], name, uuid, false);
-                                    HypixelRanks r = (HypixelRanks) replacement[1];
-                                    hRank = r;
-                                    s = s.replace(m1.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":");
-                                    HysentialsCommand.messages.add(sibling.getFormattedText() + " -> " + s);
-
-                                }
-                                if (m2.find(0)) {
-                                    Object[] replacement = getReplacement("§7", name, uuid, LocrawUtil.INSTANCE.getLocrawInfo().getGameType().equals(LocrawInfo.GameType.SKYBLOCK));
-                                    HypixelRanks r = (HypixelRanks) replacement[1];
-                                    hRank = r;
-
-                                    s = s.replace(m2.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":");
-                                    HysentialsCommand.messages.add(sibling.getFormattedText() + " -> " + s);
-
-                                }
+                    } else {
+                        if (HysentialsConfig.futuristicRanks) {
+                            Matcher m1 = Pattern.compile(regex1).matcher(s);
+                            Matcher m2 = Pattern.compile(regex2).matcher(s);
+                            if (m1.find(0)) {
+                                Object[] replacement = getReplacement(m1.group(0).split(" ")[0], name, uuid, false);
+                                HypixelRanks r = (HypixelRanks) replacement[1];
+                                hRank = r;
+                                s = s.replace(m1.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":");
+                                HysentialsCommand.messages.add(sibling.getFormattedText() + " -> " + s);
+                                diagnostics.add("Used regex1 to replace " + name + " with " + replacement[0].toString() + " (Hypixel)");
                             }
+                            if (m2.find(0)) {
+                                Object[] replacement = getReplacement("§7", name, uuid, LocrawUtil.INSTANCE.getLocrawInfo().getGameType().equals(LocrawInfo.GameType.SKYBLOCK));
+                                HypixelRanks r = (HypixelRanks) replacement[1];
+                                hRank = r;
+
+                                s = s.replace(m2.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":");
+                                HysentialsCommand.messages.add(sibling.getFormattedText() + " -> " + s);
+                                diagnostics.add("Used regex2 to replace " + name + " with " + replacement[0].toString() + " (Hypixel)");
+                            }
+                        }
 //                    if (m3.find(0) && (!BwRanks.hasRank)) {
 //                        didSomething = true;
 //                        Object[] replacement = getReplacement(m3.group(0).substring(0, 2), name, uuid, true);
 //                        HypixelRanks r = (HypixelRanks) replacement[1];
 //                        s = s.replaceAll("[a-f0-9§]{2}" + name, replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":");
 //                    }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
-                }
-                UTextComponent textComponent = new UTextComponent(sibling);
-                textComponent.setText(s);
-                if (siblings.indexOf(sibling) != -1) {
-                    siblings.set(siblings.indexOf(sibling), textComponent);
-                }
-
-                Pattern actionRegex = Pattern.compile("<(.+):(.+)>");
-                Matcher actionMatcher = actionRegex.matcher(s.replaceAll("§r", ""));
-                if (actionMatcher.find()) {
-                    String name = actionMatcher.group(1);
-                    int i = name.lastIndexOf("<");
-                    name = name.substring(i + 1);
-                    int start = s.indexOf("<" + name + ":" + actionMatcher.group(2) + ">");
-                    String a = NetworkUtils.getString("https://hysentials.redstone.llc/api/actions");
-                    JSONObject json = new JSONObject(a);
-                    JSONArray actions = json.getJSONArray("actions");
-                    String finalName = name;
-                    JSONObject action = (JSONObject) toList(actions).stream().filter(o -> {
-                        JSONObject object = ((JSONObject) o);
-                        return object.getJSONObject("action").getString("creator").equals(finalName) && object.getString("id").equals(actionMatcher.group(2));
-                    }).findFirst().orElse(null);
-
-                    if (action != null) {
-                        String mes = s.substring(0, start);
-                        String mes2 = s.substring(start + ("<" + name + ":" + actionMatcher.group(2) + ">").length());
-                        boolean isFunction = action.getJSONObject("action").getString("type").equals("function");
-                        UTextComponent messageComponent = new UTextComponent("&b" + action.getJSONObject("action").getString("creator") + "'s " + capitalizeFirst(action.getJSONObject("action").getString("type")) + (isFunction ? " " : " Action ") + "&7(Copy)");
-                        messageComponent.setHover(HoverEvent.Action.SHOW_TEXT, "§eClick to copy the action");
-                        messageComponent.setClick(ClickEvent.Action.SUGGEST_COMMAND, action.getString("id"));
-                        UTextComponent all = new UTextComponent("");
-                        all.appendSibling(new UTextComponent(mes)).appendSibling(messageComponent).appendSibling(new UTextComponent(mes2));
-                        siblings.set(siblings.indexOf(sibling), all);
-//                    all.chat();
-//                    event.setCanceled(true);
-//                    return;
-                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
-            Minecraft.getMinecraft().thePlayer.addChatMessage(chatComponent);
-        });
+            diagnostics.add("Looped through players in " + (System.currentTimeMillis() - start2) + "ms");
+            UTextComponent textComponent = new UTextComponent(sibling);
+            textComponent.setText(s);
+            if (siblings.indexOf(sibling) != -1) {
+                siblings.set(siblings.indexOf(sibling), textComponent);
+            }
+            Pattern actionRegex = pattern;
+            Matcher actionMatcher = actionRegex.matcher(s.replaceAll("§r", ""));
+            diagnostics.add("Looking for actions...");
+            if (actionMatcher.find()) {
+                diagnostics.add("Found action!");
+                String finalS = s;
+                String name = actionMatcher.group(1);
+                int i = name.lastIndexOf("<");
+                name = name.substring(i + 1);
+                int startM = finalS.indexOf("<" + name + ":" + actionMatcher.group(2) + ">");
+                diagnostics.add("Action: " + name + ":" + actionMatcher.group(2));
+
+                JSONObject action = BlockWAPIUtils.getAction(name, actionMatcher.group(2));
+
+                if (action != null) {
+                    String mes = finalS.substring(0, startM);
+                    String mes2 = finalS.substring(startM + ("<" + name + ":" + actionMatcher.group(2) + ">").length());
+                    boolean isFunction = action.getJSONObject("action").getString("type").equals("function");
+                    UTextComponent messageComponent = new UTextComponent("&b" + action.getJSONObject("action").getString("creator") + "'s " + action.getJSONObject("action").getString("name") + " &7(Copy)");
+                    messageComponent.setHover(HoverEvent.Action.SHOW_TEXT, "§eClick to copy the action");
+                    messageComponent.setClick(ClickEvent.Action.SUGGEST_COMMAND, action.getString("id"));
+                    UTextComponent all = new UTextComponent("");
+                    all.appendSibling(new UTextComponent(mes)).appendSibling(messageComponent).appendSibling(new UTextComponent(mes2));
+                    siblings.set(siblings.indexOf(sibling), all);
+                }
+            }
+        }
+        Minecraft.getMinecraft().thePlayer.addChatMessage(chatComponent);
         event.setCanceled(true);
+        diagnostics.add("Finished in " + (System.currentTimeMillis() - start0) + "ms");
     }
 
     public static String capitalizeFirst(String string) {

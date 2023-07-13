@@ -68,6 +68,7 @@ import static cc.woverflow.hysentials.htsl.compiler.ConditionCompiler.undoValidC
 
 public class Exporter {
     public static List<String> names = new ArrayList<>();
+    public static int totalFunctions = 0;
     public static String name;
     public static String export;
     public static String type;
@@ -177,12 +178,14 @@ public class Exporter {
             Navigator.selectOption(name);
             names.remove(0);
             stage = 0;
+            totalFunctions++;
             return;
         } else {
             if (stage == -1) {
                 stage = 0;
                 name = names.get(0);
                 names.remove(0);
+                totalFunctions++;
             }
         }
         if (stage == 0) {

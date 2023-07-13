@@ -5,6 +5,7 @@ import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.event.EventBus;
 import cc.woverflow.hysentials.event.events.GuiMouseClickEvent;
 import cc.woverflow.hysentials.util.MUtils;
+import cc.woverflow.hysentials.util.Material;
 import cc.woverflow.hysentials.websocket.Socket;
 import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
@@ -27,13 +28,15 @@ import java.util.Map;
 
 public abstract class Container extends InventoryBasic {
     protected String title;
+    public static Container INSTANCE;
     protected int rows = 1;
-    protected final Map<Integer, GuiItem> guiItems;
-    private static Map<Integer, GuiAction> slotActions;
-    private static GuiChest guiChest;
-    protected static boolean isOpen;
-    private static GuiAction defaultAction;
-    private ItemStack[] inventoryContents;
+    public Map<Integer, GuiItem> guiItems;
+    public Map<Integer, GuiAction> slotActions;
+    public GuiChest guiChest;
+    public boolean isOpen;
+    public GuiAction defaultAction;
+    public ItemStack[] inventoryContents;
+    public ItemStack BLACK_STAINED_GLASS_PANE = GuiItem.makeColorfulItem(Material.STAINED_GLASS_PANE, "&0", 1, 15);
 
     public Container(String title, int rows) {
         super(title, true, rows*9);
@@ -42,7 +45,7 @@ public abstract class Container extends InventoryBasic {
         this.inventoryContents = new ItemStack[rows*9];
         guiItems = new HashMap<>();
         slotActions = new HashMap<>();
-        EventBus.INSTANCE.register(this);
+        INSTANCE = this;
     }
 
     public void setItem(int slot, GuiItem item) {
@@ -54,6 +57,15 @@ public abstract class Container extends InventoryBasic {
             if (!guiItems.containsKey(i)) {
                 setItem(i, item);
                 return;
+            }
+        }
+    }
+
+
+    public void fill(GuiItem item) {
+        for (int i = 0; i < rows*9; i++) {
+            if (!guiItems.containsKey(i) || guiItems.get(i).getItemStack().getItem() == item.getItemStack().getItem()) {
+                setItem(i, item);
             }
         }
     }
@@ -112,18 +124,5 @@ public abstract class Container extends InventoryBasic {
             }
         };
         Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(guiChest);
-    }
-
-    @SubscribeEvent
-    public void mouseClick(GuiMouseClickEvent event) {
-        if (!isOpen) return;
-        Slot s = guiChest.getSlotUnderMouse();
-        if (s == null) return;
-        int slot = s.getSlotIndex();
-        defaultAction.execute(new GuiAction.GuiClickEvent(event.getCi(), slot, guiChest.inventorySlots.inventoryItemStacks.get(slot), event.getButton()));
-        if (slotActions.containsKey(slot)) {
-            GuiAction action = slotActions.get(slot);
-            action.execute(new GuiAction.GuiClickEvent(event.getCi(), slot, guiChest.inventorySlots.inventoryItemStacks.get(slot), event.getButton()));
-        }
     }
 }

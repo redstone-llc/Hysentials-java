@@ -3,7 +3,9 @@ package cc.woverflow.hysentials.guis.container;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.woverflow.hysentials.util.ItemNBT;
 import cc.woverflow.hysentials.util.Material;
+import cc.woverflow.hysentials.util.Renderer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemMonsterPlacer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -67,6 +69,14 @@ public class GuiItem {
         return item;
     }
 
+    public static ItemStack makeMonsterEgg(String displayName, int amount, int durability, String... lore) {
+        return makeColorfulItem(Material.MONSTER_EGG, displayName, amount, durability, lore);
+    }
+
+    public static ItemStack makeMonsterEgg(String displayName, int amount, int durability, List<String> lore) {
+        return makeColorfulItem(Material.MONSTER_EGG, displayName, amount, durability, lore);
+    }
+
     public static ItemStack setLore(ItemStack item, List<String> loreLines) {
         if (item.getTagCompound() == null) {
             item.setTagCompound(new NBTTagCompound());
@@ -118,6 +128,26 @@ public class GuiItem {
         }
 
         return loreLines;
+    }
+
+    public static ItemStack setColor(ItemStack item, String color) {
+        if (item.getTagCompound() == null) {
+            item.setTagCompound(new NBTTagCompound());
+        }
+
+        NBTTagCompound nbtTag = item.getTagCompound();
+        if (!nbtTag.hasKey("display")) {
+            nbtTag.setTag("display", new NBTTagCompound());
+        }
+
+        NBTTagCompound displayTag = nbtTag.getCompoundTag("display");
+        //hex to int
+        int colorInt = Integer.parseInt(color, 16);
+        displayTag.setInteger("color", colorInt);
+        nbtTag.setTag("display", displayTag);
+
+        item.setTagCompound(nbtTag);
+        return item;
     }
 
     public static ItemStack hideFlag(ItemStack item, int flags) {
