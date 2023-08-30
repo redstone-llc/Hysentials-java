@@ -3,6 +3,7 @@ package cc.woverflow.hysentials.guis.misc;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.cosmetic.CosmeticGui;
 import cc.woverflow.hysentials.handlers.htsl.Navigator;
 import cc.woverflow.hysentials.handlers.npc.QuestNPC;
@@ -40,17 +41,25 @@ public class PlayerInvHandler {
         ItemStack item = Minecraft.getMinecraft().thePlayer.getHeldItem();
         if (!(event.target instanceof EntityPlayer)) return;
         if (event.target.getUniqueID().equals(Minecraft.getMinecraft().thePlayer.getUniqueID())) return;
+        if (Minecraft.getMinecraft().getNetHandler().getPlayerInfo(((EntityPlayer) event.target).getUniqueID()) == null) return;
         if (item != null && item.getTagCompound() != null) {
             NBTTagCompound tag = item.getTagCompound();
             NBTTagCompound extraAttributes = tag.getCompoundTag("ExtraAttributes");
             if (extraAttributes != null && !extraAttributes.hasKey("HOUSING_MENU") && SbbRenderer.housingScoreboard.getHousingName() != null) {
-                if (Minecraft.getMinecraft().thePlayer.isSneaking()) {
+                if (Minecraft.getMinecraft().thePlayer.isSneaking() && HysentialsConfig.shiftRightClickInv) {
                     new PlayerInventory((EntityPlayer) event.target).open();
                     event.setCanceled(true);
                     event.setCanceled(true);
                 }
                 return;
             }
+        } else if (SbbRenderer.housingScoreboard.getHousingName() != null) {
+            if (Minecraft.getMinecraft().thePlayer.isSneaking() && HysentialsConfig.shiftRightClickInv) {
+                new PlayerInventory((EntityPlayer) event.target).open();
+                event.setCanceled(true);
+                event.setCanceled(true);
+            }
+            return;
         }
     }
 

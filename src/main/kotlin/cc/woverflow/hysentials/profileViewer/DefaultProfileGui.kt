@@ -19,7 +19,6 @@ import cc.woverflow.hysentials.utils.formatCapitalize
 import cc.woverflow.hysentials.websocket.Socket
 import com.google.common.collect.Lists
 import net.minecraft.client.Minecraft
-import net.minecraft.client.entity.AbstractClientPlayer
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.entity.player.EntityPlayer
@@ -29,6 +28,7 @@ import net.minecraft.util.ResourceLocation
 import org.json.JSONArray
 import org.json.JSONObject
 import java.math.BigDecimal
+import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.*
@@ -45,11 +45,14 @@ private fun String.addFormatting(): String {
 
 class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
     companion object {
-        fun getLevel(exp: Int): Int {
-            var level = 0
-            while (exp >= HysentialsLevel.getExpForLevel(level)) {
+        fun getLevel(exp: Int): Float {
+            var exp = exp
+            var level = 0f
+            while (exp >= HysentialsLevel.getExpForLevel(level.toInt())) {
                 level++
+                exp -= HysentialsLevel.getExpForLevel(level.toInt())
             }
+            level += exp / HysentialsLevel.getExpForLevel(level.toInt()).toFloat()
             return level
         }
     }
@@ -67,9 +70,9 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
     var inventory: ProfileInventory? = null
     var theSlot: Slot? = null
     var inventorySlots: ArrayList<Slot> = Lists.newArrayList()
-    lateinit var hypixelData: JSONObject
+    var hypixelData: JSONObject? = null
     var hysentialData: JSONObject? = null
-    lateinit var guildData: JSONObject
+    var guildData: JSONObject? = null
     val fontRenderer: ImageIconRenderer = Hysentials.INSTANCE.imageIconRenderer
 
 
@@ -141,50 +144,49 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                 )
             }
 
-            val rankUser = BwRanksUtils.getReplace(
-                (hypixelData["rank_formatted"] as String).addFormatting(),
-                player.name,
-                player.uniqueID
-            )
+            if (hypixelData != null) {
+                val rankUser = BwRanksUtils.getReplace(
+                    (hypixelData!!["rank_formatted"] as String).addFormatting(),
+                    player.name,
+                    player.uniqueID
+                )
 
-            val guildTag = try {
-                val guildRank =
-                    (toList(guildData["members"] as JSONArray).firstOrNull { (it as JSONObject)["uuid"] == player.uniqueID.toNoDash() } as JSONObject)["rank"]
-                        ?: "Member"
-                if (guildData["guild"] == true) {
-                    "${guildData["tag_color"]}[${(toList(guildData["ranks"] as JSONArray).firstOrNull() { (it as JSONObject)["name"] == guildRank } as JSONObject)["tag"]}]"
-                } else {
+                val guildTag = try {
+                    if (guildData!!["guild"] == true && guildData!!["tag"] != null) {
+                        "${guildData!!["tag_color"]}${guildData!!["tag"]}"
+                    } else {
+                        ""
+                    }
+                } catch (e: Exception) {
                     ""
                 }
-            } catch (e: Exception) {
-                ""
+
+
+                var largeFormat = DecimalFormat("#,###")
+                var lore = "§f${rankUser}${player.name} $guildTag\n" +
+                        "&7Hypixel Level: &e${(hypixelData!!["level"] as BigDecimal).toDouble().roundToInt()}\n"
+                if (hysentialData != null) {
+                    lore += "&7Hysentials Level: &e${getLevel(hysentialData!!["exp"] as Int)}\n" +
+                            "&7Emeralds: &a${largeFormat.format(hysentialData!!["emeralds"] as Int)}"
+                }
+                lore = lore.addFormatting()
+                val loreList = lore.split("\n")
+
+                GlStateManager.scale(0.70f, 0.70f, 0.70f)
+
+                for (i in loreList.indices) {
+                    Renderer.drawString(
+                        fontRenderer,
+                        loreList[i],
+                        (guiLeft * 1.40 + 64 * 1.40 + 2 * Renderer.screen.getScale()).toFloat(),
+                        (guiTop * 1.40 + 21 * 1.40 + (i * 10 * 0.70) * 1.40).toFloat(),
+                        true
+                    )
+                }
+                GlStateManager.scale(1f, 1f, 1f)
+                GlStateManager.popMatrix()
+                GlStateManager.pushMatrix()
             }
-
-
-
-            var lore = "§f${rankUser}${player.name} $guildTag\n" +
-                    "&7Hypixel Level: &e${(hypixelData["level"] as BigDecimal).toDouble().roundToInt()}\n"
-            if (hysentialData != null) {
-                lore += "&7Hysentials Level: &e${getLevel(hysentialData!!["exp"] as Int)}\n" +
-                        "&7Emeralds: &a${hysentialData!!["emeralds"] as Int}"
-            }
-            lore = lore.addFormatting()
-            val loreList = lore.split("\n")
-
-            GlStateManager.scale(0.70f, 0.70f, 0.70f)
-
-            for (i in loreList.indices) {
-                Renderer.drawString(
-                    fontRenderer,
-                    loreList[i],
-                    (guiLeft * 1.40 + 64 * 1.40).toFloat(),
-                    (guiTop * 1.40 + 21 * 1.40 + (i * 10 * 0.70) * 1.40).toFloat(),
-                    true
-                )
-            }
-            GlStateManager.scale(1f, 1f, 1f)
-            GlStateManager.popMatrix()
-            GlStateManager.pushMatrix()
 
 
             val separation = 5 // Set the desired separation in pixels
@@ -367,142 +369,145 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
         super.initScreen(width, height)
         guiLeft = (width - xSize) / 2
         guiTop = (height - ySize) / 2
-
-        val hypixel = NetworkUtils.getString(getRequest("hypixel") + "&lookup=" + player.uniqueID.toNoDash())
-        if (hypixel == null) {
-            Minecraft.getMinecraft().thePlayer.closeScreen()
-            UChat.chat("&cFailed to get data from Hypixel API.")
-            return
-        }
-        hypixelData = JSONObject(hypixel)
-        online = "offline"
-        hypixelData.let {
-            if (it.getBoolean("online")) online = "online"
-        }
-
-        val guild = NetworkUtils.getString(getRequest("hypixel/guild") + "&lookup=" + player.uniqueID.toNoDash())
-        if (guild == null) {
-            Minecraft.getMinecraft().thePlayer.closeScreen()
-            UChat.chat("&cFailed to get data from Hypixel API.")
-            return
-        }
-        guildData = JSONObject(guild)
-
-        hysentialData = Socket.cachedUsers.firstOrNull { it["uuid"] == player.uniqueID.toString() }
-
-        badges = ArrayList()
-
-        if (hysentialData != null && hysentialData!!.getBoolean("isEarlySupporter")) badges.add(
-            TriVariable(
-                "early-supporter",
-                "<#ff3e3e>Early Supporter",
-                DuoVariable(10, 9)
-            )
-        )
-
-        if (hysentialData != null && hysentialData!!.getBoolean("isBoosting")) badges.add(
-            TriVariable(
-                "booster",
-                "<#dc69da>Discord Booster",
-                DuoVariable(8, 9)
-            )
-        )
-
-        if (hypixelData.getJSONObject("links")!!["HYPIXEL"] != null && hypixelData.getJSONObject("links")!!["HYPIXEL"].toString() != "null") badges.add(
-            TriVariable(
-                "forums",
-                hypixelData.getJSONObject("links")!!["HYPIXEL"].toString(),
-                DuoVariable(9, 13)
-            )
-        )
-        if (hypixelData.getJSONObject("links")!!["DISCORD"] != null && hypixelData.getJSONObject("links")!!["DISCORD"].toString() != "null") badges.add(
-            TriVariable(
-                "discord",
-                "<#7389da>Discord Tag ${hypixelData.getJSONObject("links")!!["DISCORD"].toString()}",
-                DuoVariable(12, 9)
-            )
-        )
-        val sdf = SimpleDateFormat("MM/dd/yyyy")
-        val instant = Instant.ofEpochMilli(hypixelData.getLong("first_login"))
-        val date = Date.from(instant)
-        badges.add(
-            TriVariable(
-                "join-date",
-                "<#5fc654>First Joined ${sdf.format(date)}",
-                DuoVariable(9, 9)
-            )
-        )
-
         inventory = ProfileInventory(4)
-        val cosmetics = CosmeticGui.getEquippedCosmetics(player.uniqueID).sortedBy { it["type"] as String }
-        for (index in 0..3) {
-            if (index >= cosmetics.size) {
-                Slot(inventory, index, guiLeft + 152, guiTop + 12 + index * 18)
-                continue
-            }
-            val o = cosmetics[index]
-            val slot = Slot(inventory, index, guiLeft + 152, guiTop + 12 + index * 18)
 
-            val lore: MutableList<String> = mutableListOf()
-            val description = o["description"] as String
-            val cost = o["cost"] as Int
-            val emerald = if (Socket.cachedData == null) {
-                0
-            } else {
-                Socket.cachedData!!["emeralds"] as Int
+        Multithreading.runAsync {
+
+            val hypixel = NetworkUtils.getString(getRequest("hypixel") + "&lookup=" + player.uniqueID.toNoDash())
+            if (hypixel == null) {
+                Minecraft.getMinecraft().thePlayer.closeScreen()
+                UChat.chat("&cFailed to get data from Hypixel API.")
+                return@runAsync
             }
-            description.split("\n").forEach(lore::add)
-            if (cost > 0) {
-                if (emerald < cost) {
-                    lore.add("")
-                    lore.add("&7Cost: &a$cost⏣")
+            hypixelData = JSONObject(hypixel)
+            online = "offline"
+            hypixelData.let {
+                if (it!!.getBoolean("online")) online = "online"
+            }
+
+            val guild = NetworkUtils.getString(getRequest("hypixel/guild") + "&lookup=" + player.uniqueID.toNoDash())
+            if (guild == null) {
+                Minecraft.getMinecraft().thePlayer.closeScreen()
+                UChat.chat("&cFailed to get data from Hypixel API.")
+                return@runAsync
+            }
+            guildData = JSONObject(guild)
+
+            hysentialData = Socket.cachedUsers.firstOrNull { it["uuid"] == player.uniqueID.toString() }
+
+            badges = ArrayList()
+
+            if (hysentialData != null && hysentialData!!.getBoolean("isEarlySupporter")) badges.add(
+                TriVariable(
+                    "early-supporter",
+                    "<#ff3e3e>Early Supporter",
+                    DuoVariable(10, 9)
+                )
+            )
+
+            if (hysentialData != null && hysentialData!!.getBoolean("isBoosting")) badges.add(
+                TriVariable(
+                    "booster",
+                    "<#dc69da>Discord Booster",
+                    DuoVariable(8, 9)
+                )
+            )
+
+            if (hypixelData!!.getJSONObject("links")!!["HYPIXEL"] != null && hypixelData!!.getJSONObject("links")!!["HYPIXEL"].toString() != "null") badges.add(
+                TriVariable(
+                    "forums",
+                    hypixelData!!.getJSONObject("links")!!["HYPIXEL"].toString(),
+                    DuoVariable(9, 13)
+                )
+            )
+            if (hypixelData!!.getJSONObject("links")!!["DISCORD"] != null && hypixelData!!.getJSONObject("links")!!["DISCORD"].toString() != "null") badges.add(
+                TriVariable(
+                    "discord",
+                    "<#7389da>Discord Tag ${hypixelData!!.getJSONObject("links")!!["DISCORD"].toString()}",
+                    DuoVariable(12, 9)
+                )
+            )
+            val sdf = SimpleDateFormat("MM/dd/yyyy")
+            val instant = Instant.ofEpochMilli(hypixelData!!.getLong("first_login"))
+            val date = Date.from(instant)
+            badges.add(
+                TriVariable(
+                    "join-date",
+                    "<#5fc654>First Joined ${sdf.format(date)}",
+                    DuoVariable(9, 9)
+                )
+            )
+
+            val cosmetics = CosmeticGui.getEquippedCosmetics(player.uniqueID).sortedBy { it["type"] as String }
+            for (index in 0..3) {
+                if (index >= cosmetics.size) {
+                    Slot(inventory, index, guiLeft + 152, guiTop + 12 + index * 18)
+                    continue
+                }
+                val o = cosmetics[index]
+                val slot = Slot(inventory, index, guiLeft + 152, guiTop + 12 + index * 18)
+
+                val lore: MutableList<String> = mutableListOf()
+                val description = o["description"] as String
+                val cost = o["cost"] as Int
+                val emerald = if (Socket.cachedData == null) {
+                    0
                 } else {
+                    Socket.cachedData!!["emeralds"] as Int
+                }
+                description.split("\n").forEach(lore::add)
+                if (cost > 0) {
+                    if (emerald < cost) {
+                        lore.add("")
+                        lore.add("&7Cost: &a$cost⏣")
+                    } else {
+                        lore.add("")
+                        lore.add("&7Cost: &a$cost⏣")
+                    }
+                } else if (cost == 0) {
                     lore.add("")
-                    lore.add("&7Cost: &a$cost⏣")
+                    lore.add("&7Cost: &aFREE")
                 }
-            } else if (cost == 0) {
-                lore.add("")
-                lore.add("&7Cost: &aFREE")
-            }
-            val type = o["type"] as String
-            val rarity = o["rarity"] as String
-            val name = (o["name"] as String).formatCapitalize()
-            val itemID = o["itemID"] as Int
-            var item: ItemStack? = null
-            when (type) {
-                "pet" -> {
-                    item = GuiItem.makeMonsterEgg(
-                        "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>${name} Pet",
-                        1,
-                        itemID,
-                        lore
-                    )
-                }
+                val type = o["type"] as String
+                val rarity = o["rarity"] as String
+                val name = (o["name"] as String).formatCapitalize()
+                val itemID = o["itemID"] as Int
+                var item: ItemStack? = null
+                when (type) {
+                    "pet" -> {
+                        item = GuiItem.makeMonsterEgg(
+                            "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>${name} Pet",
+                            1,
+                            itemID,
+                            lore
+                        )
+                    }
 
-                "cape" -> {
-                    item = GuiItem.makeColorfulItem(
-                        Material.LEATHER_CHESTPLATE,
-                        "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>${name} Cape",
-                        1,
-                        0,
-                        lore
-                    )
-                    GuiItem.setColor(item, o["color"] as String)
-                }
+                    "cape" -> {
+                        item = GuiItem.makeColorfulItem(
+                            Material.LEATHER_CHESTPLATE,
+                            "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>${name} Cape",
+                            1,
+                            0,
+                            lore
+                        )
+                        GuiItem.setColor(item, o["color"] as String)
+                    }
 
-                "hat" -> {
-                    item = GuiItem.makeColorfulItem(
-                        Material.LEATHER_HELMET,
-                        "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>${name} Hat",
-                        1,
-                        0,
-                        lore
-                    )
-                    GuiItem.setColor(item, o["color"] as String)
+                    "hat" -> {
+                        item = GuiItem.makeColorfulItem(
+                            Material.LEATHER_HELMET,
+                            "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>${name} Hat",
+                            1,
+                            0,
+                            lore
+                        )
+                        GuiItem.setColor(item, o["color"] as String)
+                    }
                 }
+                slot.putStack(item)
+                inventorySlots.add(slot)
             }
-            slot.putStack(item)
-            inventorySlots.add(slot)
         }
     }
 

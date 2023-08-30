@@ -62,6 +62,10 @@ public class SetLoreLineCommand extends CommandBase {
             UChat.chat("§cYou must be holding an item!");
             return;
         }
+        if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative()) {
+            MUtils.chat("§cYou must be in creative mode!");
+            return;
+        }
         line = line - 1;
 
         for (int i = 1; i < args.length; i++) {

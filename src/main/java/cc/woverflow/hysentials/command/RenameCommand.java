@@ -33,6 +33,10 @@ public class RenameCommand extends CommandBase {
             MUtils.chat("§cYou must be holding an item!");
             return;
         }
+        if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative()) {
+            MUtils.chat("§cYou must be in creative mode!");
+            return;
+        }
         item = item.copy();
         StringBuilder builder = new StringBuilder("");
         String completeArgs = "";

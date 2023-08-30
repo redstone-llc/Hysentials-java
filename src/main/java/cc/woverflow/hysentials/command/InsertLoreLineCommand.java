@@ -3,6 +3,7 @@ package cc.woverflow.hysentials.command;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.guis.container.GuiItem;
 import cc.woverflow.hysentials.util.C;
+import cc.woverflow.hysentials.util.MUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
@@ -54,6 +55,10 @@ public class InsertLoreLineCommand extends CommandBase {
         ItemStack item = Minecraft.getMinecraft().thePlayer.getHeldItem();
         if (item == null || item.getItem() == null) {
             UChat.chat("§cYou must be holding an item!");
+            return;
+        }
+        if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative()) {
+            MUtils.chat("§cYou must be in creative mode!");
             return;
         }
         item = item.copy();

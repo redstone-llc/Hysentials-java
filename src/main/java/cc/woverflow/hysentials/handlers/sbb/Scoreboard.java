@@ -17,7 +17,7 @@ public class Scoreboard {
         ScaledResolution res = new ScaledResolution(Minecraft.getMinecraft());
         GuiIngameForge.renderObjective = false;
         int x = res.getScaledWidth();
-        int radius = new Integer[]{0, 2, 4}[HysentialsConfig.scoreboardBoxesBorderRadius];
+        int radius = new Integer[]{0, 2, 4}[HysentialsConfig.scoreboardBorderRadius];
         List<ScoreboardWrapper.ScoreWrapper> lines = ScoreboardWrapper.getLines(false);
         if (lines == null) return;
         List<String[]> formattedLines = new ArrayList<>();
@@ -32,7 +32,7 @@ public class Scoreboard {
         if (lines.size() == 0) return;
         String title = ScoreboardWrapper.getTitle();
         String housingName = SbbRenderer.housingScoreboard.getHousingName();
-        if (housingName != null) {
+        if (housingName != null && HysentialsConfig.housingNameScoreboard) {
             title = "§e§l" + SbbRenderer.housingScoreboard.removeFormatting(housingName).toUpperCase();
         }
         int titleWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(title);

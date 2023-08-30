@@ -27,4 +27,12 @@ public class DuoVariable<E, T> {
     public static DuoVariable of(Object first, Object second) {
         return new DuoVariable(first, second);
     }
+
+    @Override
+    public String toString() {
+        return "DuoVariable{" +
+                "first=" + first +
+                ", second=" + second +
+                '}';
+    }
 }

@@ -2,6 +2,7 @@ package cc.woverflow.hysentials.util;
 
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
+import cc.woverflow.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -61,12 +62,13 @@ public class ScoreboardWrapper {
         for (ScoreWrapper score : scores) {
             if (score.getName().startsWith("Rank: ") && HysentialsConfig.futuristicRanks) {
                 BlockWAPIUtils.Rank rank = null;
-                if (Hysentials.INSTANCE.getOnlineCache().getOnlinePlayers().containsKey(Minecraft.getMinecraft().thePlayer.getGameProfile().getId())) {
-                    try {
-                        rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().getRankCache().get(Minecraft.getMinecraft().thePlayer.getGameProfile().getId()).toUpperCase());
-                    } catch (Exception ignored) {
-                        rank = BlockWAPIUtils.Rank.DEFAULT;
+                if (Socket.cachedUsers.stream().anyMatch(u -> u.getString("uuid").equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString()))) {
+                    String r = Socket.cachedUsers.stream().filter(u -> u.getString("uuid").equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString())).findFirst().get().getString("rank");
+                    if (r != null) {
+                        rank = BlockWAPIUtils.Rank.valueOf(r.toUpperCase());
                     }
+                } else {
+                    rank = BlockWAPIUtils.getRank(Minecraft.getMinecraft().thePlayer.getGameProfile().getId());
                 }
                 if (rank != null && !rank.equals(BlockWAPIUtils.Rank.DEFAULT)) {
                     Score score1 = new Score(scoreboard, sidebarObjective, "Rank: " + rank.getColor() + rank.name());

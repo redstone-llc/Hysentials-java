@@ -2,6 +2,7 @@ package cc.woverflow.hysentials.handlers.chat.modules.bwranks;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.cosmetic.CosmeticGui;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UMessage;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
@@ -16,6 +17,7 @@ import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.handlers.chat.ChatReceiveModule;
 import cc.woverflow.hysentials.handlers.redworks.BwRanks;
 import cc.woverflow.hysentials.util.*;
+import cc.woverflow.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
@@ -67,6 +69,7 @@ public class BWSReplace implements ChatReceiveModule {
 
         HypixelRanks hRank = null;
         BlockWAPIUtils.Rank blockwRank = null;
+        UUID uuidBold = null;
         for (IChatComponent sibling : siblings) {
             String s = sibling.getFormattedText();
             diagnostics.add("Checking sibling: " + s);
@@ -74,15 +77,18 @@ public class BWSReplace implements ChatReceiveModule {
             if (HysentialsConfig.removeAsterisk && (s.startsWith("§r§7* ") || s.startsWith("§7* "))) {
                 s = s.replaceFirst("(§7|§r§7)\\* ", "");
             }
-            if (hRank != null && (s.startsWith("§7: ") || s.startsWith("§f: "))) {
-                s = s.replaceFirst("§7: ", hRank.getChat() + ": ").replaceFirst("§f: ", hRank.getChat() + ": ");
-                hRank = null;
-                diagnostics.add("Added chat formatting to sibling. (Hypixel)");
-            }
-            if (blockwRank != null && (s.startsWith("§7: ") || s.startsWith("§f: "))) {
-                s = s.replaceFirst("§7: ", blockwRank.getChat() + ": ").replaceFirst("§f: ", blockwRank.getChat() + ": ");
-                blockwRank = null;
-                diagnostics.add("Added chat formatting to sibling. (BlockW)");
+
+            if (HysentialsConfig.futuristicRanks) {
+                if (hRank != null && (s.startsWith("§7: ") || s.startsWith("§f: "))) {
+                    s = s.replaceFirst("§7: ", hRank.getChat() + ": " + italic(uuidBold) + bold(uuidBold)).replaceFirst("§f: ", hRank.getChat() + ": " + italic(uuidBold) + bold(uuidBold));
+                    hRank = null;
+                    diagnostics.add("Added chat formatting to sibling. (Hypixel)");
+                }
+                if (blockwRank != null && (s.startsWith("§7: ") || s.startsWith("§f: "))) {
+                    s = s.replaceFirst("§7: ", blockwRank.getChat() + ": " + italic(uuidBold) + bold(uuidBold)).replaceFirst("§f: ", blockwRank.getChat() + ": " + italic(uuidBold) + bold(uuidBold));
+                    blockwRank = null;
+                    diagnostics.add("Added chat formatting to sibling. (BlockW)");
+                }
             }
             diagnostics.add("Starting loop for players...");
             long start2 = System.currentTimeMillis();
@@ -92,19 +98,20 @@ public class BWSReplace implements ChatReceiveModule {
                 if (uuid.equals(UUID.fromString("00000000-0000-0000-0000-000000000000"))) continue;
                 try {
                     BlockWAPIUtils.Rank rank = null;
-                    if (Hysentials.INSTANCE.getOnlineCache().getOnlinePlayers().containsKey(uuid)) {
-                        try {
-                            rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().getRankCache().get(uuid).toUpperCase());
-                        } catch (Exception ignored) {
-                            rank = BlockWAPIUtils.Rank.DEFAULT;
+                    if (Socket.cachedUsers.stream().anyMatch(u -> u.getString("uuid").equals(uuid.toString()))) {
+                        String r = Socket.cachedUsers.stream().filter(u -> u.getString("uuid").equals(uuid.toString())).findFirst().get().getString("rank");
+                        if (r != null) {
+                            rank = BlockWAPIUtils.Rank.valueOf(r.toUpperCase());
                         }
+                    } else {
+                        rank = BlockWAPIUtils.getRank(uuid);
                     }
                     String regex1 = "\\[[A-Za-z§0-9+]+] " + name;
                     String regex2 = "(§r§7|§7)" + name;
                     if (rank != null && rank != BlockWAPIUtils.Rank.DEFAULT) {
-                        String replacement = (rank.getPrefix(name) + name + (getPlus(uuid)));
+                        String replacement = (rank.getPrefix(name) + name);
                         if (HysentialsConfig.futuristicRanks) {
-                            replacement = (rank.getPlaceholder() + name + (getPlus(uuid)));
+                            replacement = (rank.getPlaceholder() + name);
                             if (!BwRanks.hasRank) {
                                 replacement = (rank.getPlaceholder() + name);
                             }
@@ -115,12 +122,16 @@ public class BWSReplace implements ChatReceiveModule {
                         Matcher m1 = Pattern.compile(regex1).matcher(s);
                         if (m1.find(0)) {
                             blockwRank = rank;
-                            s = s.replaceAll("\\[[A-Za-z§0-9+]+] " + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": ");
+                            if (uuidBold == null) uuidBold = user.getValue();
+                            s = s.replaceAll("\\[[A-Za-z§0-9+]+] " + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": " + italic(uuidBold) + bold(uuidBold));
                             diagnostics.add("Used regex1 to replace " + name + " with " + replacement + " (BlockW)");
                         } else if (Pattern.compile(regex2).matcher(s).find(0)) {
                             blockwRank = rank;
-                            s = s.replaceAll("(§r§7|§7)" + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": ");
-                            diagnostics.add("Used regex2 to replace " + name + " with " + replacement + " (BlockW)");
+                            if (uuidBold == null) uuidBold = user.getValue();
+                            if (BwRanks.replacementMap.containsKey("§7" + name)) {
+                                s = s.replaceAll("(§r§7|§7)" + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": " + italic(uuidBold) + bold(uuidBold));
+                                diagnostics.add("Used regex2 to replace " + name + " with " + replacement + " (BlockW)");
+                            }
                         }
 //                  else if (Pattern.compile(regex3).matcher(s).find(0)) {
 //                        didSomething = true;
@@ -134,16 +145,17 @@ public class BWSReplace implements ChatReceiveModule {
                                 Object[] replacement = getReplacement(m1.group(0).split(" ")[0], name, uuid, false);
                                 HypixelRanks r = (HypixelRanks) replacement[1];
                                 hRank = r;
-                                s = s.replace(m1.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":");
+                                if (uuidBold == null) uuidBold = user.getValue();
+                                s = s.replace(m1.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":" + italic(uuidBold) + bold(uuidBold));
                                 HysentialsCommand.messages.add(sibling.getFormattedText() + " -> " + s);
                                 diagnostics.add("Used regex1 to replace " + name + " with " + replacement[0].toString() + " (Hypixel)");
                             }
-                            if (m2.find(0)) {
+                            if (m2.find(0) && BwRanks.replacementMap.containsKey("§7" + name)) {
                                 Object[] replacement = getReplacement("§7", name, uuid, LocrawUtil.INSTANCE.getLocrawInfo().getGameType().equals(LocrawInfo.GameType.SKYBLOCK));
                                 HypixelRanks r = (HypixelRanks) replacement[1];
                                 hRank = r;
-
-                                s = s.replace(m2.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":");
+                                if (uuidBold == null) uuidBold = user.getValue();
+                                s = s.replace(m2.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":" + italic(uuidBold) + bold(uuidBold));
                                 HysentialsCommand.messages.add(sibling.getFormattedText() + " -> " + s);
                                 diagnostics.add("Used regex2 to replace " + name + " with " + replacement[0].toString() + " (Hypixel)");
                             }
@@ -192,9 +204,22 @@ public class BWSReplace implements ChatReceiveModule {
                 }
             }
         }
+        if (uuidBold != null) {
+            BwRanks.replacementMap.put(chatComponent.getFormattedText().replaceAll("§r", ""), new DuoVariable<>(uuidBold, chatComponent.getFormattedText().replaceAll("§r", "")));
+        }
         Minecraft.getMinecraft().thePlayer.addChatMessage(chatComponent);
         event.setCanceled(true);
         diagnostics.add("Finished in " + (System.currentTimeMillis() - start0) + "ms");
+    }
+
+    private static String bold(UUID id) {
+        boolean bold = id != null && CosmeticGui.Companion.equippedCosmetic(id, "bold messages");
+        return bold ? "§l" : "";
+    }
+
+    private static String italic(UUID id) {
+        boolean italic = id != null && CosmeticGui.Companion.equippedCosmetic(id, "italic messages");
+        return italic ? "§o" : "";
     }
 
     public static String capitalizeFirst(String string) {
@@ -225,7 +250,7 @@ public class BWSReplace implements ChatReceiveModule {
                 UChat.chat("§9§m-----------------------------------------------------");
             }
             if (middle.get(0).equals("§cThe party was disbanded because all invites expired and the party was empty.")) {
-                UChat.chat(":party: &9Party &ewas disbanded because all invites expired and the party was empty.");
+                UChat.chat(":partyprefix: &9Party &ewas disbanded because all invites expired and the party was empty.");
                 event.setCanceled(true);
                 middle.clear();
                 return true;
@@ -236,29 +261,29 @@ public class BWSReplace implements ChatReceiveModule {
             Pattern partyInvite = Pattern.compile("(§[0-9a-fk-or].+ |§[0-9a-fk-or])(.+) §einvited (§[0-9a-fk-or].+ |§[0-9a-fk-or])(.+) §eto the party! They have §c60 §eseconds to accept.");
             Matcher pIMatcher = partyInvite.matcher(middle.get(0));
             if (pIMatcher.find()) {
-                UChat.chat(":party: &9" + pIMatcher.group(2) + " &einvited &9" + pIMatcher.group(4) + " &eto the party! &7(60s to accept)");
+                UChat.chat(":partyprefix: &9" + pIMatcher.group(2) + " &einvited &9" + pIMatcher.group(4) + " &eto the party! &7(60s to accept)");
             } else if (pNMatcher.find()) {
                 switch (pNMatcher.group(3)) {
                     case "§ehas been removed from the party.": {
-                        UChat.chat(":party: &9" + pNMatcher.group(2) + " &ehas been removed from the party.");
+                        UChat.chat(":partyprefix: &9" + pNMatcher.group(2) + " &ehas been removed from the party.");
                         break;
                     }
                     case "§ejoined the party.": {
-                        UChat.chat(":party: &9" + pNMatcher.group(2) + " &ejoined the party.");
+                        UChat.chat(":partyprefix: &9" + pNMatcher.group(2) + " &ejoined the party.");
                         break;
                     }
                     case "§chas already been invited to the party.": {
-                        UChat.chat(":party: &c" + pNMatcher.group(2) + " &ehas already been invited to the party.");
+                        UChat.chat(":partyprefix: &c" + pNMatcher.group(2) + " &ehas already been invited to the party.");
                         break;
                     }
                     case "§ehas disconnected, they have §c5 §eminutes to rejoin before they are removed from the party.": {
-                        UChat.chat(":party: &9" + pNMatcher.group(2) + " &edisconnected. &7(5 mins until kick)");
+                        UChat.chat(":partyprefix: &9" + pNMatcher.group(2) + " &edisconnected. &7(5 mins until kick)");
                     }
                     case "§ewas removed from your party because they disconnected.": {
-                        UChat.chat(":party: &9" + pNMatcher.group(2) + " &ewas removed from your party because they disconnected.");
+                        UChat.chat(":partyprefix: &9" + pNMatcher.group(2) + " &ewas removed from your party because they disconnected.");
                     }
                     case "§ehas disbanded the party!": {
-                        UChat.chat(":party: &9" + pNMatcher.group(2) + " &ehas disbanded the party!");
+                        UChat.chat(":partyprefix: &9" + pNMatcher.group(2) + " &ehas disbanded the party!");
                     }
                 }
             } else {
@@ -284,7 +309,7 @@ public class BWSReplace implements ChatReceiveModule {
                     prefix = prefix;
                     String message = partyMatcher.group(3);
 //                    MUtils.chat(":party: " + replacement[0].toString() + chat + ": " + message);
-                    MUtils.chat(":party: &9" + name + "<#c0def5>" + ": " + message);
+                    MUtils.chat(":partyprefix: &9" + name + "<#c0def5>" + ": " + message);
                 } catch (Exception e) {
                     System.out.println("Error in party chat\n" + e.getMessage());
                 }

@@ -7,14 +7,12 @@ import cc.woverflow.hysentials.util.NetworkUtils
 import cc.woverflow.hysentials.utils.Utils
 import cc.woverflow.hysentials.websocket.Socket
 import cc.woverflow.hysentials.utils.RedstoneRepo
+import cc.woverflow.hysentials.utils.UpdateNotes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiMainMenu
 import net.minecraft.util.Util
@@ -22,11 +20,43 @@ import net.minecraftforge.client.event.GuiOpenEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion
+import org.json.JSONObject
 import java.awt.Desktop
 import java.io.File
 
-object UpdateChecker {
-    val updateGetter = UpdateGetter()
+class UpdateChecker {
+    companion object {
+        lateinit var instance: UpdateChecker
+        val updateGetter = UpdateGetter()
+
+        fun checkUpdateAndOpenMenu() {
+            try {
+                HysentialsKt.IO.launch {
+                    updateGetter.run()
+                    if (updateGetter.updateObj != null) {
+                        Minecraft.getMinecraft().addScheduledTask {
+                            Minecraft.getMinecraft().displayGuiScreen(RequestUpdateGui(true))
+                        }
+                    }
+                }
+            } catch (ex: InterruptedException) {
+                ex.printStackTrace()
+            }
+        }
+
+        fun installFromUrl(data: RedstoneRepo, notes: UpdateNotes) {
+            HysentialsKt.IO.launch {
+                updateGetter.updateObj = data
+                updateGetter.updateNotes = notes
+                if (updateGetter.updateObj != null) {
+                    Minecraft.getMinecraft().addScheduledTask {
+                        Minecraft.getMinecraft().displayGuiScreen(RequestUpdateGui(inGame = true, deleteOld = false))
+                    }
+                }
+            }
+        }
+    }
+
     val updateAsset
         get() = updateGetter.updateObj!!
     val updateDownloadURL: String
@@ -36,7 +66,7 @@ object UpdateChecker {
         return url.split(Regex("/")).last()
     }
 
-    fun scheduleCopyUpdateAtShutdown(jarName: String) {
+    fun scheduleCopyUpdateAtShutdown(jarName: String, deleteOld: Boolean = false) {
         Runtime.getRuntime().addShutdownHook(Thread {
             try {
                 println("Attempting to apply Hysentials update.")
@@ -57,10 +87,16 @@ object UpdateChecker {
                 newLocation.createNewFile()
                 newJar.copyTo(newLocation, true)
                 newJar.delete()
-                if (oldJar.delete()) {
+                if (deleteOld && oldJar.delete()) {
                     println("successfully deleted the files. skipping install tasks")
                     return@Thread
                 }
+
+                if (!deleteOld) {
+                    println("Skipping delete task")
+                    return@Thread
+                }
+
                 println("Running delete task")
                 val taskFile = File(File(Hysentials.modDir, "updates"), "tasks").listFiles()?.last()
                 if (taskFile == null) {
@@ -111,6 +147,7 @@ object UpdateChecker {
     }
 
     init {
+        instance = this
         try {
             HysentialsKt.IO.launch {
                 updateGetter.run()
@@ -120,17 +157,20 @@ object UpdateChecker {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    fun onGuiOpen(e: GuiOpenEvent) {
-        if (e.gui !is GuiMainMenu) return
-        if (updateGetter.updateObj == null) return
-        if (UpdateGui.complete) return
-        Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(RequestUpdateGui())
-    }
+//    @SubscribeEvent(priority = EventPriority.HIGHEST)
+//    fun onGuiOpen(e: GuiOpenEvent) {
+//        if (e.gui !is GuiMainMenu) return
+//        if (updateGetter.updateObj == null) return
+//        if (UpdateGui.complete) return
+//        Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(RequestUpdateGui(false))
+//    }
 
     class UpdateGetter {
         @Volatile
         var updateObj: RedstoneRepo? = null
+
+        @Volatile
+        var updateNotes: UpdateNotes? = null
 
         suspend fun run() {
             println("Checking for updates...")
@@ -145,7 +185,8 @@ object UpdateChecker {
                     }
                     val body = Json.decodeFromString<RedstoneRepo>(req)
                     body.type = "beta"
-                    body.downloadUrl = "https://hysentials.redstone.llc/api/update/file?type=beta&uuid=${Minecraft.getMinecraft().session.profile.id.toString()}&key=${Socket.serverId}"
+                    body.downloadUrl =
+                        "https://hysentials.redstone.llc/api/update/file?type=beta&uuid=${Minecraft.getMinecraft().session.profile.id.toString()}&key=${Socket.serverId}"
                     body
                 }
 
@@ -160,7 +201,8 @@ object UpdateChecker {
                         }
                         val body = Json.decodeFromString<RedstoneRepo>(req)
                         body.type = "dev"
-                        body.downloadUrl = "https://hysentials.redstone.llc/api/update/file?type=dev&uuid=${Minecraft.getMinecraft().session.profile.id.toString()}&key=${Socket.serverId}"
+                        body.downloadUrl =
+                            "https://hysentials.redstone.llc/api/update/file?type=dev&uuid=${Minecraft.getMinecraft().session.profile.id.toString()}&key=${Socket.serverId}"
                         body
                     }
                 }
@@ -176,6 +218,18 @@ object UpdateChecker {
             if (currentVersion < latestVersion) {
                 updateObj = latestRelease
                 println("Update available!")
+                val req = NetworkUtils.getString( //dev
+                    "https://hysentials.redstone.llc/api/updatenotes?name=${latestRelease.name}"
+                ) ?: return
+                JSONObject(req).let {
+                    if (it.has("error")) {
+                        return@let null
+                    } else {
+                        val body = Json.decodeFromString<UpdateNotes>(req)
+                        body.notes = "A new update has been released in the ${listOf("release", "beta", "dev")[HysentialsConfig.updateChannel]} channel!\n\n${body.notes}\n\nYou can find the full changelog in the Discord.\nhttps://discord.gg/redstone"
+                        updateNotes = body
+                    }
+                }
             }
         }
     }
@@ -208,6 +262,7 @@ object UpdateChecker {
         override fun compareTo(other: SkytilsVersion): Int {
             if (!isSafe) return Int.MAX_VALUE
             if (!other.isSafe) return Int.MIN_VALUE
+            if (other.specialVersionType != this.specialVersionType) return Int.MIN_VALUE
             return if (versionArtifact.compareTo(other.versionArtifact) == 0) {
                 if (specialVersionType.ordinal == other.specialVersionType.ordinal) {
                     (specialVersion ?: 0.0).compareTo(other.specialVersion ?: 0.0)

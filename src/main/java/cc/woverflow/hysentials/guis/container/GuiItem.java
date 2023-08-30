@@ -4,20 +4,22 @@ import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.woverflow.hysentials.util.ItemNBT;
 import cc.woverflow.hysentials.util.Material;
 import cc.woverflow.hysentials.util.Renderer;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemMonsterPlacer;
+import net.minecraft.item.ItemSkull;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.NBTUtil;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class GuiItem {
     private GuiAction action;
@@ -34,6 +36,37 @@ public class GuiItem {
     public static GuiItem fromStack(@NotNull ItemStack itemStack) {
         Validate.notNull(itemStack, "The ItemStack for the GUI Item cannot be null!");
         return new GuiItem(itemStack, null);
+    }
+
+    public static List<String> stringToLore(String string, int characterLimit, ChatColor prefixColor) {
+        String[] words = string.split(" ");
+        List<String> lines = new ArrayList();
+        StringBuilder currentLine = new StringBuilder();
+        String[] var6 = words;
+        int var7 = words.length;
+
+        for (int var8 = 0; var8 < var7; ++var8) {
+            String word = var6[var8];
+            if (!word.equals("/newline")) {
+                if (currentLine.toString().equals("")) {
+                    currentLine = new StringBuilder(word);
+                } else {
+                    currentLine.append(" ").append(word);
+                }
+            }
+
+            if (word.equals("/newline") || currentLine.length() + word.length() >= characterLimit) {
+                String newLine = currentLine.toString();
+                lines.add("" + prefixColor + newLine);
+                currentLine = new StringBuilder();
+            }
+        }
+
+        if (currentLine.length() > 0) {
+            lines.add("" + prefixColor + currentLine);
+        }
+
+        return lines;
     }
 
     public static String colorize(String s) {
@@ -65,6 +98,19 @@ public class GuiItem {
 
         hideFlag(item, 34);
         setLore(item, colorize(Arrays.asList(lore)));
+
+        return item;
+    }
+
+    public static ItemStack makeColorfulSkullItem(String displayname, String owner, int amount, List<String> lore) {
+        ItemStack item = makeColorfulItem(Material.SKULL_ITEM, displayname, amount, 3, lore);
+
+        NBTTagCompound skullOwner = new NBTTagCompound();
+        GameProfile profile = new GameProfile(UUID.randomUUID(), null);
+        owner = new String(Base64.getEncoder().encode(String.format("{textures:{SKIN:{url:\"%s\"}}}", owner).getBytes()));
+        profile.getProperties().put("textures", new Property("textures", owner));
+        NBTUtil.writeGameProfile(skullOwner, profile);
+        item.setTagInfo("SkullOwner", skullOwner);
 
         return item;
     }
@@ -158,6 +204,21 @@ public class GuiItem {
         NBTTagCompound nbtTag = item.getTagCompound();
         nbtTag.setInteger("HideFlags", flags);
         item.setTagCompound(nbtTag);
+        return item;
+    }
+
+    public static ItemStack setEnchanted(ItemStack item, boolean enchanted) {
+        if (item.getTagCompound() == null) {
+            item.setTagCompound(new NBTTagCompound());
+        }
+
+        NBTTagCompound nbtTag = item.getTagCompound();
+        if (enchanted && !nbtTag.hasKey("ench")) {
+            nbtTag.setTag("ench", new NBTTagList());
+        } else {
+            nbtTag.removeTag("ench");
+        }
+
         return item;
     }
 

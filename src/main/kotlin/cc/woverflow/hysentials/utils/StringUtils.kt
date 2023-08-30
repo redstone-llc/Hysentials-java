@@ -1,6 +1,6 @@
 package cc.woverflow.hysentials.utils
 
-import gg.essential.universal.wrappers.message.UTextComponent
+import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent
 import org.apache.commons.lang3.StringUtils as ApacheStringUtils
 
 fun CharSequence?.countMatches(subString: CharSequence): Int = ApacheStringUtils.countMatches(this, subString)
@@ -24,6 +24,11 @@ fun String.toDashedUUID(): String {
         insert(8, "-")
     }
 }
+fun String.substringBefore(delimiter: String): String {
+    return this.substringBefore(delimiter, this)
+}
+
+
 
 fun String.toTitleCase(): String = this.lowercase().replaceFirstChar { c -> c.titlecase() }
 fun String.splitToWords(): String = this.split('_', ' ').joinToString(" ") { it.toTitleCase() }

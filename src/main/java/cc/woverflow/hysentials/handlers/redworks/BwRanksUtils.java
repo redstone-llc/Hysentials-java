@@ -8,6 +8,7 @@ import cc.woverflow.hysentials.util.BlockWAPIUtils;
 import cc.woverflow.hysentials.util.C;
 import cc.woverflow.hysentials.util.HypixelRanks;
 import cc.woverflow.hysentials.util.ScoreboardWrapper;
+import cc.woverflow.hysentials.websocket.Socket;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,12 +28,13 @@ public class BwRanksUtils {
 
         try {
             BlockWAPIUtils.Rank rank = null;
-            if (Hysentials.INSTANCE.getOnlineCache().getOnlinePlayers().containsKey(uuid)) {
-                try {
-                    rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().getRankCache().get(uuid).toUpperCase());
-                } catch (Exception ignored) {
-                    rank = BlockWAPIUtils.Rank.DEFAULT;
+            if (Socket.cachedUsers.stream().anyMatch(u -> u.getString("uuid").equals(uuid.toString()))) {
+                String r = Socket.cachedUsers.stream().filter(u -> u.getString("uuid").equals(uuid.toString())).findFirst().get().getString("rank");
+                if (r != null) {
+                    rank = BlockWAPIUtils.Rank.valueOf(r.toUpperCase());
                 }
+            } else {
+                rank = BlockWAPIUtils.getRank(uuid);
             }
             String regex1 = "\\[[A-Za-z§0-9+]+] " + name;
             String regex2 = "(§r§7|§7)" + name;
@@ -105,7 +107,7 @@ public class BwRanksUtils {
                     return message;
                 }
 
-                if (LocrawUtil.INSTANCE.isInGame()) {
+                if (LocrawUtil.INSTANCE.isInGame() && !LocrawUtil.INSTANCE.getLocrawInfo().getGameType().equals(LocrawInfo.GameType.HOUSING)) {
                     if (!(sline1.startsWith("Players: ") || sline2.startsWith("Players: ") || sline1.startsWith("Map: ") || sline2.startsWith("Map: "))) {
                         return message;
                     }
@@ -253,12 +255,13 @@ public class BwRanksUtils {
 
     public static String getReplace(String prefix, String name, UUID uuid) {
         BlockWAPIUtils.Rank rank = null;
-        if (Hysentials.INSTANCE.getOnlineCache().getOnlinePlayers().containsKey(uuid)) {
-            try {
-                rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().getRankCache().get(uuid).toUpperCase());
-            } catch (Exception ignored) {
-                rank = BlockWAPIUtils.Rank.DEFAULT;
+        if (Socket.cachedUsers.stream().anyMatch(u -> u.getString("uuid").equals(uuid.toString()))) {
+            String r = Socket.cachedUsers.stream().filter(u -> u.getString("uuid").equals(uuid.toString())).findFirst().get().getString("rank");
+            if (r != null) {
+                rank = BlockWAPIUtils.Rank.valueOf(r.toUpperCase());
             }
+        } else {
+            rank = BlockWAPIUtils.getRank(uuid);
         }
 
         if (rank != null && rank != BlockWAPIUtils.Rank.DEFAULT) {

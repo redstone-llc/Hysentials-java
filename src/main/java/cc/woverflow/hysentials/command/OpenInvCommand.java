@@ -48,7 +48,7 @@ public class OpenInvCommand extends CommandBase {
             return;
         }
         for (EntityPlayer player : Minecraft.getMinecraft().theWorld.playerEntities) {
-            if (player.getName().equals(args[0])) {
+            if (player.getName().equalsIgnoreCase(args[0])) {
                 new PlayerInventory(player).open();
                 return;
             }

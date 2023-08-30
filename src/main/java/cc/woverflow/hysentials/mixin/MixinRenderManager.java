@@ -1,7 +1,11 @@
 package cc.woverflow.hysentials.mixin;
 
-import cc.woverflow.hysentials.pets.cubit.EntityCubit;
-import cc.woverflow.hysentials.pets.cubit.RenderCubit;
+import cc.woverflow.hysentials.cosmetics.cubit.EntityCubit;
+import cc.woverflow.hysentials.cosmetics.cubit.RenderCubit;
+import cc.woverflow.hysentials.cosmetics.hamster.EntityHamster;
+import cc.woverflow.hysentials.cosmetics.hamster.RenderHamster;
+import cc.woverflow.hysentials.cosmetics.pepper.EntityPepper;
+import cc.woverflow.hysentials.cosmetics.pepper.RenderPepper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.entity.Render;
@@ -25,6 +29,8 @@ public class MixinRenderManager {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void injectEntities(TextureManager renderEngineIn, RenderItem itemRendererIn, CallbackInfo ci) {
         entityRenderMap.put(EntityCubit.class, new RenderCubit((RenderManager) (Object) this));
+        entityRenderMap.put(EntityPepper.class, new RenderPepper((RenderManager) (Object) this));
+        entityRenderMap.put(EntityHamster.class, new RenderHamster((RenderManager) (Object) this));
     }
 
     @Inject(method = "getFontRenderer", at = @At("HEAD"), cancellable = true)

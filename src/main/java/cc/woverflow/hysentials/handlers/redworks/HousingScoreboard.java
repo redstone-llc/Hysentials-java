@@ -1,5 +1,6 @@
 package cc.woverflow.hysentials.handlers.redworks;
 
+import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import cc.woverflow.hysentials.util.C;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiPlayerTabOverlay;
@@ -37,6 +38,7 @@ public class HousingScoreboard {
     }
     public String getHousingName() {
         if (getMinecraft().ingameGUI == null || getMinecraft().ingameGUI.getTabList() == null) return null;
+        if (!HypixelUtils.INSTANCE.isHypixel()) return null;
         try {
             GuiPlayerTabOverlay tab = getMinecraft().ingameGUI.getTabList();
             String footer = ((IChatComponent) footerField.get(tab)).getFormattedText();
@@ -58,6 +60,7 @@ public class HousingScoreboard {
 
     public String getHousingCreator() {
         if (getMinecraft().ingameGUI == null || getMinecraft().ingameGUI.getTabList() == null) return null;
+        if (!HypixelUtils.INSTANCE.isHypixel()) return null;
         try {
             GuiPlayerTabOverlay tab = getMinecraft().ingameGUI.getTabList();
             String footer = ((IChatComponent) footerField.get(tab)).getFormattedText();

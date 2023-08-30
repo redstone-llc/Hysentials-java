@@ -10,18 +10,27 @@ import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
-import cc.polyfrost.oneconfig.libs.checker.units.qual.N;
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.libs.universal.UKeyboard;
+import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.cosmetic.CosmeticGui;
+import cc.woverflow.hysentials.gui.UpdateChecker;
+
+import cc.woverflow.hysentials.utils.RedstoneRepo;
+import cc.woverflow.hysentials.utils.UpdateNotes;
 import cc.woverflow.hytils.HytilsReborn;
 import net.minecraft.client.Minecraft;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.awt.*;
 import java.io.File;
+import java.util.List;
+
+import static cc.woverflow.hysentials.guis.actionLibrary.ClubActionViewer.toList;
 
 public class HysentialsConfig extends Config {
-    // GENERAL
     @Text(
         name = "Chat Prefix",
         category = "General",
@@ -39,6 +48,17 @@ public class HysentialsConfig extends Config {
     )
     public static int updateChannel = 1;
 
+    @Button(
+        name = "Check for Updates",
+        category = "General",
+        subcategory = "General",
+        description = "Check for updates for Hysentials.",
+        text = "Check for Updates"
+    )
+    public void checkForUpdates() {
+        UpdateChecker.Companion.checkUpdateAndOpenMenu();
+    }
+
     @KeyBind(
         name = "Open Cosmetics",
         category = "General",
@@ -46,7 +66,6 @@ public class HysentialsConfig extends Config {
         description = "The keybind to open the cosmetics menu."
     )
     public static OneKeyBind keyBind = new OneKeyBind(UKeyboard.KEY_K);
-
 
 
     @Switch(
@@ -60,18 +79,10 @@ public class HysentialsConfig extends Config {
     @Switch(
         name = "Futuristic Ranks",
         category = "General",
-        subcategory = "Ranks",
-        description = "Enable futuristic ranks. This will allow you to see an image as a users rank."
+        subcategory = "Fancy Formatting",
+        description = "Enable futuristic ranks. This will allow you to see an image as a users rank, aswell as other things."
     )
     public static boolean futuristicRanks = true;
-
-    @Switch(
-        name = "Futuristic Channels",
-        category = "General",
-        subcategory = "Chat",
-        description = "Enable futuristic channels. This will allow you to see an image as a chat channel"
-    )
-    public static boolean futuristicChannels = true;
 
     @Switch(
         name = "Chat Limit 256",
@@ -84,8 +95,8 @@ public class HysentialsConfig extends Config {
     @Button(
         name = "Rank Image Config",
         category = "General",
-        subcategory = "Ranks",
-        description = "Opens the rank image config directory.",
+        subcategory = "Fancy Formatting",
+        description = "Opens the rank image config folder.",
         text = "Open Folder")
     public void openRankImageConfig() {
         Desktop desktop = Desktop.getDesktop();
@@ -93,16 +104,82 @@ public class HysentialsConfig extends Config {
         try {
             desktop.open(directory);
         } catch (Exception e) {
+            UChat.chat("&cError opening folder!");
             e.printStackTrace();
         }
     }
 
     @Button(
-            name = "Additional Configs",
-            category = "General",
-            subcategory = "Hytils",
-            description = "Opens the Hytils config page.",
-            text = "OPEN")
+        name = "Hex Color Config",
+        category = "General",
+        subcategory = "Fancy Formatting",
+        description = "Opens the rank hex color config file.",
+        text = "Open File")
+    public void openRankHexConfig() {
+        Desktop desktop = Desktop.getDesktop();
+        File directory = new File("./config/hysentials/colors.json");
+        try {
+            desktop.open(directory);
+        } catch (Exception e) {
+            UChat.chat("&cError opening file!");
+            e.printStackTrace();
+        }
+    }
+
+    @Button(
+        name = "Install Hytils Reborn",
+        category = "General",
+        subcategory = "Hytils",
+        description = "Installs Hytils Reborn for you.",
+        text = "Install")
+    public void installHytils() {
+        if (!Hysentials.INSTANCE.isHytils) {
+            Hysentials.INSTANCE.getLogger().info("Installing Hytils Reborn...");
+            try {
+                String request1 = NetworkUtils.getString("https://api.modrinth.com/v2/project/nF6YaBfO");
+                JSONObject json1 = new JSONObject(request1);
+                if (json1.isEmpty()) {
+                    Hysentials.INSTANCE.getLogger().error("Error installing Hytils Reborn!");
+                    return;
+                }
+                List<Object> versions = toList(json1.getJSONArray("versions"));
+                String latestVersion = ((String) versions.get(versions.size() - 1));
+                String request2 = NetworkUtils.getString("https://api.modrinth.com/v2/version/" + latestVersion);
+                JSONObject json2 = new JSONObject(request2);
+                if (json2.isEmpty()) {
+                    Hysentials.INSTANCE.getLogger().error("Error installing Hytils Reborn!");
+                    return;
+                }
+                JSONObject file = json2.getJSONArray("files").getJSONObject(0);
+                RedstoneRepo repo = new RedstoneRepo(
+                    file.getString("filename"),
+                    "jar",
+                    file.getInt("size"),
+                    json2.getString("version_type"),
+                    file.getString("url")
+                );
+                UpdateNotes notes = new UpdateNotes(
+                    file.getString("filename"),
+                    "https://cdn.modrinth.com/data/nF6YaBfO/5de4ce522bbc4af9229018cbaeefb117ec458648.png",
+                    json2.getString("changelog")
+                );
+
+                UpdateChecker.Companion.installFromUrl(repo, notes);
+            } catch (Exception e) {
+                Hysentials.INSTANCE.getLogger().error("Error installing Hytils Reborn!");
+                e.printStackTrace();
+            }
+        } else {
+            Hysentials.INSTANCE.getLogger().error("Hytils Reborn is already installed!");
+        }
+    }
+
+    @Button(
+        name = "Additional Configs",
+        category = "General",
+        subcategory = "Hytils",
+        description = "Opens the Hytils config page.",
+        text = "OPEN")
     public void openHytilsConfig() {
         if (Hysentials.INSTANCE.isHytils) {
             HytilsReborn.INSTANCE.getConfig().openGui();
@@ -120,41 +197,53 @@ public class HysentialsConfig extends Config {
     )
     public static boolean removeAsterisk = true;
 
+    @Switch(
+        name = "Housing Name Scoreboard",
+        category = "Housing",
+        subcategory = "General",
+        description = "Adds the housing name to the scoreboards title."
+    )
+    public static boolean housingNameScoreboard = true;
 
-//    // PETS
-//    @Button(
-//        name = "Hamster Pet",
-//        category = "Pets",
-//        subcategory = "Hamster",
-//        description = "Will enable the hamster pet, if you have it unlocked.",
-//        text = "DISABLED"
-//    )
-//    public void hamsterEnabled() {
-//
-//    }
-//
-//    @Button(
-//        name = "Cubit Pet",
-//        category = "Pets",
-//        subcategory = "Cubit",
-//        description = "Will enable the cubit pet, if you have it unlocked. Only available for \"Special\" Plus Players.",
-//        text = "DISABLED"
-//    )
-//    public void cubitEnabled() {
-//    }
+    @Switch(
+        name = "Shift+Right Click OpenInv",
+        category = "Housing",
+        subcategory = "General",
+        description = "Toggles the ability to open a players inventory by shift right clicking them."
+    )
+    public static boolean shiftRightClickInv = true;
+
     @Switch(
         name = "Show Pets in game",
-        category = "Pets",
-        subcategory = "General",
+        category = "Comsetics",
+        subcategory = "Pets",
         description = "Will allow pets to be shown in game."
     )
     public static boolean showPets = false;
+
+    @Dropdown(
+        name = "Cape Animation",
+        category = "Comsetics",
+        subcategory = "Capes",
+        description = "Which animation the capes should render with.",
+        options = {"Blocky Animation", "Silky Animation"}
+    )
+    public static int blockyCapes = 0;
+
+    @Switch(
+        name = "Wind Effect",
+        category = "Comsetics",
+        subcategory = "Capes",
+        description = "Will give the capes a windy effect making it look like they are blowing in the wind."
+    )
+    public static boolean windEffect = true;
+
 
     // LOBBY
 
     @Switch(
         name = "Housing Lag Reducer",
-        category= "Lobby",
+        category = "Lobby",
         subcategory = "General",
         description = "Will reduce the lag in the housing lobby, by hiding armorstands further than 20 blocks away from the player."
     )
@@ -248,24 +337,24 @@ public class HysentialsConfig extends Config {
     // HTSL
     @Checkbox(
         name = "HTSL Enabled",
-        category = "HTSL",
-        subcategory = "General",
+        category = "Housing",
+        subcategory = "HTSL",
         description = "Enable HTSL. This will allow you to use the HTSL language."
     )
     public static boolean htslEnabled = true;
 
     @Checkbox(
         name = "Use Safemode",
-        category = "HTSL",
-        subcategory = "General",
+        category = "Housing",
+        subcategory = "HTSL",
         description = "Will show you where to click while loading in an action, this requires manual input and is no longer considered a \"macro\".\n\n&aSafeMode is recommended if you want to be extra careful not to break the rules."
     )
     public static boolean htslSafeMode = false;
 
     @Number(
         name = "Gui Cooldown",
-        category = "HTSL",
-        subcategory = "Miscellaneous",
+        category = "Housing",
+        subcategory = "HTSL",
         description = "Amount of cooldown between clicking an item in a GUI.\n\nvalues under 20 will result in more errors.",
         min = 0,
         max = 100
@@ -274,19 +363,22 @@ public class HysentialsConfig extends Config {
 
     @Number(
         name = "Gui Timeout",
-        category = "HTSL",
-        subcategory = "Miscellaneous",
+        category = "Housing",
+        subcategory = "HTSL",
         description = "Amount of ticks after not clicking anything in the GUI before declaring an error and timing out.\n\n&eIf you have lots of lagspikes / slow internet and HTSL keeps timing out you should increase this",
         min = 60,
         max = 200
     )
     public static int guiTimeout = 60;
 
+    public static boolean wardrobeDarkMode = true;
+
 
     public HysentialsConfig() {
         super(new Mod("Hysentials", ModType.HYPIXEL), "hysentials.json");
         this.initialize();
         this.hideIf("openHytilsConfig", () -> !Hysentials.INSTANCE.isHytils);
+        this.hideIf("installHytils", () -> Hysentials.INSTANCE.isHytils);
         this.registerKeyBind(keyBind, () -> {
             Minecraft.getMinecraft().thePlayer.closeScreen();
             Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(new CosmeticGui());

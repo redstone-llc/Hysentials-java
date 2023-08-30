@@ -1,5 +1,6 @@
 package cc.woverflow.hysentials.handlers.imageicons;
 
+import cc.woverflow.hysentials.cosmetic.CosmeticGui;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.woverflow.hysentials.util.ImageIconRenderer;
 import net.minecraft.client.Minecraft;
@@ -9,6 +10,7 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.opengl.GL11;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -16,10 +18,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,44 +32,49 @@ public class ImageIcon {
     private final String name;
     public int width;
     public int height;
+    public boolean emoji;
 
-    public ImageIcon(String name, ResourceLocation resourceLocation) {
+    public ImageIcon(String name, ResourceLocation resourceLocation, boolean emoji) {
         this.name = name;
         this.resourceLocation = resourceLocation;
+        this.emoji = emoji;
         try {
-            File file = new File("./config/hysentials/imageicons/" + name + ".png");
-            if (!file.exists()) {
-                if (!file.getParentFile().exists()) {
-                    file.getParentFile().mkdirs();
-                }
-                InputStream stream = Minecraft.getMinecraft().mcDefaultResourcePack.getInputStream(resourceLocation);
-                if (stream == null) {
-                    throw new RuntimeException("ImageIcon " + name + " does not exist in the resource pack!");
-                }
-                BufferedImage image = javax.imageio.ImageIO.read(stream);
-                this.width = image.getWidth();
-                this.height = image.getHeight();
-                if (height != 9) {
-                    throw new RuntimeException("ImageIcon " + name + " has an invalid size! Expected height to be 9");
-                }
-                this.dynamicTexture = new DynamicTexture(image);
-                stream.close();
-                ImageIO.write(image, "png", file);
-                this.resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(this.name, this.dynamicTexture);
-            } else {
-                BufferedImage image = javax.imageio.ImageIO.read(file);
-                this.width = image.getWidth();
-                this.height = image.getHeight();
-                if (height != 9) {
-                    throw new RuntimeException("ImageIcon " + name + " has an invalid size! Expected height to be 9");
-                }
-                this.dynamicTexture = new DynamicTexture(image);
-                this.resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(this.name, this.dynamicTexture);
-            }
+            handleImageIcon();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         ImageIcon.imageIcons.put(name, this);
+    }
+
+    public ImageIcon(String name, ResourceLocation resourceLocation) {
+        this(name, resourceLocation, false);
+    }
+
+    private void handleImageIcon() throws IOException {
+        File file = new File("./config/hysentials/" + (emoji ? "emojis" : "imageicons") + "/" + name + ".png");
+        if (!file.exists() || (name.equals("party") && javax.imageio.ImageIO.read(file).getWidth() != 48)) {
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+            InputStream stream = Minecraft.getMinecraft().mcDefaultResourcePack.getInputStream(resourceLocation);
+            if (stream == null) {
+                throw new RuntimeException("ImageIcon " + name + " does not exist in the resource pack!");
+            }
+            BufferedImage image = javax.imageio.ImageIO.read(stream);
+            this.width = image.getWidth();
+            this.height = image.getHeight();
+
+            this.dynamicTexture = new DynamicTexture(image);
+            stream.close();
+            ImageIO.write(image, "png", file);
+            this.resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(this.name, this.dynamicTexture);
+        } else {
+            BufferedImage image = javax.imageio.ImageIO.read(file);
+            this.width = image.getWidth();
+            this.height = image.getHeight();
+            this.dynamicTexture = new DynamicTexture(image);
+            this.resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(this.name, this.dynamicTexture);
+        }
     }
 
     public static void reloadIcons() {
@@ -78,11 +83,6 @@ public class ImageIcon {
                 File file = new File("./config/hysentials/imageicons/" + icon.name + ".png");
                 if (file.exists()) {
                     BufferedImage image = javax.imageio.ImageIO.read(file);
-                    if (image.getHeight() != 9) {
-                        MUtils.chat("&cImageIcon " + icon.name + " has an invalid size! Expected height to be 9");
-                        ImageIcon.imageIcons.remove(icon.name);
-                        continue;
-                    }
                     icon.width = image.getWidth();
                     icon.height = image.getHeight();
                     icon.dynamicTexture = new DynamicTexture(image);
@@ -111,7 +111,7 @@ public class ImageIcon {
         return height;
     }
 
-    public static Pattern stringPattern = Pattern.compile(":([a-z_\\-0-9]+):", 2);
+    public static Pattern stringPattern = Pattern.compile(":([a-z_\\-0-9?]+):", 2);
 
     public static List<ImageIcon> getIconsFromText(String text) {
         List<ImageIcon> icons = new ArrayList<>();
@@ -126,10 +126,27 @@ public class ImageIcon {
         return icons;
     }
 
-    public int renderImage(float x, float y) {
+    public int renderImage(float x, float y, boolean shadow, int oldColor, UUID uuid, float alpha) {
+        if (emoji && uuid != null && !CosmeticGui.Companion.hasCosmetic(uuid, "hymojis")) {
+            return -1;
+        }
         Minecraft.getMinecraft().getTextureManager().bindTexture(this.resourceLocation);
-        drawModalRectWithCustomSizedTexture((x), y, 0, 0, getWidth(), getHeight(), getWidth(), getHeight());
-        return getWidth();
+        int width = this.getWidth();
+        int height = this.getHeight();
+        float scaledHeight = (float) 9/height;
+
+        GlStateManager.pushMatrix();
+        GlStateManager.scale(scaledHeight, scaledHeight, scaledHeight);
+        int textColor = Integer.parseInt("FFFFFF", 16);
+        if (shadow) {
+            textColor = (textColor & 16579836) >> 2 | textColor & -16777216;
+        }
+        GlStateManager.color((float) (textColor >> 16) / 255.0F, (float) (textColor >> 8 & 255) / 255.0F, (float) (textColor & 255) / 255.0F, alpha);
+        drawModalRectWithCustomSizedTexture(x * (1 / scaledHeight), y * (1 / scaledHeight), 0, 0, width, height, width, height);
+        GlStateManager.color((float) (oldColor >> 16) / 255.0F, (float) (oldColor >> 8 & 255) / 255.0F, (float) (oldColor & 255) / 255.0F, alpha);
+
+        GlStateManager.popMatrix();
+        return (int) (getWidth() * scaledHeight);
     }
 
     public static void drawModalRectWithCustomSizedTexture(double x, double y, float u, float v, int width, int height, float textureWidth, float textureHeight) {

@@ -41,6 +41,10 @@ public class RemoveLoreLineCommand extends CommandBase {
             UChat.chat("&cUsage: /removeloreline <line>");
             return;
         }
+        if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative()) {
+            MUtils.chat("§cYou must be in creative mode!");
+            return;
+        }
         int line;
         try {
             line = Integer.parseInt(args[0]);

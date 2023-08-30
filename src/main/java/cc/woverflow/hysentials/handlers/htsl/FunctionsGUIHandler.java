@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static cc.woverflow.hysentials.command.RemoveGlowCommand.enchantmentTagListToHashMap;
-import static cc.woverflow.hysentials.command.RemoveGlowCommand.removeEnchant;
 import static cc.woverflow.hysentials.guis.sbBoxes.SBBoxesEditor.drawRect;
 
 public class FunctionsGUIHandler {

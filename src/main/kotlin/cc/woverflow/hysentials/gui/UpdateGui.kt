@@ -20,7 +20,7 @@ import kotlin.math.floor
  * https://github.com/Wynntils/Wynntils/blob/development/LICENSE
  * @author Wynntils
  */
-class UpdateGui(restartNow: Boolean) : GuiScreen() {
+class UpdateGui(restartNow: Boolean, private var deleteOld: Boolean = false) : GuiScreen() {
     companion object {
         private val DOTS = arrayOf(".", "..", "...", "...", "...")
         private const val DOT_TIME = 200 // ms between "." -> ".." -> "..."
@@ -39,12 +39,12 @@ class UpdateGui(restartNow: Boolean) : GuiScreen() {
         try {
             val directory = File(Hysentials.modDir, "updates")
             directory.mkdirs()
-            val url = UpdateChecker.updateDownloadURL
-            val jarName = UpdateChecker.updateAsset.name
+            val url = UpdateChecker.instance.updateDownloadURL
+            val jarName = UpdateChecker.instance.updateAsset.name
             thread(name = "Hysentials-update-downloader-thread") {
                 downloadUpdate(url, directory, jarName)
                 if (!failed) {
-                    UpdateChecker.scheduleCopyUpdateAtShutdown(jarName)
+                    UpdateChecker.instance.scheduleCopyUpdateAtShutdown(jarName, deleteOld)
                     if (restartNow) {
                         mc.shutdown()
                     }
@@ -122,7 +122,7 @@ class UpdateGui(restartNow: Boolean) : GuiScreen() {
     }
 
     override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
-        drawDefaultBackground()
+        drawBackground(0)
         when {
             failed -> drawCenteredString(
                 mc.fontRendererObj,

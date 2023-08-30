@@ -2,6 +2,7 @@ package cc.woverflow.hysentials.util;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
 import com.google.gson.JsonObject;
 import org.json.JSONObject;
@@ -13,6 +14,7 @@ public enum HypixelRanks {
     VIP_PLUS("[VIP§6+§a] ", "vipplus", "§a", "vips"),
     MVP("[MVP] ", "mvp", "§b", "bluemvps"),
     MOD("[MOD] ", "mod", "§2", "mod"),
+    HELPER("[HELPER] ", "helper", "§9", "helper"),
     ADMIN("[ADMIN] ", "admin", "§c", "admin"),
     YOUTUBER("[§fYOUTUBE§c] ", "youtube", "§c", "youtube"),
     NPC("[NPC] ", "npc", "§8", "npc"),
@@ -99,13 +101,21 @@ public enum HypixelRanks {
     }
 
     public String getNametag() {
-        JSONObject colorGroup = Hysentials.INSTANCE.rankColors.jsonObject.getJSONObject(hex);
-        return "<" + colorGroup.getString("nametag_color") + ">";
+        if (HysentialsConfig.futuristicRanks) {
+            JSONObject colorGroup = Hysentials.INSTANCE.rankColors.jsonObject.getJSONObject(hex);
+            return "<" + colorGroup.getString("nametag_color") + ">";
+        } else {
+            return color;
+        }
     }
 
     public String getChat() {
-        JSONObject colorGroup = Hysentials.INSTANCE.rankColors.jsonObject.getJSONObject(hex);
-        return "<" + colorGroup.getString("chat_message_color") + ">";
+        if (HysentialsConfig.futuristicRanks) {
+            JSONObject colorGroup = Hysentials.INSTANCE.rankColors.jsonObject.getJSONObject(hex);
+            return "<" + colorGroup.getString("chat_message_color") + ">";
+        } else {
+            return (this.equals(DEFAULT) ? "§7" : "§f");
+        }
     }
 
     public String getAsPlaceholder() {
@@ -134,6 +144,7 @@ public enum HypixelRanks {
         WHITE("§f");
 
         private final String color;
+
         RankColors(String color) {
             this.color = color;
         }

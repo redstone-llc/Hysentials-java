@@ -1,5 +1,7 @@
 package cc.woverflow.hysentials.handlers.npc;
 
+import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
+import cc.woverflow.hysentials.handlers.npc.lost.LostAdventure;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
@@ -18,11 +20,14 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.*;
 import net.minecraft.world.World;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.lang.reflect.Field;
@@ -33,8 +38,25 @@ public class QuestNPC {
     public static GameProfile profile;
     public static EntityOtherPlayerMP player;
     public static boolean isSpawned = false;
+
+    public QuestNPC() {
+        new LostAdventure();
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void onMessageReceived(@NotNull ClientChatReceivedEvent event) {
+        if (!HypixelUtils.INSTANCE.isHypixel()) return;
+        if (event.type != 0 && event.type != 1) return;
+        for (NPC npc : NPC.npcs) {
+            npc.onMessageRecieve(event);
+        }
+    }
+
     @SubscribeEvent
     public void onWorldLoad(WorldEvent.Load event) {
+        for (NPC npc : NPC.npcs) {
+            npc.onWorldLoad();
+        }
 //        Multithreading.schedule(() -> {
 //            if (Minecraft.getMinecraft().theWorld != null) {
 //                if ((!Socket.cachedData.has("questNPC") || !Socket.cachedData.getJSONObject("questNPC").has("x"))) {
@@ -75,14 +97,17 @@ public class QuestNPC {
 
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
-        LocrawInfo locraw = LocrawUtil.INSTANCE.getLocrawInfo();
-        if (QuestNPC.pos != null) {
-            WaypointUtil.renderWayPoint("Spawn NPC", QuestNPC.pos, event.partialTicks);
+        for (NPC npc : NPC.npcs) {
+            if (npc.entity == null) continue;
+            WaypointUtil.renderWayPoint("Spawn NPC", npc.entity.getPosition(), event.partialTicks);
         }
     }
 
     @SubscribeEvent
     public void onWorldRender(RenderWorldLastEvent event) {
+        for (NPC npc : NPC.npcs) {
+            npc.onWorldRender(event);
+        }
         if (Minecraft.getMinecraft().theWorld == null) return;
         if (QuestNPC.player == null) return;
         EntityPlayer player = getClosestPlayer(QuestNPC.player.posX, QuestNPC.player.posY, QuestNPC.player.posZ, 5);
@@ -93,30 +118,12 @@ public class QuestNPC {
 
     @SubscribeEvent
     public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.action.equals(PlayerInteractEvent.Action.RIGHT_CLICK_AIR)) {
+        for (NPC npc : NPC.npcs) {
             MovingObjectPosition obj = getMouseOverExtended(4);
             if (obj == null) return;
-            if (obj.entityHit == null || QuestNPC.player == null || obj.entityHit.getUniqueID() == null) return;
-            if (obj.entityHit.getUniqueID().equals(QuestNPC.player.getUniqueID())) {
-                if (!Socket.cachedData.has("questNPC")) {
-                    MUtils.chat("§e[Quest NPC] &fHello adventurer! You managed to find me congratulations!");
-                    Multithreading.schedule(() -> MUtils.chat("§e[Quest NPC] &fThis won't be the last time you will have to find me though."), 2, TimeUnit.SECONDS);
-                    Multithreading.schedule(() -> MUtils.chat("§e[Quest NPC] &fI will be hiding in a different location each time you complete a quest."), 4, TimeUnit.SECONDS);
-                    Multithreading.schedule(() -> MUtils.chat("§e[Quest NPC] &fClick me again to recieve your first "), 6, TimeUnit.SECONDS);
-
-                    JSONObject obj1 = new JSONObject();
-                    obj1.put("interacted", true);
-                    Socket.CLIENT.sendText(new Request(
-                        "method", "updateData",
-                        "uuid", Minecraft.getMinecraft().thePlayer.getUniqueID().toString(),
-                        "questNPC", obj1.toString()
-                    ).toString());
-                    Socket.cachedData.put("questNPC", obj1);
-                } else {
-
-                }
-
-            }
+            if (obj.entityHit == null || npc.entity == null || obj.entityHit.getUniqueID() == null) return;
+            if (!obj.entityHit.getUniqueID().equals(npc.entity.getUniqueID())) return;
+            npc.onInteract(event, obj);
         }
     }
 
@@ -228,7 +235,7 @@ public class QuestNPC {
         me.setRotationYawHead((float)yaw);
     }
 
-    public EntityPlayer getClosestPlayer(double x, double y, double z, double distance) {
+    public static EntityPlayer getClosestPlayer(double x, double y, double z, double distance) {
         double d0 = -1.0;
         EntityPlayer entityplayer = null;
 
@@ -251,13 +258,11 @@ public class QuestNPC {
     }
 
     public static BlockPos pos = null;
-    public static BlockPos checkPosition() {
+    public static BlockPos checkPosition(int radius) {
         World world = Minecraft.getMinecraft().theWorld;
         int centerX = Minecraft.getMinecraft().thePlayer.getPosition().getX();
         int centerY = Minecraft.getMinecraft().thePlayer.getPosition().getY();
         int centerZ = Minecraft.getMinecraft().thePlayer.getPosition().getZ();
-
-        int radius = 200; // Maximum distance from the given coordinates
 
         Random random = new Random();
 
@@ -269,9 +274,9 @@ public class QuestNPC {
         boolean air = world.isAirBlock(new BlockPos(randomX, randomY + 1, randomZ)) && world.isAirBlock(new BlockPos(randomX, randomY + 2, randomZ)) && world.isAirBlock(new BlockPos(randomX, randomY + 3, randomZ));
 
         if (!block || !air || !world.canSeeSky(new BlockPos(randomX, randomY + 3, randomZ))) {
-            return checkPosition();
+            return checkPosition(radius);
         } else {
-            MUtils.chat("§a" + randomX + " " + randomY + " " + randomZ);
+//            MUtils.chat("§a" + randomX + " " + randomY + " " + randomZ);
             return new BlockPos(randomX, randomY + 3, randomZ);
         }
     }

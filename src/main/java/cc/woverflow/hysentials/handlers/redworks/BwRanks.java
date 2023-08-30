@@ -9,13 +9,23 @@ import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.handlers.sbb.SbbRenderer;
 import cc.woverflow.hysentials.util.*;
+import cc.woverflow.hysentials.utils.StringUtilsKt;
 import cc.woverflow.hysentials.websocket.Socket;
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Ordering;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.gui.GuiPlayerTabOverlay;
+import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.scoreboard.ScorePlayerTeam;
+import net.minecraft.world.WorldSettings;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.IOException;
 import java.util.*;
@@ -23,11 +33,12 @@ import java.util.regex.Pattern;
 
 public class BwRanks {
     private int tick;
-    public static HashMap<NetworkPlayerInfo, DuoVariable<String,String>> playerTeamMap = new HashMap<>();
+    public static HashMap<NetworkPlayerInfo, DuoVariable<String, String>> playerTeamMap = new HashMap<>();
 
-    public static HashMap<String, String> replacementMap = new HashMap<>();
+    public static HashMap<String, DuoVariable<UUID, String>> replacementMap = new HashMap<>();
     public static HashMap<UUID, ScorePlayerTeam> customTeamMap = new HashMap<>();
     public static boolean hasRank = true;
+
 
     @SubscribeEvent
     public void onWorldLoad(WorldEvent.Load event) {
@@ -36,6 +47,14 @@ public class BwRanks {
         replacementMap.clear();
         customTeamMap.clear();
     }
+
+    @SubscribeEvent
+    public void onGuiOpen(GuiOpenEvent event) {
+        if (!(event.gui instanceof GuiMainMenu)) return;
+        if (!Socket.banned) return;
+
+    }
+
     public static boolean hidingGuildList = false;
     public static boolean hidingLastMessage = false;
     public static List<String> lines = new ArrayList<>();
@@ -43,6 +62,7 @@ public class BwRanks {
     public boolean debug = false;
     public static boolean initializedRpc = false;
     int tick2 = 0;
+
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         final LocrawInfo locraw = LocrawUtil.INSTANCE.getLocrawInfo();
@@ -60,57 +80,52 @@ public class BwRanks {
             this.tick = 0;
         }
         if (tick % 5 == 0) {
-            if (Minecraft.getMinecraft().fontRendererObj instanceof ImageIconRenderer && !HysentialsConfig.futuristicRanks) {
-                Minecraft.getMinecraft().fontRendererObj = Hysentials.minecraftFont;
-            } else if (!(Minecraft.getMinecraft().fontRendererObj instanceof ImageIconRenderer) && HysentialsConfig.futuristicRanks) {
-                Minecraft.getMinecraft().fontRendererObj = Hysentials.INSTANCE.imageIconRenderer;
-            }
-
-
             Multithreading.runAsync(() -> {
                 //Discord RPC
-                if (Socket.cachedServerData.has("rpc") && Socket.cachedServerData.getBoolean("rpc")) {
-                    if (!initializedRpc && HypixelUtils.INSTANCE.isHypixel()) {
-                        if (Hysentials.INSTANCE.discordRPC == null) {
-                            try {
-                                DiscordCore.init();
+                try {
+                    if (Socket.cachedServerData.has("rpc") && Socket.cachedServerData.getBoolean("rpc")) {
+                        if (!initializedRpc && HypixelUtils.INSTANCE.isHypixel()) {
+                            if (Hysentials.INSTANCE.discordRPC == null) {
                                 Hysentials.INSTANCE.discordRPC = new DiscordRPC();
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
                             }
+                            Hysentials.INSTANCE.discordRPC.register();
+                            initializedRpc = true;
                         }
-                        Hysentials.INSTANCE.discordRPC.register();
-                        initializedRpc = true;
+                        Hysentials.INSTANCE.discordRPC.updateRPC();
                     }
-                    Hysentials.INSTANCE.discordRPC.updateRPC();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
-                HashMap<NetworkPlayerInfo, String> displayMap = Minecraft.getMinecraft().getNetHandler().getPlayerInfoMap().stream().collect(HashMap::new, (map, playerInfo) -> {
+                NetHandlerPlayClient netHandlerPlayClient = Minecraft.getMinecraft().thePlayer.sendQueue;
+
+                HashMap<NetworkPlayerInfo, String> displayMap = netHandlerPlayClient.getPlayerInfoMap().stream().collect(HashMap::new, (map, playerInfo) -> {
                     String display = playerInfo.getDisplayName() == null ? "" : playerInfo.getDisplayName().getFormattedText();
                     if (display.equals("") && playerInfo.getPlayerTeam() != null) {
                         display = playerInfo.getPlayerTeam().getColorPrefix() + playerInfo.getGameProfile().getName() + playerInfo.getPlayerTeam().getColorSuffix();
                     }
                     String originalDisplay = display;
-                    display = display.replace(display.substring(display.indexOf(playerInfo.getGameProfile().getName()) + playerInfo.getGameProfile().getName().length()), "");
+                    display = StringUtilsKt.substringBefore(display, playerInfo.getGameProfile().getName()) + playerInfo.getGameProfile().getName();
 
                     String newDisplay = BwRanksUtils.getMessage(display, playerInfo.getGameProfile().getName(), playerInfo.getGameProfile().getId(), true, true);
                     map.put(playerInfo, originalDisplay);
                     if (!display.equals("") && !newDisplay.equals(display)) {
-                        replacementMap.put(display.substring(0, display.indexOf(playerInfo.getGameProfile().getName()) + playerInfo.getGameProfile().getName().length()), newDisplay);
+                        replacementMap.put(display.substring(0, display.indexOf(playerInfo.getGameProfile().getName()) + playerInfo.getGameProfile().getName().length()), new DuoVariable<>(playerInfo.getGameProfile().getId(), newDisplay));
                     }
                 }, HashMap::putAll);
 
                 for (NetworkPlayerInfo player : displayMap.keySet()) {
                     BlockWAPIUtils.Rank rank = null;
-                    if (Hysentials.INSTANCE.getOnlineCache().getOnlinePlayers().containsKey(player.getGameProfile().getId())) {
-                        try {
-                            rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().getRankCache().get(player.getGameProfile().getId()).toUpperCase());
-                        } catch (Exception ignored) {
-                            rank = BlockWAPIUtils.Rank.DEFAULT;
+                    if (Socket.cachedUsers.stream().anyMatch(u -> u.getString("uuid").equals(player.getGameProfile().getId().toString()))) {
+                        String r = Socket.cachedUsers.stream().filter(u -> u.getString("uuid").equals(player.getGameProfile().getId().toString())).findFirst().get().getString("rank");
+                        if (r != null) {
+                            rank = BlockWAPIUtils.Rank.valueOf(r.toUpperCase());
                         }
+                    } else {
+                        rank = BlockWAPIUtils.getRank(player.getGameProfile().getId());
                     }
 
-                    if (rank != null && !rank.equals(BlockWAPIUtils.Rank.DEFAULT) && !customTeamMap.containsKey(player.getGameProfile().getId()) && SbbRenderer.housingScoreboard.getHousingName() == null) {
+                    if (rank != null && !rank.equals(BlockWAPIUtils.Rank.DEFAULT) && !customTeamMap.containsKey(player.getGameProfile().getId())) {
                         ScorePlayerTeam customTeam = Minecraft.getMinecraft().theWorld.getScoreboard().createTeam("AA" + randomString(10));
                         customTeam.setNamePrefix(displayMap.get(player).substring(0, displayMap.get(player).indexOf(player.getGameProfile().getName())));
                         customTeam.setNameSuffix(displayMap.get(player).substring(displayMap.get(player).indexOf(player.getGameProfile().getName()) + player.getGameProfile().getName().length()));
@@ -142,7 +157,7 @@ public class BwRanks {
     }
 
     private void oldCode() {
-        List<DuoVariable<String,String>> teams = new ArrayList<>();
+        List<DuoVariable<String, String>> teams = new ArrayList<>();
         Minecraft.getMinecraft().getNetHandler().getPlayerInfoMap().forEach(playerInfo -> {
             String name = playerInfo.getGameProfile().getName();
             String display = playerInfo.getDisplayName() == null ? "" : playerInfo.getDisplayName().getFormattedText();
@@ -157,7 +172,7 @@ public class BwRanks {
             }
         });
         List<String> prefixes = new ArrayList<>();
-        for (DuoVariable<String,String> team : teams) {
+        for (DuoVariable<String, String> team : teams) {
             String prefix = team.getFirst();
             if (prefix == null) {
                 prefix = "";
@@ -168,7 +183,7 @@ public class BwRanks {
         for (NetworkPlayerInfo player : playerTeamMap.keySet()) {
             long start = System.currentTimeMillis();
             String name = player.getGameProfile().getName();
-            DuoVariable<String,String> team = playerTeamMap.get(player);
+            DuoVariable<String, String> team = playerTeamMap.get(player);
             String prefix = team.getFirst();
             String suffix = team.getSecond();
             if (prefix == null) {
@@ -180,15 +195,16 @@ public class BwRanks {
             }
             String display = prefix + name + suffix;
             String replacement = BwRanksUtils.getMessage(display, name, player.getGameProfile().getId(), true, hasRank);
-            replacementMap.put(display, replacement);
+            replacementMap.put(display, new DuoVariable<>(player.getGameProfile().getId(), replacement));
 
             BlockWAPIUtils.Rank rank = null;
-            if (Hysentials.INSTANCE.getOnlineCache().getOnlinePlayers().containsKey(player.getGameProfile().getId())) {
-                try {
-                    rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().getRankCache().get(player.getGameProfile().getId()).toUpperCase());
-                } catch (Exception ignored) {
-                    rank = BlockWAPIUtils.Rank.DEFAULT;
+            if (Socket.cachedUsers.stream().anyMatch(u -> u.getString("uuid").equals(player.getGameProfile().getId().toString()))) {
+                String r = Socket.cachedUsers.stream().filter(u -> u.getString("uuid").equals(player.getGameProfile().getId().toString())).findFirst().get().getString("rank");
+                if (r != null) {
+                    rank = BlockWAPIUtils.Rank.valueOf(r.toUpperCase());
                 }
+            } else {
+                rank = BlockWAPIUtils.getRank(player.getGameProfile().getId());
             }
 
             if (rank != null && !customTeamMap.containsKey(player.getGameProfile().getId())) {
@@ -199,6 +215,18 @@ public class BwRanks {
                 Minecraft.getMinecraft().theWorld.getScoreboard().addPlayerToTeam(name, customTeam.getTeamName());
                 Minecraft.getMinecraft().theWorld.getScoreboard().removePlayerFromTeam(name, player.getPlayerTeam());
             }
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    static class PlayerComparator implements Comparator<NetworkPlayerInfo> {
+        private PlayerComparator() {
+        }
+
+        public int compare(NetworkPlayerInfo networkPlayerInfo, NetworkPlayerInfo networkPlayerInfo2) {
+            ScorePlayerTeam scorePlayerTeam = networkPlayerInfo.getPlayerTeam();
+            ScorePlayerTeam scorePlayerTeam2 = networkPlayerInfo2.getPlayerTeam();
+            return ComparisonChain.start().compareTrueFirst(networkPlayerInfo.getGameType() != WorldSettings.GameType.SPECTATOR, networkPlayerInfo2.getGameType() != WorldSettings.GameType.SPECTATOR).compare(scorePlayerTeam != null ? scorePlayerTeam.getRegisteredName() : "", scorePlayerTeam2 != null ? scorePlayerTeam2.getRegisteredName() : "").compare(networkPlayerInfo.getGameProfile().getName(), networkPlayerInfo2.getGameProfile().getName()).result();
         }
     }
 }

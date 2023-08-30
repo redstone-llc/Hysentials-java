@@ -31,6 +31,10 @@ public class RemoveNameCommand extends CommandBase {
             MUtils.chat("§cYou must be holding an item!");
             return;
         }
+        if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative()) {
+            MUtils.chat("§cYou must be in creative mode!");
+            return;
+        }
         item = item.copy();
         item.clearCustomName();
         setCreativeAction(item, Minecraft.getMinecraft().thePlayer.inventory.currentItem);

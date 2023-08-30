@@ -133,7 +133,7 @@ public class BlockWAPIUtils {
     public static Rank getRank(String uuid) {
         BlockWAPIUtils.Rank rank;
         try {
-            rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().rankCache.get(UUID.fromString(uuid)));
+            rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().rankCache.get(UUID.fromString(uuid)).toUpperCase());
         } catch (Exception e) {
             rank = BlockWAPIUtils.Rank.DEFAULT;
         }
@@ -143,7 +143,7 @@ public class BlockWAPIUtils {
     public static Rank getRank(UUID uuid) {
         BlockWAPIUtils.Rank rank;
         try {
-            rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().rankCache.get(uuid));
+            rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().rankCache.get(uuid).toUpperCase());
         } catch (Exception e) {
             rank = BlockWAPIUtils.Rank.DEFAULT;
         }
@@ -151,7 +151,7 @@ public class BlockWAPIUtils {
     }
 
     public static String getUsername(UUID uuid) {
-        return Hysentials.INSTANCE.getOnlineCache().onlinePlayers.get(uuid);
+        return Socket.cachedUsers.stream().filter(user -> user.getString("uuid").equals(uuid.toString())).findFirst().orElse(new JSONObject().put("username", "unknown")).getString("username");
     }
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -175,10 +175,11 @@ public class BlockWAPIUtils {
     }
 
     public enum Rank {
-        ADMIN(5, "1", "§c[ADMIN] ", "§c", "admin"),
-        MOD(3, "2", "§2[MOD] ", "§2", "mod"),
-        CREATOR(2, "3", "§3[§fCREATOR§3] ", "§3", "creator"),
-        TEAM(4, "4", "§6[TEAM] ", "§6", "team"),
+        ADMIN(6, "1", "§c[ADMIN] ", "§c", "admin"),
+        MOD(4, "2", "§2[MOD] ", "§2", "mod"),
+        HELPER(3, "3", "§9[HELPER] ", "§9", "helper"),
+        CREATOR(2, "4", "§3[§fCREATOR§3] ", "§3", "creator"),
+        TEAM(5, "5", "§6[TEAM] ", "§6", "team"),
         DEFAULT(1, "replace", "", "", "", "");
 
         public final int index;
@@ -222,13 +223,21 @@ public class BlockWAPIUtils {
         }
 
         public String getNametag() {
-            JSONObject colorGroup = Hysentials.INSTANCE.rankColors.jsonObject.getJSONObject(hex);
-            return "<" + colorGroup.getString("nametag_color") + ">";
+            if (HysentialsConfig.futuristicRanks) {
+                JSONObject colorGroup = Hysentials.INSTANCE.rankColors.jsonObject.getJSONObject(hex);
+                return "<" + colorGroup.getString("nametag_color") + ">";
+            } else {
+                return color;
+            }
         }
 
         public String getChat() {
-            JSONObject colorGroup = Hysentials.INSTANCE.rankColors.jsonObject.getJSONObject(hex);
-            return "<" + colorGroup.getString("chat_message_color") + ">";
+            if (HysentialsConfig.futuristicRanks) {
+                JSONObject colorGroup = Hysentials.INSTANCE.rankColors.jsonObject.getJSONObject(hex);
+                return "<" + colorGroup.getString("chat_message_color") + ">";
+            } else {
+                return "§f";
+            }
         }
 
         public String getHex() {

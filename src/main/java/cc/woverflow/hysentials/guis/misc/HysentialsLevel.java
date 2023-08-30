@@ -1,15 +1,23 @@
 package cc.woverflow.hysentials.guis.misc;
 
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
+import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.guis.container.Container;
 import cc.woverflow.hysentials.guis.container.GuiItem;
 import cc.woverflow.hysentials.util.Material;
+import cc.woverflow.hysentials.utils.StringUtilsKt;
 import cc.woverflow.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.MouseEvent;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class HysentialsLevel extends Container {
     int page;
@@ -42,7 +50,7 @@ public class HysentialsLevel extends Container {
             setItem(48, GuiItem.fromStack(GuiItem.makeColorfulItem(Material.ARROW, "&aPrevious Page", 1, 0)));
         }
         setItem(49, GuiItem.fromStack(GuiItem.makeColorfulItem(Material.BARRIER, "&cClose", 1, 0)));
-        if (((int) getLevel()) > page * slots.length + slots.length) {
+        if (((int) getLevel()) >= page * slots.length + slots.length) {
             setItem(50, GuiItem.fromStack(GuiItem.makeColorfulItem(Material.ARROW, "&aNext Page", 1, 0)));
         }
         //refresh exp button may take a few minutes to update data from server
@@ -59,38 +67,66 @@ public class HysentialsLevel extends Container {
         return String.format("%.2f", getProgress());
     }
 
+    public static String getRewards(int level) {
+        StringBuilder rewards = new StringBuilder();
+        for (Map.Entry<String, Object> entry : Socket.cachedRewards.toMap().entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (key.equals(String.valueOf(level))) {
+                JSONObject json = new JSONObject((Map<?, ?>) value);
+                if (json.has("emeralds") && json.has("cosmetic")) {
+                    rewards.append("     &8+&a").append(json.getInt("emeralds")).append(" Emeralds").append("\n");
+                    rewards.append("     &8+&f").append(StringUtilsKt.toTitleCase(json.getString("cosmetic"))).append(" Cape");
+                } else if (json.has("emeralds")) {
+                    rewards.append("     &8+&a").append(json.getInt("emeralds")).append(" Emeralds");
+                } else if (json.has("cosmetic")) {
+                    rewards.append("     &8+&f").append(StringUtilsKt.toTitleCase(json.getString("cosmetic"))).append(" Cape");
+                }
+            }
+        }
+        if (rewards.toString().equals(""))
+            rewards = new StringBuilder("     &8+&a25 Emeralds");
+        return rewards.toString();
+    }
+
     public ItemStack getUnlockedPane(int level) {
+        List<String> lore = new ArrayList<>();
+        lore.add("&a&lRewards");
+        lore.addAll(Arrays.asList(getRewards(level).split("\n")));
+        lore.add("");
+        lore.add("&aUNLOCKED");
         return GuiItem.makeColorfulItem(
             Material.STAINED_GLASS_PANE,
             "&aHysentials Level " + level,
             1, 5,
-            "&7Rewards:",
-            "  &cCOMING SOON",
-            "",
-            "&aUNLOCKED"
+            lore
         );
     }
 
     public ItemStack getWorkingPane(int level) {
+        List<String> lore = new ArrayList<>();
+        lore.add("&a&lRewards");
+        lore.addAll(Arrays.asList(getRewards(level).split("\n")));
+        lore.add("");
+        lore.add("&7Progress: &e" + (getProgressString()) + "%");
+        lore.add(getProgressBar() + " &e" + getExpStart() + "&6/&e" + getExpForLevel((int) getLevel() + 1));
         return GuiItem.makeColorfulItem(
             Material.STAINED_GLASS_PANE,
             "&eHysentials Level " + level,
             1, 4,
-            "&7Rewards:",
-            "  &cCOMING SOON",
-            "",
-            "&7Progress: &e" + (getProgressString()) + "%",
-            getProgressBar() + " &e" + getExpStart() + "&6/&e" + getExpForLevel((int) getLevel() + 1)
+            lore
         );
     }
 
     public ItemStack getLockedPane(int level) {
+        List<String> lore = new ArrayList<>();
+        lore.add("&a&lRewards");
+        lore.addAll(Arrays.asList(getRewards(level).split("\n")));
         return GuiItem.makeColorfulItem(
             Material.STAINED_GLASS_PANE,
             "&cHysentials Level " + level,
             1, 14,
-            "&7Rewards:",
-            "  &cCOMING SOON"
+            lore
         );
     }
 
@@ -101,20 +137,20 @@ public class HysentialsLevel extends Container {
     public static float getLevel() {
         float level = 0;
         int exp = getExp();
-        while (exp >= getExpForLevel((int)level)) {
+        while (exp >= getExpForLevel((int) level)) {
             level++;
-            exp -= getExpForLevel((int)level);
+            exp -= getExpForLevel((int) level);
         }
-        level += exp / (float)getExpForLevel((int)level);
+        level += exp / (float) getExpForLevel((int) level);
         return level;
     }
 
     public static int getExpStart() {
         float level = 0;
         int exp = getExp();
-        while (exp >= getExpForLevel((int)level)) {
+        while (exp >= getExpForLevel((int) level)) {
             level++;
-            exp -= getExpForLevel((int)level);
+            exp -= getExpForLevel((int) level);
         }
         return exp;
     }
@@ -165,8 +201,13 @@ public class HysentialsLevel extends Container {
             Multithreading.runAsync(() -> {
                 String s = NetworkUtils.getString("https://hysentials.redstone.llc/api/exp?username=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getName());
                 JSONObject json = new JSONObject(s);
+                if (json.has("message") && json.getString("message").equals("You are being ratelimited")) {
+                    UChat.chat(HysentialsConfig.chatPrefix + " &cDue to Hypixel API restrictions we are unable to update your level at this time. Please try again in a moment.");
+                    return;
+                }
                 if (json.has("exp") && getExp() != json.getInt("exp")) {
-                    Socket.cachedData.put("exp", json.getInt("exp"));
+                    checkLevel(json);
+
                     Minecraft.getMinecraft().thePlayer.closeScreen();
                     new HysentialsLevel(page).open();
                 }
@@ -176,8 +217,8 @@ public class HysentialsLevel extends Container {
         setAction(48, event -> {
             event.getEvent().cancel();
             if (page == 0) return;
-            Minecraft.getMinecraft().thePlayer.closeScreen();
-            new HysentialsLevel(page - 1).open();
+            page -= 1;
+            update();
         });
 
         setAction(49, event -> {
@@ -187,9 +228,45 @@ public class HysentialsLevel extends Container {
 
         setAction(50, event -> {
             event.getEvent().cancel();
-            if (((int) getLevel()) <= page * slots.length + slots.length) return;
-            Minecraft.getMinecraft().thePlayer.closeScreen();
-            new HysentialsLevel(page + 1).open();
+            if (((int) getLevel()) < page * slots.length + slots.length) return;
+            page += 1;
+            update();
         });
+    }
+
+
+    public static void checkLevel(JSONObject json) {
+        if (json.has("exp") && getExp() != json.getInt("exp")) {
+            int previousExp = getExp();
+            int currentExp = json.getInt("exp");
+            int differenceExp = currentExp - previousExp;
+
+            int previousEmeralds = Socket.cachedData.getInt("emeralds");
+            int currentEmeralds = json.getInt("emeralds");
+            int differenceEmeralds = currentEmeralds - previousEmeralds;
+
+            int previousLevel = (int) getLevel();
+            Socket.cachedData.put("exp", json.getInt("exp"));
+            Socket.cachedData.put("emeralds", json.getInt("emeralds"));
+            int currentLevel = (int) getLevel();
+            int differenceLevel = currentLevel - previousLevel;
+
+            UChat.chat("");
+            UChat.chat("&a&lHysentials Level Update!");
+            if (differenceEmeralds > 0) UChat.chat("&a+" + differenceEmeralds + "⏣ Emeralds");
+            if (differenceExp > 0) UChat.chat("&6+" + differenceExp + " Hysentials XP");
+            UChat.chat("");
+
+            if (differenceLevel > 0) {
+                for (int i = previousLevel + 1; i <= currentLevel; i++) {
+                    UChat.chat("");
+                    UChat.chat("&6&lHYSENTIALS LEVEL UP!");
+                    UChat.chat("&7You are now &6Hysentials Level " + i + "&7.");
+                    UChat.chat("&a &b &c &a&lRewards");
+                    Arrays.asList(getRewards(i).split("\n")).forEach(UChat::chat);
+                    UChat.chat("");
+                }
+            }
+        }
     }
 }

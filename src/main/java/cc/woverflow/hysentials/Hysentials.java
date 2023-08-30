@@ -3,11 +3,18 @@ package cc.woverflow.hysentials;
 import cc.polyfrost.oneconfig.events.EventManager;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.capes.CapeHandler;
 import cc.woverflow.hysentials.cosmetic.CosmeticManager;
-import cc.woverflow.hysentials.gui.UpdateChecker;
+import cc.woverflow.hysentials.cosmetics.hamster.HamsterCompanion;
+import cc.woverflow.hysentials.cosmetics.hats.cat.CatHat;
+import cc.woverflow.hysentials.cosmetics.pepper.PepperCompanion;
+import cc.woverflow.hysentials.cosmetics.hats.technocrown.TechnoCrown;
 import cc.woverflow.hysentials.guis.club.ClubDashboardHandler;
 import cc.woverflow.hysentials.guis.container.ContainerHandler;
+import cc.woverflow.hysentials.guis.utils.SBBoxes;
 import cc.woverflow.hysentials.handlers.chat.modules.misc.Limit256;
+import cc.woverflow.hysentials.handlers.misc.QuestHandler;
+import cc.woverflow.hysentials.quest.Quest;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.commands.CommandManager;
 import cc.woverflow.hysentials.command.*;
@@ -15,7 +22,6 @@ import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.event.events.HysentialsLoadedEvent;
 import cc.woverflow.hysentials.guis.ResolutionUtil;
 import cc.woverflow.hysentials.guis.actionLibrary.ActionLibrary;
-import cc.woverflow.hysentials.guis.club.ClubDashboard;
 import cc.woverflow.hysentials.guis.gameMenu.RevampedGameMenu;
 import cc.woverflow.hysentials.guis.misc.PlayerInvHandler;
 import cc.woverflow.hysentials.guis.sbBoxes.SBBoxesEditor;
@@ -31,18 +37,15 @@ import cc.woverflow.hysentials.handlers.lobby.HousingLagReducer;
 import cc.woverflow.hysentials.handlers.lobby.LobbyChecker;
 import cc.woverflow.hysentials.handlers.npc.QuestNPC;
 import cc.woverflow.hysentials.handlers.redworks.BwRanks;
-import cc.woverflow.hysentials.handlers.redworks.NeighborInstall;
 import cc.woverflow.hysentials.handlers.sbb.Actionbar;
 import cc.woverflow.hysentials.handlers.sbb.SbbRenderer;
 import cc.woverflow.hysentials.htsl.Cluster;
-import cc.woverflow.hysentials.pets.cubit.CubitCompanion;
+import cc.woverflow.hysentials.cosmetics.cubit.CubitCompanion;
 import cc.woverflow.hysentials.util.*;
 import cc.woverflow.hysentials.util.blockw.OnlineCache;
 import cc.woverflow.hysentials.websocket.Socket;
-import cc.woverflow.hytils.util.friends.FriendCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -108,6 +111,9 @@ public class Hysentials {
     public String rank;
 
     public CubitCompanion cubitCompanion;
+    public PepperCompanion pepperCompanion;
+    public HamsterCompanion hamsterCompanion;
+    public TechnoCrown technoCrown;
 
 
 
@@ -126,8 +132,8 @@ public class Hysentials {
         if (!file.exists() && !file.mkdirs()) {
             throw new RuntimeException("Failed to create config directory! Please report this to sinender on Discord");
         }
-        sbBoxes = new JsonData("./config/hysentials/lines.json", new JSONObject().put("lines", new JSONArray()));
-        rankColors = new JsonData("/assets/minecraft/textures/icons/colors.json", "./config/hysentials/color.jsonn", true);
+        sbBoxes = new SBBJsonData("./config/hysentials/lines.json", new JSONObject().put("lines", new JSONArray()));
+        rankColors = new JsonData("/assets/minecraft/textures/icons/colors.json", "./config/hysentials/color.json", true);
 
         try {
             System.setProperty("file.encoding", "UTF-8");
@@ -150,8 +156,8 @@ public class Hysentials {
 
         Socket.createSocket();
 
-        CommandManager.INSTANCE.registerCommand(new HysentialsCommand());
         CommandManager.INSTANCE.registerCommand(new GroupChatCommand());
+        ClientCommandHandler.instance.registerCommand(new HysentialsCommand());
         ClientCommandHandler.instance.registerCommand(new GlobalChatCommand());
         ClientCommandHandler.instance.registerCommand(new HypixelChatCommand());
         ClientCommandHandler.instance.registerCommand(new VisitCommand());
@@ -163,22 +169,22 @@ public class Hysentials {
         ClientCommandHandler.instance.registerCommand(new InsertLoreLineCommand());
         ClientCommandHandler.instance.registerCommand(new RemoveLoreLineCommand());
         ClientCommandHandler.instance.registerCommand(new OpenInvCommand());
+        ClientCommandHandler.instance.registerCommand(new SetTextureCommand());
+        ClientCommandHandler.instance.registerCommand(new HymojiCommand());
         CommandManager.INSTANCE.registerCommand(new SBBoxesCommand());
         CommandManager.INSTANCE.registerCommand(new ActionLibraryCommand());
         CommandManager.INSTANCE.registerCommand(new ClubCommand());
 
+
         if (Socket.cachedServerData.has("rpc") && Socket.cachedServerData.getBoolean("rpc")) {
-            try {
-                DiscordCore.init();
-                discordRPC = new DiscordRPC();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            //                DiscordCore.init();
+            discordRPC = new DiscordRPC();
         }
 
         HeightHandler.INSTANCE.initialize();
 
         registerHandlers();
+        Quest.registerQuests();
     }
 
     @Mod.EventHandler
@@ -208,7 +214,7 @@ public class Hysentials {
         new ImageIcon("globalchat", new ResourceLocation("textures/icons/globalchat.png"));
         new ImageIcon("creator", new ResourceLocation("textures/icons/creator.png"));
         new ImageIcon("guild", new ResourceLocation("textures/icons/guild.png"));
-        new ImageIcon("party", new ResourceLocation("textures/icons/party.png"));
+        new ImageIcon("partyprefix", new ResourceLocation("textures/icons/party.png"));
         new ImageIcon("to", new ResourceLocation("textures/icons/to.png"));
         new ImageIcon("from", new ResourceLocation("textures/icons/from.png"));
         new ImageIcon("team", new ResourceLocation("textures/icons/team.png"));
@@ -219,6 +225,66 @@ public class Hysentials {
         new ImageIcon("epic", new ResourceLocation("textures/icons/epic.png"));
         new ImageIcon("legendary", new ResourceLocation("textures/icons/legendary.png"));
         new ImageIcon("exclusive", new ResourceLocation("textures/icons/exclusive.png"));
+
+        new ImageIcon("moan", new ResourceLocation("textures/emoji/1005491490027487333.png"), true);
+        new ImageIcon("super_neutral", new ResourceLocation("textures/emoji/1013063272473317377.png"), true);
+        new ImageIcon("neutral", new ResourceLocation("textures/emoji/1013063271143714866.png"), true);
+        new ImageIcon("creeper", new ResourceLocation("textures/emoji/1013063267964432494.png"), true);
+        new ImageIcon("speechless", new ResourceLocation("textures/emoji/1013063269688283186.png"), true);
+        new ImageIcon("yawn", new ResourceLocation("textures/emoji/1013063264667697263.png"), true);
+        new ImageIcon("weary", new ResourceLocation("textures/emoji/1005491488739827752.png"), true);
+        new ImageIcon("plead", new ResourceLocation("textures/emoji/1005491491294167111.png"), true);
+        new ImageIcon("hehe", new ResourceLocation("textures/emoji/1013063262868348958.png"), true);
+        new ImageIcon("foggy", new ResourceLocation("textures/emoji/1013063247819186267.png"), true);
+        new ImageIcon("mind_blown", new ResourceLocation("textures/emoji/1013063244480512050.png"), true);
+        new ImageIcon("curse", new ResourceLocation("textures/emoji/1013063242970566696.png"), true);
+        new ImageIcon("mad", new ResourceLocation("textures/emoji/1013063241280266292.png"), true);
+        new ImageIcon("angry", new ResourceLocation("textures/emoji/1013063239967449128.png"), true);
+        new ImageIcon("cool", new ResourceLocation("textures/emoji/1005491469244698666.png"), true);
+        new ImageIcon("drool", new ResourceLocation("textures/emoji/1005491492699254886.png"), true);
+        new ImageIcon("phew", new ResourceLocation("textures/emoji/1005491497254264912.png"), true);
+        new ImageIcon("huff", new ResourceLocation("textures/emoji/1005491495689785464.png"), true);
+        new ImageIcon("sob", new ResourceLocation("textures/emoji/1005491494066602188.png"), true);
+        new ImageIcon("thinking", new ResourceLocation("textures/emoji/1013063261396156477.png"), true);
+        new ImageIcon("hugs", new ResourceLocation("textures/emoji/1013063259789733989.png"), true);
+        new ImageIcon("big_frown", new ResourceLocation("textures/emoji/1013063256908234782.png"), true);
+        new ImageIcon("worried", new ResourceLocation("textures/emoji/1013063255406673970.png"), true);
+        new ImageIcon("scared", new ResourceLocation("textures/emoji/1013063253338894347.png"), true);
+        new ImageIcon("scream", new ResourceLocation("textures/emoji/1013063252101570570.png"), true);
+        new ImageIcon("cold", new ResourceLocation("textures/emoji/1013063250734235708.png"), true);
+        new ImageIcon("party", new ResourceLocation("textures/emoji/1005491471455096935.png"), true);
+        new ImageIcon("star_eyes", new ResourceLocation("textures/emoji/1005491470486208632.png"), true);
+        new ImageIcon("nerd", new ResourceLocation("textures/emoji/1005491467990614107.png"), true);
+        new ImageIcon("hmm", new ResourceLocation("textures/emoji/1005491466736500817.png"), true);
+        new ImageIcon("raised_eyebrow", new ResourceLocation("textures/emoji/1005491463179747429.png"), true);
+        new ImageIcon("crazy", new ResourceLocation("textures/emoji/1005491460352774255.png"), true);
+        new ImageIcon("wink_silly", new ResourceLocation("textures/emoji/1005491459165782097.png"), true);
+        new ImageIcon("extremely_silly", new ResourceLocation("textures/emoji/1005491457982996635.png"), true);
+        new ImageIcon("silly", new ResourceLocation("textures/emoji/1005491456611467285.png"), true);
+        new ImageIcon("yum", new ResourceLocation("textures/emoji/1005491455344783370.png"), true);
+        new ImageIcon("blush_kiss", new ResourceLocation("textures/emoji/1005491454115852378.png"), true);
+        new ImageIcon("kiss", new ResourceLocation("textures/emoji/1005491451846721718.png"), true);
+        new ImageIcon("kiss_wink", new ResourceLocation("textures/emoji/1005491450668134620.png"), true);
+        new ImageIcon("love", new ResourceLocation("textures/emoji/1005491448982012096.png"), true);
+        new ImageIcon("heart_eyes", new ResourceLocation("textures/emoji/1005491448138973264.png"), true);
+        new ImageIcon("uhoh", new ResourceLocation("textures/emoji/1005491446842929152.png"), true);
+        new ImageIcon("relief", new ResourceLocation("textures/emoji/1005491445337161829.png"), true);
+        new ImageIcon("wink", new ResourceLocation("textures/emoji/1005491444208906340.png"), true);
+        new ImageIcon("downwards_smile", new ResourceLocation("textures/emoji/1005491443101618227.png"), true);
+        new ImageIcon("slight_smile", new ResourceLocation("textures/emoji/1005491441881075752.png"), true);
+        new ImageIcon("angel", new ResourceLocation("textures/emoji/1005491440253685821.png"), true);
+        new ImageIcon("blush", new ResourceLocation("textures/emoji/1005491439574196224.png"), true);
+        new ImageIcon("rofl", new ResourceLocation("textures/emoji/1005491437124714536.png"), true);
+        new ImageIcon("roy", new ResourceLocation("textures/emoji/1005491435899998338.png"), true);
+        new ImageIcon("guilty", new ResourceLocation("textures/emoji/1005491434566189176.png"), true);
+        new ImageIcon("lol", new ResourceLocation("textures/emoji/1005491428278935664.png"), true);
+        new ImageIcon("cheer", new ResourceLocation("textures/emoji/1005491425275822152.png"), true);
+        new ImageIcon("smile", new ResourceLocation("textures/emoji/1005491424495685673.png"), true);
+        new ImageIcon("happy", new ResourceLocation("textures/emoji/1005491423170285638.png"), true);
+        new ImageIcon("downvote", new ResourceLocation("textures/emoji/downvote.png"), true);
+        new ImageIcon("upvote", new ResourceLocation("textures/emoji/upvote.png"), true);
+        new ImageIcon("left", new ResourceLocation("textures/emoji/left.png"), true);
+        new ImageIcon("right", new ResourceLocation("textures/emoji/right.png"), true);
 
         for (HypixelRanks rank : HypixelRanks.values()) {
             try {
@@ -257,6 +323,9 @@ public class Hysentials {
         eventBus.register(new BwRanks());
         eventBus.register(new GameMenuOpen());
         eventBus.register(new SbbRenderer());
+        eventBus.register(new cc.woverflow.hysentials.handlers.SbbRenderer());
+
+
         eventBus.register(new Actionbar());
         eventBus.register(new ActionLibrary());
         eventBus.register(new Queue());
@@ -271,7 +340,13 @@ public class Hysentials {
         eventBus.register(new QuestNPC());
         eventBus.register(new MUtils());
         eventBus.register(new Limit256());
+        eventBus.register(new QuestHandler());
+        eventBus.register(new CapeHandler());
         eventBus.register(cubitCompanion = new CubitCompanion());
+        eventBus.register(pepperCompanion = new PepperCompanion());
+        eventBus.register(hamsterCompanion = new HamsterCompanion());
+        eventBus.register(technoCrown = new TechnoCrown());
+        CatHat.loadCatHats();
         eventBus.register(new ContainerHandler());
 
         new Renderer();
@@ -281,11 +356,18 @@ public class Hysentials {
         EventManager.INSTANCE.register(new BwRanks());
 
         eventBus.register(new HypixelAPIUtils());
-        eventBus.register(new NeighborInstall());
+//        eventBus.register(new NeighborInstall());
 
         HysentialsKt.Companion.init();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            JSONArray array = new JSONArray();
+            for (SBBoxes box : SBBoxes.boxes) {
+                array.put(box.save());
+            }
+            JSONObject object = new JSONObject();
+            object.put("lines", array);
+            sbBoxes.jsonObject = object;
             sbBoxes.save();
         }));
     }

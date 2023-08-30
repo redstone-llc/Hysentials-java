@@ -22,6 +22,7 @@ import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +71,14 @@ public abstract class Container extends InventoryBasic {
         }
     }
 
+    public void border(GuiItem item) {
+        for (int i = 0; i < rows*9; i++) {
+            if (i < 9 || i > (rows*9)-9 || i % 9 == 0 || i % 9 == 8) {
+                setItem(i, item);
+            }
+        }
+    }
+
     public void setAction(int slot, GuiAction action) {
         slotActions.put(slot, action);
     }
@@ -84,9 +93,24 @@ public abstract class Container extends InventoryBasic {
 
     public abstract void setClickActions();
 
+    protected void drawGuiContainerBackgroundLayer(int mouseX, int mouseY) {
+
+    }
+
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+
+    }
+
+    protected boolean keyTyped(char typedChar, int keyCode) throws IOException {
+        return true;
+    }
+
     public void update() {
         if (isOpen) {
             guiItems.clear();
+            for (int i = 0; i < rows*9; i++) {
+                setInventorySlotContents(i, null);
+            }
             setItems();
             for (Map.Entry<Integer, GuiItem> entry : guiItems.entrySet()) {
                 Integer slot = entry.getKey();
@@ -117,10 +141,29 @@ public abstract class Container extends InventoryBasic {
         isOpen = true;
         guiChest = new GuiChest(owner.inventory, this) {
             @Override
+            protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+                super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
+                Container.this.drawGuiContainerBackgroundLayer(mouseX, mouseY);
+            }
+
+            @Override
             public void onGuiClosed() {
                 super.onGuiClosed();
                 isOpen = false;
                 guiChest = null;
+            }
+
+            @Override
+            protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+                super.mouseClicked(mouseX, mouseY, mouseButton);
+                Container.this.mouseClicked(mouseX, mouseY, mouseButton);
+            }
+
+            @Override
+            protected void keyTyped(char typedChar, int keyCode) throws IOException {
+                if (Container.this.keyTyped(typedChar, keyCode)) {
+                    super.keyTyped(typedChar, keyCode);
+                }
             }
         };
         Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(guiChest);

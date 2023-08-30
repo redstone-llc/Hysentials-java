@@ -10,6 +10,7 @@ import cc.polyfrost.oneconfig.gui.OneConfigGui;
 import cc.polyfrost.oneconfig.gui.pages.ModConfigPage;
 import cc.polyfrost.oneconfig.utils.gui.GuiUtils;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.guis.utils.SBBoxes;
 import net.minecraft.client.Minecraft;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -17,7 +18,7 @@ import org.json.JSONObject;
 import java.io.File;
 
 public class EditorConfig extends Config {
-    public JSONObject line;
+    public SBBoxes line;
     @Checkbox(
         name = "enabled",
         description = "Enable the line",
@@ -92,44 +93,42 @@ public class EditorConfig extends Config {
         text = "Delete"
     )
     public void delete() {
-        JSONArray lines = Hysentials.INSTANCE.sbBoxes.jsonObject.getJSONArray("lines");
-        int i = lines.toList().indexOf(line.toMap());
-        lines.remove(i);
+        SBBoxes.boxes.remove(line);
         Minecraft.getMinecraft().thePlayer.closeScreen();
     }
 
-    public EditorConfig(JSONObject line) {
+    public EditorConfig(SBBoxes line) {
         super(new Mod("Hysentials", ModType.HYPIXEL), "editor");
         initialize();
         this.line = line;
-        this.enabled = line.getBoolean("enabled");
-        this.regex = line.getString("regex");
-        this.display = line.getString("display");
-        this.title = line.getString("title");
-        this.x = line.getInt("x");
-        this.y = line.getInt("y");
-        this.scale = (float) line.getDouble("scale");
+        this.enabled = line.isEnabled();
+        this.regex = line.getRegex();
+        this.display = line.getRegexDisplay();
+        this.title = line.getTitle();
+        this.x = (int) line.position.getX();
+        this.y = (int) line.position.getY();
+        this.scale = (float) line.getScale();
 
         this.addListener("enabled", () -> {
-            line.put("enabled", enabled);
+            line.setEnabled(enabled);
         });
         this.addListener("regex", () -> {
-            regex = line.getString("regex");
+            line.setRegex(regex);
         });
         this.addListener("display", () -> {
-            line.put("display", display);
+            line.setRegexDisplay(display);
         });
         this.addListener("title", () -> {
-            line.put("title", title);
+            line.setTitle(title);
         });
         this.addListener("x", () -> {
-            line.put("x", x);
+            line.setX(x);
         });
         this.addListener("y", () -> {
-            line.put("y", y);
+            line.setY(y);
         });
         this.addListener("scale", () -> {
-            line.put("scale", scale);
+            line.setScale(scale);
         });
     }
 

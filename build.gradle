@@ -78,17 +78,10 @@ dependencies {
     }
     include('com.github.JnCrMx:discord-game-sdk4j:v0.5.5')
     include('com.neovisionaries:nv-websocket-client:2.14')
-    compileOnly("gg.essential:elementa-1.8.9-forge:590") {
-        exclude module: "asm"
-        exclude module: "asm-commons"
-        exclude module: "asm-tree"
-        exclude module: "gson"
-    }
+    include('com.github.MinnDevelopment:java-discord-rpc:v2.0.2')
 
     compileOnly('org.spongepowered:mixin:0.7.11-SNAPSHOT')
 
-
-    compileOnly(files('libs/Hytils-Reborn-1.6.0-beta4.jar'))
     compileOnly("me.djtheredstoner:DevAuth-forge-legacy:1.1.0")
 }
 
@@ -142,6 +135,7 @@ jar {
 }
 
 remapJar {
+    archiveFileName.set("${mod_name}-${mod_version}.jar")
     destinationDirectory = file("C:\\Users\\griff\\Desktop\\games\\MultiMC\\instances\\1.8.9\\.minecraft\\mods")
 }
 

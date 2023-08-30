@@ -114,6 +114,9 @@ public class PlayerInventory extends Container {
                 if (item == null || item.getItem() == null) {
                     return;
                 }
+                if (item.getItemDamage() == 8) {
+                    return;
+                }
                 if (Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative()) {
                     int i = Minecraft.getMinecraft().thePlayer.inventory.getFirstEmptyStack();
                     if (i < 0) {

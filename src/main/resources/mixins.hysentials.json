@@ -10,11 +10,13 @@
     "ContainerMixin",
     "EntityPlayerSPMixin_MessageHandling",
     "FontRendererMixin",
+    "GuiMainMenuMixin",
     "GuiNewChatAccessor",
     "GuiNewChatMixin_GuildListHide",
     "GuiNewChatMixin_LocrawHider",
     "GuiScreenMixin",
     "GuiUtilRCMixin",
+    "ItemMonsterPlacerMixin",
     "MinecraftMixin",
     "MinecraftMixin_LeftClickInteract",
     "MixinRenderManager",
@@ -23,9 +25,6 @@
     "PlayerModelMixin",
     "PlayerRendererMixin",
     "RenderItemMixin",
-    "RenderMixin",
-    "SimpleReloadableResourceManagerMixin",
-    "TextureUtilMixin",
-    "ItemMonsterPlacerMixin"
+    "RenderMixin"
   ]
 }

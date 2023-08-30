@@ -2,17 +2,15 @@ package cc.woverflow.hysentials.websocket;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.guis.misc.HysentialsLevel;
 import cc.woverflow.hysentials.handlers.chat.modules.bwranks.BWSReplace;
-import cc.woverflow.hysentials.util.MUtils;
+import cc.woverflow.hysentials.util.*;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UMessage;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.handlers.groupchats.GroupChat;
 import cc.woverflow.hysentials.handlers.redworks.BwRanksUtils;
-import cc.woverflow.hysentials.util.BlockWAPIUtils;
-import cc.woverflow.hysentials.util.DuoVariable;
-import cc.woverflow.hysentials.util.SSLStore;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.neovisionaries.ws.client.*;
 import kotlin.random.Random;
@@ -39,23 +37,32 @@ import static cc.woverflow.hysentials.guis.actionLibrary.ActionViewer.toList;
 import static cc.woverflow.hysentials.util.HypixelAPIUtils.getUsername;
 
 public class Socket {
+    public static List<WebSocket> sockets = new ArrayList<>();
     public static WebSocket CLIENT;
     public static JSONObject cachedData = new JSONObject();
     public static List<JSONObject> cachedUsers = new ArrayList<>();
+    public static JSONObject cachedRewards = new JSONObject();
     public static JSONObject cachedServerData = new JSONObject();
     public static String serverId;
     public static boolean linking = false;
     public static boolean linked = false;
     public static JSONObject data = null;
+    public static boolean banned = false;
+    public static String banReason = "";
     public static List<DuoVariable<String, Consumer<JSONObject>>> awaiting = new ArrayList<>();
 
     public static int relogAttempts = 0;
 
+    public static boolean manualDisconnect = false;
+
     public static void createSocket() {
-        if (relogAttempts > 2) return;
+        if (relogAttempts > 2) {
+            MUtils.chat("&cAn error occurred whilst connecting to the Hysentials websocket. Please contact @sinender on Discord if this issue persists.");
+            return;
+        }
         try {
             serverId = randomString(Random.Default.nextInt(3, 16));
-            String hash = hash("Hysentials_" + serverId);
+            String hash = hash("Hysentialss_" + serverId);
 
             Minecraft.getMinecraft().getSessionService().joinServer(
                 Minecraft.getMinecraft().getSession().getProfile(),
@@ -73,7 +80,8 @@ public class Socket {
             factory.getProxySettings().setServerName("socket.redstone.llc");
             factory.getProxySettings().setPort(443);
             factory.getProxySettings().setSSLContext(context);
-            WebSocket socket = factory.createSocket("ws://socket.redstone.llc");
+//            WebSocket socket = factory.createSocket("ws://127.0.0.1:8080/ws");
+            WebSocket socket = factory.createSocket("wss://socket.redstone.llc");
 
             socket.addListener(new WebSocketListener() {
                 public void send(String message) {
@@ -102,6 +110,11 @@ public class Socket {
 
                 @Override
                 public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
+                    if (manualDisconnect) {
+                        manualDisconnect = false;
+                        return;
+                    }
+
                     linking = false;
                     data = null;
                     relogAttempts++;
@@ -109,8 +122,8 @@ public class Socket {
                         MUtils.chat(HysentialsConfig.chatPrefix + " §cFailed to connect to websocket server. This is probably because it is offline. Please try again later with `/hs reconnect`.");
                         return;
                     }
-                    MUtils.chat(HysentialsConfig.chatPrefix + " §cDisconnected from websocket server. Attempting to reconnect in 5 seconds");
-                    Multithreading.schedule(Socket::createSocket, 5, TimeUnit.SECONDS);
+                    MUtils.chat(HysentialsConfig.chatPrefix + " §cDisconnected from websocket server. Attempting to reconnect in 20 seconds");
+                    Multithreading.schedule(Socket::createSocket, 20, TimeUnit.SECONDS);
                 }
 
                 @Override
@@ -140,12 +153,11 @@ public class Socket {
 
                 @Override
                 public void onPingFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
-
+                    websocket.sendPong();
                 }
 
                 @Override
                 public void onPongFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
-
                 }
 
                 @Override
@@ -155,11 +167,38 @@ public class Socket {
                         switch (json.getString("method")) {
                             case "login": {
                                 relogAttempts = 0;
+                                if (json.has("success") && !json.getBoolean("success")) {
+                                    banned = true;
+                                    banReason = json.getString("status");
+                                    relogAttempts = 3;
+                                }
+
                                 if (json.has("success") && json.getBoolean("success")) {
                                     MUtils.chat(HysentialsConfig.chatPrefix + " §aLogged in successfully!");
                                     CLIENT = websocket;
-                                    Multithreading.runAsync(BlockWAPIUtils::getOnline);
+                                    sockets.add(websocket);
+                                    if (sockets.size() > 1) {
+                                        for (int i = 0; i < sockets.size(); i++) {
+                                            WebSocket socket = sockets.get(i);
+                                            if (i != sockets.size() - 1) {
+                                                socket.disconnect();
+                                                sockets.remove(socket);
+                                            }
+                                        }
+                                    }
+                                    Multithreading.runAsync(() -> {
+                                        BlockWAPIUtils.getOnline();
+
+                                        String levelRewards = NetworkUtils.getString("https://hysentials.redstone.llc/api/rewards");
+                                        if (levelRewards != null) {
+                                            JSONObject rewards = new JSONObject(levelRewards);
+                                            if (rewards.has("rewards")) {
+                                                cachedRewards = rewards.getJSONObject("rewards");
+                                            }
+                                        }
+                                    });
                                 }
+
                                 if (!json.getBoolean("linked")) {
                                     Socket.linked = false;
                                     MUtils.chat(HysentialsConfig.chatPrefix + " §cYou are not linked to a discord account! Some features will not work.");
@@ -197,7 +236,7 @@ public class Socket {
                                                 )
                                                     .setHover(
                                                         HoverEvent.Action.SHOW_TEXT,
-                                                        rank.getPlaceholder() + BlockWAPIUtils.getUsername(UUID.fromString(json.getString("uuid")))
+                                                        (rank.getPlaceholder() + BlockWAPIUtils.getUsername(UUID.fromString(json.getString("uuid"))))
                                                     )
                                             )
                                             .appendSibling(
@@ -212,7 +251,7 @@ public class Socket {
                                         IChatComponent comp = new UTextComponent("")
                                             .appendSibling(
                                                 new UTextComponent(
-                                                    ":globalchat: "
+                                                    "&6Global > "
                                                 )
                                             )
                                             .appendSibling(
@@ -221,7 +260,7 @@ public class Socket {
                                                 )
                                                     .setHover(
                                                         HoverEvent.Action.SHOW_TEXT,
-                                                        rank.getPrefix("") + BlockWAPIUtils.getUsername(UUID.fromString(json.getString("uuid")))
+                                                        (rank.getPrefix("") + BlockWAPIUtils.getUsername(UUID.fromString(json.getString("uuid"))))
                                                     )
                                             )
                                             .appendSibling(
@@ -245,12 +284,14 @@ public class Socket {
                                     linking = false;
                                     data = null;
                                 }, 5, TimeUnit.MINUTES);
+                                break;
                             }
 
                             case "diagnose": {
                                 JSONObject data = new JSONObject().put("ram", Runtime.getRuntime().maxMemory() / 1024 / 1024).put("cpu", Runtime.getRuntime().availableProcessors()).put("diagnoses", BWSReplace.diagnostics);
                                 json.put("data", data);
                                 send(json.toString());
+                                break;
                             }
 
                             case "groupChat": {
@@ -281,6 +322,20 @@ public class Socket {
                                 } else {
                                     MUtils.chat(HysentialsConfig.chatPrefix + " §cFailed to join club!");
                                 }
+                            }
+
+                            case "message": {
+                                if (json.has("type")) {
+                                    switch (json.getString("type")) {
+                                        case "level": {
+                                            HysentialsLevel.checkLevel(json);
+                                            break;
+                                        }
+                                    }
+                                } else if (json.has("message")) {
+                                    MUtils.chat(json.getString("message"));
+                                }
+                                break;
                             }
                         }
                     }
@@ -380,11 +435,10 @@ public class Socket {
             });
 
             socket.connect();
-        } catch (AuthenticationException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
-            MUtils.chat("&cAn error occurred whilst connecting to the Hysentials websocket. Please contact @sinender on Discord if this issue persists.");
+            relogAttempts++;
+            createSocket();
         }
     }
 

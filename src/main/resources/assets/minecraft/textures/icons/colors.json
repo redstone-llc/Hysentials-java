@@ -42,5 +42,9 @@
   "team": {
     "nametag_color": "#ec6f19",
     "chat_message_color": "#fff7f0"
+  },
+  "helper": {
+    "nametag_color": "#108cff",
+    "chat_message_color": "#bfd9ff"
   }
 }

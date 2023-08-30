@@ -1,5 +1,6 @@
 package cc.woverflow.hysentials.capes;
 
+import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.cosmetic.CosmeticGui;
 import cc.woverflow.hysentials.util.BlockWAPIUtils;
 import net.minecraft.client.Minecraft;
@@ -9,10 +10,16 @@ import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
+import net.minecraft.client.renderer.texture.ITextureObject;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.entity.player.EnumPlayerModelParts;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.event.terraingen.InitMapGenEvent;
 import org.json.JSONObject;
+
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
 
 public class CustomCapeRenderLayer implements LayerRenderer<AbstractClientPlayer> {
 
@@ -52,15 +59,11 @@ public class CustomCapeRenderLayer implements LayerRenderer<AbstractClientPlayer
         }
 
         this.playerRenderer.bindTexture(abstractClientPlayer.getLocationCape());
-        for (JSONObject cosmetic : BlockWAPIUtils.getCosmetics()) {
-            if (cosmetic.getString("type").equals("cape")) {
-                String name = cosmetic.getString("name");
-                if (CosmeticGui.Companion.hasCosmetic(abstractClientPlayer.getUniqueID(), name) && CosmeticGui.Companion.equippedCosmetic(abstractClientPlayer.getUniqueID(), name)) {
-                    this.playerRenderer.bindTexture(new ResourceLocation(cosmetic.getString("resource")));
-                }
-            }
+        if (CapeHandler.textureMap.containsKey(abstractClientPlayer.getUniqueID())) {
+            GlStateManager.bindTexture(CapeHandler.textureMap.get(abstractClientPlayer.getUniqueID()).getGlTextureId());
         }
-        if (false) {
+
+        if (HysentialsConfig.blockyCapes == 1) {
             smoothCapeRenderer.renderSmoothCape(this, abstractClientPlayer, deltaTick);
         } else {
             ModelRenderer[] parts = customCape;
@@ -159,7 +162,7 @@ public class CustomCapeRenderLayer implements LayerRenderer<AbstractClientPlayer
     }
 
     float getNatrualWindSwing(int part) {
-        if (true) {
+        if (HysentialsConfig.windEffect) {
             long highlightedPart = (System.currentTimeMillis() / 3) % 360;
             float relativePart = (float) (part + 1) / partCount;
             return (float) (Math.sin(Math.toRadians((relativePart) * 360 - (highlightedPart))) * 3);

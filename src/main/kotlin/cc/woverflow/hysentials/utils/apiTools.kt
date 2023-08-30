@@ -87,6 +87,13 @@ data class RedstoneRepo(
 )
 
 @Serializable
+data class UpdateNotes(
+    val name: String,
+    val image: String? = null,
+    var notes: String,
+)
+
+@Serializable
 data class GithubAsset(
     val name: String,
     @SerialName("browser_download_url")

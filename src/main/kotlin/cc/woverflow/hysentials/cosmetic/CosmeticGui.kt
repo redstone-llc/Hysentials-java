@@ -1,42 +1,61 @@
 package cc.woverflow.hysentials.cosmetic
 
+import cc.polyfrost.oneconfig.libs.universal.UKeyboard
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack
 import cc.polyfrost.oneconfig.libs.universal.UScreen
-import cc.polyfrost.oneconfig.renderer.NanoVGHelper
 import cc.woverflow.hysentials.Hysentials
+import cc.woverflow.hysentials.config.HysentialsConfig
+import cc.woverflow.hysentials.gui.Button
+import cc.woverflow.hysentials.gui.HysentialsGui
 import cc.woverflow.hysentials.guis.container.GuiItem
 import cc.woverflow.hysentials.util.*
 import cc.woverflow.hysentials.utils.formatCapitalize
-import cc.woverflow.hysentials.utils.toTitleCase
+import cc.woverflow.hysentials.utils.splitToWords
 import cc.woverflow.hysentials.websocket.Socket
 import com.google.common.collect.Lists
 import net.minecraft.client.Minecraft
+import net.minecraft.client.audio.PositionedSoundRecord
 import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.client.renderer.OpenGlHelper
+import net.minecraft.client.renderer.RenderHelper
+import net.minecraft.client.resources.model.IBakedModel
+import net.minecraft.entity.EntityLivingBase
 import net.minecraft.inventory.Slot
 import net.minecraft.item.ItemStack
+import net.minecraft.util.EnumChatFormatting
 import net.minecraft.util.ResourceLocation
-import net.minecraftforge.fml.client.config.GuiUtils
 import org.json.JSONObject
+import java.text.DecimalFormat
 import java.util.*
+import java.util.stream.Collectors
 
-open class CosmeticGui : UScreen() {
+open class CosmeticGui : UScreen(), HysentialsGui {
     companion object {
+        var instance: CosmeticGui? = null
+        var buttons = ArrayList<Button>()
+
         fun equippedCosmetic(uuid: UUID, name: String): Boolean {
-            val cosmetics = BlockWAPIUtils.getCosmetics()
-            cosmetics.find { it["name"] == name }?.let {
-                if (it.getJSONArray("equipped").contains(uuid.toString())) {
-                    return true
+            try {
+                val cosmetics = BlockWAPIUtils.getCosmetics()
+                cosmetics.find { it.has("name") && it["name"] == name }?.let {
+                    if (it.getJSONArray("equipped").contains(uuid.toString())) {
+                        return true
+                    }
                 }
+            } catch (_: Exception) {
             }
             return false
         }
 
         fun hasCosmetic(uuid: UUID, name: String): Boolean {
-            val cosmetics = BlockWAPIUtils.getCosmetics()
-            cosmetics.find { it["name"] == name }?.let {
-                if (it.getJSONArray("users").contains(uuid.toString())) {
-                    return true
+            try {
+                val cosmetics = BlockWAPIUtils.getCosmetics()
+                cosmetics.find { it.has("name") && it["name"] == name }?.let {
+                    if (it.getJSONArray("users").contains(uuid.toString())) {
+                        return true
+                    }
                 }
+            } catch (_: Exception) {
             }
             return false
         }
@@ -84,28 +103,53 @@ open class CosmeticGui : UScreen() {
                 else -> 0
             }
         }
+
+        var search: String = ""
+        var page: Int = 1
+        var maxPage: Int = 1
+        var type: String = "owned"
+        var inventorySlots: ArrayList<Slot> = Lists.newArrayList()
     }
 
-    var xSize = 176
-    var ySize = 125
+    var xSize = 290
+    var ySize = 164
     protected var guiLeft = 0
     protected var guiTop = 0
+
     var inventory: CosmeticInventory? = null
     var theSlot: Slot? = null
-    var textureManager = Minecraft.getMinecraft().textureManager
-    var inventorySlots: ArrayList<Slot> = Lists.newArrayList()
     var inventoryMap: HashMap<String, ArrayList<JSONObject>> = HashMap()
-    var opaqueSlot = ResourceLocation("hysentials:gui/inventory_slot_opaque.png")
-    var selectedSlot = ResourceLocation("hysentials:gui/inventory_slot_selected.png")
-    var cosmeticBackground = ResourceLocation("hysentials:gui/cosmeticBackground.png")
-    var guiSidebar = ResourceLocation("hysentials:gui/guisidebar.png")
-    var firstPage = ResourceLocation("hysentials:gui/first_page.png")
-    var lastPage = ResourceLocation("hysentials:gui/last_page.png")
+    var cosmeticBackground = ResourceLocation("hysentials:gui/wardrobe/background.png")
+    var lightBackground = ResourceLocation("hysentials:gui/wardrobe/background-light.png")
+    var selectedSlot = ResourceLocation("hysentials:gui/wardrobe/selected_slot.png")
+
+    // Tabs
+    var ownedTab = ResourceLocation("hysentials:gui/wardrobe/tab/owned.png")
+    var headTab = ResourceLocation("hysentials:gui/wardrobe/tab/headwear.png")
+    var backTab = ResourceLocation("hysentials:gui/wardrobe/tab/chestwear.png")
+    var pantaloonsTab = ResourceLocation("hysentials:gui/wardrobe/tab/pantaloons.png")
+    var bootsTab = ResourceLocation("hysentials:gui/wardrobe/tab/boots.png")
+    var petsTab = ResourceLocation("hysentials:gui/wardrobe/tab/pets.png")
+    var chatTab = ResourceLocation("hysentials:gui/wardrobe/tab/chatbox.png")
+
+
+    var mcFive = HysentialsFontRenderer("Minecraft Five", 12f)
     var fontRenderer: ImageIconRenderer? = Hysentials.INSTANCE.imageIconRenderer
-    var page: Int = 1
-    var maxPage: Int = 1
-    var type: String = "pet"
+
     var paginationList: PaginationList<JSONObject>? = null
+
+    var focused: Boolean = false
+    var blinkTimer: Int = 0
+
+    val input: Input = Input(0, 0, 0, 0).let {
+        it.setEnabled(true)
+        it.isFocused = true
+        it
+    }
+
+    var xAngle = 0f
+    var yAngle = 0f
+    var isDragging = false
 
     override fun onDrawScreen(matrixStack: UMatrixStack, mouseX: Int, mouseY: Int, partialTicks: Float) {
         super.onDrawScreen(matrixStack, mouseX, mouseY, partialTicks)
@@ -113,73 +157,163 @@ open class CosmeticGui : UScreen() {
         GlStateManager.pushMatrix()
         this.drawDefaultBackground()
 
+        if (isDragging) {
+            xAngle = (mouseX - width / 2) * 0.5f
+            yAngle = (mouseY - height / 2) * 0.5f
+
+            if (yAngle > 20) {
+                yAngle = 20f
+            } else if (yAngle < -20) {
+                yAngle = -20f
+            }
+        }
         try {
-            Renderer.drawImage(
-                cosmeticBackground,
-                guiLeft.toDouble(),
-                guiTop.toDouble(),
-                xSize.toDouble(),
-                ySize.toDouble()
-            )
+            if (HysentialsConfig.wardrobeDarkMode) {
+                Renderer.drawImage(
+                    cosmeticBackground,
+                    guiLeft.toDouble(),
+                    guiTop.toDouble(),
+                    xSize.toDouble(),
+                    ySize.toDouble()
+                )
+            } else {
+                Renderer.drawImage(
+                    lightBackground,
+                    guiLeft.toDouble(),
+                    guiTop.toDouble(),
+                    xSize.toDouble(),
+                    ySize.toDouble()
+                )
+            }
 
-            Renderer.drawString(
-                fontRenderer,
-                "&8Cosmetics",
-                (guiLeft + 30).toFloat(),
-                (guiTop + 12).toFloat()
-            )
-
-            Renderer.drawString(
-                fontRenderer,
-                "${type.toTitleCase()} ($page/$maxPage)",
-                (guiLeft + ((xSize) - fontRenderer!!.getStringWidth("${type.toTitleCase()} ($page/$maxPage)")) / 2).toFloat(),
-                (guiTop + ySize - 22).toFloat()
-            )
-
-            val emerald = if (Socket.cachedData == null) {
+            val emerald = if (!Socket.cachedData.has("emeralds")) {
                 0
             } else {
                 Socket.cachedData!!["emeralds"] as Int
             }
 
-            val lore = "&fEmeralds: &a${emerald}⏣\n" +
-                    "&fOwned: &a${getOwnedCosmetics(Minecraft.getMinecraft().thePlayer.uniqueID).size}&8/&c${BlockWAPIUtils.getCosmetics().size}\n" +
-                    "\n" +
-                    "&8Earn &aEmeralds ⏣ &8by &8playing\n" +
-                    "&8regular &3minigames&8! View your\n" +
-                    "&8progress &8by doing &e/hs level\n" +
-                    "\n" +
-                    "&7Alternatively, purchase\n" +
-                    "&7them at our online\n" +
-                    "&7webstore:\n" +
-                    "<#3366CC>www.redstone.llc/store"
-            val loreList = lore.split("\n")
+            when {
+                type === "owned" -> {
+                    Renderer.drawImage(
+                        ownedTab,
+                        guiLeft + 5.0,
+                        guiTop + 4.0,
+                        10.0,
+                        10.0
+                    )
+                }
 
-            val maxLoreWidth = loreList.maxOf { fontRenderer!!.getStringWidth(it) }*0.6
-            Renderer.drawImage(
-                guiSidebar,
-                (guiLeft + xSize).toDouble(),
-                (guiTop).toDouble(),
-                (maxLoreWidth + 10).toDouble(),
-                (124).toDouble()
+                type === "head" -> {
+                    Renderer.drawImage(
+                        headTab,
+                        guiLeft + 5.0,
+                        guiTop + 22.0,
+                        9.0,
+                        10.0
+                    )
+                }
+
+                type === "back" -> {
+                    Renderer.drawImage(
+                        backTab,
+                        guiLeft + 5.0,
+                        guiTop + 38.0,
+                        9.0,
+                        9.0
+                    )
+                }
+
+                type === "pantaloons" -> {
+                    Renderer.drawImage(
+                        pantaloonsTab,
+                        guiLeft + 5.0,
+                        guiTop + 53.0,
+                        9.0,
+                        11.0
+                    )
+                }
+
+                type === "boots" -> {
+                    Renderer.drawImage(
+                        bootsTab,
+                        guiLeft + 4.0,
+                        guiTop + 70.0,
+                        11.0,
+                        7.0
+                    )
+                }
+
+                type === "pet" -> {
+                    Renderer.drawImage(
+                        petsTab,
+                        guiLeft + 5.0,
+                        guiTop + 83.0,
+                        9.0,
+                        10.0
+                    )
+                }
+
+                type === "chat" -> {
+                    Renderer.drawImage(
+                        chatTab,
+                        guiLeft + 5.0,
+                        guiTop + 99.0,
+                        9.0,
+                        7.0
+                    )
+                }
+            }
+
+            var typeFinal = type
+            if (typeFinal === "back") {
+                typeFinal = "chest wear"
+            }
+            if (typeFinal === "head") {
+                typeFinal = "head wear"
+            }
+            if (typeFinal === "pet") {
+                typeFinal = "pets"
+            }
+            mcFive.drawString(
+                " > ${typeFinal.splitToWords().uppercase()}",
+                guiLeft + 72f,
+                guiTop + 5f,
+                0x1b1a18
+            )
+            mcFive.drawString(
+                " > ${typeFinal.splitToWords().uppercase()}",
+                guiLeft + 71f,
+                guiTop + 5f,
+                0xFFFFFF
             )
 
+
+            var largeFormat = DecimalFormat("#,###")
+            mcFive.drawString(
+                " ${largeFormat.format(emerald)}",
+                guiLeft + 72f,
+                guiTop + 149f,
+                0x153F15
+            )
+            mcFive.drawString(
+                " ${largeFormat.format(emerald)}",
+                guiLeft + 71f,
+                guiTop + 149f,
+                0x55FF55
+            )
+
+            GlStateManager.enableLighting()
+            GlStateManager.enableDepth()
+            RenderHelper.enableStandardItemLighting()
             GlStateManager.enableRescaleNormal()
-            GlStateManager.scale(0.75f, 0.75f, 0.75f)
-
-            for (i in loreList.indices) {
-                Renderer.drawString(
-                    fontRenderer,
-                    loreList[i],
-                    (guiLeft * 1.35 + xSize * 1.30 + 6*1.25).toFloat(),
-                    (guiTop * 1.35 + 20*1.35 + (i * 10*0.75)*1.35).toFloat(),
-                    true
-                )
-            }
-            GlStateManager.disableRescaleNormal()
-            GlStateManager.popMatrix()
-            GlStateManager.pushMatrix()
-
+            drawEntityOnScreen(
+                guiLeft + 256,
+                guiTop + 124,
+                40,
+                xAngle,
+                yAngle,
+                mc.thePlayer
+            )
 
             for (slot in inventorySlots) {
                 drawSlot(slot, mouseX, mouseY, partialTicks)
@@ -194,7 +328,7 @@ open class CosmeticGui : UScreen() {
                     val j1 = slot.xDisplayPosition
                     val l2 = slot.yDisplayPosition
                     GlStateManager.colorMask(true, true, true, false)
-                    drawGradientRect(j1, l2, j1 + 16, l2 + 16, -2130706433, -2130706433)
+                    drawGradientRect(j1, l2, j1 + 25, l2 + 26, -2130706433, -2130706433)
                     GlStateManager.colorMask(true, true, true, true)
                     GlStateManager.enableLighting()
                     GlStateManager.enableDepth()
@@ -203,49 +337,156 @@ open class CosmeticGui : UScreen() {
             val inventoryplayer = mc.thePlayer.inventory
             if (inventoryplayer.itemStack == null && theSlot != null && theSlot!!.hasStack) {
                 val itemstack1 = theSlot!!.stack
-                renderToolTip(itemstack1, mouseX, mouseY)
+                val list: MutableList<String> =
+                    itemstack1.getTooltip(mc.thePlayer, mc.gameSettings.advancedItemTooltips)
+
+                for (i in list.indices) {
+                    if (i == 0) {
+                        list[i] = itemstack1.rarity.rarityColor.toString() + list[i] as String
+                    } else {
+                        list[i] = EnumChatFormatting.GRAY.toString() + list[i] as String
+                    }
+                }
+
+                this.drawHoveringText(list, mouseX, mouseY, fontRenderer)
             }
 
-            if (mouseX >= guiLeft + 8 && mouseX <= guiLeft + 43 && mouseY >= guiTop + 100 && mouseY <= guiTop + 113) {
-                Renderer.drawImage(firstPage, guiLeft + 9.0, guiTop + 101.0, 34.0, 12.0)
-                val next = if (page == maxPage && type == "pet") {
-                    "Go to Cape"
-                } else if (page == maxPage && type == "cape") {
-                    "Go to Hat"
-                } else if (page == maxPage && type == "hat") {
-                    "Go to Pet"
-                } else {
-                    "Go to " + type.formatCapitalize() + " Page " + (page + 1)
+            var rX = mouseX.toFloat() - guiLeft
+            var rY = mouseY.toFloat() - guiTop
+            when {
+                rX in 5.0..15.0 && rY in 4.0..14.0 && type !== "owned" -> {
+                    drawHoveringText(listOf("§8➔ <#32a852>Owned Cosmetics"), mouseX, mouseY, fontRenderer)
                 }
-                drawHoveringText(
-                    listOf(next),
-                    mouseX,
-                    mouseY,
-                    fontRenderer,
+
+                rX in 5.0..14.0 && rY in 22.0..31.0 && type !== "head" -> {
+                    drawHoveringText(listOf("§8➔ <#1787e3>Headwear"), mouseX, mouseY, fontRenderer)
+                }
+
+                rX in 5.0..14.0 && rY in 38.0..47.0 && type !== "back" -> {
+                    drawHoveringText(listOf("§8➔ <#e69927>Chestwear"), mouseX, mouseY, fontRenderer)
+                }
+
+                rX in 5.0..14.0 && rY in 53.0..64.0 && type !== "pantaloons" -> {
+                    drawHoveringText(listOf("§8➔ <#8327e6>Bottomwear"), mouseX, mouseY, fontRenderer)
+                }
+
+                rX in 4.0..15.0 && rY in 70.0..77.0 && type !== "boots" -> {
+                    drawHoveringText(listOf("§8➔ <#ea323b>Shoes"), mouseX, mouseY, fontRenderer)
+                }
+
+                rX in 5.0..14.0 && rY in 83.0..93.0 && type !== "pet" -> {
+                    drawHoveringText(listOf("§8➔ <#e4ea32>Pets"), mouseX, mouseY, fontRenderer)
+                }
+
+                rX in 5.0..14.0 && rY in 99.0..106.0 && type !== "chat" -> {
+                    drawHoveringText(listOf("§8➔ <#32eade>Chatting"), mouseX, mouseY, fontRenderer)
+                }
+
+                rX in 277.0..284.0 && rY in 5.0..11.0 -> {
+                    drawHoveringText(
+                        listOf(
+                            "§aEmeralds",
+                            "§8Currency",
+                            "",
+                            "§7Hysentials uses Emeralds as",
+                            "§7the main currency of the mod.",
+                            "§7Useful for things like quest rerolls",
+                            "§7cosmetic purchases, trading, and more!",
+                            "§7Emeralds are obtained by playing games and earning",
+                            "§7small increments at a time (your performance in the",
+                            "§7game may impact your emerald yield) or by purchasing",
+                            "§7them on our website, at §9§nwww.redstone.llc/store"
+                        ), mouseX, mouseY, fontRenderer
+                    )
+                }
+
+                rX in 261.0..268.0 && rY in 5.0..11.0 -> {
+                    drawHoveringText(
+                        listOf(
+                            "§fOwned Cosmetics: §a${getOwnedCosmetics(mc.thePlayer.uniqueID).size}§7/§8${BlockWAPIUtils.getCosmetics().size}",
+                            "§fAmount Spent: §a${largeFormat.format(if (Socket.cachedData.has("amountSpent")) Socket.cachedData.getNumber("amountSpent") else 0)} emeralds",
+                        ), mouseX, mouseY, fontRenderer
+                    )
+                }
+
+                rX in 245.0..254.0 && rY in 5.0..12.0 -> {
+                    if (HysentialsConfig.wardrobeDarkMode) {
+                        drawHoveringText(listOf("Turn on Light Mode."), mouseX, mouseY)
+                    } else {
+                        drawHoveringText(listOf("Turn on Dark Mode."), mouseX, mouseY)
+                    }
+                }
+            }
+
+            if (focused && ++blinkTimer >= 60) {
+                if (blinkTimer >= 120) blinkTimer = 0
+                mcFive.drawString(
+                    "|",
+                    guiLeft + 61f + (if (search.isEmpty()) 0f else mcFive.getWidth(search.uppercase()) + 4f),
+                    guiTop + 131f,
+                    0xFFFFFF
                 )
             }
-            if (mouseX >= guiLeft + 133 && mouseX <= guiLeft + 167 && mouseY >= guiTop + 100 && mouseY <= guiTop + 113) {
-                Renderer.drawImage(lastPage, guiLeft + 133.0, guiTop + 101.0, 34.0, 12.0)
-                val next = if (page == 1 && type == "pet") {
-                    "Go to Hat"
-                } else if (page == 1 && type == "hat") {
-                    "Go to Cape"
-                } else if (page == 1 && type == "cape") {
-                    "Go to Pet"
-                } else {
-                    "Go to " + type.formatCapitalize() + " Page " + (page - 1)
+
+            mcFive.drawString(search.uppercase(), guiLeft + 62f, guiTop + 131f, 0x1b1a18)
+            mcFive.drawString(search.uppercase(), guiLeft + 61f, guiTop + 131f, 0xFFFFFF)
+
+            Renderer.translate(guiLeft.toDouble(), guiTop.toDouble(), 0.0)
+            buttons.forEach {
+                if (it.hoverImage?.endsWith("-light.png") == true && !HysentialsConfig.wardrobeDarkMode) {
+                    it.draw(mouseX, mouseY)
+                } else if (HysentialsConfig.wardrobeDarkMode && it.hoverImage?.endsWith("-light.png") == false) {
+                    it.draw(mouseX, mouseY)
                 }
-                drawHoveringText(
-                    listOf(next),
-                    mouseX,
-                    mouseY,
-                    fontRenderer,
-                )
             }
         } catch (ignored: Exception) {
         }
 
+        Renderer.untranslate(0.0, 0.0, 0.0)
         GlStateManager.popMatrix()
+    }
+
+    open fun drawEntityOnScreen(posX: Int, posY: Int, scale: Int, xAngle: Float, yAngle: Float, ent: EntityLivingBase) {
+        GlStateManager.enableColorMaterial()
+        GlStateManager.pushMatrix()
+        GlStateManager.translate(posX.toFloat(), posY.toFloat(), 50.0f)
+        GlStateManager.scale((-scale).toFloat(), scale.toFloat(), scale.toFloat())
+        GlStateManager.rotate(180.0f, 0.0f, 0.0f, 1.0f)
+        val f = ent.renderYawOffset
+        val g = ent.rotationYaw
+        val h = ent.rotationPitch
+        val i = ent.prevRotationYawHead
+        val j = ent.rotationYawHead
+
+        ent.renderYawOffset = 0.0f
+        ent.rotationYaw = 0.0f
+        ent.rotationPitch = 0.0f
+        ent.prevRotationYawHead = 0.0f
+        ent.rotationYawHead = 0.0f
+        GlStateManager.rotate(135.0f, 0.0f, 1.0f, 0.0f)
+        RenderHelper.enableStandardItemLighting()
+        GlStateManager.rotate(-135.0f, 0.0f, 1.0f, 0.0f)
+        GlStateManager.translate(0.0f, 0.0f, 0.0f)
+        val renderManager = Minecraft.getMinecraft().renderManager
+        GlStateManager.rotate(xAngle, 0.0f, 1.0f, 0.0f)
+//        GlStateManager.rotate(yAngle, 1.0f, 0.0f, 0.0f)
+        renderManager.setPlayerViewY(180.0f + yAngle)
+        renderManager.isRenderShadow = false
+        renderManager.renderEntityWithPosYaw(ent, 0.0, 0.0, 0.0, 0.0f, 1.0f)
+        renderManager.isRenderShadow = true
+        GlStateManager.rotate(-xAngle, 0.0f, 1.0f, 0.0f)
+//        GlStateManager.rotate(-yAngle, 1.0f, 0.0f, 0.0f)
+        ent.renderYawOffset = f
+        ent.rotationYaw = g
+        ent.rotationPitch = h
+        ent.prevRotationYawHead = i
+        ent.rotationYawHead = j
+        GlStateManager.popMatrix()
+        RenderHelper.disableStandardItemLighting()
+        GlStateManager.disableRescaleNormal()
+        GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit)
+        GlStateManager.disableTexture2D()
+        GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit)
     }
 
     private fun drawSlot(slotIn: Slot, mouseX: Int, mouseY: Int, partialTicks: Float) {
@@ -254,68 +495,140 @@ open class CosmeticGui : UScreen() {
         GlStateManager.disableLighting()
         GlStateManager.disableDepth()
         GlStateManager.colorMask(true, true, true, false)
-        Renderer.drawImage(opaqueSlot, i.toDouble(), j.toDouble(), 16.0, 16.0)
         val page = paginationList!!.getPage(page)
         if (page.size > slotIn.slotIndex) {
             val cosmetic = page[slotIn.slotIndex]
             val name = cosmetic["name"] as String
             val uuid = Minecraft.getMinecraft().thePlayer.uniqueID
             if (equippedCosmetic(uuid, name)) {
-                Renderer.drawImage(selectedSlot, i.toDouble() - 1, j.toDouble() - 1, 18.0, 18.0)
+                Renderer.drawImage(selectedSlot, i.toDouble(), j.toDouble(), 25.0, 26.0)
             }
         }
         val itemstack: ItemStack = slotIn.stack ?: return
 
-        itemRender.renderItemAndEffectIntoGUI(itemstack, i, j)
-        itemRender.renderItemOverlayIntoGUI(fontRendererObj, itemstack, i, j, "")
+        val ibakedmodel: IBakedModel = Minecraft.getMinecraft().getRenderItem().itemModelMesher.getItemModel(itemstack)
+        val width = ibakedmodel.particleTexture.iconWidth
+        val height = ibakedmodel.particleTexture.iconHeight
+        itemRender.renderItemAndEffectIntoGUI(itemstack, i + (25 - width) / 2, j + (26 - height) / 2)
+        itemRender.renderItemOverlayIntoGUI(fontRendererObj, itemstack, i + (25 - width) / 2, j + (26 - height) / 2, "")
     }
 
     override fun onMouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int) {
         super.onMouseClicked(mouseX, mouseY, mouseButton)
+        buttons.forEach {
+            if (it.hoverImage?.endsWith("-light.png") == true && !HysentialsConfig.wardrobeDarkMode) {
+                it.click(mouseX, mouseY, mouseButton)
+            } else if (HysentialsConfig.wardrobeDarkMode) {
+                it.click(mouseX, mouseY, mouseButton)
+            }
+        }
+
         if (mouseButton == 0) {
-            //Close button
-            if (mouseX >= guiLeft + 8 && mouseX <= guiLeft + 23 && mouseY >= guiTop + 8 && mouseY <= guiTop + 21) {
-                Minecraft.getMinecraft().thePlayer.playSound("entity.item.pickup", 10.0f, 0.4f)
-                Minecraft.getMinecraft().thePlayer.closeScreen()
-            }
-            //First page
-            if (mouseX >= guiLeft + 8 && mouseX <= guiLeft + 43 && mouseY >= guiTop + 100 && mouseY <= guiTop + 113) {
-                if (page == maxPage && type == "pet") {
-                    type = "cape"
+
+            val rX = mouseX - guiLeft
+            val rY = mouseY - guiTop
+
+            when {
+                rX in 5.0..15.0 && rY in 4.0..14.0 && type !== "owned" -> {
+                    type = "owned"
                     page = 1
                     updatePage()
-                } else if (page == maxPage && type == "cape") {
-                    type = "hat"
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
+                }
+
+                rX in 5.0..14.0 && rY in 22.0..31.0 && type !== "head" -> {
+                    type = "head"
                     page = 1
                     updatePage()
-                } else if (page == maxPage && type == "hat") {
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
+                }
+
+                rX in 5.0..14.0 && rY in 38.0..47.0 && type !== "back" -> {
+                    type = "back"
+                    page = 1
+                    updatePage()
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
+                }
+
+                rX in 5.0..14.0 && rY in 53.0..64.0 && type !== "pantaloons" -> {
+                    type = "pantaloons"
+                    page = 1
+                    updatePage()
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
+                }
+
+                rX in 4.0..15.0 && rY in 70.0..77.0 && type !== "boots" -> {
+                    type = "boots"
+                    page = 1
+                    updatePage()
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
+                }
+
+                rX in 5.0..14.0 && rY in 83.0..93.0 && type !== "pet" -> {
                     type = "pet"
                     page = 1
                     updatePage()
-                } else if (page != maxPage) {
-                    page++
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
+                }
+
+                rX in 5.0..14.0 && rY in 99.0..106.0 && type !== "chat" -> {
+                    type = "chat"
+                    page = 1
                     updatePage()
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
+                }
+
+                rX in 223.0..288.0 && rY in 20.0..159.0 -> {
+                    isDragging = true
+                }
+
+                rX in 245.0..254.0 && rY in 5.0..12.0 -> {
+                    HysentialsConfig.wardrobeDarkMode = !HysentialsConfig.wardrobeDarkMode
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
                 }
             }
-            //Last page
-            if (mouseX >= guiLeft + 133 && mouseX <= guiLeft + 167 && mouseY >= guiTop + 100 && mouseY <= guiTop + 113) {
-                if (page == 1 && type == "pet") {
-                    type = "hat"
-                    page = maxPage
-                    updatePage()
-                } else if (page == 1 && type == "hat") {
-                    type = "cape"
-                    page = maxPage
-                    updatePage()
-                } else if (page == 1 && type == "cape") {
-                    type = "pet"
-                    page = maxPage
-                    updatePage()
-                } else if (page != 1) {
-                    page--
-                    updatePage()
-                }
-            }
+
+            focused = rX in 47.0..192.0 && rY in 128.0..141.0
 
             val slot = getSlot(
                 mouseX.toFloat() - guiLeft,
@@ -323,13 +636,13 @@ open class CosmeticGui : UScreen() {
             )
             if (slot != -1) {
                 val cosmetics: List<JSONObject> = inventoryMap[type]!!
-                val paginationList = PaginationList(cosmetics, 36)
+                val paginationList = PaginationList(cosmetics, 32)
                 val page = paginationList.getPage(page)
                 if (slot >= page.size) return
                 val cosmetic = page[slot]
                 val cosmeticName = cosmetic.getString("name")
                 val uuid = Minecraft.getMinecraft().thePlayer.uniqueID
-                val emerald = if (Socket.cachedData == null) {
+                val emerald = if (!Socket.cachedData.has("emeralds")) {
                     0
                 } else {
                     Socket.cachedData!!["emeralds"] as Int
@@ -354,16 +667,43 @@ open class CosmeticGui : UScreen() {
         }
     }
 
+    override fun onMouseReleased(mouseX: Double, mouseY: Double, state: Int) {
+        super.onMouseReleased(mouseX, mouseY, state)
+        if (state == 0) {
+            isDragging = false
+        }
+    }
+
+    override fun onKeyPressed(keyCode: Int, typedChar: Char, modifiers: UKeyboard.Modifiers?) {
+        super.onKeyPressed(keyCode, typedChar, modifiers)
+        if (focused) {
+            if (search.isEmpty() && keyCode == UKeyboard.KEY_SPACE) return
+            input.textboxKeyTyped(typedChar, keyCode)
+            if (keyCode == 1) { // keycode for escape key
+                Minecraft.getMinecraft().thePlayer.closeScreen()
+                return
+            }
+            if (keyCode == 15) { // keycode for tab key
+                return
+            }
+            if (keyCode == 28) { // keycode for enter key
+                return
+            }
+            search = input.text
+            page = 1
+            updatePage()
+        }
+    }
+
     fun getSlot(x: Float, y: Float): Int {
-        val slotSize = 16
         val slotSpacing = 2
         val numRows = 4
-        val numCols = 9
-        if (x < 7 || y < 24) return -1
-        if (x > 168 || y > 96) return -1
+        val numCols = 8
+        if (x < 21 || y < 21) return -1
+        if (x > 222 || y > 121) return -1
         // Calculate the slot number based on the coordinates
-        val row = ((y - 24) / (slotSize + slotSpacing)).toInt()
-        val col = ((x - 7) / (slotSize + slotSpacing)).toInt()
+        val row = ((y - 21) / (24 + slotSpacing)).toInt()
+        val col = ((x - 21) / (23 + slotSpacing)).toInt()
 
         if (row < 0 || col < 0 || row >= numRows || col >= numCols) return -1
         // Calculate the slot number
@@ -373,16 +713,23 @@ open class CosmeticGui : UScreen() {
     }
 
     private fun updatePage() {
-        if (!inventoryMap.containsKey(type)) return
-        val cosmetics: List<JSONObject> = inventoryMap[type]!!
-        paginationList = PaginationList(cosmetics, 36)
-        val page = paginationList!!.getPage(page)
-        maxPage = paginationList!!.pageCount
         inventorySlots.clear()
+        if (!inventoryMap.containsKey(type)) return
+        var cosmetics: List<JSONObject> = inventoryMap[type]!!
+        cosmetics = cosmetics.stream().filter { item: JSONObject ->
+            C.removeColor(
+                item.getString("name")
+            ).contains(search.lowercase(Locale.getDefault()))
+        }.collect(Collectors.toList())
+
+        paginationList = PaginationList(cosmetics, 32)
+        val page = paginationList!!.getPage(page)
+        if (page == null || page.isEmpty()) return
+        maxPage = paginationList!!.pageCount
         for (i in 0..3) {
-            for (j in 0..8) {
-                val index = i * 9 + j
-                val slot = Slot(inventory, index, guiLeft + 8 + j * 18, guiTop + 26 + i * 18)
+            for (j in 0..7) {
+                val index = i * 8 + j
+                val slot = Slot(inventory, index, guiLeft + 20 + j * 25, guiTop + 20 + i * 26)
                 if (index < page.size) {
                     val cosmetic = page[index]
                     val item = cosmetic["item"] as ItemStack
@@ -397,6 +744,7 @@ open class CosmeticGui : UScreen() {
 
     override fun initScreen(width: Int, height: Int) {
         super.initScreen(width, height)
+        instance = this
         inventory = CosmeticInventory()
         inventoryMap.clear()
         inventorySlots.clear()
@@ -406,15 +754,18 @@ open class CosmeticGui : UScreen() {
         val uuid = Minecraft.getMinecraft().thePlayer.uniqueID
 
         //sort cosmetics by rarity and if they have it or not
-        val cosmetics = BlockWAPIUtils.getCosmetics().sortedWith(compareBy({ hasCosmetic(uuid, it["name"] as String) }, { indexFromRarity(it["rarity"] as String) })).asReversed()
+        val cosmetics = BlockWAPIUtils.getCosmetics().sortedWith(
+            compareBy({ hasCosmetic(uuid, it["name"] as String) },
+                { indexFromRarity(it["rarity"] as String) })
+        ).asReversed()
         for (o in cosmetics) {
-            val type = o["type"] as String
+            var type = o["type"] as String
             val name = (o["name"] as String).formatCapitalize()
             val itemID = o["itemID"] as Int
             val description = o["description"] as String
             val rarity = o["rarity"] as String
             val cost = o["cost"] as Int
-            val emerald = if (Socket.cachedData == null) {
+            val emerald = if (!Socket.cachedData.has("emeralds")) {
                 0
             } else {
                 Socket.cachedData!!["emeralds"] as Int
@@ -482,15 +833,104 @@ open class CosmeticGui : UScreen() {
                     )
                     GuiItem.setColor(item, o["color"] as String)
                 }
+
+                "chat" -> {
+                    item = GuiItem.makeColorfulItem(
+                        Material.valueOf(o["material"] as String),
+                        "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>${name}",
+                        1,
+                        0,
+                        lore
+                    )
+                }
             }
             o.put("item", item)
+
+            type = if (type == "cape") {
+                "back"
+            } else {
+                type
+            }
+
+            type = if (type == "hat") {
+                "head"
+            } else {
+                type
+            }
+
             if (!inventoryMap.containsKey(type)) {
                 inventoryMap[type] = ArrayList()
             }
             inventoryMap[type]?.add(o)
+
+            if (!inventoryMap.containsKey("owned")) {
+                inventoryMap["owned"] = ArrayList()
+            }
+            if (hasCosmetic(uuid, name.lowercase())) {
+                inventoryMap["owned"]?.add(o)
+            }
+        }
+
+        buttons.let {
+            it.add(Button(18, 126, 29, 20, "hysentials:gui/wardrobe/left.png", instance) { _, _, _ ->
+                if (page > 1) {
+                    page--
+                    updatePage()
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
+                }
+            })
+            it.add(Button(192, 126, 29, 20, "hysentials:gui/wardrobe/right.png", instance) { _, _, _ ->
+                if (page < maxPage) {
+                    page++
+                    updatePage()
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
+                }
+            })
+            it.add(Button(18, 126, 29, 20, "hysentials:gui/wardrobe/left-light.png", instance) { _, _, _ ->
+                if (page > 1) {
+                    page--
+                    updatePage()
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
+                }
+            })
+            it.add(Button(192, 126, 29, 20, "hysentials:gui/wardrobe/right-light.png", instance) { _, _, _ ->
+                if (page < maxPage) {
+                    page++
+                    updatePage()
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
+                }
+            })
         }
 
         updatePage()
+    }
+
+    override fun getTop(): Int {
+        return guiTop
+    }
+
+    override fun getLeft(): Int {
+        return guiLeft
     }
 
 

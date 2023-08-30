@@ -4,6 +4,8 @@ import cc.woverflow.hysentials.util.MUtils;
 import cc.woverflow.hysentials.guis.container.GuiItem;
 import cc.woverflow.hysentials.util.Material;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.enchantment.Enchantment;
@@ -33,16 +35,15 @@ public class GlowCommand extends CommandBase {
             MUtils.chat("§cYou must be holding an item!");
             return;
         }
-        item = item.copy();
-        if (Material.FISHING_ROD.getId() == Item.getIdFromItem(item.getItem())) {
-            item.addEnchantment(Enchantment.infinity, 10);
-            GuiItem.hideFlag(item, 1);
-            RenameCommand.setCreativeAction(item, Minecraft.getMinecraft().thePlayer.inventory.currentItem);
-        } else {
-            item.addEnchantment(Enchantment.lure, 10);
-            GuiItem.hideFlag(item, 1);
-            RenameCommand.setCreativeAction(item, Minecraft.getMinecraft().thePlayer.inventory.currentItem);
+        if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative()) {
+            MUtils.chat("§cYou must be in creative mode!");
+            return;
         }
+        item = item.copy();
+        item.addEnchantment(Enchantment.lure, 10);
+        GuiItem.hideFlag(item, 1);
+        GuiItem.setEnchanted(item, true);
+        RenameCommand.setCreativeAction(item, Minecraft.getMinecraft().thePlayer.inventory.currentItem);
         MUtils.chat("§aAdded glow to the item successfully!");
     }
 }

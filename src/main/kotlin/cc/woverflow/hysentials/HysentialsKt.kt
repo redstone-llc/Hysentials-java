@@ -1,7 +1,6 @@
 package cc.woverflow.hysentials
 
 import cc.woverflow.hysentials.gui.UpdateChecker
-import cc.woverflow.hysentials.gui.UpdateChecker.downloadDeleteTask
 import kotlinx.coroutines.*
 import net.minecraftforge.common.MinecraftForge
 
@@ -12,11 +11,13 @@ class HysentialsKt {
         }
 
         fun init() {
-            MinecraftForge.EVENT_BUS.register(UpdateChecker)
+            MinecraftForge.EVENT_BUS.register(UpdateChecker())
         }
 
         fun postInit() {
-            downloadDeleteTask()
+            UpdateChecker.instance.downloadDeleteTask()
         }
     }
+
+
 }

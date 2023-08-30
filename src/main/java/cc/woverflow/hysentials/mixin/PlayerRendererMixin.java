@@ -1,6 +1,8 @@
 package cc.woverflow.hysentials.mixin;
 
 import cc.woverflow.hysentials.capes.CustomCapeRenderLayer;
+import cc.woverflow.hysentials.cosmetics.hats.cat.LayerCatHat;
+import cc.woverflow.hysentials.cosmetics.hats.technocrown.LayerTechnoCrown;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,6 +24,8 @@ public abstract class PlayerRendererMixin extends RendererLivingEntity<AbstractC
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onCreate(CallbackInfo info) {
         addLayer(new CustomCapeRenderLayer((RenderPlayer)(Object)this, getMainModel()));
+        addLayer(new LayerTechnoCrown((RenderPlayer)(Object)this));
+        addLayer(new LayerCatHat((RenderPlayer)(Object)this));
     }
 
 }

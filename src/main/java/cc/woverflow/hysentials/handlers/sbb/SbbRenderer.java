@@ -3,6 +3,7 @@ package cc.woverflow.hysentials.handlers.sbb;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.guis.utils.SBBoxes;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.Hysentials;
@@ -11,6 +12,10 @@ import cc.woverflow.hysentials.guis.sbBoxes.SBBoxesEditor;
 import cc.woverflow.hysentials.handlers.redworks.HousingScoreboard;
 import cc.woverflow.hysentials.util.Renderer;
 import cc.woverflow.hysentials.util.ScoreboardWrapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -43,70 +48,6 @@ public class SbbRenderer {
         housingScoreboard = new HousingScoreboard();
     }
 
-    @SubscribeEvent
-    public void renderOverlay(RenderGameOverlayEvent.Pre event) {
-        if (event.type != RenderGameOverlayEvent.ElementType.TEXT) return;
-        GL11.glPushMatrix();
-        Actionbar.actionBar();
-        if (HysentialsConfig.scoreboard) {
-            Scoreboard.scoreboard();
-        } else {
-            GuiIngameForge.renderObjective = true;
-        }
-        ArrayList<ScoreboardWrapper.ScoreWrapper> lines = ScoreboardWrapper.getScoreboard().getSortedScores(ScoreboardWrapper.getSidebar()).stream().map(ScoreboardWrapper.ScoreWrapper::new).collect(Collectors.toCollection(ArrayList::new));
-        for (ScoreboardWrapper.ScoreWrapper line : lines) {
-
-            JSONArray ls = Hysentials.INSTANCE.sbBoxes.jsonObject.getJSONArray("lines");
-            String s = SBBoxesEditor.removeHiddenCharacters(line.toString());
-            Optional<Object> l = ls.toList().stream().filter(o -> s.matches((String) ((HashMap<String, Object>) o).get("regex"))).findFirst();
-            if (!l.isPresent()) continue;
-            JSONObject lineData = new JSONObject((Map) l.get());
-            try {
-                Matcher matcher = Pattern.compile(lineData.getString("regex")).matcher(s);
-                String display = lineData.getString("display");
-                if (matcher.find()) {
-                    for (int i = 1; i <= matcher.groupCount(); i++) {
-                        display = display.replace("{$" + i + "}", matcher.group(i));
-                    }
-                }
-                if (!lineData.getBoolean("enabled")) continue;
-                if (!lineData.getString("title").equals("") && !ChatColor.Companion.stripControlCodes(ScoreboardWrapper.getTitle()).equals(lineData.getString("title")))
-                    continue;
-                lineData.put("text", display);
-                ls.put(ls.toList().indexOf(l.get()), lineData);
-
-                double scale = lineData.getDouble("scale");
-                double width = (getMinecraft().fontRendererObj.getStringWidth(display)) * scale;
-                double height = 15 * scale;
-
-                double scaledX = lineData.getInt("x") + (10 * scale) / 2;
-                double scaledY = lineData.getInt("y") + (6 * scale) / 2;
-
-                drawBox(
-                    lineData.getInt("x"),
-                    lineData.getInt("y"),
-                    (float) (width + 10 * scale),
-                    (float) height,
-                    HysentialsConfig.boxColor,
-                    HysentialsConfig.boxShadows,
-                    new Integer[]{0, 2, 4}[HysentialsConfig.scoreboardBoxesBorderRadius]
-                );
-                GL11.glPushMatrix();
-                GL11.glScaled(lineData.getDouble("scale"), lineData.getDouble("scale"), 1);
-                Renderer.drawString(display, (float) (scaledX / scale), (float) (scaledY / scale));
-                GL11.glScalef(1, 1, 1);
-                GL11.glPopMatrix();
-            } catch (Exception e) {
-                UChat.chat("&cError occured while rendering scoreboard box: &e" + e.getMessage());
-                UChat.chat("&cRemoving this line from the config file to prevent further issues...");
-                UChat.chat("&cPlease report this issue to the developer if it continues!");
-                int i = toList(Hysentials.INSTANCE.sbBoxes.jsonObject.getJSONArray("lines")).indexOf(lineData);
-                Hysentials.INSTANCE.sbBoxes.jsonObject.getJSONArray("lines").remove(i);
-            }
-        }
-        GL11.glPopMatrix();
-    }
-
     int tick = 0;
 
     @SubscribeEvent
@@ -114,7 +55,15 @@ public class SbbRenderer {
         if (event.phase == TickEvent.Phase.END) return;
         if (event.type != TickEvent.Type.CLIENT) return;
         ScoreboardWrapper.resetCache();
+
         if (++tick % (60 * 20 * 5) == 0) {
+            JSONArray array = new JSONArray();
+            for (SBBoxes box : SBBoxes.boxes) {
+                array.put(box.save());
+            }
+            JSONObject object = new JSONObject();
+            object.put("lines", array);
+            Hysentials.INSTANCE.sbBoxes.jsonObject = object;
             Hysentials.INSTANCE.sbBoxes.save();
         }
 
