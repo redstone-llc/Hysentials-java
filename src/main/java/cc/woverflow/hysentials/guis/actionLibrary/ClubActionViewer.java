@@ -7,6 +7,8 @@ import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.guis.container.Container;
 import cc.woverflow.hysentials.guis.container.GuiItem;
 import cc.woverflow.hysentials.util.Material;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.MouseEvent;
 import org.apache.commons.io.IOUtils;
@@ -22,12 +24,12 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class ClubActionViewer extends Container {
-    JSONObject action;
-    JSONArray actions;
-    JSONObject club;
+    JsonObject action;
+    JsonArray actions;
+    JsonObject club;
 
-    public ClubActionViewer(JSONObject action, JSONArray actions, JSONObject club) {
-        super("Viewing: " + action.getString("id"), 4);
+    public ClubActionViewer(JsonObject action, JsonArray actions, JsonObject club) {
+        super("Viewing: " + action.get("id").getAsString(), 4);
         this.action = action;
         this.actions = actions;
         this.club = club;
@@ -35,18 +37,18 @@ public class ClubActionViewer extends Container {
 
     @Override
     public void setItems() {
-        JSONObject actionData = action.getJSONObject("action");
-        JSONObject codespace = actionData.getJSONObject("codespace");
+        JsonObject actionData = action.getAsJsonObject("action");
+        JsonObject codespace = actionData.getAsJsonObject("codespace");
         setItem(13, GuiItem.fromStack(
-            GuiItem.makeColorfulItem(Material.PAPER, "&a" + actionData.getString("name"), codespace.getInt("functions"), 0,
-                "&7Creator: &b" + actionData.getString("creator"),
+            GuiItem.makeColorfulItem(Material.PAPER, "&a" + actionData.get("name").getAsString(), codespace.get("functions").getAsInt(), 0,
+                "&7Creator: &b" + actionData.get("creator").getAsString(),
                 "&7Codespace Required:",
-                "&8 ▪ &a" + codespace.getInt("functions") + " Function Slots",
-                "   &8+" + codespace.getInt("conditions") + " Conditionals",
-                "   &8+" + codespace.getInt("actions") + " Total Actions",
+                "&8 ▪ &a" + codespace.get("functions").getAsInt() + " Function Slots",
+                "   &8+" + codespace.get("conditions").getAsInt() + " Conditionals",
+                "   &8+" + codespace.get("actions").getAsInt() + " Total Actions",
                 "",
                 "&7Function Description:",
-                "&f" + actionData.getString("description")
+                "&f" + actionData.get("description").getAsString()
             )
         ));
 
@@ -79,7 +81,7 @@ public class ClubActionViewer extends Container {
             ));
         }
 
-        if (toList(actions).indexOf(action) != actions.length() - 1) {
+        if (toList(actions).indexOf(action) != actions.size() - 1) {
             setItem(51 - 18, GuiItem.fromStack(
                 GuiItem.makeColorfulItem(Material.ARROW, "&aNext Action", 1, 0,
                     "&7Click to view the next action.",
@@ -111,7 +113,7 @@ public class ClubActionViewer extends Container {
 
         setAction(48 - 18, (event) -> {
             event.getEvent().cancel();
-            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(action.getString("id")), null);
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(action.get("id").getAsString()), null);
             UChat.chat("&aCopied action ID to clipboard.");
         });
 
@@ -131,7 +133,7 @@ public class ClubActionViewer extends Container {
             if (toList(actions).indexOf(action) == 0) return;
             float mouseX = Mouse.getX();
             float mouseY = Mouse.getY();
-            action = actions.getJSONObject(toList(actions).indexOf(action) - 1);
+            action = actions.get(toList(actions).indexOf(action) - 1).getAsJsonObject();
             update();
 //            new ClubActionViewer(actions.getJSONObject(toList(actions).indexOf(action) - 1), actions).open(Minecraft.getMinecraft().thePlayer);
 //            Multithreading.schedule(() -> {
@@ -141,11 +143,11 @@ public class ClubActionViewer extends Container {
 
         setAction(51 - 18, (event) -> {
             event.getEvent().cancel();
-            if (toList(actions).indexOf(action) == actions.length() - 1) return;
+            if (toList(actions).indexOf(action) == actions.size() - 1) return;
             Minecraft.getMinecraft().thePlayer.closeScreen();
             float mouseX = Mouse.getX();
             float mouseY = Mouse.getY();
-            action = actions.getJSONObject(toList(actions).indexOf(action) + 1);
+            action = actions.get(toList(actions).indexOf(action) + 1).getAsJsonObject();
             update();
 //            new ClubActionViewer(actions.getJSONObject(toList(actions).indexOf(action) + 1), actions).open(Minecraft.getMinecraft().thePlayer);
 //            Multithreading.schedule(() -> {
@@ -153,7 +155,6 @@ public class ClubActionViewer extends Container {
 //            }, 1, TimeUnit.MILLISECONDS);
         });
     }
-
     public static ArrayList<Object> toList(JSONArray array) {
         ArrayList<Object> list = new ArrayList<>();
         for (int i = 0; i < array.length(); i++) {
@@ -169,4 +170,21 @@ public class ClubActionViewer extends Container {
         }
         return list;
     }
+
+    public static ArrayList<Object> toList(JsonArray array) {
+        ArrayList<Object> list = new ArrayList<>();
+        for (int i = 0; i < array.size(); i++) {
+            if (array.get(i) instanceof JsonArray) {
+                list.add(toList(array.get(i).getAsJsonArray()));
+                continue;
+            }
+            if (array.get(i) instanceof JsonObject) {
+                list.add(array.get(i).getAsJsonObject());
+                continue;
+            }
+            list.add(array.get(i));
+        }
+        return list;
+    }
+
 }

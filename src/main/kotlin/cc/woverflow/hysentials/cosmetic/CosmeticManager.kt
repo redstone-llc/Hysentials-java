@@ -12,7 +12,7 @@ class CosmeticManager {
         HysentialsKt.IO.launch {
             val name = name.replace(" ", "%20")
             val response =
-                NetworkUtils.postString("https://hysentials.redstone.llc/api/cosmetic?name=$name&function=unequip&uuid=${Minecraft.getMinecraft().thePlayer.uniqueID}&key=${Socket.serverId}")
+                NetworkUtils.postString("http://127.0.0.1:8080/api/cosmetic?name=$name&function=unequip&uuid=${Minecraft.getMinecraft().thePlayer.uniqueID}&key=${Socket.serverId}")
             BlockWAPIUtils.getOnline()
             cb(response)
         }
@@ -22,7 +22,7 @@ class CosmeticManager {
         HysentialsKt.IO.launch {
             val name = name.replace(" ", "%20")
             val response =
-                NetworkUtils.postString("https://hysentials.redstone.llc/api/cosmetic?name=$name&function=equip&uuid=${Minecraft.getMinecraft().thePlayer.uniqueID}&key=${Socket.serverId}")
+                NetworkUtils.postString("http://127.0.0.1:8080/api/cosmetic?name=$name&function=equip&uuid=${Minecraft.getMinecraft().thePlayer.uniqueID}&key=${Socket.serverId}")
             BlockWAPIUtils.getOnline()
             cb(response)
         }
@@ -32,7 +32,7 @@ class CosmeticManager {
         HysentialsKt.IO.launch {
             val cosmeticName = cosmeticName.replace(" ", "%20")
             val response =
-                NetworkUtils.postString("https://hysentials.redstone.llc/api/cosmetic?name=$cosmeticName&function=purchase&uuid=${Minecraft.getMinecraft().thePlayer.uniqueID}&key=${Socket.serverId}")
+                NetworkUtils.postString("http://127.0.0.1:8080/api/cosmetic?name=$cosmeticName&function=purchase&uuid=${Minecraft.getMinecraft().thePlayer.uniqueID}&key=${Socket.serverId}")
             BlockWAPIUtils.getOnline()
             cb(response)
         }

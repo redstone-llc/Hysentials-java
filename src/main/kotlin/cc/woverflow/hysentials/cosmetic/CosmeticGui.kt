@@ -150,6 +150,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
     var xAngle = 0f
     var yAngle = 0f
     var isDragging = false
+    var dragPos = Pair(0.0, 0.0)
 
     override fun onDrawScreen(matrixStack: UMatrixStack, mouseX: Int, mouseY: Int, partialTicks: Float) {
         super.onDrawScreen(matrixStack, mouseX, mouseY, partialTicks)
@@ -158,13 +159,14 @@ open class CosmeticGui : UScreen(), HysentialsGui {
         this.drawDefaultBackground()
 
         if (isDragging) {
-            xAngle = (mouseX - width / 2) * 0.5f
-            yAngle = (mouseY - height / 2) * 0.5f
+            xAngle += (mouseX - dragPos.first).toFloat() * 0.5f
+            yAngle += (mouseY - dragPos.second).toFloat() * 0.5f
+            dragPos = Pair(mouseX.toDouble(), mouseY.toDouble())
 
-            if (yAngle > 20) {
-                yAngle = 20f
-            } else if (yAngle < -20) {
-                yAngle = -20f
+            if (yAngle > 90) {
+                yAngle = 90f
+            } else if (yAngle < -90) {
+                yAngle = -90f
             }
         }
         try {
@@ -275,13 +277,13 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 typeFinal = "pets"
             }
             mcFive.drawString(
-                " > ${typeFinal.splitToWords().uppercase()}",
+                " > ${typeFinal.splitToWords().uppercase()} ($page/$maxPage)",
                 guiLeft + 72f,
                 guiTop + 5f,
                 0x1b1a18
             )
             mcFive.drawString(
-                " > ${typeFinal.splitToWords().uppercase()}",
+                " > ${typeFinal.splitToWords().uppercase()} ($page/$maxPage)",
                 guiLeft + 71f,
                 guiTop + 5f,
                 0xFFFFFF
@@ -311,7 +313,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 guiTop + 124,
                 40,
                 xAngle,
-                yAngle,
+                -yAngle,
                 mc.thePlayer
             )
 
@@ -441,7 +443,6 @@ open class CosmeticGui : UScreen(), HysentialsGui {
             }
         } catch (ignored: Exception) {
         }
-
         Renderer.untranslate(0.0, 0.0, 0.0)
         GlStateManager.popMatrix()
     }
@@ -466,7 +467,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
         GlStateManager.rotate(135.0f, 0.0f, 1.0f, 0.0f)
         RenderHelper.enableStandardItemLighting()
         GlStateManager.rotate(-135.0f, 0.0f, 1.0f, 0.0f)
-        GlStateManager.translate(0.0f, 0.0f, 0.0f)
+        GlStateManager.rotate(-Math.atan((yAngle / 40.0f).toDouble()).toFloat() * 20.0f, 1.0f, 0.0f, 0.0f)
         val renderManager = Minecraft.getMinecraft().renderManager
         GlStateManager.rotate(xAngle, 0.0f, 1.0f, 0.0f)
 //        GlStateManager.rotate(yAngle, 1.0f, 0.0f, 0.0f)
@@ -615,6 +616,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
 
                 rX in 223.0..288.0 && rY in 20.0..159.0 -> {
                     isDragging = true
+                    dragPos = Pair(mouseX, mouseY)
                 }
 
                 rX in 245.0..254.0 && rY in 5.0..12.0 -> {
@@ -872,7 +874,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
         }
 
         buttons.let {
-            it.add(Button(18, 126, 29, 20, "hysentials:gui/wardrobe/left.png", instance) { _, _, _ ->
+            it.add(Button(18, 126, 29, 20, "hysentials:gui/wardrobe/left.png", instance, onHover = {_, _ -> page > 1 }) { _, _, _ ->
                 if (page > 1) {
                     page--
                     updatePage()
@@ -884,7 +886,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                     )
                 }
             })
-            it.add(Button(192, 126, 29, 20, "hysentials:gui/wardrobe/right.png", instance) { _, _, _ ->
+            it.add(Button(192, 126, 29, 20, "hysentials:gui/wardrobe/right.png", instance, onHover = {_, _ -> page < maxPage}) { _, _, _ ->
                 if (page < maxPage) {
                     page++
                     updatePage()

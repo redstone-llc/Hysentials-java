@@ -30,6 +30,7 @@ import cc.woverflow.hysentials.util.ScoreboardWrapper;
 import cc.woverflow.hysentials.utils.ChatLib;
 import cc.woverflow.hysentials.websocket.Socket;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.client.Minecraft;
@@ -114,7 +115,7 @@ public class HysentialsCommand extends CommandBase {
             case "reconnect": {
                 if (Socket.CLIENT != null && Socket.CLIENT.isOpen()) {
                     Socket.manualDisconnect = true;
-                    Socket.CLIENT.sendClose();
+                    Socket.CLIENT.disconnect();
                 }
                 Socket.relogAttempts = 0;
                 Socket.createSocket();
@@ -216,13 +217,13 @@ public class HysentialsCommand extends CommandBase {
                     codeToBeCompiled = FileUtils.readFileToString(file);
                 } else {
                     try {
-                        JSONObject club = ClubDashboard.getClub();
-                        String otherCode = NetworkUtils.getString("https://hysentials.redstone.llc/api/club/action?clubID=" + (club != null ? club.getString("id") : null) + "&id=" + id);
+                        JsonObject club = ClubDashboard.getClub();
+                        String otherCode = NetworkUtils.getString("http://127.0.0.1:8080/api/club/action?clubID=" + (club != null ? club.get("id").getAsString() : null) + "&id=" + id);
                         JSONObject otherJson = new JSONObject(otherCode);
                         if (otherJson.has("action")) {
                             codeToBeCompiled = otherJson.getJSONObject("action").getJSONObject("action").getString("code");
                         } else {
-                            String code = NetworkUtils.getString("https://hysentials.redstone.llc/api/action?id=" + id);
+                            String code = NetworkUtils.getString("http://127.0.0.1:8080/api/action?id=" + id);
                             JSONObject json = new JSONObject(code);
                             if (json.has("action")) {
                                 codeToBeCompiled = json.getJSONObject("action").getJSONObject("action").getString("code");

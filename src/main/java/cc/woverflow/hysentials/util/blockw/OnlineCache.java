@@ -11,7 +11,6 @@ import java.util.UUID;
 public class OnlineCache {
     public HashMap<UUID, String> onlinePlayers = new HashMap<>();
     public HashMap<UUID, Player> playersCache = new HashMap<>();
-    public HashMap<UUID, List<String>> cosmeticsCache = new HashMap<>();
     public HashMap<UUID, String> rankCache = new HashMap<>();
     public ArrayList<BlockWAPIUtils.Group> groups = new ArrayList<>(); //This may be a bit of a memory leak...... :P
     public ArrayList<UUID> plusPlayers = new ArrayList<>();

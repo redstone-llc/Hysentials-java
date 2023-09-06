@@ -13,6 +13,9 @@ import cc.woverflow.hysentials.guis.container.GuiItem;
 import cc.woverflow.hysentials.handlers.htsl.Navigator;
 import cc.woverflow.hysentials.util.Material;
 import cc.woverflow.hysentials.websocket.Socket;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.item.Item;
@@ -34,31 +37,27 @@ import static cc.woverflow.hysentials.guis.container.GuiItem.getLore;
 import static cc.woverflow.hysentials.guis.container.GuiItem.setLore;
 
 public class ClubDashboard extends Container {
-    public static JSONObject clubData;
+    public static JsonObject clubData;
     public static ClubDashboard instance;
 
-    public ClubDashboard() {
+    public ClubDashboard(JsonObject clubData) {
         super("Club Dashboard", 3);
-        String s = NetworkUtils.getString("https://hysentials.redstone.llc/api/club?uuid="
-            + Minecraft.getMinecraft().getSession().getProfile().getId().toString()
-            + "&key=" + Socket.serverId);
-        clubData = new JSONObject(s);
         instance = this;
-        if (!clubData.getBoolean("success")) {
+        if (!clubData.get("success").getAsBoolean()) {
             return;
         }
-        clubData = clubData.getJSONObject("club");
+        ClubDashboard.clubData = new GsonBuilder().create().fromJson(clubData.get("club").getAsString(), JsonObject.class);;
     }
 
     @Override
     public void setItems() {
-        if (clubData.getBoolean("isOwner")) {
+        if (clubData.get("isOwner").getAsBoolean()) {
             setItem(10, GuiItem.fromStack(
                 GuiItem.makeColorfulItem(Material.SIGN, "&aClub Name", 1, 0,
                     "&8Option",
                     "",
                     "&7Change your club name!",
-                    "&7Current Name: &b" + clubData.getString("name"),
+                    "&7Current Name: &b" + clubData.get("name").getAsString(),
                     "&8You can only change your club name",
                     "&8once every 30d!",
                     "",
@@ -70,7 +69,7 @@ public class ClubDashboard extends Container {
                     "",
                     "&7Add your own unique &d/visit &7ending!",
                     "&7Only allocated clubhouses will be shown",
-                    "&7Current Alias: &6" + clubData.getString("alias"),
+                    "&7Current Alias: &6" + clubData.get("alias").getAsString(),
                     "",
                     "&eClick to set!"
                 )));
@@ -98,10 +97,10 @@ public class ClubDashboard extends Container {
                     "&8Option",
                     "",
                     "&7Select which one of your houses you",
-                    "&7want shown in the &b/visit " + clubData.getString("alias"),
+                    "&7want shown in the &b/visit " + clubData.get("alias").getAsString(),
                     "&7menu!",
                     "",
-                    "&7Clubhouse Slots: &a" + clubData.getJSONArray("houses").length() + "&7/&e5",
+                    "&7Clubhouse Slots: &a" + clubData.getAsJsonArray("houses").size() + "&7/&e5",
                     "",
                     "&eClick to edit!"
                 )));
@@ -126,6 +125,7 @@ public class ClubDashboard extends Container {
     public static boolean selectingAlias = false;
     public static boolean invitePlayers = false;
     public static boolean clubhouseSelect = false;
+
     @Override
     public void setClickActions() {
         setDefaultAction((event) -> {
@@ -164,7 +164,7 @@ public class ClubDashboard extends Container {
 
         setAction(13, (event) -> {
             event.getEvent().cancel();
-            if (clubData.getBoolean("isOwner")) {
+            if (clubData.get("isOwner").getAsBoolean()) {
                 Minecraft.getMinecraft().thePlayer.closeScreen();
                 invitePlayers = true;
                 UChat.chat("\n&ePlease send the username of the user you want to invite in chat!");
@@ -215,7 +215,11 @@ public class ClubDashboard extends Container {
                 jsonObject.put("name", message);
                 update(jsonObject);
             });
-            new ClubDashboard().open();
+            JsonObject newClubData = getClub();
+            if (newClubData == null) {
+                return null;
+            }
+            new ClubDashboard(newClubData).open();
             return null;
         }
         if (selectingAlias) {
@@ -225,7 +229,11 @@ public class ClubDashboard extends Container {
                 jsonObject.put("alias", message);
                 update(jsonObject);
             });
-            new ClubDashboard().open();
+            JsonObject newClubData = getClub();
+            if (newClubData == null) {
+                return null;
+            }
+            new ClubDashboard(newClubData).open();
             return null;
         }
 
@@ -236,7 +244,11 @@ public class ClubDashboard extends Container {
                 jsonObject.put("invitee", message);
                 update(jsonObject);
             });
-            new ClubDashboard().open();
+            JsonObject newClubData = getClub();
+            if (newClubData == null) {
+                return null;
+            }
+            new ClubDashboard(newClubData).open();
             return null;
         }
         return message;
@@ -244,8 +256,8 @@ public class ClubDashboard extends Container {
 
     public static void update(JSONObject json) {
         try (InputStreamReader input = new InputStreamReader(
-            Hysentials.post((!json.has("invitee") ? "https://hysentials.redstone.llc/api/club/update" : "https://hysentials.redstone.llc/api/club/invite")
-                + "?id=" + clubData.getString("id")
+            Hysentials.post((!json.has("invitee") ? "http://127.0.0.1:8080/api/club/update" : "http://127.0.0.1:8080/api/club/invite")
+                + "?id=" + clubData.get("id").getAsString()
                 + "&uuid=" + Minecraft.getMinecraft().getSession().getProfile().getId().toString()
                 + "&key=" + Socket.serverId, json), StandardCharsets.UTF_8)) {
             String s = IOUtils.toString(input);
@@ -259,15 +271,15 @@ public class ClubDashboard extends Container {
         }
     }
 
-    public static JSONObject getClub() {
-        String s = NetworkUtils.getString("https://hysentials.redstone.llc/api/club?uuid="
+    public static JsonObject getClub() {
+        String s = NetworkUtils.getString("http://127.0.0.1:8080/api/club?uuid="
             + Minecraft.getMinecraft().getSession().getProfile().getId().toString()
             + "&key=" + Socket.serverId);
-        clubData = new JSONObject(s);
-        if (!clubData.getBoolean("success")) {
+        clubData = new JsonParser().parse(s).getAsJsonObject();
+        if (!clubData.get("success").getAsBoolean()) {
             return null;
         }
-        return clubData.getJSONObject("club");
+        return clubData.getAsJsonObject("club");
     }
 
     public static ItemStack getItemfromNBT(String nbt) {

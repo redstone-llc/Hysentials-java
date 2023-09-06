@@ -311,7 +311,11 @@ public class SBBoxesEditor extends HysentialsGui {
     private ArrayList<Float> getXSnappingLines() {
         ArrayList<Float> lines = new ArrayList<>();
         lines.add(UResolution.getScaledWidth() / 2f);
-        for (SBBoxes hud : SBBoxes.boxes) {
+        ArrayList<ScoreboardWrapper.ScoreWrapper> ls = ScoreboardWrapper.getScoreboard().getSortedScores(ScoreboardWrapper.getSidebar()).stream().map(ScoreboardWrapper.ScoreWrapper::new).collect(Collectors.toCollection(ArrayList::new));
+
+        for (ScoreboardWrapper.ScoreWrapper l : ls) {
+            SBBoxes hud = SBBoxes.getFromMatch(l.getName());
+            if (hud == null) continue;
             if (!hud.isEnabled() || editingHuds.containsKey(hud)) continue;
             lines.add(hud.position.getX());
             lines.add(hud.position.getCenterX());
@@ -343,7 +347,11 @@ public class SBBoxesEditor extends HysentialsGui {
     private ArrayList<Float> getYSnappingLines() {
         ArrayList<Float> lines = new ArrayList<>();
         lines.add(UResolution.getScaledHeight() / 2f);
-        for (SBBoxes hud : SBBoxes.boxes) {
+        ArrayList<ScoreboardWrapper.ScoreWrapper> ls = ScoreboardWrapper.getScoreboard().getSortedScores(ScoreboardWrapper.getSidebar()).stream().map(ScoreboardWrapper.ScoreWrapper::new).collect(Collectors.toCollection(ArrayList::new));
+
+        for (ScoreboardWrapper.ScoreWrapper l : ls) {
+            SBBoxes hud = SBBoxes.getFromMatch(l.getName());
+            if (hud == null) continue;
             if (!hud.isEnabled() || editingHuds.containsKey(hud)) continue;
             lines.add(hud.position.getY());
             lines.add(hud.position.getCenterY());

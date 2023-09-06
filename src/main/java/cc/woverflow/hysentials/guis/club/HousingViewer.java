@@ -4,6 +4,8 @@ import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.guis.container.Container;
 import cc.woverflow.hysentials.guis.container.GuiItem;
 import cc.woverflow.hysentials.util.Material;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -18,11 +20,11 @@ import static cc.woverflow.hysentials.guis.container.GuiItem.getLore;
 import static cc.woverflow.hysentials.guis.container.GuiItem.setLore;
 
 public class HousingViewer extends Container {
-    JSONObject clubData;
+    JsonObject clubData;
     Map<Integer, List<Integer>> slotsMap = new HashMap<>();
 
-    public HousingViewer(JSONObject clubData) {
-        super(clubData.getString("name") + " Houses", 3);
+    public HousingViewer(JsonObject clubData) {
+        super(clubData.get("name").getAsString() + " Houses", 3);
         this.clubData = clubData;
         slotsMap.put(1, Arrays.asList(13));
         slotsMap.put(2, Arrays.asList(12, 14));
@@ -33,16 +35,16 @@ public class HousingViewer extends Container {
 
     @Override
     public void setItems() {
-        JSONArray houses = clubData.getJSONArray("houses");
-        for (int i = 0; i < Math.min(houses.length(), 5); i++) {
-            JSONObject house = houses.getJSONObject(i);
-            ItemStack item = ClubDashboard.getItemfromNBT(house.getString("nbt"));
-            if (clubData.getString("owner").equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString())) {
+        JsonArray houses = clubData.getAsJsonArray("houses");
+        for (int i = 0; i < Math.min(houses.size(), 5); i++) {
+            JsonObject house = houses.get(i).getAsJsonObject();
+            ItemStack item = ClubDashboard.getItemfromNBT(house.get("nbt").getAsString());
+            if (clubData.get("owner").getAsString().equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString())) {
                 List<String> lore = getLore(item);
                 lore.add("§bRight click to remove");
                 setLore(item, lore);
             }
-            setItem(slotsMap.get(houses.length()).get(i), GuiItem.fromStack(
+            setItem(slotsMap.get(houses.size()).get(i), GuiItem.fromStack(
                 item
             ));
         }
@@ -57,12 +59,12 @@ public class HousingViewer extends Container {
     public void setClickActions() {
         setDefaultAction((event) -> {
             event.getEvent().cancel();
-            JSONArray houses = clubData.getJSONArray("houses");
-            for (int i = 0; i < Math.min(houses.length(), 5); i++) {
-                JSONObject house = houses.getJSONObject(i);
-                int slot = slotsMap.get(houses.length()).get(i);
+            JsonArray houses = clubData.getAsJsonArray("houses");
+            for (int i = 0; i < Math.min(houses.size(), 5); i++) {
+                JsonObject house = houses.get(i).getAsJsonObject();
+                int slot = slotsMap.get(houses.size()).get(i);
                 if (event.getSlot() == slot) {
-                    if (clubData.getString("owner").equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString()) && event.getButton() == 1) {
+                    if (clubData.get("owner").getAsString().equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString()) && event.getButton() == 1) {
                         JSONObject data = new JSONObject();
                         data.put("houses", house);
                         data.put("remove", true);
@@ -73,7 +75,7 @@ public class HousingViewer extends Container {
                         });
                     } else {
                         Minecraft.getMinecraft().thePlayer.closeScreen();
-                        Minecraft.getMinecraft().thePlayer.sendChatMessage("/visit " + house.getString("username") + " " + house.getString("name"));
+                        Minecraft.getMinecraft().thePlayer.sendChatMessage("/visit " + house.get("username").getAsString() + " " + house.get("name").getAsString());
                     }
                 }
             }

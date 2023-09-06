@@ -1,9 +1,9 @@
 package cc.woverflow.hysentials.websocket;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
-import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.guis.misc.HysentialsLevel;
 import cc.woverflow.hysentials.handlers.chat.modules.bwranks.BWSReplace;
+import cc.woverflow.hysentials.schema.Hysentials;
 import cc.woverflow.hysentials.util.*;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UMessage;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
@@ -11,6 +11,7 @@ import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.handlers.groupchats.GroupChat;
 import cc.woverflow.hysentials.handlers.redworks.BwRanksUtils;
+import com.google.gson.Gson;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.neovisionaries.ws.client.*;
 import kotlin.random.Random;
@@ -26,10 +27,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -39,8 +37,10 @@ import static cc.woverflow.hysentials.util.HypixelAPIUtils.getUsername;
 public class Socket {
     public static List<WebSocket> sockets = new ArrayList<>();
     public static WebSocket CLIENT;
+    public static Hysentials.AuthUser user;
     public static JSONObject cachedData = new JSONObject();
     public static List<JSONObject> cachedUsers = new ArrayList<>();
+    public static HashMap<String, Hysentials.User> cachedUsersNew = new HashMap<>();
     public static JSONObject cachedRewards = new JSONObject();
     public static JSONObject cachedServerData = new JSONObject();
     public static String serverId;
@@ -69,7 +69,7 @@ public class Socket {
                 Minecraft.getMinecraft().getSession().getToken(),
                 hash
             );
-
+            Gson gson = new Gson();
             WebSocketFactory factory = new WebSocketFactory();
             SSLStore store = new SSLStore();
             store.load("/ssl/socket.der");
@@ -80,8 +80,8 @@ public class Socket {
             factory.getProxySettings().setServerName("socket.redstone.llc");
             factory.getProxySettings().setPort(443);
             factory.getProxySettings().setSSLContext(context);
-//            WebSocket socket = factory.createSocket("ws://127.0.0.1:8080/ws");
-            WebSocket socket = factory.createSocket("wss://socket.redstone.llc");
+            WebSocket socket = factory.createSocket("ws://127.0.0.1:8080/ws");
+//            WebSocket socket = factory.createSocket("ws://socket.redstone.llc");
 
             socket.addListener(new WebSocketListener() {
                 public void send(String message) {
@@ -112,6 +112,7 @@ public class Socket {
                 public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
                     if (manualDisconnect) {
                         manualDisconnect = false;
+                        relogAttempts = 0;
                         return;
                     }
 
@@ -189,7 +190,7 @@ public class Socket {
                                     Multithreading.runAsync(() -> {
                                         BlockWAPIUtils.getOnline();
 
-                                        String levelRewards = NetworkUtils.getString("https://hysentials.redstone.llc/api/rewards");
+                                        String levelRewards = NetworkUtils.getString("http://127.0.0.1:8080/api/rewards");
                                         if (levelRewards != null) {
                                             JSONObject rewards = new JSONObject(levelRewards);
                                             if (rewards.has("rewards")) {
@@ -213,6 +214,7 @@ public class Socket {
                                 cachedUsers = new ArrayList<>();
                                 for (Object o : toList(json.getJSONArray("users"))) {
                                     cachedUsers.add((JSONObject) o);
+                                    cachedUsersNew.put(((JSONObject) o).getString("uuid"), gson.fromJson(((JSONObject) o).toString(), Hysentials.User.class));
                                 }
                                 break;
                             }
@@ -224,20 +226,11 @@ public class Socket {
                                     }
                                     if (HysentialsConfig.futuristicRanks) {
                                         BlockWAPIUtils.Rank rank = BlockWAPIUtils.getRank(json.getString("uuid"));
-                                        IChatComponent comp = new UTextComponent("")
-                                            .appendSibling(
-                                                new UTextComponent(
-                                                    ":globalchat: "
-                                                )
-                                            )
+                                        IChatComponent comp = new UTextComponent(":globalchat: ")
                                             .appendSibling(
                                                 new UTextComponent(
                                                     "&6" + json.getString("username")
-                                                )
-                                                    .setHover(
-                                                        HoverEvent.Action.SHOW_TEXT,
-                                                        (rank.getPlaceholder() + BlockWAPIUtils.getUsername(UUID.fromString(json.getString("uuid"))))
-                                                    )
+                                                ).setHover(HoverEvent.Action.SHOW_TEXT, (rank.getPlaceholder() + BlockWAPIUtils.getUsername(UUID.fromString(json.getString("uuid")))))
                                             )
                                             .appendSibling(
                                                 new UTextComponent(

@@ -6,6 +6,8 @@ import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.woverflow.hysentials.guis.container.Container;
 import cc.woverflow.hysentials.guis.container.GuiItem;
 import cc.woverflow.hysentials.util.Material;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import net.minecraftforge.client.event.MouseEvent;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -19,13 +21,13 @@ import java.util.List;
 import static net.minecraft.client.Minecraft.getMinecraft;
 
 public class SharedCode extends Container {
-    JSONObject clubData;
-    public SharedCode(JSONObject clubData) {
+    JsonObject clubData;
+    public SharedCode(JsonObject clubData) {
         super("Club Code", 6);
         this.clubData = clubData;
     }
     List<Integer> slots = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 28, 29, 30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 43, 44);
-    JSONArray actions = null;
+    JsonArray actions = null;
     @Override
     public void setItems() {
         setItem(0, GuiItem.fromStack(
@@ -56,23 +58,23 @@ public class SharedCode extends Container {
 //            GuiItem.makeColorfulItem(Material.REDSTONE, "&aConditional Presets", 1, 0, "&7Edit and create conditionals", "&7that can be saved and shared.", "", "&eClick to open.")
 //        ));
 
-        JSONArray actions = clubData.getJSONArray("actions");
+        JsonArray actions = clubData.getAsJsonArray("actions");
         this.actions = actions;
-        for (int i = 0; i < Math.min(actions.length(), 32); i++) {
-            JSONObject action = actions.getJSONObject(i);
-            JSONObject actionData = action.getJSONObject("action");
-            JSONObject codespace = actionData.getJSONObject("codespace");
+        for (int i = 0; i < Math.min(actions.size(), 32); i++) {
+            JsonObject action = actions.get(i).getAsJsonObject();
+            JsonObject actionData = action.getAsJsonObject("action");
+            JsonObject codespace = actionData.getAsJsonObject("codespace");
             addItem(GuiItem.fromStack(
-                GuiItem.makeColorfulItem(Material.PAPER, "&a" + actionData.getString("name"), codespace.getInt("functions"), 0,
-                    "&7Creator: &b" + actionData.getString("creator"),
-                    "&7Rating: &6" + ((action.getInt("rating") > 0 ? "+" + action.getInt("rating") : action.getInt("rating")) + "✭ &a(+" + action.getInt("ratingsPositive") + "▲) &c(-" + action.getInt("ratingsNegative") + "▼)"),
+                GuiItem.makeColorfulItem(Material.PAPER, "&a" + actionData.get("name").getAsString(), codespace.get("functions").getAsInt(), 0,
+                    "&7Creator: &b" + actionData.get("creator").getAsString(),
+                    "&7Rating: &6" + ((action.get("rating").getAsInt() > 0 ? "+" + action.get("rating").getAsInt() : action.get("rating").getAsInt()) + "✭ &a(+" + action.get("ratingsPositive").getAsInt() + "▲) &c(-" + action.get("ratingsNegative").getAsInt() + "▼)"),
                     "&7Codespace Required:",
-                    "&8 ▪ &a" + codespace.getInt("functions") + " Function Slots",
-                    "   &8+" + codespace.getInt("conditions") + " Conditionals",
-                    "   &8+" + codespace.getInt("actions") + " Total Actions",
+                    "&8 ▪ &a" + codespace.get("functions").getAsInt() + " Function Slots",
+                    "   &8+" + codespace.get("conditions").getAsInt() + " Conditionals",
+                    "   &8+" + codespace.get("actions").getAsInt() + " Total Actions",
                     "",
                     "&7Function Description:",
-                    "&f" + actionData.getString("description"),
+                    "&f" + actionData.get("description").getAsString(),
                     "",
                     "&eLeft-Click to open.",
                     "&bRight-Click to copy action."
@@ -91,13 +93,13 @@ public class SharedCode extends Container {
             event.getEvent().cancel();
             if (slots.contains(event.getSlot())) {
                 int index = slots.indexOf(event.getSlot());
-                if (index < actions.length()) {
-                    JSONObject action = actions.getJSONObject(index);
+                if (index < actions.size()) {
+                    JsonObject action = actions.get(index).getAsJsonObject();
                     if (event.getButton() == 0) {
                         getMinecraft().thePlayer.closeScreen();
                         new ClubActionViewer(action, actions, clubData).open(getMinecraft().thePlayer);
                     } else if (event.getButton() == 1) {
-                        StringSelection stringSelection = new StringSelection(action.getString("id"));
+                        StringSelection stringSelection = new StringSelection(action.get("id").getAsString());
                         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                         clipboard.setContents(stringSelection, null);
                         UChat.chat("&aCopied action ID to clipboard.");

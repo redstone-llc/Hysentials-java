@@ -13,6 +13,8 @@ import cc.woverflow.hysentials.guis.club.ClubDashboard;
 import cc.woverflow.hysentials.util.HypixelAPIUtils;
 import cc.woverflow.hysentials.websocket.Request;
 import cc.woverflow.hysentials.websocket.Socket;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.sun.org.apache.xpath.internal.operations.Mult;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.io.IOUtils;
@@ -53,7 +55,7 @@ public class ClubCommand {
             JSONObject json = new JSONObject();
             json.put("name", name);
             json.put("owner", Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString());
-            try (InputStreamReader input = new InputStreamReader(Hysentials.post("https://hysentials.redstone.llc/api/club/create"
+            try (InputStreamReader input = new InputStreamReader(Hysentials.post("http://127.0.0.1:8080/api/club/create"
                 + "?id=" + id
                 + "&uuid=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString()
                 + "&key=" + Socket.serverId, json)
@@ -93,7 +95,7 @@ public class ClubCommand {
             return;
         }
         try {
-            String s = NetworkUtils.getString("https://hysentials.redstone.llc/api/club?uuid="
+            String s = NetworkUtils.getString("http://127.0.0.1:8080/api/club?uuid="
                 + Minecraft.getMinecraft().getSession().getProfile().getId().toString()
                 + "&key=" + Socket.serverId);
             JSONObject clubData = new JSONObject(s);
@@ -157,17 +159,16 @@ public class ClubCommand {
             return;
         }
         try {
-            String s = NetworkUtils.getString("https://hysentials.redstone.llc/api/club?uuid="
+            String s = NetworkUtils.getString("http://127.0.0.1:8080/api/club?uuid="
                 + Minecraft.getMinecraft().getSession().getProfile().getId().toString()
                 + "&key=" + Socket.serverId);
-            JSONObject clubData = new JSONObject(s);
-            if (!clubData.getBoolean("success")) {
-                MUtils.chat(HysentialsConfig.chatPrefix + " &c" + clubData.getString("message"));
+            JsonObject clubData = new JsonParser().parse(s).getAsJsonObject();
+            if (!clubData.get("success").getAsBoolean()) {
+                MUtils.chat(HysentialsConfig.chatPrefix + " &c" + clubData.get("message").getAsString());
                 return;
             }
+            new ClubDashboard(clubData).open(Minecraft.getMinecraft().thePlayer);
         } catch (Exception e) {
-
         }
-        new ClubDashboard().open(Minecraft.getMinecraft().thePlayer);
     }
 }

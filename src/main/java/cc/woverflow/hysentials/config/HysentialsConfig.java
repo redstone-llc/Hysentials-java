@@ -76,6 +76,15 @@ public class HysentialsConfig extends Config {
     )
     public static boolean globalChatEnabled = true;
 
+
+    @Switch(
+        name = "Fancy Formatting",
+        category = "General",
+        subcategory = "Fancy Formatting",
+        description = "Enable fancy formatting. This will allow you to see rank images, hex colors, and other things."
+    )
+    public static boolean fancyFormatting = true;
+
     @Switch(
         name = "Futuristic Ranks",
         category = "General",
@@ -83,6 +92,23 @@ public class HysentialsConfig extends Config {
         description = "Enable futuristic ranks. This will allow you to see an image as a users rank, aswell as other things."
     )
     public static boolean futuristicRanks = true;
+
+    @Switch(
+        name = "Hex Colors",
+        category = "General",
+        subcategory = "Fancy Formatting",
+        description = "Enable hex colors. This will allow you to see hex colors in chat."
+    )
+    public static boolean hexColors = true;
+
+    @Switch(
+        name = "Channel Formatting",
+        category = "General",
+        subcategory = "Fancy Formatting",
+        description = "Enable channel formatting. This enables fancier formatting for channels."
+    )
+    public static boolean channelFormatting = true;
+
 
     @Switch(
         name = "Chat Limit 256",

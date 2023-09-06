@@ -6,6 +6,10 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 import cc.woverflow.hysentials.guis.club.HousingViewer;
 import cc.woverflow.hysentials.websocket.Socket;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -34,12 +38,18 @@ public class VisitCommand extends CommandBase {
         if (args.length != 1) return;
         String player = args[0];
         Multithreading.runAsync(() -> {
-            String s = NetworkUtils.getString("https://hysentials.redstone.llc/api/club?alias=" + player);
-            JSONObject clubData = new JSONObject(s);
-            if (clubData.getBoolean("success")) {
-                new HousingViewer(clubData.getJSONObject("club")).open();
-            } else {
-                Minecraft.getMinecraft().thePlayer.sendChatMessage("/visit " + player);
+            try {
+                Gson gson = new GsonBuilder().create();
+                String s = NetworkUtils.getString("http://127.0.0.1:8080/api/club?alias=" + player);
+                JsonObject clubData = gson.fromJson(s, JsonObject.class);
+                if (clubData.get("success").getAsBoolean()) {
+                    System.out.println(clubData.get("club"));
+                    new HousingViewer(gson.fromJson(clubData.get("club").getAsString(), JsonObject.class)).open();
+                } else {
+                    Minecraft.getMinecraft().thePlayer.sendChatMessage("/visit " + player);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }

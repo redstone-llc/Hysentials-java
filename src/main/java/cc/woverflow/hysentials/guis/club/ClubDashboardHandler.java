@@ -4,6 +4,7 @@ import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.event.events.GuiMouseClickEvent;
 import cc.woverflow.hysentials.handlers.htsl.Navigator;
+import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.item.ItemStack;
@@ -56,7 +57,9 @@ public class ClubDashboardHandler {
                 Multithreading.runAsync(() -> {
                     ClubDashboard.update(jsonObject);
                     clubhouseSelect = false;
-                    new ClubDashboard().open();
+                    JsonObject newClubData = ClubDashboard.getClub();
+                    if (newClubData == null) return;
+                    new ClubDashboard(newClubData).open();
                 });
             }
         }

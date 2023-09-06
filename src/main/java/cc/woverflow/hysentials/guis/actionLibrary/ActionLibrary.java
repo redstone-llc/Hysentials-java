@@ -56,7 +56,7 @@ public class ActionLibrary extends Container {
 //            GuiItem.makeColorfulItem(Material.REDSTONE, "&aConditional Presets", 1, 0, "&7Edit and create conditionals", "&7that can be saved and shared.", "", "&eClick to open.")
 //        ));
 
-        String s = NetworkUtils.getString("https://hysentials.redstone.llc/api/actions");
+        String s = NetworkUtils.getString("http://127.0.0.1:8080/api/actions");
         JSONObject json = new JSONObject(s);
         JSONArray actions = json.getJSONArray("actions");
         this.actions = actions;

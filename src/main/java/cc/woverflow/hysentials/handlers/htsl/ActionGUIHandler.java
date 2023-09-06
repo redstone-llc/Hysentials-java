@@ -16,6 +16,7 @@ import cc.woverflow.hysentials.htsl.compiler.Compiler;
 import cc.woverflow.hysentials.util.Input;
 import cc.woverflow.hysentials.util.Material;
 import cc.woverflow.hysentials.util.Renderer;
+import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiScreen;
@@ -202,13 +203,13 @@ public class ActionGUIHandler {
                         codeToBeCompiled = FileUtils.readFileToString(file);
                     } else {
                         try {
-                            JSONObject club = ClubDashboard.getClub();
-                            String otherCode = NetworkUtils.getString("https://hysentials.redstone.llc/api/club/action?clubID=" + (club != null ? club.getString("id") : null) + "&id=" + input.getText());
+                            JsonObject club = ClubDashboard.getClub();
+                            String otherCode = NetworkUtils.getString("http://127.0.0.1:8080/api/club/action?clubID=" + (club != null ? club.get("id").getAsString() : null) + "&id=" + input.getText());
                             JSONObject otherJson = new JSONObject(otherCode);
                             if (otherJson.has("action")) {
                                 codeToBeCompiled = otherJson.getJSONObject("action").getJSONObject("action").getString("code");
                             } else {
-                                String code = NetworkUtils.getString("https://hysentials.redstone.llc/api/action?id=" + input.getText());
+                                String code = NetworkUtils.getString("http://127.0.0.1:8080/api/action?id=" + input.getText());
                                 JSONObject json = new JSONObject(code);
                                 if (json.has("action")) {
                                     codeToBeCompiled = json.getJSONObject("action").getJSONObject("action").getString("code");

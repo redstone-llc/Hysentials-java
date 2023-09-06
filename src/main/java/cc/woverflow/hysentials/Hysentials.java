@@ -7,6 +7,7 @@ import cc.woverflow.hysentials.capes.CapeHandler;
 import cc.woverflow.hysentials.cosmetic.CosmeticManager;
 import cc.woverflow.hysentials.cosmetics.hamster.HamsterCompanion;
 import cc.woverflow.hysentials.cosmetics.hats.cat.CatHat;
+import cc.woverflow.hysentials.cosmetics.miya.MiyaCompanion;
 import cc.woverflow.hysentials.cosmetics.pepper.PepperCompanion;
 import cc.woverflow.hysentials.cosmetics.hats.technocrown.TechnoCrown;
 import cc.woverflow.hysentials.guis.club.ClubDashboardHandler;
@@ -112,6 +113,7 @@ public class Hysentials {
 
     public CubitCompanion cubitCompanion;
     public PepperCompanion pepperCompanion;
+    public MiyaCompanion miyaCompanion;
     public HamsterCompanion hamsterCompanion;
     public TechnoCrown technoCrown;
 
@@ -344,6 +346,7 @@ public class Hysentials {
         eventBus.register(new CapeHandler());
         eventBus.register(cubitCompanion = new CubitCompanion());
         eventBus.register(pepperCompanion = new PepperCompanion());
+        eventBus.register(miyaCompanion = new MiyaCompanion());
         eventBus.register(hamsterCompanion = new HamsterCompanion());
         eventBus.register(technoCrown = new TechnoCrown());
         CatHat.loadCatHats();

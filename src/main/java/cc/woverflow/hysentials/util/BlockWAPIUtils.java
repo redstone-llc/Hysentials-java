@@ -34,9 +34,9 @@ public class BlockWAPIUtils {
             JsonElement ranks = null;
             JsonElement cosmetics = null;
             try {
-                online = NetworkUtils.getJsonElement("https://hysentials.redstone.llc/api/online");
-                ranks = NetworkUtils.getJsonElement("https://hysentials.redstone.llc/api/ranks");
-                cosmetics = NetworkUtils.getJsonElement("https://hysentials.redstone.llc/api/cosmetic");
+                online = NetworkUtils.getJsonElement("http://127.0.0.1:8080/api/online");
+                ranks = NetworkUtils.getJsonElement("http://127.0.0.1:8080/api/ranks");
+                cosmetics = NetworkUtils.getJsonElement("http://127.0.0.1:8080/api/cosmetic");
                 String a = NetworkUtils.getString("https://hysentials.redstone.llc/api/actions");
                 JSONObject json = new JSONObject(a);
                 actions = json.getJSONArray("actions");
@@ -56,19 +56,7 @@ public class BlockWAPIUtils {
             }
             Hysentials.INSTANCE.getOnlineCache().setOnlinePlayers(onlinePlayers);
             HashMap<UUID, String> rankCache = new HashMap<>();
-            HashMap<UUID, List<String>> cosmeticCache = new HashMap<>();
             ArrayList<UUID> plusPlayers = new ArrayList<>();
-
-            //TODO: Replace this with a better backend system
-            for (JsonElement element : cosmetics.getAsJsonObject().get("cosmetics").getAsJsonArray()) {
-                JsonArray uuids = element.getAsJsonObject().get("users").getAsJsonArray();
-                for (JsonElement uuid : uuids) {
-                    if (onlinePlayers.containsKey(UUID.fromString(uuid.getAsString()))) {
-                        cosmeticCache.putIfAbsent(UUID.fromString(uuid.getAsString()), new ArrayList<>());
-                        cosmeticCache.get(UUID.fromString(uuid.getAsString())).add(element.getAsJsonObject().get("name").getAsString());
-                    }
-                }
-            }
 
             for (JsonElement element : ranks.getAsJsonObject().get("ranks").getAsJsonArray()) {
                 JsonArray uuids = element.getAsJsonObject().get("users").getAsJsonArray();
@@ -87,7 +75,6 @@ public class BlockWAPIUtils {
             }
             Hysentials.INSTANCE.getOnlineCache().rankCache = rankCache;
             Hysentials.INSTANCE.getOnlineCache().plusPlayers = plusPlayers;
-            Hysentials.INSTANCE.getOnlineCache().cosmeticsCache = cosmeticCache;
             diagnostics.add("Parsing took " + (System.currentTimeMillis() - start2) + "ms");
 
             return onlinePlayers;
@@ -119,7 +106,7 @@ public class BlockWAPIUtils {
     }
 
     public static String getRequest(String endpoint) {
-        return "https://hysentials.redstone.llc/api/" + endpoint + "?key=" + Socket.serverId + "&uuid=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString();
+        return "http://127.0.0.1:8080/api/" + endpoint + "?key=" + Socket.serverId + "&uuid=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString();
     }
 
     public static JSONObject getAction(String id, String creator) {
@@ -159,7 +146,7 @@ public class BlockWAPIUtils {
 
     public static List<Group> getGroups() {
         try {
-            JsonElement groups = NetworkUtils.getJsonElement("https://hysentials.redstone.llc/api/groups");
+            JsonElement groups = NetworkUtils.getJsonElement("http://127.0.0.1:8080/api/groups");
             if (groups.isJsonNull()) return new ArrayList<>();
             JsonArray groupsArray = groups.getAsJsonObject().get("groups").getAsJsonArray();
             List<Group> groupList = new ArrayList<>();
@@ -212,6 +199,10 @@ public class BlockWAPIUtils {
         }
 
         public String getPrefix(String name) {
+            return prefix;
+        }
+
+        public String getPrefix() {
             return prefix;
         }
 

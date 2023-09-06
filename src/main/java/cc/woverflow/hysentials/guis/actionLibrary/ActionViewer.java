@@ -129,7 +129,7 @@ public class ActionViewer extends Container {
         setAction(30, (event) -> {
             event.getEvent().cancel();
             action.put("ratingsPositive", action.getInt("ratingsPositive") + 1);
-            try (InputStreamReader input = new InputStreamReader(Hysentials.post("https://hysentials.redstone.llc/api/action?id=" + action.getString("id") + "&upvote=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString(), new JSONObject()), StandardCharsets.UTF_8)) {
+            try (InputStreamReader input = new InputStreamReader(Hysentials.post("http://127.0.0.1:8080/api/action?id=" + action.getString("id") + "&upvote=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString(), new JSONObject()), StandardCharsets.UTF_8)) {
                 String s = IOUtils.toString(input);
                 JSONObject response = new JSONObject(s);
                 if (response.getBoolean("success")) {
@@ -145,7 +145,7 @@ public class ActionViewer extends Container {
         setAction(32, (event) -> {
             event.getEvent().cancel();
             action.put("ratingsNegative", action.getInt("ratingsNegative") + 1);
-            try (InputStreamReader input = new InputStreamReader(Hysentials.post("https://hysentials.redstone.llc/api/action?id=" + action.getString("id") + "&downvote=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString(), new JSONObject()), StandardCharsets.UTF_8)) {
+            try (InputStreamReader input = new InputStreamReader(Hysentials.post("http://127.0.0.1:8080/api/action?id=" + action.getString("id") + "&downvote=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString(), new JSONObject()), StandardCharsets.UTF_8)) {
                 String s = IOUtils.toString(input);
                 JSONObject response = new JSONObject(s);
                 if (response.getBoolean("success")) {

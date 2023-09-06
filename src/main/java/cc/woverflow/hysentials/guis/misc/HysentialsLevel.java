@@ -199,7 +199,7 @@ public class HysentialsLevel extends Container {
         setAction(40, event -> {
             event.getEvent().cancel();
             Multithreading.runAsync(() -> {
-                String s = NetworkUtils.getString("https://hysentials.redstone.llc/api/exp?username=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getName());
+                String s = NetworkUtils.getString("http://127.0.0.1:8080/api/exp?username=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getName());
                 JSONObject json = new JSONObject(s);
                 if (json.has("message") && json.getString("message").equals("You are being ratelimited")) {
                     UChat.chat(HysentialsConfig.chatPrefix + " &cDue to Hypixel API restrictions we are unable to update your level at this time. Please try again in a moment.");
