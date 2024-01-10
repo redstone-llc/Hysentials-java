@@ -1,6 +1,7 @@
 package cc.woverflow.hysentials.guis.container;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.event.EventBus;
 import cc.woverflow.hysentials.event.events.GuiMouseClickEvent;
@@ -26,14 +27,19 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public abstract class Container extends InventoryBasic {
     protected String title;
     public static Container INSTANCE;
+    public static HashMap<UUID, Function<String, String>> chatRequests = new HashMap<>();
     protected int rows = 1;
     public Map<Integer, GuiItem> guiItems;
     public Map<Integer, GuiAction> slotActions;
-    public GuiChest guiChest;
+    public GuiChestCustom guiChest;
     public boolean isOpen;
     public GuiAction defaultAction;
     public ItemStack[] inventoryContents;
@@ -51,6 +57,10 @@ public abstract class Container extends InventoryBasic {
 
     public void setItem(int slot, GuiItem item) {
         guiItems.put(slot, item);
+    }
+
+    public void setItem(int slot, ItemStack item) {
+        guiItems.put(slot, GuiItem.fromStack(item));
     }
 
     public void addItem(GuiItem item) {
@@ -87,6 +97,18 @@ public abstract class Container extends InventoryBasic {
         defaultAction = action;
     }
 
+    /**
+     * @param function The function to be called when the entered text is received
+     * @param expire  The time in milliseconds before the request expires
+     */
+    protected void chatRequest(Function<String, String> function, long expire) {
+        UUID id = UUID.randomUUID();
+        chatRequests.put(id, function);
+        Multithreading.schedule(() -> {
+            chatRequests.remove(id);
+        }, expire, TimeUnit.MILLISECONDS);
+    }
+
     public abstract void setItems();
 
     public abstract void handleMenu(MouseEvent event);
@@ -94,6 +116,10 @@ public abstract class Container extends InventoryBasic {
     public abstract void setClickActions();
 
     protected void drawGuiContainerBackgroundLayer(int mouseX, int mouseY) {
+
+    }
+
+    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
 
     }
 
@@ -139,11 +165,17 @@ public abstract class Container extends InventoryBasic {
         }
         setClickActions();
         isOpen = true;
-        guiChest = new GuiChest(owner.inventory, this) {
+        guiChest = new GuiChestCustom(owner.inventory, this) {
             @Override
             protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
                 super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
                 Container.this.drawGuiContainerBackgroundLayer(mouseX, mouseY);
+            }
+
+            @Override
+            protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+                super.drawGuiContainerForegroundLayer(mouseX, mouseY);
+                Container.this.drawGuiContainerForegroundLayer(mouseX, mouseY);
             }
 
             @Override

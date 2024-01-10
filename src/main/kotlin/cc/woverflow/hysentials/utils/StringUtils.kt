@@ -28,6 +28,10 @@ fun String.substringBefore(delimiter: String): String {
     return this.substringBefore(delimiter, this)
 }
 
+fun String.substringAfter(delimiter: String): String {
+    return this.substringAfter(delimiter, this)
+}
+
 
 
 fun String.toTitleCase(): String = this.lowercase().replaceFirstChar { c -> c.titlecase() }

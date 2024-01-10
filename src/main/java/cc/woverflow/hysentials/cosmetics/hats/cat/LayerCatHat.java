@@ -1,5 +1,6 @@
 package cc.woverflow.hysentials.cosmetics.hats.cat;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderPlayer;
@@ -15,6 +16,7 @@ public class LayerCatHat implements LayerRenderer<AbstractClientPlayer> {
 
     @Override
     public void doRenderLayer(AbstractClientPlayer entitylivingbaseIn, float f, float g, float partialTicks, float h, float i, float j, float scale) {
+        if (entitylivingbaseIn.isInvisible()) return;
         CatHat hat = null;
         for (CatHat catHat : CatHat.catHats) {
             if (catHat.canUse(entitylivingbaseIn)) {
@@ -26,14 +28,15 @@ public class LayerCatHat implements LayerRenderer<AbstractClientPlayer> {
             return;
         }
         this.playerRenderer.bindTexture(hat.texture);
-        float l = entitylivingbaseIn.prevRotationYaw + (entitylivingbaseIn.rotationYaw - entitylivingbaseIn.prevRotationYaw) * partialTicks - (entitylivingbaseIn.prevRenderYawOffset + (entitylivingbaseIn.renderYawOffset - entitylivingbaseIn.prevRenderYawOffset) * partialTicks);
-        float m = entitylivingbaseIn.prevRotationPitch + (entitylivingbaseIn.rotationPitch - entitylivingbaseIn.prevRotationPitch) * partialTicks;
         GlStateManager.pushMatrix();
-        GlStateManager.rotate(l, 0.0F, 0.2F, 0.0F);
-        GlStateManager.rotate(m, 0.2F, 0.0F, 0.0F);
+        if (entitylivingbaseIn.isSneaking()) {
+            GlStateManager.translate(0.0F, 0.2F, 0.0F);
+        }
+        playerRenderer.getMainModel().bipedHead.postRender(0.0625F);
+
         boolean flag = entitylivingbaseIn.isWearing(EnumPlayerModelParts.HAT);
-        boolean shifting = entitylivingbaseIn.isSneaking();
-        GlStateManager.translate(0.375F * (float) (0.5 * 2 - 1), -2.0F - (flag ? 0.04F : 0F) + (shifting ? 0.25F : 0F), 0.0F);
+
+        GlStateManager.translate(0.375F * (float) (0.5 * 2 - 1), -2.0F - (flag ? 0.04F : 0F), 0.0F);
         float n = 1;
         GlStateManager.scale(n, n, n);
         hat.model.render(entitylivingbaseIn, f, g, h, i, j, scale);

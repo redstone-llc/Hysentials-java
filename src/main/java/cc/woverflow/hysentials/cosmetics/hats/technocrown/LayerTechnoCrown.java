@@ -1,6 +1,7 @@
 package cc.woverflow.hysentials.cosmetics.hats.technocrown;
 
 import cc.woverflow.hysentials.Hysentials;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderPlayer;
@@ -21,16 +22,18 @@ public class LayerTechnoCrown implements LayerRenderer<AbstractClientPlayer> {
         if (!Hysentials.INSTANCE.technoCrown.canUse(entitylivingbaseIn)) {
             return;
         }
+        if (entitylivingbaseIn.isInvisible()) return;
         this.playerRenderer.bindTexture(texture);
-        float l = entitylivingbaseIn.prevRotationYaw + (entitylivingbaseIn.rotationYaw - entitylivingbaseIn.prevRotationYaw) * partialTicks - (entitylivingbaseIn.prevRenderYawOffset + (entitylivingbaseIn.renderYawOffset - entitylivingbaseIn.prevRenderYawOffset) * partialTicks);
-        float m = entitylivingbaseIn.prevRotationPitch + (entitylivingbaseIn.rotationPitch - entitylivingbaseIn.prevRotationPitch) * partialTicks;
+        Minecraft minecraft = Minecraft.getMinecraft();
         GlStateManager.pushMatrix();
-        GlStateManager.rotate(l, 0.0F, 0.2F, 0.0F);
-        GlStateManager.rotate(m, 0.2F, 0.0F, 0.0F);
-        boolean flag = entitylivingbaseIn.isWearing(EnumPlayerModelParts.HAT);
-        boolean shifting = entitylivingbaseIn.isSneaking();
-        GlStateManager.translate(0.375F * (float) (0.5 * 2 - 1), -2.0F - (flag ? 0.04F : 0F) + 0.08 + (shifting ? 0.2F : 0F), 0.0F);
+        if (entitylivingbaseIn.isSneaking()) {
+            GlStateManager.translate(0.0F, 0.2F, 0.0F);
+        }
+        playerRenderer.getMainModel().bipedHead.postRender(0.0625F);
 
+        boolean flag = entitylivingbaseIn.isWearing(EnumPlayerModelParts.HAT);
+
+        GlStateManager.translate(0.375F * (float) (0.5 * 2 - 1), -2.0F - (flag ? 0.04F : 0F) + 0.08, 0.0F);
         float n = 1;
         GlStateManager.scale(n, n, n);
         Hysentials.INSTANCE.technoCrown.model.render(entitylivingbaseIn, f, g, h, i, j, scale);

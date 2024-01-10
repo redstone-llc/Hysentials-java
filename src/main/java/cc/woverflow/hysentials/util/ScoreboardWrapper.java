@@ -2,6 +2,7 @@ package cc.woverflow.hysentials.util;
 
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
+import cc.woverflow.hysentials.config.hysentialMods.FormattingConfig;
 import cc.woverflow.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.Score;
@@ -60,7 +61,7 @@ public class ScoreboardWrapper {
 
         List<ScoreWrapper> scores = scoreboard.getSortedScores(sidebarObjective).stream().map(ScoreWrapper::new).collect(Collectors.toCollection(ArrayList::new));
         for (ScoreWrapper score : scores) {
-            if (score.getName().startsWith("Rank: ") && HysentialsConfig.futuristicRanks) {
+            if (score.getName().startsWith("Rank: ") && FormattingConfig.fancyRendering()) {
                 BlockWAPIUtils.Rank rank = null;
                 if (Socket.cachedUsers.stream().anyMatch(u -> u.getString("uuid").equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString()))) {
                     String r = Socket.cachedUsers.stream().filter(u -> u.getString("uuid").equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString())).findFirst().get().getString("rank");

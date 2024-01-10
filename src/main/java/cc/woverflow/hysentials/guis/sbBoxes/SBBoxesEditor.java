@@ -6,6 +6,7 @@ import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UKeyboard;
 import cc.polyfrost.oneconfig.libs.universal.UResolution;
 import cc.polyfrost.oneconfig.utils.Multithreading;
+import cc.woverflow.hysentials.GuiIngameHysentials;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.EditorConfig;
 import cc.woverflow.hysentials.config.HysentialsConfig;
@@ -374,7 +375,7 @@ public class SBBoxesEditor extends HysentialsGui {
         ScaledResolution res = new ScaledResolution(Minecraft.getMinecraft());
 
         if (HysentialsConfig.scoreboard) {
-            GuiIngameForge.renderObjective = false;
+            GuiIngameHysentials.renderObjective = false;
             int x = res.getScaledWidth();
             int radius = new Integer[]{0, 2, 4}[HysentialsConfig.scoreboardBorderRadius];
             List<ScoreboardWrapper.ScoreWrapper> lines = ScoreboardWrapper.getLines(true);

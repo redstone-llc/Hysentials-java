@@ -1,6 +1,7 @@
 package cc.woverflow.hysentials.command;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.util.BUtils;
 import cc.woverflow.hysentials.util.MUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
@@ -37,14 +38,15 @@ public class RemoveLoreLineCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
+        if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative() || BUtils.isSBX()) {
+            Minecraft.getMinecraft().thePlayer.sendChatMessage("/removeloreline " + String.join(" ", args));
+            return;
+        }
         if (args.length == 0) {
             UChat.chat("&cUsage: /removeloreline <line>");
             return;
         }
-        if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative()) {
-            MUtils.chat("§cYou must be in creative mode!");
-            return;
-        }
+
         int line;
         try {
             line = Integer.parseInt(args[0]);

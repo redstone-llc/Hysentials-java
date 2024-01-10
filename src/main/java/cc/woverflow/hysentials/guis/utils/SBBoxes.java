@@ -144,11 +144,11 @@ public class SBBoxes {
         if (regexDisplay == null) {
             regexDisplay = display;
         }
+        display = regexDisplay;
         for (int i = 1; i <= matcher.groupCount(); i++) {
-            if (matcher.group(i) == null) {
-                continue;
+            if (matcher.group(i) != null) {
+                display = display.replace("{$" + i + "}", matcher.group(i));
             }
-            display = regexDisplay.replace("{$" + i + "}", matcher.group(i));
         }
     }
 

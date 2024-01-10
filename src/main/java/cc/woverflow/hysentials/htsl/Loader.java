@@ -55,6 +55,10 @@ public class Loader {
         new TeleportPlayer(null, null);
         new TriggerFunction(null, false);
         new UseRemoveHeldItem();
+        new PauseExecution(null);
+        new SetPlayerTeam(null);
+        new ChangeTeamStat(null, null, null, null);
+        new DisplayMenu(null);
     }
 
     public static boolean isNAN(String s) {

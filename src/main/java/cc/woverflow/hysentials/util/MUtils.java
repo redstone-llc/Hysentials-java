@@ -17,8 +17,7 @@ public class MUtils {
     public static List<String> messages = new ArrayList<>();
     @SubscribeEvent
     public void onTickEvent(TickEvent event) {
-        final LocrawInfo locraw = LocrawUtil.INSTANCE.getLocrawInfo();
-        if (event.phase != TickEvent.Phase.START || event.type != TickEvent.Type.CLIENT || Minecraft.getMinecraft().thePlayer == null || !HypixelUtils.INSTANCE.isHypixel() || locraw == null) {
+        if (event.phase != TickEvent.Phase.START || event.type != TickEvent.Type.CLIENT || Minecraft.getMinecraft().thePlayer == null || !BUtils.isHypixelOrSBX()) {
             return;
         }
         if (messages.size() == 0) {

@@ -184,7 +184,7 @@ public class Navigator {
         for (int index = 0; index < playerContainer.inventorySlots.size(); index++) {
             ItemStack item = playerContainer.getSlot(index).getStack();
             if (item == null) continue; // Skip empty slots
-            if (ChatColor.Companion.stripControlCodes(item.getDisplayName()).equals(optionName)) {
+            if (ChatColor.Companion.stripControlCodes(item.getDisplayName()).equalsIgnoreCase(optionName)) {
                 click(index);
                 isSelecting = false;
                 return true;

@@ -3,11 +3,13 @@ package cc.woverflow.hysentials.guis.misc;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
+import cc.woverflow.hysentials.HysentialsUtilsKt;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.guis.container.Container;
 import cc.woverflow.hysentials.guis.container.GuiItem;
 import cc.woverflow.hysentials.util.Material;
 import cc.woverflow.hysentials.utils.StringUtilsKt;
+import cc.woverflow.hysentials.utils.Utils;
 import cc.woverflow.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
@@ -131,28 +133,15 @@ public class HysentialsLevel extends Container {
     }
 
     public static int getExp() {
-        return Socket.cachedData.has("exp") ? Socket.cachedData.getInt("exp") : 0;
+        return (Socket.cachedUser != null ? Socket.cachedUser.getExp() : 0);
     }
 
     public static float getLevel() {
-        float level = 0;
-        int exp = getExp();
-        while (exp >= getExpForLevel((int) level)) {
-            level++;
-            exp -= getExpForLevel((int) level);
-        }
-        level += exp / (float) getExpForLevel((int) level);
-        return level;
+        return Utils.getLevel(getExp());
     }
 
     public static int getExpStart() {
-        float level = 0;
-        int exp = getExp();
-        while (exp >= getExpForLevel((int) level)) {
-            level++;
-            exp -= getExpForLevel((int) level);
-        }
-        return exp;
+        return Utils.getExpStart(getExp());
     }
 
     public String getProgressBar() {
@@ -174,15 +163,7 @@ public class HysentialsLevel extends Container {
         ~ Base = 1,000 XP. So Level 1 would be 1,000 to obtain and level 2 would be 1,000 + 15% of 1,000 (which is 150) added onto the next requirement for the next level (1,150 XP for Level 2).
      */
     public static int getExpForLevel(int level) {
-        int previous = 1000;
-        double amount = 0;
-        double multiplier = 1.15;
-        for (int i = 0; i < level; i++) {
-            previous += amount;
-            amount = (int) (150 * multiplier);
-            multiplier += (i > 10 ? 0.1 : 0.15);
-        }
-        return previous;
+        return Utils.getExpForLevel(level);
     }
 
     @Override
@@ -199,7 +180,7 @@ public class HysentialsLevel extends Container {
         setAction(40, event -> {
             event.getEvent().cancel();
             Multithreading.runAsync(() -> {
-                String s = NetworkUtils.getString("http://127.0.0.1:8080/api/exp?username=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getName());
+                String s = NetworkUtils.getString(HysentialsUtilsKt.getHYSENTIALS_API() + "/exp?username=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getName());
                 JSONObject json = new JSONObject(s);
                 if (json.has("message") && json.getString("message").equals("You are being ratelimited")) {
                     UChat.chat(HysentialsConfig.chatPrefix + " &cDue to Hypixel API restrictions we are unable to update your level at this time. Please try again in a moment.");
@@ -241,13 +222,15 @@ public class HysentialsLevel extends Container {
             int currentExp = json.getInt("exp");
             int differenceExp = currentExp - previousExp;
 
-            int previousEmeralds = Socket.cachedData.getInt("emeralds");
+            int previousEmeralds = (Socket.cachedUser != null ? Socket.cachedUser.getEmeralds() : 0);
             int currentEmeralds = json.getInt("emeralds");
             int differenceEmeralds = currentEmeralds - previousEmeralds;
 
             int previousLevel = (int) getLevel();
-            Socket.cachedData.put("exp", json.getInt("exp"));
-            Socket.cachedData.put("emeralds", json.getInt("emeralds"));
+            if (Socket.cachedUser != null) {
+                Socket.cachedUser.setExp(json.getInt("exp"));
+                Socket.cachedUser.setEmeralds(json.getInt("emeralds"));
+            }
             int currentLevel = (int) getLevel();
             int differenceLevel = currentLevel - previousLevel;
 

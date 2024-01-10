@@ -13,8 +13,8 @@ public class PlayerJoin extends Cluster {
         super("Player Join", "playerJoin", loaders);
         add(close());
         add(command("menu"));
-        add(click(39));
-        add(click(28));
+        add(click(31));
+        add(click(11));
         add(click(10));
         if (loaders != null) {
             loadActions(loaders);

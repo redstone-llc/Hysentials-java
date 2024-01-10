@@ -40,7 +40,7 @@ public class OpenInvCommand extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
         if (SbbRenderer.housingScoreboard.getHousingName() == null) {
-            MUtils.chat("&cYou must be in a housing to use this command!");
+            Minecraft.getMinecraft().thePlayer.sendChatMessage("/openinv " + String.join(" ", args));
             return;
         }
         if (args.length == 0) {

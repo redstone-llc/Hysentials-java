@@ -31,7 +31,8 @@ public class PepperCompanion extends AbstractCosmetic<EntityPepper> {
     @Override
     public boolean canUse(EntityPlayer player) {
         return CosmeticGui.Companion.equippedCosmetic(player.getUniqueID(), "pepper")
-            && CosmeticGui.Companion.hasCosmetic(player.getUniqueID(), "pepper");
+            && CosmeticGui.Companion.hasCosmetic(player.getUniqueID(), "pepper")
+            && !player.isInvisible();
     }
 
     public static long cooldown = 0;

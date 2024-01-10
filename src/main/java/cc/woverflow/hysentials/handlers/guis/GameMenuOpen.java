@@ -1,7 +1,12 @@
 package cc.woverflow.hysentials.handlers.guis;
 
+import cc.polyfrost.oneconfig.gui.OneConfigGui;
+import cc.polyfrost.oneconfig.gui.pages.ModConfigPage;
+import cc.polyfrost.oneconfig.gui.pages.ModsPage;
+import cc.polyfrost.oneconfig.gui.pages.Page;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.config.HysentialsMods;
 import cc.woverflow.hysentials.profileViewer.DefaultProfileGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
@@ -22,6 +27,8 @@ public class GameMenuOpen {
     public static Field field_lowerChestInventory;
     public static Field field_upperChestInventory;
     public static Field field_inventoryContents;
+    public static Field field_currentPage;
+    public static Field field_prevPage;
 
     public GameMenuOpen () {
         try {
@@ -31,6 +38,10 @@ public class GameMenuOpen {
             field_upperChestInventory.setAccessible(true);
             field_inventoryContents = InventoryBasic.class.getDeclaredField("field_70482_c");
             field_inventoryContents.setAccessible(true);
+            field_currentPage = OneConfigGui.class.getDeclaredField("currentPage");
+            field_currentPage.setAccessible(true);
+            field_prevPage = OneConfigGui.class.getDeclaredField("prevPage");
+            field_prevPage.setAccessible(true);
         } catch (NoSuchFieldException e) {
             throw new RuntimeException(e);
         }

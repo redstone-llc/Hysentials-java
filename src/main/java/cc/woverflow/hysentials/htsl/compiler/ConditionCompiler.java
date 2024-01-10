@@ -64,6 +64,15 @@ public class ConditionCompiler {
                     });
                     break;
                 }
+                case "teamstat": {
+                    String mode = validComparator(argsList.get(2));
+                    ConditionResult result = isNullComparator(conditionList, mode);
+                    if (result != null) return result;
+                    conditionList.add(new Object[]{"team_stat_requirement",
+                        new Object[]{argsList.get(0), argsList.get(1), mode, argsList.get(3)}
+                    });
+                    break;
+                }
                 case "hasPotion": {
                     conditionList.add(new Object[]{"has_potion_effect",
                         new Object[]{argsList.get(0)}
@@ -88,6 +97,12 @@ public class ConditionCompiler {
                 }
                 case "hasGroup": {
                     conditionList.add(new Object[]{"required_group",
+                        new Object[]{argsList.get(0), Boolean.parseBoolean(argsList.get(1))}
+                    });
+                    break;
+                }
+                case "hasTeam": {
+                    conditionList.add(new Object[]{"required_team",
                         new Object[]{argsList.get(0), Boolean.parseBoolean(argsList.get(1))}
                     });
                     break;
@@ -118,6 +133,10 @@ public class ConditionCompiler {
                 }
                 case "isSneaking": {
                     conditionList.add(new Object[]{"is_sneaking", new Object[]{}});
+                    break;
+                }
+                case "isFlying": {
+                    conditionList.add(new Object[]{"is_flying", new Object[]{}});
                     break;
                 }
                 case "hasItem": {
@@ -179,6 +198,9 @@ public class ConditionCompiler {
             case "Global Stat Requirement": {
                 return "globalstat \"" + args.get(0) + "\" " + args.get(1) + " " + args.get(2);
             }
+            case "Team Stat Requirement": {
+                return "teamstat \"" + args.get(0) + "\" \"" + args.get(1) + "\" " + args.get(2) + " " + args.get(3);
+            }
             case "Has Potion Effect": {
                 return "hasPotion \"" + args.get(0) + "\"";
             }
@@ -194,6 +216,9 @@ public class ConditionCompiler {
             case "Required Group": {
                 return "hasGroup \"" + args.get(0) + "\" " + args.get(1);
             }
+            case "Required Team": {
+                return "hasTeam \"" + args.get(0) + "\"";
+            }
             case "Damage Cause": {
                 return "damageCause \"" + args.get(0) + "\"";
             }
@@ -202,6 +227,9 @@ public class ConditionCompiler {
             }
             case "Player Sneaking": {
                 return "isSneaking";
+            }
+            case "Player Flying": {
+                return "isFlying";
             }
             case "Required Gamemode": {
                 return "gamemode \"" + args.get(0) + "\"";

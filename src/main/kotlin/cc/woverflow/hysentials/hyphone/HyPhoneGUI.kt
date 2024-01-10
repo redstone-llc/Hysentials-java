@@ -5,8 +5,8 @@ import cc.polyfrost.oneconfig.libs.universal.UMatrixStack
 import cc.polyfrost.oneconfig.libs.universal.UScreen
 import cc.woverflow.hysentials.Hysentials
 import cc.woverflow.hysentials.cosmetic.CosmeticGui
-import cc.woverflow.hysentials.gui.Button
-import cc.woverflow.hysentials.gui.HysentialsGui
+import cc.woverflow.hysentials.updateGui.Button
+import cc.woverflow.hysentials.updateGui.HysentialsGui
 import cc.woverflow.hysentials.guis.misc.HysentialsLevel
 import cc.woverflow.hysentials.util.ImageIconRenderer
 import cc.woverflow.hysentials.util.Renderer

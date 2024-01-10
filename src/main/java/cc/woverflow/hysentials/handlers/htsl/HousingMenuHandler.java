@@ -23,7 +23,7 @@ public class HousingMenuHandler {
         if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
             return;
         if (!isInHousingMenu()) return;
-        Slot slot = Minecraft.getMinecraft().thePlayer.openContainer.getSlot(31);
+        Slot slot = Minecraft.getMinecraft().thePlayer.openContainer.getSlot(22);
         if (!slot.getHasStack()) {
             ItemStack item = GuiItem.makeColorfulItem(Material.STORAGE_MINECART, "&aAction Library", 1, 0, "&7Opens the Action Library", "&7GUI.", "", "&eLeft-Click to browse!");
             slot.putStack(item);
@@ -38,7 +38,7 @@ public class HousingMenuHandler {
         if (screen instanceof GuiChest) {
             Slot slot = ((GuiChest) screen).getSlotUnderMouse();
             if (slot == null) return;
-            if (slot.getSlotIndex() == 31) {
+            if (slot.getSlotIndex() == 22) {
                 event.getCi().cancel();
                 Minecraft.getMinecraft().thePlayer.closeScreen();
                 new ActionLibrary().open(Minecraft.getMinecraft().thePlayer);
@@ -52,7 +52,7 @@ public class HousingMenuHandler {
             try {
                 if (field_lowerChestInventory.get(chest) instanceof IInventory) {
                     IInventory inventory = (IInventory) field_lowerChestInventory.get(chest);
-                    if (inventory.getName().equals("Housing Menu")) {
+                    if (inventory.getName().equals("Housing Menu") && inventory.getSizeInventory() == 45) {
                         return true;
                     }
                 }

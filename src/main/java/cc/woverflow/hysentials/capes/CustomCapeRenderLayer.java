@@ -49,7 +49,9 @@ public class CustomCapeRenderLayer implements LayerRenderer<AbstractClientPlayer
 
         if (!abstractClientPlayer.hasPlayerInfo() || abstractClientPlayer.isInvisible()
             || !abstractClientPlayer.isWearing(EnumPlayerModelParts.CAPE)
-            || abstractClientPlayer.getLocationCape() == null) {
+            || abstractClientPlayer.getLocationCape() == null
+            || BlockWAPIUtils.isWearingType(abstractClientPlayer.getUniqueID(), "backpack")
+            || HysentialsConfig.disableCustomCapes) {
             return;
         }
 
@@ -167,9 +169,6 @@ public class CustomCapeRenderLayer implements LayerRenderer<AbstractClientPlayer
             float relativePart = (float) (part + 1) / partCount;
             return (float) (Math.sin(Math.toRadians((relativePart) * 360 - (highlightedPart))) * 3);
         }
-//        if (WaveyCapesBase.config.windMode == WindMode.SLIGHT) {
-//            return getWind(60);
-//        }
         return 0;
     }
 

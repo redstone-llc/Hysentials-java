@@ -1,24 +1,17 @@
 package cc.woverflow.hysentials.mixin;
 
-import cc.woverflow.hysentials.gui.RequestUpdateGui;
-import cc.woverflow.hysentials.gui.UpdateChecker;
-import cc.woverflow.hysentials.gui.UpdateGui;
+import cc.woverflow.hysentials.updateGui.RequestUpdateGui;
+import cc.woverflow.hysentials.updateGui.UpdateChecker;
+import cc.woverflow.hysentials.updateGui.UpdateGui;
 import cc.woverflow.hysentials.hook.MainMenuHook;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiMainMenu;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiScreenRealmsProxy;
-import net.minecraft.client.renderer.entity.RenderPlayer;
+import net.minecraft.client.gui.*;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.io.IOException;
-import java.util.List;
 
 @Mixin(GuiMainMenu.class)
 public class GuiMainMenuMixin implements MainMenuHook {

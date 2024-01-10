@@ -3,6 +3,7 @@ package cc.woverflow.hysentials.guis.club;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.guis.container.Container;
 import cc.woverflow.hysentials.guis.container.GuiItem;
+import cc.woverflow.hysentials.schema.HysentialsSchema;
 import cc.woverflow.hysentials.util.Material;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -20,11 +21,11 @@ import static cc.woverflow.hysentials.guis.container.GuiItem.getLore;
 import static cc.woverflow.hysentials.guis.container.GuiItem.setLore;
 
 public class HousingViewer extends Container {
-    JsonObject clubData;
+    HysentialsSchema.Club clubData;
     Map<Integer, List<Integer>> slotsMap = new HashMap<>();
 
-    public HousingViewer(JsonObject clubData) {
-        super(clubData.get("name").getAsString() + " Houses", 3);
+    public HousingViewer(HysentialsSchema.Club clubData) {
+        super(clubData.getName() + " Houses", 3);
         this.clubData = clubData;
         slotsMap.put(1, Arrays.asList(13));
         slotsMap.put(2, Arrays.asList(12, 14));
@@ -35,11 +36,11 @@ public class HousingViewer extends Container {
 
     @Override
     public void setItems() {
-        JsonArray houses = clubData.getAsJsonArray("houses");
+        List<JsonObject> houses = clubData.getHouses();
         for (int i = 0; i < Math.min(houses.size(), 5); i++) {
             JsonObject house = houses.get(i).getAsJsonObject();
             ItemStack item = ClubDashboard.getItemfromNBT(house.get("nbt").getAsString());
-            if (clubData.get("owner").getAsString().equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString())) {
+            if (clubData.getOwner().equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString())) {
                 List<String> lore = getLore(item);
                 lore.add("§bRight click to remove");
                 setLore(item, lore);
@@ -59,19 +60,19 @@ public class HousingViewer extends Container {
     public void setClickActions() {
         setDefaultAction((event) -> {
             event.getEvent().cancel();
-            JsonArray houses = clubData.getAsJsonArray("houses");
+            List<JsonObject> houses = clubData.getHouses();
             for (int i = 0; i < Math.min(houses.size(), 5); i++) {
                 JsonObject house = houses.get(i).getAsJsonObject();
                 int slot = slotsMap.get(houses.size()).get(i);
                 if (event.getSlot() == slot) {
-                    if (clubData.get("owner").getAsString().equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString()) && event.getButton() == 1) {
+                    if (clubData.getOwner().equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString()) && event.getButton() == 1) {
                         JSONObject data = new JSONObject();
                         data.put("houses", house);
                         data.put("remove", true);
                         Multithreading.runAsync(() -> {
-                            ClubDashboard.clubData = ClubDashboard.getClub();
+                            ClubDashboard.getClub();
                             ClubDashboard.update(data);
-                            new HousingViewer(Objects.requireNonNull(ClubDashboard.getClub())).open();
+                            new HousingViewer(ClubDashboard.clubData).open();
                         });
                     } else {
                         Minecraft.getMinecraft().thePlayer.closeScreen();

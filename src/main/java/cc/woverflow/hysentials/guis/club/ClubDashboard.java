@@ -1,43 +1,32 @@
 package cc.woverflow.hysentials.guis.club;
 
-import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
-import cc.woverflow.hysentials.util.MUtils;
+import cc.woverflow.hysentials.HysentialsUtilsKt;
+import cc.woverflow.hysentials.schema.HysentialsSchema.Club;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.woverflow.hysentials.Hysentials;
-import cc.woverflow.hysentials.event.events.GuiMouseClickEvent;
 import cc.woverflow.hysentials.guis.actionLibrary.SharedCode;
 import cc.woverflow.hysentials.guis.container.Container;
 import cc.woverflow.hysentials.guis.container.GuiItem;
-import cc.woverflow.hysentials.handlers.htsl.Navigator;
 import cc.woverflow.hysentials.util.Material;
 import cc.woverflow.hysentials.websocket.Socket;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.inventory.GuiChest;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraftforge.client.event.MouseEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static cc.woverflow.hysentials.guis.container.GuiItem.getLore;
-import static cc.woverflow.hysentials.guis.container.GuiItem.setLore;
-
 public class ClubDashboard extends Container {
-    public static JsonObject clubData;
+    public static Club clubData;
     public static ClubDashboard instance;
 
     public ClubDashboard(JsonObject clubData) {
@@ -46,18 +35,18 @@ public class ClubDashboard extends Container {
         if (!clubData.get("success").getAsBoolean()) {
             return;
         }
-        ClubDashboard.clubData = new GsonBuilder().create().fromJson(clubData.get("club").getAsString(), JsonObject.class);;
+        ClubDashboard.clubData = Club.Companion.deserialize(clubData.getAsJsonObject("club"));
     }
 
     @Override
     public void setItems() {
-        if (clubData.get("isOwner").getAsBoolean()) {
+        if (clubData.isOwner()) {
             setItem(10, GuiItem.fromStack(
                 GuiItem.makeColorfulItem(Material.SIGN, "&aClub Name", 1, 0,
                     "&8Option",
                     "",
                     "&7Change your club name!",
-                    "&7Current Name: &b" + clubData.get("name").getAsString(),
+                    "&7Current Name: &b" + clubData.getName(),
                     "&8You can only change your club name",
                     "&8once every 30d!",
                     "",
@@ -69,7 +58,7 @@ public class ClubDashboard extends Container {
                     "",
                     "&7Add your own unique &d/visit &7ending!",
                     "&7Only allocated clubhouses will be shown",
-                    "&7Current Alias: &6" + clubData.get("alias").getAsString(),
+                    "&7Current Alias: &6" + clubData.getAlias(),
                     "",
                     "&eClick to set!"
                 )));
@@ -97,10 +86,10 @@ public class ClubDashboard extends Container {
                     "&8Option",
                     "",
                     "&7Select which one of your houses you",
-                    "&7want shown in the &b/visit " + clubData.get("alias").getAsString(),
+                    "&7want shown in the &b/visit " + clubData.getAlias(),
                     "&7menu!",
                     "",
-                    "&7Clubhouse Slots: &a" + clubData.getAsJsonArray("houses").size() + "&7/&e5",
+                    "&7Clubhouse Slots: &a" + clubData.getHouses().size() + "&7/&e5",
                     "",
                     "&eClick to edit!"
                 )));
@@ -164,7 +153,7 @@ public class ClubDashboard extends Container {
 
         setAction(13, (event) -> {
             event.getEvent().cancel();
-            if (clubData.get("isOwner").getAsBoolean()) {
+            if (clubData.isOwner()) {
                 Minecraft.getMinecraft().thePlayer.closeScreen();
                 invitePlayers = true;
                 UChat.chat("\n&ePlease send the username of the user you want to invite in chat!");
@@ -256,12 +245,13 @@ public class ClubDashboard extends Container {
 
     public static void update(JSONObject json) {
         try (InputStreamReader input = new InputStreamReader(
-            Hysentials.post((!json.has("invitee") ? "http://127.0.0.1:8080/api/club/update" : "http://127.0.0.1:8080/api/club/invite")
-                + "?id=" + clubData.get("id").getAsString()
+            Hysentials.post((!json.has("invitee") ? HysentialsUtilsKt.getHYSENTIALS_API() + "/club/update" : HysentialsUtilsKt.getHYSENTIALS_API() + "/club/invite")
+                + "?id=" + clubData.getId()
                 + "&uuid=" + Minecraft.getMinecraft().getSession().getProfile().getId().toString()
                 + "&key=" + Socket.serverId, json), StandardCharsets.UTF_8)) {
             String s = IOUtils.toString(input);
             JSONObject object = new JSONObject(s);
+            System.out.println(object.toString());
             if (!object.getBoolean("success")) {
                 UChat.chat("&c" + object.getString("message"));
                 return;
@@ -272,14 +262,15 @@ public class ClubDashboard extends Container {
     }
 
     public static JsonObject getClub() {
-        String s = NetworkUtils.getString("http://127.0.0.1:8080/api/club?uuid="
+        String s = NetworkUtils.getString(HysentialsUtilsKt.getHYSENTIALS_API() + "/club?uuid="
             + Minecraft.getMinecraft().getSession().getProfile().getId().toString()
             + "&key=" + Socket.serverId);
-        clubData = new JsonParser().parse(s).getAsJsonObject();
-        if (!clubData.get("success").getAsBoolean()) {
+        JsonObject obj = new JsonParser().parse(s).getAsJsonObject();
+        if (!obj.get("success").getAsBoolean()) {
             return null;
         }
-        return clubData.getAsJsonObject("club");
+        clubData = Club.Companion.deserialize(obj.get("club").getAsJsonObject());
+        return obj;
     }
 
     public static ItemStack getItemfromNBT(String nbt) {

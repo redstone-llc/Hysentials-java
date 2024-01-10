@@ -50,6 +50,16 @@ public class GuiChat256 extends GuiChat {
         sendMessage(msg);
     }
 
+    @Override
+    protected void setText(String newChatText, boolean shouldOverwrite) {
+        newChatText = newChatText.replace("§", "&");
+        if (shouldOverwrite) {
+            this.inputField.setText(newChatText);
+        } else {
+            this.inputField.writeText(newChatText);
+        }
+    }
+
     public static void sendMessage(String msg) {
         C01PacketChatMessage packet = new C01PacketChatMessage();
 

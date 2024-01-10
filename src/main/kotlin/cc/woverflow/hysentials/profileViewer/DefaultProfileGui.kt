@@ -166,7 +166,7 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                 var lore = "§f${rankUser}${player.name} $guildTag\n" +
                         "&7Hypixel Level: &e${(hypixelData!!["level"] as BigDecimal).toDouble().roundToInt()}\n"
                 if (hysentialData != null) {
-                    lore += "&7Hysentials Level: &e${getLevel(hysentialData!!["exp"] as Int)}\n" +
+                    lore += "&7Hysentials Level: &e${getLevel(hysentialData!!["exp"] as Int).roundToInt()}\n" +
                             "&7Emeralds: &a${largeFormat.format(hysentialData!!["emeralds"] as Int)}"
                 }
                 lore = lore.addFormatting()
@@ -438,7 +438,7 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                 )
             )
 
-            val cosmetics = CosmeticGui.getEquippedCosmetics(player.uniqueID).sortedBy { it["type"] as String }
+            val cosmetics = CosmeticGui.getEquippedCosmetics(player.uniqueID).sortedBy { it.type }
             for (index in 0..3) {
                 if (index >= cosmetics.size) {
                     Slot(inventory, index, guiLeft + 152, guiTop + 12 + index * 18)
@@ -448,13 +448,9 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                 val slot = Slot(inventory, index, guiLeft + 152, guiTop + 12 + index * 18)
 
                 val lore: MutableList<String> = mutableListOf()
-                val description = o["description"] as String
-                val cost = o["cost"] as Int
-                val emerald = if (Socket.cachedData == null) {
-                    0
-                } else {
-                    Socket.cachedData!!["emeralds"] as Int
-                }
+                val description = o.description
+                val cost = o.cost
+                val emerald = Socket.cachedUser?.emeralds?:0
                 description.split("\n").forEach(lore::add)
                 if (cost > 0) {
                     if (emerald < cost) {
@@ -468,17 +464,17 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                     lore.add("")
                     lore.add("&7Cost: &aFREE")
                 }
-                val type = o["type"] as String
-                val rarity = o["rarity"] as String
-                val name = (o["name"] as String).formatCapitalize()
-                val itemID = o["itemID"] as Int
+                val type = o.type
+                val rarity = o.rarity
+                val name = (o.name).formatCapitalize()
+                val itemID = o.itemID
                 var item: ItemStack? = null
                 when (type) {
                     "pet" -> {
                         item = GuiItem.makeMonsterEgg(
                             "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>${name} Pet",
                             1,
-                            itemID,
+                            itemID!!,
                             lore
                         )
                     }
@@ -491,7 +487,7 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                             0,
                             lore
                         )
-                        GuiItem.setColor(item, o["color"] as String)
+                        GuiItem.setColor(item, o.color)
                     }
 
                     "hat" -> {
@@ -502,7 +498,7 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                             0,
                             lore
                         )
-                        GuiItem.setColor(item, o["color"] as String)
+                        GuiItem.setColor(item, o.color)
                     }
                 }
                 slot.putStack(item)

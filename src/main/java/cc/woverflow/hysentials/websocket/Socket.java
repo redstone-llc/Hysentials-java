@@ -1,18 +1,20 @@
 package cc.woverflow.hysentials.websocket;
 
-import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.HysentialsUtilsKt;
+import cc.woverflow.hysentials.config.hysentialMods.ChatConfig;
+import cc.woverflow.hysentials.config.hysentialMods.FormattingConfig;
 import cc.woverflow.hysentials.guis.misc.HysentialsLevel;
 import cc.woverflow.hysentials.handlers.chat.modules.bwranks.BWSReplace;
-import cc.woverflow.hysentials.schema.Hysentials;
+import cc.woverflow.hysentials.schema.HysentialsSchema;
 import cc.woverflow.hysentials.util.*;
-import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UMessage;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.handlers.groupchats.GroupChat;
-import cc.woverflow.hysentials.handlers.redworks.BwRanksUtils;
+import cc.woverflow.hysentials.websocket.methods.DoorbellAuthenticate;
 import com.google.gson.Gson;
-import com.mojang.authlib.exceptions.AuthenticationException;
+import com.google.gson.JsonParser;
 import com.neovisionaries.ws.client.*;
 import kotlin.random.Random;
 import net.minecraft.client.Minecraft;
@@ -23,7 +25,6 @@ import org.json.JSONObject;
 
 import javax.net.ssl.SSLContext;
 import java.math.BigInteger;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -32,15 +33,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static cc.woverflow.hysentials.guis.actionLibrary.ActionViewer.toList;
-import static cc.woverflow.hysentials.util.HypixelAPIUtils.getUsername;
 
 public class Socket {
     public static List<WebSocket> sockets = new ArrayList<>();
     public static WebSocket CLIENT;
-    public static Hysentials.AuthUser user;
-    public static JSONObject cachedData = new JSONObject();
+
+    //Client's authenticated data
+    public static HysentialsSchema.AuthUser user;
+    //Client's player data (levels, ranks, etc)
+    public static HysentialsSchema.User cachedUser = null;
+    //All online hysentials users
     public static List<JSONObject> cachedUsers = new ArrayList<>();
-    public static HashMap<String, Hysentials.User> cachedUsersNew = new HashMap<>();
+    public static HashMap<String, HysentialsSchema.User> cachedUsersNew = new HashMap<>();
     public static JSONObject cachedRewards = new JSONObject();
     public static JSONObject cachedServerData = new JSONObject();
     public static String serverId;
@@ -54,6 +58,10 @@ public class Socket {
     public static int relogAttempts = 0;
 
     public static boolean manualDisconnect = false;
+
+    public static void init() {
+        new DoorbellAuthenticate();
+    }
 
     public static void createSocket() {
         if (relogAttempts > 2) {
@@ -80,8 +88,7 @@ public class Socket {
             factory.getProxySettings().setServerName("socket.redstone.llc");
             factory.getProxySettings().setPort(443);
             factory.getProxySettings().setSSLContext(context);
-            WebSocket socket = factory.createSocket("ws://127.0.0.1:8080/ws");
-//            WebSocket socket = factory.createSocket("ws://socket.redstone.llc");
+            WebSocket socket = factory.createSocket(HysentialsUtilsKt.getWEBSOCKET());
 
             socket.addListener(new WebSocketListener() {
                 public void send(String message) {
@@ -189,8 +196,7 @@ public class Socket {
                                     }
                                     Multithreading.runAsync(() -> {
                                         BlockWAPIUtils.getOnline();
-
-                                        String levelRewards = NetworkUtils.getString("http://127.0.0.1:8080/api/rewards");
+                                        String levelRewards = NetworkUtils.getString(HysentialsUtilsKt.getHYSENTIALS_API() + "/rewards");
                                         if (levelRewards != null) {
                                             JSONObject rewards = new JSONObject(levelRewards);
                                             if (rewards.has("rewards")) {
@@ -209,63 +215,51 @@ public class Socket {
                                 break;
                             }
                             case "data": {
-                                cachedData = json.getJSONObject("data");
+//                                cachedData = json.getJSONObject("data");
+                                JsonParser jsonParser = new JsonParser();
+                                cachedUser = HysentialsSchema.User.Companion.deserialize(jsonParser.parse(json.getJSONObject("data").toString()).getAsJsonObject());
                                 cachedServerData = json.getJSONObject("server");
+                                List<HysentialsSchema.User> users = new ArrayList<>();
+                                for (Object o : toList(json.getJSONArray("users"))) {
+                                    cachedUsersNew.put(((JSONObject) o).getString("uuid"), HysentialsSchema.User.Companion.deserialize(jsonParser.parse(o.toString()).getAsJsonObject()));
+                                }
+
                                 cachedUsers = new ArrayList<>();
                                 for (Object o : toList(json.getJSONArray("users"))) {
                                     cachedUsers.add((JSONObject) o);
-                                    cachedUsersNew.put(((JSONObject) o).getString("uuid"), gson.fromJson(((JSONObject) o).toString(), Hysentials.User.class));
                                 }
                                 break;
                             }
                             case "chat": {
-                                if (HysentialsConfig.globalChatEnabled) {
+                                if (ChatConfig.globalChat && Hysentials.INSTANCE.getConfig().chatConfig.enabled) {
                                     if (json.getString("username").equals("HYPIXELCONSOLE") && !json.has("uuid")) {
                                         MUtils.chat(HysentialsConfig.chatPrefix + " §c" + json.getString("message"));
                                         break;
                                     }
-                                    if (HysentialsConfig.futuristicRanks) {
-                                        BlockWAPIUtils.Rank rank = BlockWAPIUtils.getRank(json.getString("uuid"));
-                                        IChatComponent comp = new UTextComponent(":globalchat: ")
-                                            .appendSibling(
-                                                new UTextComponent(
-                                                    "&6" + json.getString("username")
-                                                ).setHover(HoverEvent.Action.SHOW_TEXT, (rank.getPlaceholder() + BlockWAPIUtils.getUsername(UUID.fromString(json.getString("uuid")))))
-                                            )
-                                            .appendSibling(
-                                                new UTextComponent(
-                                                    "<#fff1d4>: "
-                                                        + json.getString("message")
-                                                )
-                                            );
-                                        Minecraft.getMinecraft().thePlayer.addChatMessage(comp);
-                                    } else {
-                                        BlockWAPIUtils.Rank rank = BlockWAPIUtils.getRank(json.getString("uuid"));
-                                        IChatComponent comp = new UTextComponent("")
-                                            .appendSibling(
-                                                new UTextComponent(
-                                                    "&6Global > "
-                                                )
-                                            )
-                                            .appendSibling(
-                                                new UTextComponent(
-                                                    "&6" + json.getString("username")
-                                                )
-                                                    .setHover(
-                                                        HoverEvent.Action.SHOW_TEXT,
-                                                        (rank.getPrefix("") + BlockWAPIUtils.getUsername(UUID.fromString(json.getString("uuid"))))
-                                                    )
-                                            )
-                                            .appendSibling(
-                                                new UTextComponent(
-                                                    "&f: "
-                                                        + json.getString("message")
-                                                )
-                                            );
-                                        Minecraft.getMinecraft().thePlayer.addChatMessage(comp);
+
+                                    BlockWAPIUtils.Rank rank = BlockWAPIUtils.getRank(json.getString("uuid"));
+                                    String username = json.getString("username");
+                                    if (!ChatConfig.globalChatSuffix) {
+                                        username = username.split(" ")[0];
                                     }
+                                    String hex = "&6";
+                                    if (FormattingConfig.fancyRendering()) {
+                                        hex = "<#fff1d4>";
+                                    }
+                                    IChatComponent comp = new UTextComponent(ChatConfig.globalPrefix)
+                                        .appendSibling(
+                                            new UTextComponent(
+                                                "&6" + username
+                                            ).setHover(HoverEvent.Action.SHOW_TEXT, (rank.getPrefixCheck() + BlockWAPIUtils.getUsername(UUID.fromString(json.getString("uuid")))))
+                                        )
+                                        .appendSibling(
+                                            new UTextComponent(
+                                                hex + ": " + json.getString("message")
+                                            )
+                                        );
+                                    Minecraft.getMinecraft().thePlayer.addChatMessage(comp);
                                 }
-                                break;
+                                return;
                             }
 
                             case "link": {
@@ -337,6 +331,12 @@ public class Socket {
                         if (json.has("method") && json.getString("method").equals(value.getFirst())) {
                             value.getSecond().accept(json);
                             awaiting.remove(i);
+                        }
+                    }
+
+                    for (Channel channel : Channel.Companion.getChannels().values()) {
+                        if (channel.getName().equals(json.getString("method"))) {
+                            channel.onReceive(new JsonParser().parse(json.toString()).getAsJsonObject());
                         }
                     }
                 }

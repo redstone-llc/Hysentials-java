@@ -396,4 +396,13 @@ public enum Material {
     public int getId() {
         return id;
     }
+
+    public static Material getMaterial(int id) {
+        for (Material m : values()) {
+            if (m.getId() == id) {
+                return m;
+            }
+        }
+        return null;
+    }
 }

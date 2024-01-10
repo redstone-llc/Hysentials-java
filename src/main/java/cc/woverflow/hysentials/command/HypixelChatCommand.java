@@ -1,19 +1,17 @@
 package cc.woverflow.hysentials.command;
 
+import cc.woverflow.hysentials.config.hysentialMods.ChatConfig;
 import cc.woverflow.hysentials.handlers.chat.modules.bwranks.BWSReplace;
+import cc.woverflow.hysentials.util.BUtils;
 import cc.woverflow.hysentials.util.MUtils;
-import cc.polyfrost.oneconfig.utils.StringUtils;
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
-import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
-import cc.woverflow.hysentials.util.HypixelAPIUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.BlockPos;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +37,7 @@ public class HypixelChatCommand extends CommandBase {
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
         List<String> chats = Arrays.asList("All", "Global", "Party", "Guild", "Officer", "Skyblock-Coop");
         List<String> chatAliases = Arrays.asList("a", "gl", "p", "g", "o", "coop");
-        if (!HypixelUtils.INSTANCE.isHypixel()) {
+        if (!BUtils.isHypixelOrSBX()) {
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/chat " + String.join(" ", args));
             return;
         }
@@ -48,12 +46,13 @@ public class HypixelChatCommand extends CommandBase {
             MUtils.chat("&cValid channels: " + String.join(", ", chats));
             return;
         }
-        if (!HysentialsConfig.globalChatEnabled) {
+        boolean enabled = ChatConfig.globalChat && Hysentials.INSTANCE.getConfig().chatConfig.enabled;
+        if (!enabled) {
             chats.remove(1);
             chatAliases.remove(1);
         }
         String command = args[0].toLowerCase();
-        if ((command.equals("global") || command.equals("gl")) && HysentialsConfig.globalChatEnabled) {
+        if ((command.equals("global") || command.equals("gl")) && enabled) {
             if (isInGlobalChat) {
                 BWSReplace.diagnostics.add("Already in Global Chat");
                 MUtils.chat("&cYou're already in this channel!");
@@ -82,7 +81,8 @@ public class HypixelChatCommand extends CommandBase {
     @Override
     public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
         List<String> chats = Arrays.asList("All", "Global", "Party", "Guild", "Officer", "Skyblock-Coop");
-        if (!HysentialsConfig.globalChatEnabled) {
+        boolean enabled = ChatConfig.globalChat && Hysentials.INSTANCE.getConfig().chatConfig.enabled;
+        if (!enabled) {
             chats.remove(1);
         }
         if (args.length == 1) {

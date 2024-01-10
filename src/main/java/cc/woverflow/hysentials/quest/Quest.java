@@ -3,6 +3,7 @@ package cc.woverflow.hysentials.quest;
 import cc.woverflow.hysentials.quest.dailyQuests.*;
 import cc.woverflow.hysentials.quest.quests.LobbyParkourist;
 import cc.woverflow.hysentials.quest.quests.LostMage;
+import cc.woverflow.hysentials.schema.HysentialsSchema;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import org.json.JSONObject;
 
@@ -22,7 +23,7 @@ public abstract class Quest {
     public boolean isCompleted;
     public int progress;
     public List<String> rewards = new ArrayList<>();
-    public JSONObject data;
+    public HysentialsSchema.Quest data;
 
     public Quest(String name, String description, String id, boolean daily) {
         this.name = name;
@@ -80,11 +81,8 @@ public abstract class Quest {
     public abstract void onQuestEnd();
 
     public static void registerQuests() {
-//        questInstances.add(new SkywarsNausea());
         questInstances.add(new BlitzDuelsRandom());
-        questInstances.add(new PerfectPartygame());
         questInstances.add(new DuelsMaster());
-        questInstances.add(new PitchPerfect());
         questInstances.add(new LobbyParkourist());
         questInstances.add(new LostMage());
     }

@@ -30,7 +30,8 @@ public class CubitCompanion extends AbstractCosmetic<EntityCubit> {
     @Override
     public boolean canUse(EntityPlayer player) {
         return CosmeticGui.Companion.equippedCosmetic(player.getUniqueID(), "cubit")
-            && CosmeticGui.Companion.hasCosmetic(player.getUniqueID(), "cubit");
+            && CosmeticGui.Companion.hasCosmetic(player.getUniqueID(), "cubit")
+            && !player.isInvisible();
     }
 
     public static long cooldown = 0;
@@ -65,7 +66,7 @@ public class CubitCompanion extends AbstractCosmetic<EntityCubit> {
             case 5:
                 return "Why don't robots ever eat junk food? Because they're afraid of becoming bytesized!";
             case 6:
-                if (System.currentTimeMillis() > Socket.cachedData.getDouble("lastJoin") + 1000*60*60*60*3) {
+                if (System.currentTimeMillis() > Socket.cachedUser.getLastJoin() + 1000*60*60*60*3) {
                     return "Please touch grass immediately";
                 } else {
                     return getDialog(name);

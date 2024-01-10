@@ -2,6 +2,7 @@ package cc.woverflow.hysentials.cosmetics;
 
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.woverflow.hysentials.config.HysentialsConfig;
+import cc.woverflow.hysentials.util.BUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.entity.Entity;
@@ -16,7 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static cc.woverflow.hysentials.handlers.npc.QuestNPC.getMouseOverExtended;
+import static cc.woverflow.hysentials.handlers.npc.NPC.getMouseOverExtended;
 import static java.lang.Thread.sleep;
 
 public abstract class AbstractCosmetic <E extends Entity>{
@@ -56,8 +57,8 @@ public abstract class AbstractCosmetic <E extends Entity>{
     public void onTick(TickEvent event) {
         WorldClient theWorld = Minecraft.getMinecraft().theWorld;
         if (theWorld == null) return;
-        if (LocrawUtil.INSTANCE.getLocrawInfo() == null) return;
-        if (!LocrawUtil.INSTANCE.getLocrawInfo().getGameMode().equals("lobby") && !HysentialsConfig.showPets) {
+        if (!BUtils.isHypixelOrSBX()) return;
+        if (!HysentialsConfig.showPets && !BUtils.isSBX() && !(LocrawUtil.INSTANCE.getLocrawInfo() != null && LocrawUtil.INSTANCE.getLocrawInfo().getGameMode().equals("lobby"))) {
             for (EntityPlayer player : theWorld.playerEntities) {
                 if (player == null) continue;
                 if (player.isDead) continue;

@@ -7,6 +7,7 @@ import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Greedy;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.HysentialsUtilsKt;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.cosmetic.CosmeticGui;
 import cc.woverflow.hysentials.guis.actionLibrary.ActionLibrary;
@@ -17,17 +18,19 @@ import cc.woverflow.hysentials.handlers.htsl.CodeEditor;
 import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
 import cc.woverflow.hysentials.handlers.misc.QuestHandler;
 import cc.woverflow.hysentials.handlers.npc.NPC;
-import cc.woverflow.hysentials.handlers.npc.QuestNPC;
 import cc.woverflow.hysentials.handlers.npc.lost.LostAdventure;
 import cc.woverflow.hysentials.htsl.compiler.Compiler;
 import cc.woverflow.hysentials.hyphone.HyPhoneGUI;
+import cc.woverflow.hysentials.macrowheel.MacroWheelSelector;
 import cc.woverflow.hysentials.profileViewer.DefaultProfileGui;
 import cc.woverflow.hysentials.quest.Quest;
+import cc.woverflow.hysentials.schema.HysentialsSchema;
 import cc.woverflow.hysentials.util.JsonData;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.woverflow.hysentials.util.SBBJsonData;
 import cc.woverflow.hysentials.util.ScoreboardWrapper;
 import cc.woverflow.hysentials.utils.ChatLib;
+import cc.woverflow.hysentials.websocket.Request;
 import cc.woverflow.hysentials.websocket.Socket;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -36,6 +39,11 @@ import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
+import net.minecraft.client.gui.GuiDisconnected;
+import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.gui.GuiMultiplayer;
+import net.minecraft.client.multiplayer.GuiConnecting;
+import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -44,9 +52,17 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
+import net.minecraft.network.EnumConnectionState;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.handshake.client.C00Handshake;
+import net.minecraft.network.login.client.C00PacketLoginStart;
+import net.minecraft.network.login.server.S02PacketLoginSuccess;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -60,15 +76,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static cc.woverflow.hysentials.handlers.npc.QuestNPC.checkPosition;
 
 public class HysentialsCommand extends CommandBase {
     public static List<String> messages = new ArrayList<>();
     public static boolean collecting = false;
+
     @Override
     public String getCommandName() {
         return "hysentials";
@@ -107,7 +125,6 @@ public class HysentialsCommand extends CommandBase {
             case "reload": {
                 ImageIcon.reloadIcons();
                 Hysentials.INSTANCE.sbBoxes = new SBBJsonData("./config/hysentials/lines.json", new JSONObject().put("lines", new JSONArray()));
-                Hysentials.INSTANCE.rankColors = new JsonData("./config/hysentials/colors.json", new JSONObject());
                 UChat.chat("§aReloaded Hysentials!");
                 break;
             }
@@ -145,12 +162,12 @@ public class HysentialsCommand extends CommandBase {
             }
 
             case "online": {
-                Hysentials.INSTANCE.sendMessage("§aOnline Players (" + Hysentials.INSTANCE.getOnlineCache().onlinePlayers.size() + "):");
-                for (Map.Entry<UUID, String> player : Hysentials.INSTANCE.getOnlineCache().onlinePlayers.entrySet().stream().limit(25).collect(Collectors.toList())) {
-                    UChat.chat("&8 - &a" + player.getValue());
+                Hysentials.INSTANCE.sendMessage("§aOnline Players (" + Socket.cachedUsersNew.size() + "):");
+                for (Map.Entry<String, HysentialsSchema.User> player : Socket.cachedUsersNew.entrySet().stream().limit(25).collect(Collectors.toList())) {
+                    UChat.chat("&8 - &a" + player.getValue().getUsername());
                 }
-                if (Hysentials.INSTANCE.getOnlineCache().onlinePlayers.size() > 25) {
-                    UChat.chat("&8 - &aAnd " + (Hysentials.INSTANCE.getOnlineCache().onlinePlayers.size() - 25) + " more...");
+                if (Socket.cachedUsersNew.size() > 25) {
+                    UChat.chat("&8 - &aAnd " + ( Socket.cachedUsersNew.size() - 25) + " more...");
                 }
                 break;
             }
@@ -167,7 +184,7 @@ public class HysentialsCommand extends CommandBase {
                     new UTextComponent("§b§nhttps://discord.gg/mtAXV24bqM")
                         .setClick(ClickEvent.Action.OPEN_URL, "https://discord.gg/mtAXV24bqM")
                         .setHover(HoverEvent.Action.SHOW_TEXT, "§7Click to open the discord invite link."
-                ));
+                        ));
                 UChat.chat(text);
                 break;
             }
@@ -218,12 +235,12 @@ public class HysentialsCommand extends CommandBase {
                 } else {
                     try {
                         JsonObject club = ClubDashboard.getClub();
-                        String otherCode = NetworkUtils.getString("http://127.0.0.1:8080/api/club/action?clubID=" + (club != null ? club.get("id").getAsString() : null) + "&id=" + id);
+                        String otherCode = NetworkUtils.getString(HysentialsUtilsKt.getHYSENTIALS_API() + "/club/action?clubID=" + (club != null ? club.get("id").getAsString() : null) + "&id=" + id);
                         JSONObject otherJson = new JSONObject(otherCode);
                         if (otherJson.has("action")) {
                             codeToBeCompiled = otherJson.getJSONObject("action").getJSONObject("action").getString("code");
                         } else {
-                            String code = NetworkUtils.getString("http://127.0.0.1:8080/api/action?id=" + id);
+                            String code = NetworkUtils.getString(HysentialsUtilsKt.getHYSENTIALS_API() + "/action?id=" + id);
                             JSONObject json = new JSONObject(code);
                             if (json.has("action")) {
                                 codeToBeCompiled = json.getJSONObject("action").getJSONObject("action").getString("code");
@@ -305,38 +322,20 @@ public class HysentialsCommand extends CommandBase {
     private static void handleTest(String command, String args) {
         if (Minecraft.getMinecraft().thePlayer.getName().equals("EndKloon") || Minecraft.getMinecraft().thePlayer.getName().equals("Sin_ender")) {
             switch (command.toLowerCase()) {
-                case "cosmetic": {
-                    Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(new CosmeticGui());
+
+                case "doorbell": {
+                    Socket.CLIENT.sendText(
+                        new Request(
+                            "method", "doorbellAuthenticate",
+                            "uuid", Minecraft.getMinecraft().thePlayer.getUniqueID().toString(),
+                            "key", Socket.serverId
+                        ).toString()
+                    );
                     break;
                 }
 
-                case "spawnnpc": {
-                    System.out.println("Woo");
-                    NPC npc = NPC.npcs.get(0);
-                    LostAdventure a = (LostAdventure) npc;
-                    BlockPos pos = QuestNPC.checkPosition(40);
-                    a.lastX = pos.getX();
-                    a.lastY = pos.getY();
-                    a.lastZ = pos.getZ();
-                    a.spawnNPC(a.lastX, a.lastY, a.lastZ);
-
-                    Entity viewer = Minecraft.getMinecraft().getRenderViewEntity();
-                    double viewerX = viewer.lastTickPosX + (viewer.posX - viewer.lastTickPosX);
-                    double viewerY = viewer.lastTickPosY + (viewer.posY - viewer.lastTickPosY);
-                    double viewerZ = viewer.lastTickPosZ + (viewer.posZ - viewer.lastTickPosZ);
-
-                    double x = pos.getX() - viewerX + 0.5f;
-                    double y = pos.getY() - viewerY - viewer.getEyeHeight();
-                    double z = pos.getZ() - viewerZ + 0.5f;
-
-                    double distSq = x * x + y * y + z * z;
-                    double dist = Math.sqrt(distSq);
-
-                    UTextComponent textComponent = new UTextComponent("&e[NPC] ??????&f: *Growns* How did I get here?");
-                    textComponent.setHover(HoverEvent.Action.SHOW_TEXT, "§7Someone has been here before you...\n§7Maybe you should ask them what happened?\n§7Distance: §e" + ((int) dist) + " §7blocks away");
-                    a.chatID = new Random().nextInt(Integer.MAX_VALUE - 1);
-                    Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(textComponent, a.chatID);
-
+                case "macrowheel": {
+                    new MacroWheelSelector().open();
                     break;
                 }
 
@@ -345,12 +344,8 @@ public class HysentialsCommand extends CommandBase {
                     break;
                 }
 
-                case "check": {
-                    QuestHandler.checkQuest(Quest.getQuestById(args));
-                }
-
                 case "getnpcskin": {
-                    MovingObjectPosition obj = QuestNPC.getMouseOverExtended(4);
+                    MovingObjectPosition obj = NPC.getMouseOverExtended(4);
                     if (obj.entityHit != null && obj.entityHit instanceof EntityPlayer) {
                         EntityPlayer player = (EntityPlayer) obj.entityHit;
                         GameProfile profile = player.getGameProfile();

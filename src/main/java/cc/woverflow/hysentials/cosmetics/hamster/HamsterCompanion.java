@@ -63,7 +63,8 @@ public class HamsterCompanion extends AbstractCosmetic<EntityHamster> {
     @Override
     public boolean canUse(EntityPlayer player) {
         return CosmeticGui.Companion.equippedCosmetic(player.getUniqueID(), "hamster")
-            && CosmeticGui.Companion.hasCosmetic(player.getUniqueID(), "hamster");
+            && CosmeticGui.Companion.hasCosmetic(player.getUniqueID(), "hamster")
+            && !player.isInvisible();
     }
 
     @Override

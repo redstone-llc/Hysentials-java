@@ -2,6 +2,7 @@ package cc.woverflow.hysentials.handlers
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor.Companion.stripControlCodes
 import cc.polyfrost.oneconfig.libs.universal.UChat.chat
+import cc.woverflow.hysentials.GuiIngameHysentials
 import cc.woverflow.hysentials.Hysentials
 import cc.woverflow.hysentials.config.HysentialsConfig
 import cc.woverflow.hysentials.guis.actionLibrary.ClubActionViewer
@@ -34,7 +35,7 @@ class SbbRenderer {
             if (HysentialsConfig.scoreboard && HysentialsConfig.showScoreboard) {
                 Scoreboard.scoreboard()
             } else {
-                GuiIngameForge.renderObjective = HysentialsConfig.showScoreboard
+                GuiIngameHysentials.renderObjective = HysentialsConfig.showScoreboard
             }
             val lines = ScoreboardWrapper.getScoreboard().getSortedScores(ScoreboardWrapper.getSidebar()).stream()
                 .map { score: Score? ->

@@ -1,5 +1,6 @@
 package cc.woverflow.hysentials.handlers.sbb;
 
+import cc.woverflow.hysentials.GuiIngameHysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.handlers.redworks.HousingScoreboard;
 import cc.woverflow.hysentials.util.Renderer;
@@ -15,7 +16,7 @@ import java.util.List;
 public class Scoreboard {
     public static void scoreboard() {
         ScaledResolution res = new ScaledResolution(Minecraft.getMinecraft());
-        GuiIngameForge.renderObjective = false;
+        GuiIngameHysentials.renderObjective = false;
         int x = res.getScaledWidth();
         int radius = new Integer[]{0, 2, 4}[HysentialsConfig.scoreboardBorderRadius];
         List<ScoreboardWrapper.ScoreWrapper> lines = ScoreboardWrapper.getLines(false);

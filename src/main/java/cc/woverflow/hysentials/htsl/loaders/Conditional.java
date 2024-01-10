@@ -199,6 +199,45 @@ public class Conditional extends Loader {
                 sequence.add(back());
                 break;
             }
+            case "team_stat_requirement": {
+                sequence.add(option("Team Stat Requirement"));
+                if (conditionData[0] != null && !conditionData[0].toString().equals("Kills")) {
+                    sequence.add(click(10));
+                    sequence.add(chat(conditionData[0].toString()));
+                }
+                if (conditionData[1] != null && !conditionData[0].toString().equalsIgnoreCase("none")) {
+                    sequence.add(click(11));
+                    sequence.add(option(conditionData[1].toString()));
+                }
+                if (conditionData[2] != null && !conditionData[2].equals("equal_to")) {
+                    sequence.add(click(11));
+                    switch (conditionData[2].toString()) {
+                        case "less_than": {
+                            sequence.add(click(10));
+                            break;
+                        }
+                        case "less_than_or_equal_to": {
+                            sequence.add(click(11));
+                            break;
+                        }
+                        case "greater_than": {
+                            sequence.add(click(14));
+                            break;
+                        }
+                        case "greater_than_or_equal_to": {
+                            sequence.add(click(13));
+                            break;
+                        }
+                    }
+                }
+
+                if (conditionData[3] != null) {
+                    sequence.add(click(12));
+                    sequence.add(anvil(conditionData[3].toString()));
+                }
+                sequence.add(back());
+                break;
+            }
             case "required_group": {
                 sequence.add(setGuiContext("Condition -> Required Group"));
                 sequence.add(option("Required Group"));
@@ -210,6 +249,20 @@ public class Conditional extends Loader {
                     sequence.add(click(11));
                 }
                 sequence.add(back());
+                break;
+            }
+            case "required_team": {
+                sequence.add(setGuiContext("Condition -> Required Team"));
+                sequence.add(option("Required Team"));
+                if (conditionData[0] != null) {
+                    sequence.add(click(10));
+                    sequence.add(option(conditionData[0].toString()));
+                }
+                sequence.add(back());
+                break;
+            }
+            case "is_flying": {
+                sequence.add(option("Player Flying"));
                 break;
             }
             case "is_sneaking": {
@@ -390,6 +443,7 @@ public class Conditional extends Loader {
                 sequence.add(back());
                 break;
             }
+
         }
 
         return sequence;

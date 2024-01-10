@@ -30,20 +30,20 @@ public class GroupChatMessage implements ChatSendModule {
                 ).toString());
                 return null;
             }
-            for (BlockWAPIUtils.Group group : Hysentials.INSTANCE.getOnlineCache().groups) {
-                if (group.getName().equalsIgnoreCase(tab.getName())) {
-                    Socket.CLIENT.sendText(
-                        new Request(
-                            "method", "groupChat",
-                            "name", group.getName(),
-                            "username", Minecraft.getMinecraft().thePlayer.getName(),
-                            "serverId", Socket.serverId,
-                            "message", message
-                        ).toString()
-                    );
-                    return null;
-                }
-            }
+//            for (BlockWAPIUtils.Group group : Hysentials.INSTANCE.getOnlineCache().groups) {
+//                if (group.getName().equalsIgnoreCase(tab.getName())) {
+//                    Socket.CLIENT.sendText(
+//                        new Request(
+//                            "method", "groupChat",
+//                            "name", group.getName(),
+//                            "username", Minecraft.getMinecraft().thePlayer.getName(),
+//                            "serverId", Socket.serverId,
+//                            "message", message
+//                        ).toString()
+//                    );
+//                    return null;
+//                }
+//            }
             return message;
         } catch (Exception e) {
             e.printStackTrace();

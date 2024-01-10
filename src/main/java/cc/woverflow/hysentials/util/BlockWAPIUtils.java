@@ -1,9 +1,14 @@
 package cc.woverflow.hysentials.util;
 
-import cc.polyfrost.oneconfig.utils.NetworkUtils;
+import cc.polyfrost.oneconfig.libs.checker.units.qual.N;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.HysentialsUtilsKt;
 import cc.woverflow.hysentials.config.HysentialsConfig;
+import cc.woverflow.hysentials.config.hysentialMods.FormattingConfig;
+import cc.woverflow.hysentials.config.hysentialMods.rank.RankStuff;
 import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
+import cc.woverflow.hysentials.handlers.redworks.BwRanksUtils;
+import cc.woverflow.hysentials.schema.HysentialsSchema;
 import cc.woverflow.hysentials.websocket.Socket;
 import com.google.gson.*;
 import net.minecraft.client.Minecraft;
@@ -13,6 +18,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONPointer;
 
+import java.text.Format;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,115 +28,74 @@ import static cc.woverflow.hysentials.guis.actionLibrary.ActionViewer.toList;
 import static cc.woverflow.hysentials.handlers.chat.modules.bwranks.BWSReplace.diagnostics;
 
 public class BlockWAPIUtils {
-    public static JSONArray actions;
-    public static JSONArray cosmetics;
+    public static List<HysentialsSchema.Action> actions = new ArrayList<>();
+    public static List<HysentialsSchema.Cosmetic> cosmetics = new ArrayList<>();
 
-    @NotNull
-    public static HashMap<UUID, String> getOnline() {
-        diagnostics.add("Starting cache refresh");
-        long start = System.currentTimeMillis();
+    /**
+     * Update the actions and cosmetics caches.
+     */
+    public static void getOnline() {
         try {
-            JsonElement online = null;
-            JsonElement ranks = null;
-            JsonElement cosmetics = null;
+            JsonElement cosmetics;
             try {
-                online = NetworkUtils.getJsonElement("http://127.0.0.1:8080/api/online");
-                ranks = NetworkUtils.getJsonElement("http://127.0.0.1:8080/api/ranks");
-                cosmetics = NetworkUtils.getJsonElement("http://127.0.0.1:8080/api/cosmetic");
-                String a = NetworkUtils.getString("https://hysentials.redstone.llc/api/actions");
-                JSONObject json = new JSONObject(a);
-                actions = json.getJSONArray("actions");
-                BlockWAPIUtils.cosmetics = new JSONObject(cosmetics.toString()).getJSONArray("cosmetics");
-            } catch (Exception ignored) {
-            }
-            diagnostics.add("API calls took " + (System.currentTimeMillis() - start) + "ms");
-            if (online == null || online.isJsonNull()) return new HashMap<>();
-            if (ranks == null || ranks.isJsonNull()) return new HashMap<>();
-            diagnostics.add("API calls were not null");
-            diagnostics.add("Starting to parse data");
-            long start2 = System.currentTimeMillis();
-            JsonArray users = online.getAsJsonObject().get("uuids").getAsJsonArray();
-            HashMap<UUID, String> onlinePlayers = new HashMap<>();
-            for (JsonElement element : users) {
-                onlinePlayers.put(UUID.fromString(element.getAsJsonObject().get("uuid").getAsString()), element.getAsJsonObject().get("username").getAsString());
-            }
-            Hysentials.INSTANCE.getOnlineCache().setOnlinePlayers(onlinePlayers);
-            HashMap<UUID, String> rankCache = new HashMap<>();
-            ArrayList<UUID> plusPlayers = new ArrayList<>();
+                cosmetics = NetworkUtils.getJsonElement(HysentialsUtilsKt.getHYSENTIALS_API() + "/cosmetic", true);
 
-            for (JsonElement element : ranks.getAsJsonObject().get("ranks").getAsJsonArray()) {
-                JsonArray uuids = element.getAsJsonObject().get("users").getAsJsonArray();
-                for (JsonElement uuid : uuids) {
-                    if (onlinePlayers.containsKey(UUID.fromString(uuid.getAsString()))) {
-                        if (element.getAsJsonObject().get("name").getAsString().equals("Plus")) {
-                            plusPlayers.add(UUID.fromString(uuid.getAsString()));
-                        } else {
-                            Rank rank = Rank.valueOF(element.getAsJsonObject().get("name").getAsString().toUpperCase());
-                            Rank oldRank = Rank.valueOF(rankCache.get(UUID.fromString(uuid.getAsString())));
-                            if (oldRank != null && oldRank.index > rank.index) continue;
-                            rankCache.put(UUID.fromString(uuid.getAsString()), element.getAsJsonObject().get("name").getAsString());
-                        }
-                    }
+                JsonElement a = NetworkUtils.getJsonElement(HysentialsUtilsKt.getHYSENTIALS_API() + "/actions", true);
+                JsonObject json = a.getAsJsonObject();
+
+                json.getAsJsonArray("actions").forEach(action -> {
+                    HysentialsSchema.Action a1 = HysentialsSchema.Action.Companion.deserialize(action.getAsJsonObject());
+                    actions.add(a1);
+                });
+
+                JsonObject object = cosmetics.getAsJsonObject();
+                JsonArray array = object.getAsJsonArray("cosmetics");
+                BlockWAPIUtils.cosmetics = new ArrayList<>();
+                for (JsonElement cosmeticObj : array) {
+                    HysentialsSchema.Cosmetic cosmetic = HysentialsSchema.Cosmetic.Companion.deserialize(cosmeticObj.getAsJsonObject());
+                    BlockWAPIUtils.cosmetics.add(cosmetic);
                 }
+            } catch (Exception ignored) {
+                ignored.printStackTrace();
             }
-            Hysentials.INSTANCE.getOnlineCache().rankCache = rankCache;
-            Hysentials.INSTANCE.getOnlineCache().plusPlayers = plusPlayers;
-            diagnostics.add("Parsing took " + (System.currentTimeMillis() - start2) + "ms");
 
-            return onlinePlayers;
         } catch (Exception e) {
-            return new HashMap<>();
+            return;
         }
     }
 
     public static boolean hasCosmetic(UUID uuid, String cosmetic) {
         if (cosmetics == null) return false;
-        List<Object> list = toList(cosmetics);
-        return list.stream().anyMatch(o -> ((JSONObject) o).getString("name").equals(cosmetic) && ((JSONObject) o).getJSONArray("users").toList().contains(uuid.toString()));
+        return cosmetics.stream().anyMatch(c -> c.getUsers().contains(uuid.toString()) && c.getName().equals(cosmetic));
     }
 
     public static boolean equippedCosmetic(UUID uuid, String cosmetic) {
         if (cosmetics == null) return false;
-        List<Object> list = toList(cosmetics);
-        return list.stream().anyMatch(o -> ((JSONObject) o).getString("name").equals(cosmetic) && ((JSONObject) o).getJSONArray("users").toList().contains(uuid.toString()));
+        return cosmetics.stream().anyMatch(c -> c.getUsers().contains(uuid.toString()) && c.getEquipped().contains(cosmetic) && c.getName().equals(cosmetic));
     }
 
-    public static List<JSONObject> getCosmetics() {
+    public static List<HysentialsSchema.Cosmetic> getCosmetics() {
         if (cosmetics == null) return new ArrayList<>();
-        List<JSONObject> list = new ArrayList<>();
-        for (Object o : toList(cosmetics)) {
-            JSONObject object = (JSONObject) o;
-            list.add(object);
-        }
-        return list;
+        return cosmetics;
     }
 
     public static String getRequest(String endpoint) {
-        return "http://127.0.0.1:8080/api/" + endpoint + "?key=" + Socket.serverId + "&uuid=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString();
+        return HysentialsUtilsKt.getHYSENTIALS_API() + "/" + endpoint + "?key=" + Socket.serverId + "&uuid=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString();
     }
 
-    public static JSONObject getAction(String id, String creator) {
+    public static HysentialsSchema.Action getAction(String id, String creator) {
         if (actions == null) return null;
-        return (JSONObject) toList(actions).stream().filter(o -> {
-            JSONObject object = ((JSONObject) o);
-            return object.getJSONObject("action").getString("creator").equals(creator) && object.getString("id").equals(id);
-        }).findFirst().orElse(null);
+        return actions.stream().filter(a -> a.getId().equals(id) && a.getAction().getCreator().equals(creator)).findFirst().orElse(null);
     }
 
     public static Rank getRank(String uuid) {
-        BlockWAPIUtils.Rank rank;
-        try {
-            rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().rankCache.get(UUID.fromString(uuid)).toUpperCase());
-        } catch (Exception e) {
-            rank = BlockWAPIUtils.Rank.DEFAULT;
-        }
-        return rank;
+        return getRank(UUID.fromString(uuid));
     }
 
     public static Rank getRank(UUID uuid) {
         BlockWAPIUtils.Rank rank;
         try {
-            rank = BlockWAPIUtils.Rank.valueOf(Hysentials.INSTANCE.getOnlineCache().rankCache.get(uuid).toUpperCase());
+            rank = BlockWAPIUtils.Rank.valueOf(Socket.cachedUsersNew.get(uuid.toString()).getRank().toUpperCase());
         } catch (Exception e) {
             rank = BlockWAPIUtils.Rank.DEFAULT;
         }
@@ -138,27 +103,25 @@ public class BlockWAPIUtils {
     }
 
     public static String getUsername(UUID uuid) {
-        return Socket.cachedUsers.stream().filter(user -> user.getString("uuid").equals(uuid.toString())).findFirst().orElse(new JSONObject().put("username", "unknown")).getString("username");
+        return Socket.cachedUsersNew.get(uuid.toString()).getUsername();
     }
 
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final JsonParser PARSER = new JsonParser();
-
-    public static List<Group> getGroups() {
+    public static boolean isWearingType(UUID uuid, String type) {
         try {
-            JsonElement groups = NetworkUtils.getJsonElement("http://127.0.0.1:8080/api/groups");
-            if (groups.isJsonNull()) return new ArrayList<>();
-            JsonArray groupsArray = groups.getAsJsonObject().get("groups").getAsJsonArray();
-            List<Group> groupList = new ArrayList<>();
-            for (JsonElement element : groupsArray) {
-                Group group = GSON.fromJson(element, Group.class);
-                groupList.add(group);
-            }
-            Hysentials.INSTANCE.getOnlineCache().setCachedGroups(groupList);
-            return groupList;
+            return getCosmetics().stream().anyMatch(c -> c.getEquipped().contains(uuid.toString()) && (c.getSubType() == null ? c.getType() : c.getSubType()).equals(type));
         } catch (Exception e) {
-            return new ArrayList<>();
+            return false;
         }
+    }
+
+    public static String getDisplayName(HysentialsSchema.User user) {
+        String prefix = "";
+        if (BwRanksUtils.futuristicRanks(null)) {
+            prefix = Rank.valueOF(user.getRank().toUpperCase()).getPlaceholder();
+        } else {
+            prefix = Rank.valueOF(user.getRank().toUpperCase()).getPrefix();
+        }
+        return prefix + user.getUsername() + (user.getHasPlus() ? " §6[+]" : "");
     }
 
     public enum Rank {
@@ -167,7 +130,7 @@ public class BlockWAPIUtils {
         HELPER(3, "3", "§9[HELPER] ", "§9", "helper"),
         CREATOR(2, "4", "§3[§fCREATOR§3] ", "§3", "creator"),
         TEAM(5, "5", "§6[TEAM] ", "§6", "team"),
-        DEFAULT(1, "replace", "", "", "", "");
+        DEFAULT(1, "replace", "§7", "", null, "");
 
         public final int index;
         private final String id;
@@ -207,25 +170,32 @@ public class BlockWAPIUtils {
         }
 
         public String getColor() {
-            if (HysentialsConfig.futuristicRanks) {
+            if (BwRanksUtils.futuristicRanks(null)) {
                 return getNametag();
             }
             return color;
         }
 
+        public String getPrefixCheck() {
+            if (BwRanksUtils.futuristicRanks(null)) {
+                return getPlaceholder();
+            }
+            return getPrefix();
+        }
+
         public String getNametag() {
-            if (HysentialsConfig.futuristicRanks) {
-                JSONObject colorGroup = Hysentials.INSTANCE.rankColors.jsonObject.getJSONObject(hex);
-                return "<" + colorGroup.getString("nametag_color") + ">";
+            if (Hysentials.INSTANCE.getConfig().formattingConfig.enabled && FormattingConfig.hexColors) {
+                RankStuff rank = FormattingConfig.getRank(hex);
+                return "<#" + rank.nametagColor.getHex() + ">";
             } else {
                 return color;
             }
         }
 
         public String getChat() {
-            if (HysentialsConfig.futuristicRanks) {
-                JSONObject colorGroup = Hysentials.INSTANCE.rankColors.jsonObject.getJSONObject(hex);
-                return "<" + colorGroup.getString("chat_message_color") + ">";
+            if (Hysentials.INSTANCE.getConfig().formattingConfig.enabled && FormattingConfig.hexColors) {
+                RankStuff rank = FormattingConfig.getRank(hex);
+                return "<#" + rank.chatMessageColor.getHex() + ">";
             } else {
                 return "§f";
             }
@@ -251,92 +221,6 @@ public class BlockWAPIUtils {
                 }
             }
             return null;
-        }
-    }
-
-    public static class Group {
-        private final String name;
-        private final String groupId;
-        private final String owner;
-        private final List<String> members;
-        private final List<String> officers;
-        private final List<String> invites;
-        private final String color;
-        private final JsonObject settings;
-        private final List<String> messages;
-        private final List<String> hidden;
-
-
-        public Group(String name, String groupId, String owner, List<String> members, List<String> officers, List<String> invites, String color, JsonObject settings, List<String> messages, List<String> hidden) {
-            this.name = name;
-            this.groupId = groupId;
-            this.owner = owner;
-            this.members = members;
-            this.officers = officers;
-            this.invites = invites;
-            this.color = color;
-            this.settings = settings;
-            this.messages = messages;
-            this.hidden = hidden;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getGroupId() {
-            return groupId;
-        }
-
-        public String getOwner() {
-            return owner;
-        }
-
-        public List<String> getMembers() {
-            return members;
-        }
-
-        public List<String> getOfficers() {
-            return officers;
-        }
-
-        public List<String> getInvites() {
-            return invites;
-        }
-
-        public String getColor() {
-            return color;
-        }
-
-        public JsonObject getSettings() {
-            return settings;
-        }
-
-        public List<String> getMessages() {
-            return messages;
-        }
-
-        @Override
-        public String toString() {
-            return "Group{" +
-                "name='" + name + '\'' +
-                ", groupId='" + groupId + '\'' +
-                ", owner='" + owner + '\'' +
-                ", members=" + members +
-                ", officers=" + officers +
-                ", invites=" + invites +
-                ", color='" + color + '\'' +
-                ", settings=" + settings +
-                ", messages=" + messages +
-                '}';
-        }
-
-        public List<String> getHidden() {
-            return hidden;
-        }
-
-        public boolean isHidden(String uuid) {
-            return hidden.contains(uuid);
         }
     }
 }

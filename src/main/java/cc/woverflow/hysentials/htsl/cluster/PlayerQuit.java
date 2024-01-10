@@ -12,8 +12,8 @@ public class PlayerQuit extends Cluster {
         super("Player Quit", "playerQuit", loaders);
         add(close());
         add(command("menu"));
-        add(click(39));
-        add(click(28));
+        add(click(31));
+        add(click(11));
         add(click(11));
         if (loaders != null) {
             loadActions(loaders);

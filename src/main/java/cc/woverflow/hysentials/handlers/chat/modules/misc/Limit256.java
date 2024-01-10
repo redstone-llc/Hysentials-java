@@ -1,7 +1,10 @@
 package cc.woverflow.hysentials.handlers.chat.modules.misc;
 
+import cc.polyfrost.oneconfig.platform.Platform;
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import cc.woverflow.hysentials.config.HysentialsConfig;
+import cc.woverflow.hysentials.config.hysentialMods.ChatConfig;
+import cc.woverflow.hysentials.util.BUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiScreen;
@@ -34,8 +37,8 @@ public class Limit256 {
             return;
         }
 
-        if (e.gui instanceof GuiChat && HypixelUtils.INSTANCE.isHypixel()) {
-            if (!HysentialsConfig.chatLimit256) return;
+        if (e.gui instanceof GuiChat && BUtils.isHypixelOrSBX()) {
+            if (!ChatConfig.chatLimit256) return;
             e.setCanceled(true);
             GuiScreen old = Minecraft.getMinecraft().currentScreen;
             GuiScreen guiScreenIn = e.gui;
@@ -51,7 +54,7 @@ public class Limit256 {
                 err.printStackTrace();
             }
 
-            GuiChat256 newGui = new GuiChat256(defaultText);
+            GuiChat256 newGui = new GuiChat256(defaultText.replace("§", "&"));
 
             Minecraft.getMinecraft().currentScreen = (GuiScreen) newGui;
 

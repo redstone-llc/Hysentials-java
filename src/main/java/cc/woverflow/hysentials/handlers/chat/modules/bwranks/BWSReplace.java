@@ -2,7 +2,9 @@ package cc.woverflow.hysentials.handlers.chat.modules.bwranks;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.config.hysentialMods.FormattingConfig;
 import cc.woverflow.hysentials.cosmetic.CosmeticGui;
+import cc.woverflow.hysentials.schema.HysentialsSchema;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UMessage;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
@@ -44,12 +46,17 @@ public class BWSReplace implements ChatReceiveModule {
 
     @SubscribeEvent()
     public void onMessageReceived(@NotNull ClientChatReceivedEvent event) {
-        if (!HypixelUtils.INSTANCE.isHypixel()) return;
+        if (!BUtils.isHypixelOrSBX()) return;
         if (event.type != 0 && event.type != 1) return;
+        if (PartyFormatter.checkMessage(event)) {
+            event.setCanceled(true);
+            return;
+        }
         if (checkRegexes(event)) {
             event.setCanceled(true);
             return;
         }
+        boolean futuristic = Hysentials.INSTANCE.getConfig().formattingConfig.enabled && FormattingConfig.fancyRankInChat && FormattingConfig.futuristicRanks;
         long start0 = System.currentTimeMillis();
         String message = event.message.getFormattedText();
         diagnostics.add("New message received: " + message);
@@ -78,16 +85,19 @@ public class BWSReplace implements ChatReceiveModule {
                 s = s.replaceFirst("(§7|§r§7)\\* ", "");
             }
 
-            if (HysentialsConfig.futuristicRanks) {
+            if (futuristic) {
                 if (hRank != null && (s.startsWith("§7: ") || s.startsWith("§f: "))) {
-                    s = s.replaceFirst("§7: ", hRank.getChat() + ": " + italic(uuidBold) + bold(uuidBold)).replaceFirst("§f: ", hRank.getChat() + ": " + italic(uuidBold) + bold(uuidBold));
-                    hRank = null;
+                    s = s.replaceFirst("§[7f]: ", hRank.getChat() + ": " + italic(uuidBold) + bold(uuidBold));
+//                    hRank = null;
                     diagnostics.add("Added chat formatting to sibling. (Hypixel)");
                 }
                 if (blockwRank != null && (s.startsWith("§7: ") || s.startsWith("§f: "))) {
-                    s = s.replaceFirst("§7: ", blockwRank.getChat() + ": " + italic(uuidBold) + bold(uuidBold)).replaceFirst("§f: ", blockwRank.getChat() + ": " + italic(uuidBold) + bold(uuidBold));
-                    blockwRank = null;
+                    s = s.replaceFirst("§[7f]: ", blockwRank.getChat() + ": " + italic(uuidBold) + bold(uuidBold));
+//                    blockwRank = null;
                     diagnostics.add("Added chat formatting to sibling. (BlockW)");
+                }
+                if ((s.startsWith("§7") || s.startsWith("§f")) && blockwRank != null && uuidBold != null) {
+                    s = s.replaceFirst("(§7|§f)", blockwRank.getChat() + italic(uuidBold) + bold(uuidBold));
                 }
             }
             diagnostics.add("Starting loop for players...");
@@ -110,7 +120,7 @@ public class BWSReplace implements ChatReceiveModule {
                     String regex2 = "(§r§7|§7)" + name;
                     if (rank != null && rank != BlockWAPIUtils.Rank.DEFAULT) {
                         String replacement = (rank.getPrefix(name) + name);
-                        if (HysentialsConfig.futuristicRanks) {
+                        if (futuristic) {
                             replacement = (rank.getPlaceholder() + name);
                             if (!BwRanks.hasRank) {
                                 replacement = (rank.getPlaceholder() + name);
@@ -138,11 +148,11 @@ public class BWSReplace implements ChatReceiveModule {
 //                        s = s.replaceAll("[a-f0-9§]{2}" + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": ");
 //                    }
                     } else {
-                        if (HysentialsConfig.futuristicRanks) {
+                        if (futuristic) {
                             Matcher m1 = Pattern.compile(regex1).matcher(s);
                             Matcher m2 = Pattern.compile(regex2).matcher(s);
                             if (m1.find(0)) {
-                                Object[] replacement = getReplacement(m1.group(0).split(" ")[0], name, uuid, false);
+                                Object[] replacement = getReplacement(m1.group(0).split(" ")[0], name, uuid, false, false);
                                 HypixelRanks r = (HypixelRanks) replacement[1];
                                 hRank = r;
                                 if (uuidBold == null) uuidBold = user.getValue();
@@ -151,7 +161,7 @@ public class BWSReplace implements ChatReceiveModule {
                                 diagnostics.add("Used regex1 to replace " + name + " with " + replacement[0].toString() + " (Hypixel)");
                             }
                             if (m2.find(0) && BwRanks.replacementMap.containsKey("§7" + name)) {
-                                Object[] replacement = getReplacement("§7", name, uuid, LocrawUtil.INSTANCE.getLocrawInfo().getGameType().equals(LocrawInfo.GameType.SKYBLOCK));
+                                Object[] replacement = getReplacement("§7", name, uuid, LocrawUtil.INSTANCE.getLocrawInfo().getGameType().equals(LocrawInfo.GameType.SKYBLOCK), false);
                                 HypixelRanks r = (HypixelRanks) replacement[1];
                                 hRank = r;
                                 if (uuidBold == null) uuidBold = user.getValue();
@@ -189,15 +199,15 @@ public class BWSReplace implements ChatReceiveModule {
                 int startM = finalS.indexOf("<" + name + ":" + actionMatcher.group(2) + ">");
                 diagnostics.add("Action: " + name + ":" + actionMatcher.group(2));
 
-                JSONObject action = BlockWAPIUtils.getAction(name, actionMatcher.group(2));
+                HysentialsSchema.Action action = BlockWAPIUtils.getAction(name, actionMatcher.group(2));
 
                 if (action != null) {
                     String mes = finalS.substring(0, startM);
                     String mes2 = finalS.substring(startM + ("<" + name + ":" + actionMatcher.group(2) + ">").length());
-                    boolean isFunction = action.getJSONObject("action").getString("type").equals("function");
-                    UTextComponent messageComponent = new UTextComponent("&b" + action.getJSONObject("action").getString("creator") + "'s " + action.getJSONObject("action").getString("name") + " &7(Copy)");
+                    boolean isFunction = action.getAction().getType().equals("function");
+                    UTextComponent messageComponent = new UTextComponent("&b" + action.getAction().getCreator() + "'s " + action.getAction().getName() + " &7(Copy)");
                     messageComponent.setHover(HoverEvent.Action.SHOW_TEXT, "§eClick to copy the action");
-                    messageComponent.setClick(ClickEvent.Action.SUGGEST_COMMAND, action.getString("id"));
+                    messageComponent.setClick(ClickEvent.Action.SUGGEST_COMMAND, action.getId());
                     UTextComponent all = new UTextComponent("");
                     all.appendSibling(new UTextComponent(mes)).appendSibling(messageComponent).appendSibling(new UTextComponent(mes2));
                     siblings.set(siblings.indexOf(sibling), all);
@@ -231,91 +241,9 @@ public class BWSReplace implements ChatReceiveModule {
     List<UTextComponent> components = new ArrayList<>();
 
     public boolean checkRegexes(ClientChatReceivedEvent event) {
-        if (!HysentialsConfig.futuristicRanks) return false;
-//        HysentialsCommand.messages.add(event.message.getFormattedText().replaceAll("§r", ""));
+        boolean futuristic = Hysentials.INSTANCE.getConfig().formattingConfig.enabled && FormattingConfig.fancyRankInChat && FormattingConfig.futuristicRanks;
+        if (!futuristic) return false;
         String msg = event.message.getFormattedText().replaceAll("§r", "");
-        if (!lineSeperator && msg.equals("§9§m-----------------------------------------------------")) {
-            lineSeperator = true;
-            return true;
-        }
-        if (lineSeperator && !msg.equals("§9§m-----------------------------------------------------")) {
-            middle.add(msg.replace("§r", ""));
-            components.add(new UTextComponent(event.message));
-            return true;
-        }
-        if (lineSeperator && msg.equals("§9§m-----------------------------------------------------")) {
-            lineSeperator = false;
-            if (middle.size() == 0) {
-                UChat.chat("§9§m-----------------------------------------------------");
-                UChat.chat("§9§m-----------------------------------------------------");
-            }
-            if (middle.get(0).equals("§cThe party was disbanded because all invites expired and the party was empty.")) {
-                UChat.chat(":partyprefix: &9Party &ewas disbanded because all invites expired and the party was empty.");
-                event.setCanceled(true);
-                middle.clear();
-                return true;
-            }
-            Pattern partyNotif = Pattern.compile("(§[0-9a-fk-or].+ |§[0-9a-fk-or])(.+) (§ehas been removed from the party.|§ejoined the party.|§chas already been invited to the party.|§ehas disconnected, they have §c5 §eminutes to rejoin before they are removed from the party.|§ewas removed from your party because they disconnected.|§ehas disbanded the party!)");
-            Matcher pNMatcher = partyNotif.matcher(middle.get(0));
-
-            Pattern partyInvite = Pattern.compile("(§[0-9a-fk-or].+ |§[0-9a-fk-or])(.+) §einvited (§[0-9a-fk-or].+ |§[0-9a-fk-or])(.+) §eto the party! They have §c60 §eseconds to accept.");
-            Matcher pIMatcher = partyInvite.matcher(middle.get(0));
-            if (pIMatcher.find()) {
-                UChat.chat(":partyprefix: &9" + pIMatcher.group(2) + " &einvited &9" + pIMatcher.group(4) + " &eto the party! &7(60s to accept)");
-            } else if (pNMatcher.find()) {
-                switch (pNMatcher.group(3)) {
-                    case "§ehas been removed from the party.": {
-                        UChat.chat(":partyprefix: &9" + pNMatcher.group(2) + " &ehas been removed from the party.");
-                        break;
-                    }
-                    case "§ejoined the party.": {
-                        UChat.chat(":partyprefix: &9" + pNMatcher.group(2) + " &ejoined the party.");
-                        break;
-                    }
-                    case "§chas already been invited to the party.": {
-                        UChat.chat(":partyprefix: &c" + pNMatcher.group(2) + " &ehas already been invited to the party.");
-                        break;
-                    }
-                    case "§ehas disconnected, they have §c5 §eminutes to rejoin before they are removed from the party.": {
-                        UChat.chat(":partyprefix: &9" + pNMatcher.group(2) + " &edisconnected. &7(5 mins until kick)");
-                    }
-                    case "§ewas removed from your party because they disconnected.": {
-                        UChat.chat(":partyprefix: &9" + pNMatcher.group(2) + " &ewas removed from your party because they disconnected.");
-                    }
-                    case "§ehas disbanded the party!": {
-                        UChat.chat(":partyprefix: &9" + pNMatcher.group(2) + " &ehas disbanded the party!");
-                    }
-                }
-            } else {
-                UChat.chat("§9§m-----------------------------------------------------");
-                for (UTextComponent s : components) {
-                    s.chat();
-                }
-                UChat.chat("§9§m-----------------------------------------------------");
-            }
-            components.clear();
-            middle.clear();
-            return true;
-        }
-
-        Pattern partyPattern = Pattern.compile("§9Party §8> (§[0-9a-fk-or].+ |§[0-9a-fk-or])(.+)§[f7]: (.+)");
-
-        Matcher partyMatcher = partyPattern.matcher(event.message.getFormattedText().replaceAll("§r", ""));
-        if (partyMatcher.find()) {
-            Multithreading.runAsync(() -> {
-                try {
-                    String name = partyMatcher.group(2);
-                    String prefix = partyMatcher.group(1);
-                    prefix = prefix;
-                    String message = partyMatcher.group(3);
-//                    MUtils.chat(":party: " + replacement[0].toString() + chat + ": " + message);
-                    MUtils.chat(":partyprefix: &9" + name + "<#c0def5>" + ": " + message);
-                } catch (Exception e) {
-                    System.out.println("Error in party chat\n" + e.getMessage());
-                }
-            });
-            return true;
-        }
 
         Pattern guildPattern = Pattern.compile("§2Guild > (§[0-9a-fk-or].+ |§[0-9a-fk-or])(.+)()§[f7]: (.+)");
         Pattern guildPattern2 = Pattern.compile("§2Guild > (§[0-9a-fk-or].+ |§[0-9a-fk-or])(.+)( §[0-9a-fk-or].+)§[f7]: (.+)");

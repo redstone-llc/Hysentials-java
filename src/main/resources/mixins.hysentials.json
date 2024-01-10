@@ -6,25 +6,20 @@
   "refmap": "mixins.hysentials.refmap.json",
   "verbose": true,
   "client": [
-    "ChatLineMixin",
-    "ContainerMixin",
     "EntityPlayerSPMixin_MessageHandling",
     "FontRendererMixin",
+    "GuiIngameMixin",
     "GuiMainMenuMixin",
     "GuiNewChatAccessor",
-    "GuiNewChatMixin_GuildListHide",
-    "GuiNewChatMixin_LocrawHider",
     "GuiScreenMixin",
     "GuiUtilRCMixin",
-    "ItemMonsterPlacerMixin",
-    "MinecraftMixin",
     "MinecraftMixin_LeftClickInteract",
     "MixinRenderManager",
-    "NetHandlerPlayClientMixin_GameChecker",
     "PlayerMixin",
     "PlayerModelMixin",
     "PlayerRendererMixin",
     "RenderItemMixin",
+    "RenderLivingMixin",
     "RenderMixin"
   ]
 }

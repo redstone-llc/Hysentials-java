@@ -4,7 +4,9 @@ import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
+import cc.woverflow.hysentials.HysentialsUtilsKt;
 import cc.woverflow.hysentials.guis.club.HousingViewer;
+import cc.woverflow.hysentials.schema.HysentialsSchema;
 import cc.woverflow.hysentials.websocket.Socket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -39,12 +41,11 @@ public class VisitCommand extends CommandBase {
         String player = args[0];
         Multithreading.runAsync(() -> {
             try {
-                Gson gson = new GsonBuilder().create();
-                String s = NetworkUtils.getString("http://127.0.0.1:8080/api/club?alias=" + player);
-                JsonObject clubData = gson.fromJson(s, JsonObject.class);
+                String s = NetworkUtils.getString(HysentialsUtilsKt.getHYSENTIALS_API() + "/club?alias=" + player);
+                JsonObject clubData = new JsonParser().parse(s).getAsJsonObject();
                 if (clubData.get("success").getAsBoolean()) {
-                    System.out.println(clubData.get("club"));
-                    new HousingViewer(gson.fromJson(clubData.get("club").getAsString(), JsonObject.class)).open();
+                    HysentialsSchema.Club club = HysentialsSchema.Club.Companion.deserialize(clubData.get("club").getAsJsonObject());
+                    new HousingViewer(club).open();
                 } else {
                     Minecraft.getMinecraft().thePlayer.sendChatMessage("/visit " + player);
                 }

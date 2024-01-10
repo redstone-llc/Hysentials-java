@@ -10,18 +10,23 @@ import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
+import cc.polyfrost.oneconfig.gui.OneConfigGui;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.libs.universal.UKeyboard;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
+import cc.polyfrost.oneconfig.utils.gui.GuiUtils;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.config.hysentialMods.ChatConfig;
+import cc.woverflow.hysentials.config.hysentialMods.FormattingConfig;
+import cc.woverflow.hysentials.config.hysentialMods.HousingConfig;
 import cc.woverflow.hysentials.cosmetic.CosmeticGui;
-import cc.woverflow.hysentials.gui.UpdateChecker;
+import cc.woverflow.hysentials.updateGui.UpdateChecker;
 
+import cc.woverflow.hysentials.util.ImageIconRenderer;
 import cc.woverflow.hysentials.utils.RedstoneRepo;
 import cc.woverflow.hysentials.utils.UpdateNotes;
 import cc.woverflow.hytils.HytilsReborn;
 import net.minecraft.client.Minecraft;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.awt.*;
@@ -67,6 +72,14 @@ public class HysentialsConfig extends Config {
     )
     public static OneKeyBind keyBind = new OneKeyBind(UKeyboard.KEY_K);
 
+    @KeyBind(
+        name = "Open Online Players",
+        category = "General",
+        subcategory = "Keybinds",
+        description = "The keybind to open the online players menu."
+    )
+    public static OneKeyBind onlinePlayersKeyBind = new OneKeyBind(UKeyboard.KEY_LCONTROL, UKeyboard.KEY_TAB);
+
 
     @Switch(
         name = "Global Chat Enabled",
@@ -86,7 +99,7 @@ public class HysentialsConfig extends Config {
     public static boolean fancyFormatting = true;
 
     @Switch(
-        name = "Futuristic Ranks",
+        name = "Fancy Ranks",
         category = "General",
         subcategory = "Fancy Formatting",
         description = "Enable futuristic ranks. This will allow you to see an image as a users rank, aswell as other things."
@@ -108,15 +121,6 @@ public class HysentialsConfig extends Config {
         description = "Enable channel formatting. This enables fancier formatting for channels."
     )
     public static boolean channelFormatting = true;
-
-
-    @Switch(
-        name = "Chat Limit 256",
-        category = "General",
-        subcategory = "Chat",
-        description = "Enable chat limit 256. This will allow you to send messages up to 256 characters long. (This will only work on Hypixel)"
-    )
-    public static boolean chatLimit256 = true;
 
     @Button(
         name = "Rank Image Config",
@@ -247,6 +251,13 @@ public class HysentialsConfig extends Config {
     )
     public static boolean showPets = false;
 
+    @Switch(
+        name = "Disable Custom Capes",
+        category = "Comsetics",
+        subcategory = "Capes",
+        description = "Will disable custom capes including their animations."
+    )
+    public static boolean disableCustomCapes = false;
     @Dropdown(
         name = "Cape Animation",
         category = "Comsetics",
@@ -399,6 +410,9 @@ public class HysentialsConfig extends Config {
 
     public static boolean wardrobeDarkMode = true;
 
+    public transient ChatConfig chatConfig = new ChatConfig();
+    public transient FormattingConfig formattingConfig = new FormattingConfig();
+    public transient HousingConfig housingConfig = new HousingConfig();
 
     public HysentialsConfig() {
         super(new Mod("Hysentials", ModType.HYPIXEL), "hysentials.json");
@@ -409,5 +423,18 @@ public class HysentialsConfig extends Config {
             Minecraft.getMinecraft().thePlayer.closeScreen();
             Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(new CosmeticGui());
         });
+
+//        addListener("fancyFormatting", () -> {
+//            if (fancyFormatting) {
+//                Minecraft.getMinecraft().fontRendererObj = new ImageIconRenderer();
+//            } else {
+//                Minecraft.getMinecraft().fontRendererObj = Hysentials.minecraftFont;
+//            }
+//        });
+    }
+
+    @Override
+    public void openGui() {
+        GuiUtils.displayScreen(new OneConfigGui(new HysentialsMods()));
     }
 }

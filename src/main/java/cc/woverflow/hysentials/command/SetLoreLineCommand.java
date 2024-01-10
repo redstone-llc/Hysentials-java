@@ -1,6 +1,7 @@
 package cc.woverflow.hysentials.command;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.util.BUtils;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.woverflow.hysentials.util.C;
 import net.minecraft.client.Minecraft;
@@ -40,6 +41,10 @@ public class SetLoreLineCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
+        if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative() || BUtils.isSBX()) {
+            Minecraft.getMinecraft().thePlayer.sendChatMessage("/setloreline " + String.join(" ", args));
+            return;
+        }
         if (args.length < 2) {
             UChat.chat("§cUsage: /setloreline <line> <value>");
             return;
@@ -60,10 +65,6 @@ public class SetLoreLineCommand extends CommandBase {
         ItemStack item = Minecraft.getMinecraft().thePlayer.getHeldItem();
         if (item == null || item.getItem() == null) {
             UChat.chat("§cYou must be holding an item!");
-            return;
-        }
-        if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative()) {
-            MUtils.chat("§cYou must be in creative mode!");
             return;
         }
         line = line - 1;

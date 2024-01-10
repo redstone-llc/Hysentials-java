@@ -64,12 +64,36 @@ public final class NetworkUtils {
     /**
      * Gets the contents of a URL as a String.
      *
+     * @param url       The URL to read.
+     * @param userAgent The user agent to use.
+     * @param timeout   The timeout in milliseconds.
+     * @param useCaches Whether to use caches.
+     * @return The contents of the URL.
+     */
+    public static String getString(String url, String userAgent, int timeout, boolean useCaches, boolean hideError) {
+        try (InputStreamReader input = new InputStreamReader(setupConnection(url, userAgent, timeout, useCaches), StandardCharsets.UTF_8)) {
+            return IOUtils.toString(input);
+        } catch (Exception e) {
+            if (!hideError) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Gets the contents of a URL as a String.
+     *
      * @param url The URL to read.
      * @return The contents of the URL.
      * @see NetworkUtils#getString(String, String, int, boolean)
      */
     public static String getString(String url) {
-        return getString(url, "OneConfig/1.0.0", 5000, false);
+        return getString(url, "OneConfig/1.0.0", 5000, false, true);
+    }
+
+    public static String getString(String url, boolean hideError) {
+        return getString(url, "OneConfig/1.0.0", 5000, false, hideError);
     }
 
     public static String postString(String url, String userAgent, int timeout, boolean useCaches, String data) {
@@ -108,8 +132,8 @@ public final class NetworkUtils {
      * @see NetworkUtils#getString(String, String, int, boolean)
      * @see JsonUtils#parseString(String)
      */
-    public static JsonElement getJsonElement(String url, String userAgent, int timeout, boolean useCaches) {
-        return JsonUtils.parseString(getString(url, userAgent, timeout, useCaches));
+    public static JsonElement getJsonElement(String url, String userAgent, int timeout, boolean useCaches, boolean hideError) {
+        return JsonUtils.parseString(getString(url, userAgent, timeout, useCaches, hideError));
     }
 
     /**
@@ -117,10 +141,14 @@ public final class NetworkUtils {
      *
      * @param url The URL to read.
      * @return The contents of the URL.
-     * @see NetworkUtils#getJsonElement(String, String, int, boolean)
+     * @see NetworkUtils#getJsonElement(String, String, int, boolean, boolean)
      */
     public static JsonElement getJsonElement(String url) {
-        return getJsonElement(url, "Hysentials/1.0.0", 5000, false);
+        return getJsonElement(url, "Hysentials/1.0.0", 5000, false, true);
+    }
+
+    public static JsonElement getJsonElement(String url, boolean hideError) {
+        return getJsonElement(url, "Hysentials/1.0.0", 5000, false, hideError);
     }
 
     /**

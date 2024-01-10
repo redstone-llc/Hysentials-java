@@ -5,10 +5,10 @@
     "description": "Hypixel-focused Quality of Life mod.",
     "version": "${version}",
     "mcversion": "1.8.9",
-    "url": "https://github.com/Polyfrost/Hytils-Reborn",
-    "updateUrl": "https://github.com/Polyfrost/Hytils-Reborn",
+    "url": "https://beta.redstone.llc",
+    "updateUrl": "https://beta.redstone.llc/discord",
     "authorList": [
-      "Blockworks Studios"
+      "Redstone Studios"
     ],
     "credits": "",
     "logoFile": "",

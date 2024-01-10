@@ -12,8 +12,8 @@ public class FishCaught extends Cluster {
         super("Fish Caught", "fishCaught", loaders);
         add(close());
         add(command("menu"));
-        add(click(39));
-        add(click(28));
+        add(click(31));
+        add(click(11));
         add(click(19));
         if (loaders != null) {
             loadActions(loaders);

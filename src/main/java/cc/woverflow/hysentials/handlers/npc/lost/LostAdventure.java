@@ -6,7 +6,6 @@ import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.woverflow.hysentials.handlers.misc.QuestHandler;
 import cc.woverflow.hysentials.handlers.npc.NPC;
-import cc.woverflow.hysentials.handlers.npc.QuestNPC;
 import cc.woverflow.hysentials.mixin.GuiNewChatAccessor;
 import cc.woverflow.hysentials.quest.Quest;
 import com.mojang.authlib.GameProfile;
@@ -81,7 +80,7 @@ public class LostAdventure extends NPC {
     public void onMessageRecieve(ClientChatReceivedEvent event) {
         if (event.message.getFormattedText().replace("§r", "").equals("     §e§lProtect your bed and destroy the enemy beds.")) {
             Multithreading.schedule(() -> {
-                BlockPos pos = QuestNPC.checkPosition(40);
+                BlockPos pos = checkPosition(40);
                 lastX = pos.getX();
                 lastY = pos.getY();
                 lastZ = pos.getZ();

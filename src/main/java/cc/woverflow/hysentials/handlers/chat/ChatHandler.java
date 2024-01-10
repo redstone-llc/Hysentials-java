@@ -6,6 +6,7 @@ import cc.woverflow.hysentials.handlers.chat.modules.bwranks.BWSReplace;
 import cc.woverflow.hysentials.handlers.chat.modules.bwranks.FriendReplace;
 import cc.woverflow.hysentials.handlers.chat.modules.misc.GlobalChatStuff;
 import cc.woverflow.hysentials.handlers.groupchats.GroupChatMessage;
+import cc.woverflow.hysentials.util.BUtils;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -37,7 +38,6 @@ public class ChatHandler {
 //        this.registerModule(new HousingBridge());
         // Blockers
 
-        //this.registerModule(new AdBlocker());
 
 
         // Priority
@@ -72,7 +72,7 @@ public class ChatHandler {
 
     @SubscribeEvent
     public void handleChat(ClientChatReceivedEvent event) {
-        if (!HypixelUtils.INSTANCE.isHypixel()) {
+        if (!BUtils.isHypixelOrSBX()) {
             return;
         }
 
@@ -108,7 +108,7 @@ public class ChatHandler {
     @SuppressWarnings({"unused", "RedundantSuppression"})
     @Nullable
     public String handleSentMessage(@NotNull String message) {
-        if (!HypixelUtils.INSTANCE.isHypixel()) {
+        if (!BUtils.isHypixelOrSBX()) {
             return message;
         }
 

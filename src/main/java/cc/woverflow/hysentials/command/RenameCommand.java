@@ -1,6 +1,7 @@
 package cc.woverflow.hysentials.command;
 
 
+import cc.woverflow.hysentials.util.BUtils;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.woverflow.hysentials.util.C;
 import net.minecraft.client.Minecraft;
@@ -28,13 +29,13 @@ public class RenameCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
+        if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative() || BUtils.isSBX()) {
+            Minecraft.getMinecraft().thePlayer.sendChatMessage("/rename " + String.join(" ", args));
+            return;
+        }
         ItemStack item = Minecraft.getMinecraft().thePlayer.getHeldItem();
         if (item == null || item.getItem() == null) {
             MUtils.chat("§cYou must be holding an item!");
-            return;
-        }
-        if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative()) {
-            MUtils.chat("§cYou must be in creative mode!");
             return;
         }
         item = item.copy();

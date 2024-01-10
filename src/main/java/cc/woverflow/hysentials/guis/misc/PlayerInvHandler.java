@@ -6,7 +6,6 @@ import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.cosmetic.CosmeticGui;
 import cc.woverflow.hysentials.handlers.htsl.Navigator;
-import cc.woverflow.hysentials.handlers.npc.QuestNPC;
 import cc.woverflow.hysentials.handlers.sbb.SbbRenderer;
 import cc.woverflow.hysentials.profileViewer.DefaultProfileGui;
 import cc.woverflow.hysentials.util.C;
@@ -26,7 +25,6 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.concurrent.TimeUnit;
 
-import static cc.woverflow.hysentials.handlers.npc.QuestNPC.getMouseOverExtended;
 
 public class PlayerInvHandler {
     @SubscribeEvent

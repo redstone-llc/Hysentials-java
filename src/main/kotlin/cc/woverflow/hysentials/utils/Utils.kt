@@ -54,6 +54,39 @@ object Utils {
             }
         }
     }
+    @JvmStatic
+    fun getExpForLevel(level: Int): Int {
+        var previous = 1000
+        var amount = 0.0
+        var multiplier = 1.15
+        for (i in 0 until level) {
+            previous = (previous + amount).toInt()
+            amount = (150 * multiplier).toInt().toDouble()
+            multiplier += if (i > 10) 0.1 else 0.15
+        }
+        return previous
+    }
+    @JvmStatic
+    fun getLevel(exp: Int): Float {
+        var level = 0f
+        var exp = exp
+        while (exp >= getExpForLevel(level.toInt())) {
+            level++
+            exp -= getExpForLevel(level.toInt())
+        }
+        level += exp / getExpForLevel(level.toInt()).toFloat()
+        return level
+    }
+    @JvmStatic
+    fun getExpStart(exp: Int): Int {
+        var level = 0f
+        var remainingExp = exp
+        while (remainingExp >= getExpForLevel(level.toInt())) {
+            remainingExp -= getExpForLevel(level.toInt())
+            level++
+        }
+        return remainingExp
+    }
 
 
     private fun getCustomColorFromColor(color: Color) = CustomColor.fromInt(color.rgb)

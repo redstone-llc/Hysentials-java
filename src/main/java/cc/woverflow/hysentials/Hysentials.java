@@ -4,17 +4,25 @@ import cc.polyfrost.oneconfig.events.EventManager;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.woverflow.hysentials.capes.CapeHandler;
+import cc.woverflow.hysentials.config.hysentialMods.FormattingConfig;
 import cc.woverflow.hysentials.cosmetic.CosmeticManager;
+import cc.woverflow.hysentials.cosmetics.backpack.BackpackCosmetic;
 import cc.woverflow.hysentials.cosmetics.hamster.HamsterCompanion;
+import cc.woverflow.hysentials.cosmetics.hats.blackcat.BlackCat;
+import cc.woverflow.hysentials.cosmetics.hats.blackcat.BlackCatModel;
 import cc.woverflow.hysentials.cosmetics.hats.cat.CatHat;
+import cc.woverflow.hysentials.cosmetics.kzero.KzeroBundle;
 import cc.woverflow.hysentials.cosmetics.miya.MiyaCompanion;
 import cc.woverflow.hysentials.cosmetics.pepper.PepperCompanion;
 import cc.woverflow.hysentials.cosmetics.hats.technocrown.TechnoCrown;
 import cc.woverflow.hysentials.guis.club.ClubDashboardHandler;
 import cc.woverflow.hysentials.guis.container.ContainerHandler;
+import cc.woverflow.hysentials.guis.hsplayerlist.GuiOnlineList;
 import cc.woverflow.hysentials.guis.utils.SBBoxes;
 import cc.woverflow.hysentials.handlers.chat.modules.misc.Limit256;
 import cc.woverflow.hysentials.handlers.misc.QuestHandler;
+import cc.woverflow.hysentials.handlers.redworks.FormatPlayerName;
+import cc.woverflow.hysentials.macrowheel.MacroWheelData;
 import cc.woverflow.hysentials.quest.Quest;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.commands.CommandManager;
@@ -26,7 +34,6 @@ import cc.woverflow.hysentials.guis.actionLibrary.ActionLibrary;
 import cc.woverflow.hysentials.guis.gameMenu.RevampedGameMenu;
 import cc.woverflow.hysentials.guis.misc.PlayerInvHandler;
 import cc.woverflow.hysentials.guis.sbBoxes.SBBoxesEditor;
-import cc.woverflow.hysentials.handlers.cache.HeightHandler;
 import cc.woverflow.hysentials.handlers.chat.ChatHandler;
 import cc.woverflow.hysentials.handlers.chat.modules.bwranks.BWSReplace;
 import cc.woverflow.hysentials.handlers.display.GuiDisplayHandler;
@@ -35,8 +42,6 @@ import cc.woverflow.hysentials.handlers.htsl.*;
 import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
 import cc.woverflow.hysentials.handlers.language.LanguageHandler;
 import cc.woverflow.hysentials.handlers.lobby.HousingLagReducer;
-import cc.woverflow.hysentials.handlers.lobby.LobbyChecker;
-import cc.woverflow.hysentials.handlers.npc.QuestNPC;
 import cc.woverflow.hysentials.handlers.redworks.BwRanks;
 import cc.woverflow.hysentials.handlers.sbb.Actionbar;
 import cc.woverflow.hysentials.handlers.sbb.SbbRenderer;
@@ -47,6 +52,9 @@ import cc.woverflow.hysentials.util.blockw.OnlineCache;
 import cc.woverflow.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.renderer.entity.layers.LayerArmorBase;
+import net.minecraft.client.renderer.entity.layers.LayerBipedArmor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -83,6 +91,7 @@ public class Hysentials {
 
     @Mod.Instance(MOD_ID)
     public static Hysentials INSTANCE;
+    public static GuiMainMenu guiMainMenu;
     public static File jarFile;
 
     public static String modDir = "./config/hysentials";
@@ -93,7 +102,6 @@ public class Hysentials {
     private final LanguageHandler languageHandler = new LanguageHandler();
     private final OnlineCache onlineCache = new OnlineCache();
 
-    private final LobbyChecker lobbyChecker = new LobbyChecker();
     private final ChatHandler chatHandler = new ChatHandler();
 
     public final GuiDisplayHandler guiDisplayHandler = new GuiDisplayHandler();
@@ -102,6 +110,7 @@ public class Hysentials {
     public ImageIconRenderer imageIconRenderer;
     public JsonData sbBoxes;
     public JsonData rankColors;
+    public MacroWheelData.MacroJson macroJson;
     public boolean isPatcher;
     public boolean isChatting;
     public boolean isHytils;
@@ -116,6 +125,8 @@ public class Hysentials {
     public MiyaCompanion miyaCompanion;
     public HamsterCompanion hamsterCompanion;
     public TechnoCrown technoCrown;
+    public BlackCat blackCat;
+    public KzeroBundle kzeroBundle;
 
 
 
@@ -135,7 +146,7 @@ public class Hysentials {
             throw new RuntimeException("Failed to create config directory! Please report this to sinender on Discord");
         }
         sbBoxes = new SBBJsonData("./config/hysentials/lines.json", new JSONObject().put("lines", new JSONArray()));
-        rankColors = new JsonData("/assets/minecraft/textures/icons/colors.json", "./config/hysentials/color.json", true);
+        macroJson = new MacroWheelData.MacroJson();
 
         try {
             System.setProperty("file.encoding", "UTF-8");
@@ -156,6 +167,8 @@ public class Hysentials {
             throw new RuntimeException(e);
         }
 
+
+        Socket.init();
         Socket.createSocket();
 
         CommandManager.INSTANCE.registerCommand(new GroupChatCommand());
@@ -163,6 +176,7 @@ public class Hysentials {
         ClientCommandHandler.instance.registerCommand(new GlobalChatCommand());
         ClientCommandHandler.instance.registerCommand(new HypixelChatCommand());
         ClientCommandHandler.instance.registerCommand(new VisitCommand());
+        ClientCommandHandler.instance.registerCommand(new VisitPlayerCommand());
         ClientCommandHandler.instance.registerCommand(new RemoveGlowCommand());
         ClientCommandHandler.instance.registerCommand(new GlowCommand());
         ClientCommandHandler.instance.registerCommand(new SetLoreLineCommand());
@@ -173,6 +187,7 @@ public class Hysentials {
         ClientCommandHandler.instance.registerCommand(new OpenInvCommand());
         ClientCommandHandler.instance.registerCommand(new SetTextureCommand());
         ClientCommandHandler.instance.registerCommand(new HymojiCommand());
+        ClientCommandHandler.instance.registerCommand(new ClaimCommand());
         CommandManager.INSTANCE.registerCommand(new SBBoxesCommand());
         CommandManager.INSTANCE.registerCommand(new ActionLibraryCommand());
         CommandManager.INSTANCE.registerCommand(new ClubCommand());
@@ -182,8 +197,6 @@ public class Hysentials {
             //                DiscordCore.init();
             discordRPC = new DiscordRPC();
         }
-
-        HeightHandler.INSTANCE.initialize();
 
         registerHandlers();
         Quest.registerQuests();
@@ -201,7 +214,10 @@ public class Hysentials {
         Cluster.registerClusters();
 
         MinecraftForge.EVENT_BUS.post(new HysentialsLoadedEvent());
-        HysentialsKt.Companion.postInit();
+        HysentialsUtilsKt.postInit();
+
+        LayerArmorBase armorBase;
+        LayerBipedArmor bipedArmor;
     }
 
     @Mod.EventHandler
@@ -300,7 +316,9 @@ public class Hysentials {
         }
         imageIconRenderer = new ImageIconRenderer();
         minecraftFont = Minecraft.getMinecraft().fontRendererObj;
-        Minecraft.getMinecraft().fontRendererObj = imageIconRenderer;
+        if (FormattingConfig.fancyRendering()) {
+            Minecraft.getMinecraft().fontRendererObj = imageIconRenderer;
+        }
     }
 
     private void registerHandlers() {
@@ -319,7 +337,6 @@ public class Hysentials {
 
         eventBus.register(new HousingLagReducer());
         // lobby
-        eventBus.register(lobbyChecker);
         eventBus.register(guiDisplayHandler);
         eventBus.register(new ResolutionUtil());
         eventBus.register(new BwRanks());
@@ -339,7 +356,6 @@ public class Hysentials {
         eventBus.register(new ClubDashboardHandler());
         eventBus.register(new PlayerInvHandler());
         eventBus.register(new BWSReplace());
-        eventBus.register(new QuestNPC());
         eventBus.register(new MUtils());
         eventBus.register(new Limit256());
         eventBus.register(new QuestHandler());
@@ -349,30 +365,30 @@ public class Hysentials {
         eventBus.register(miyaCompanion = new MiyaCompanion());
         eventBus.register(hamsterCompanion = new HamsterCompanion());
         eventBus.register(technoCrown = new TechnoCrown());
+        eventBus.register(kzeroBundle = new KzeroBundle());
         CatHat.loadCatHats();
+        BackpackCosmetic.loadBackpacks();
         eventBus.register(new ContainerHandler());
+        eventBus.register(new FormatPlayerName());
 
         new Renderer();
 
-        // height overlay
-        EventManager.INSTANCE.register(HeightHandler.INSTANCE);
         EventManager.INSTANCE.register(new BwRanks());
 
-        eventBus.register(new HypixelAPIUtils());
-//        eventBus.register(new NeighborInstall());
+        HysentialsUtilsKt.init();
 
-        HysentialsKt.Companion.init();
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            JSONArray array = new JSONArray();
-            for (SBBoxes box : SBBoxes.boxes) {
-                array.put(box.save());
-            }
-            JSONObject object = new JSONObject();
-            object.put("lines", array);
-            sbBoxes.jsonObject = object;
-            sbBoxes.save();
-        }));
+//        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+//            JSONArray array = new JSONArray();
+//            for (SBBoxes box : SBBoxes.boxes) {
+//                array.put(box.save());
+//            }
+//            JSONObject object = new JSONObject();
+//            object.put("lines", array);
+//            sbBoxes.jsonObject = object;
+//            sbBoxes.save();
+//
+//            macroJson.save();
+//        }));
     }
 
     public void sendMessage(String message) {
@@ -383,9 +399,6 @@ public class Hysentials {
         return config;
     }
 
-    public LobbyChecker getLobbyChecker() {
-        return lobbyChecker;
-    }
 
     public boolean isLoadedCall() {
         return loadedCall;

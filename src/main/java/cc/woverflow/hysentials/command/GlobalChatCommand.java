@@ -1,7 +1,9 @@
 package cc.woverflow.hysentials.command;
 
+import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.config.hysentialMods.ChatConfig;
+import cc.woverflow.hysentials.util.BUtils;
 import cc.woverflow.hysentials.util.MUtils;
-import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.websocket.Socket;
 import net.minecraft.command.CommandBase;
@@ -36,11 +38,11 @@ public class GlobalChatCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
-        if (!HypixelUtils.INSTANCE.isHypixel()) {
+        if (!BUtils.isHypixelOrSBX()) {
             MUtils.chat(HysentialsConfig.chatPrefix + "&cYou are not in a Hypixel server!");
             return;
         }
-        if (!HysentialsConfig.globalChatEnabled) {
+        if (!ChatConfig.globalChat || !Hysentials.INSTANCE.getConfig().chatConfig.enabled) {
             MUtils.chat(HysentialsConfig.chatPrefix + "&cGlobal chat is disabled!");
             return;
         }

@@ -5,9 +5,10 @@ import cc.polyfrost.oneconfig.libs.universal.UMatrixStack
 import cc.polyfrost.oneconfig.libs.universal.UScreen
 import cc.woverflow.hysentials.Hysentials
 import cc.woverflow.hysentials.config.HysentialsConfig
-import cc.woverflow.hysentials.gui.Button
-import cc.woverflow.hysentials.gui.HysentialsGui
+import cc.woverflow.hysentials.updateGui.Button
+import cc.woverflow.hysentials.updateGui.HysentialsGui
 import cc.woverflow.hysentials.guis.container.GuiItem
+import cc.woverflow.hysentials.schema.HysentialsSchema
 import cc.woverflow.hysentials.util.*
 import cc.woverflow.hysentials.utils.formatCapitalize
 import cc.woverflow.hysentials.utils.splitToWords
@@ -20,6 +21,7 @@ import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.resources.model.IBakedModel
 import net.minecraft.entity.EntityLivingBase
+import net.minecraft.init.Items
 import net.minecraft.inventory.Slot
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumChatFormatting
@@ -29,6 +31,8 @@ import java.text.DecimalFormat
 import java.util.*
 import java.util.stream.Collectors
 
+
+//TODO REWRITE THIS - ITS TERRIBLE
 open class CosmeticGui : UScreen(), HysentialsGui {
     companion object {
         var instance: CosmeticGui? = null
@@ -37,8 +41,8 @@ open class CosmeticGui : UScreen(), HysentialsGui {
         fun equippedCosmetic(uuid: UUID, name: String): Boolean {
             try {
                 val cosmetics = BlockWAPIUtils.getCosmetics()
-                cosmetics.find { it.has("name") && it["name"] == name }?.let {
-                    if (it.getJSONArray("equipped").contains(uuid.toString())) {
+                cosmetics.find { it.name == name }?.let {
+                    if (it.equipped.contains(uuid.toString())) {
                         return true
                     }
                 }
@@ -50,8 +54,8 @@ open class CosmeticGui : UScreen(), HysentialsGui {
         fun hasCosmetic(uuid: UUID, name: String): Boolean {
             try {
                 val cosmetics = BlockWAPIUtils.getCosmetics()
-                cosmetics.find { it.has("name") && it["name"] == name }?.let {
-                    if (it.getJSONArray("users").contains(uuid.toString())) {
+                cosmetics.find { it.name == name }?.let {
+                    if (it.users.contains(uuid.toString())) {
                         return true
                     }
                 }
@@ -60,22 +64,22 @@ open class CosmeticGui : UScreen(), HysentialsGui {
             return false
         }
 
-        fun getOwnedCosmetics(uuid: UUID): ArrayList<JSONObject> {
+        fun getOwnedCosmetics(uuid: UUID): ArrayList<HysentialsSchema.Cosmetic> {
             val cosmetics = BlockWAPIUtils.getCosmetics()
-            val ownedCosmetics = ArrayList<JSONObject>()
+            val ownedCosmetics = ArrayList<HysentialsSchema.Cosmetic>()
             for (cosmetic in cosmetics) {
-                if (cosmetic.getJSONArray("users").contains(uuid.toString())) {
+                if (cosmetic.users.contains(uuid.toString())) {
                     ownedCosmetics.add(cosmetic)
                 }
             }
             return ownedCosmetics
         }
 
-        fun getEquippedCosmetics(uuid: UUID): ArrayList<JSONObject> {
+        fun getEquippedCosmetics(uuid: UUID): ArrayList<HysentialsSchema.Cosmetic> {
             val cosmetics = BlockWAPIUtils.getCosmetics()
-            val equippedCosmetics = ArrayList<JSONObject>()
+            val equippedCosmetics = ArrayList<HysentialsSchema.Cosmetic>()
             for (cosmetic in cosmetics) {
-                if (cosmetic.getJSONArray("equipped").contains(uuid.toString())) {
+                if (cosmetic.equipped.contains(uuid.toString())) {
                     equippedCosmetics.add(cosmetic)
                 }
             }
@@ -118,7 +122,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
 
     var inventory: CosmeticInventory? = null
     var theSlot: Slot? = null
-    var inventoryMap: HashMap<String, ArrayList<JSONObject>> = HashMap()
+    var inventoryMap: HashMap<String, ArrayList<HysentialsSchema.Cosmetic>> = HashMap()
     var cosmeticBackground = ResourceLocation("hysentials:gui/wardrobe/background.png")
     var lightBackground = ResourceLocation("hysentials:gui/wardrobe/background-light.png")
     var selectedSlot = ResourceLocation("hysentials:gui/wardrobe/selected_slot.png")
@@ -131,12 +135,13 @@ open class CosmeticGui : UScreen(), HysentialsGui {
     var bootsTab = ResourceLocation("hysentials:gui/wardrobe/tab/boots.png")
     var petsTab = ResourceLocation("hysentials:gui/wardrobe/tab/pets.png")
     var chatTab = ResourceLocation("hysentials:gui/wardrobe/tab/chatbox.png")
+    var bundlesTab = ResourceLocation("hysentials:gui/wardrobe/tab/bundles.png")
 
 
     var mcFive = HysentialsFontRenderer("Minecraft Five", 12f)
     var fontRenderer: ImageIconRenderer? = Hysentials.INSTANCE.imageIconRenderer
 
-    var paginationList: PaginationList<JSONObject>? = null
+    var paginationList: PaginationList<HysentialsSchema.Cosmetic>? = null
 
     var focused: Boolean = false
     var blinkTimer: Int = 0
@@ -146,6 +151,8 @@ open class CosmeticGui : UScreen(), HysentialsGui {
         it.isFocused = true
         it
     }
+
+    val soundHandler = Minecraft.getMinecraft().soundHandler;
 
     var xAngle = 0f
     var yAngle = 0f
@@ -188,11 +195,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 )
             }
 
-            val emerald = if (!Socket.cachedData.has("emeralds")) {
-                0
-            } else {
-                Socket.cachedData!!["emeralds"] as Int
-            }
+            val emerald = Socket.cachedUser?.emeralds ?: 0
 
             when {
                 type === "owned" -> {
@@ -262,6 +265,16 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                         guiTop + 99.0,
                         9.0,
                         7.0
+                    )
+                }
+
+                type === "bundles" -> {
+                    Renderer.drawImage(
+                        bundlesTab,
+                        guiLeft + 5.0,
+                        guiTop + 112.0,
+                        9.0,
+                        10.0
                     )
                 }
             }
@@ -384,6 +397,10 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                     drawHoveringText(listOf("§8➔ <#32eade>Chatting"), mouseX, mouseY, fontRenderer)
                 }
 
+                rX in 5.0..14.0 && rY in 112.0..122.0 && type !== "bundle" -> {
+                    drawHoveringText(listOf("§8➔ <#e832e6>Bundles"), mouseX, mouseY, fontRenderer)
+                }
+
                 rX in 277.0..284.0 && rY in 5.0..11.0 -> {
                     drawHoveringText(
                         listOf(
@@ -392,12 +409,14 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                             "",
                             "§7Hysentials uses Emeralds as",
                             "§7the main currency of the mod.",
-                            "§7Useful for things like quest rerolls",
-                            "§7cosmetic purchases, trading, and more!",
-                            "§7Emeralds are obtained by playing games and earning",
-                            "§7small increments at a time (your performance in the",
-                            "§7game may impact your emerald yield) or by purchasing",
-                            "§7them on our website, at §9§nwww.redstone.llc/store"
+                            "§7Useful for things like quest",
+                            "§7rerolls cosmetic purchases,",
+                            "§7trading, and more! Emeralds are",
+                            "§7obtained by playing games and ",
+                            "§7earning small increments at a time",
+                            "§7(Winning a game will earn more)",
+                            "§7or by purchasing them on our website,",
+                            "§7at §9§nwww.redstone.llc/store§7."
                         ), mouseX, mouseY, fontRenderer
                     )
                 }
@@ -406,7 +425,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                     drawHoveringText(
                         listOf(
                             "§fOwned Cosmetics: §a${getOwnedCosmetics(mc.thePlayer.uniqueID).size}§7/§8${BlockWAPIUtils.getCosmetics().size}",
-                            "§fAmount Spent: §a${largeFormat.format(if (Socket.cachedData.has("amountSpent")) Socket.cachedData.getNumber("amountSpent") else 0)} emeralds",
+                            "§fAmount Spent: §a${largeFormat.format(Socket.cachedUser.amountSpent ?: 0)} emeralds",
                         ), mouseX, mouseY, fontRenderer
                     )
                 }
@@ -499,7 +518,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
         val page = paginationList!!.getPage(page)
         if (page.size > slotIn.slotIndex) {
             val cosmetic = page[slotIn.slotIndex]
-            val name = cosmetic["name"] as String
+            val name = cosmetic.name
             val uuid = Minecraft.getMinecraft().thePlayer.uniqueID
             if (equippedCosmetic(uuid, name)) {
                 Renderer.drawImage(selectedSlot, i.toDouble(), j.toDouble(), 25.0, 26.0)
@@ -512,6 +531,11 @@ open class CosmeticGui : UScreen(), HysentialsGui {
         val height = ibakedmodel.particleTexture.iconHeight
         itemRender.renderItemAndEffectIntoGUI(itemstack, i + (25 - width) / 2, j + (26 - height) / 2)
         itemRender.renderItemOverlayIntoGUI(fontRendererObj, itemstack, i + (25 - width) / 2, j + (26 - height) / 2, "")
+
+        itemRender.zLevel = 0.0f
+        GlStateManager.enableLighting()
+        GlStateManager.enableDepth()
+        GlStateManager.colorMask(true, true, true, true)
     }
 
     override fun onMouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int) {
@@ -614,6 +638,18 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                     )
                 }
 
+                rX in 5.0..14.0 && rY in 112.0..122.0 && type !== "bundle" -> {
+                    type = "bundle"
+                    page = 1
+                    updatePage()
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
+                }
+
                 rX in 223.0..288.0 && rY in 20.0..159.0 -> {
                     isDragging = true
                     dragPos = Pair(mouseX, mouseY)
@@ -636,19 +672,15 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 mouseX.toFloat() - guiLeft,
                 mouseY.toFloat() - guiTop
             )
-            if (slot != -1) {
-                val cosmetics: List<JSONObject> = inventoryMap[type]!!
+            if (slot != -1 && slot < inventorySlots.size && inventoryMap.containsKey(type)) {
+                val cosmetics: List<HysentialsSchema.Cosmetic> = inventoryMap[type]!!
                 val paginationList = PaginationList(cosmetics, 32)
                 val page = paginationList.getPage(page)
                 if (slot >= page.size) return
                 val cosmetic = page[slot]
-                val cosmeticName = cosmetic.getString("name")
+                val cosmeticName = cosmetic.name
                 val uuid = Minecraft.getMinecraft().thePlayer.uniqueID
-                val emerald = if (!Socket.cachedData.has("emeralds")) {
-                    0
-                } else {
-                    Socket.cachedData!!["emeralds"] as Int
-                }
+                val emerald = Socket.cachedUser?.emeralds ?: 0
                 if (equippedCosmetic(uuid, cosmeticName) && hasCosmetic(uuid, cosmeticName)) {
                     Hysentials.INSTANCE.cosmeticManager.unEquipCosmetic(cosmeticName) {
                         if (!(JSONObject(it)["success"] as Boolean)) return@unEquipCosmetic
@@ -659,7 +691,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                         if (!(JSONObject(it)["success"] as Boolean)) return@equipCosmetic
                         initScreen(width, height)
                     }
-                } else if (!hasCosmetic(uuid, cosmeticName) && emerald >= cosmetic.getInt("cost")) {
+                } else if (!hasCosmetic(uuid, cosmeticName) && emerald >= cosmetic.cost) {
                     Hysentials.INSTANCE.cosmeticManager.purchaseCosmetic(cosmeticName) {
                         if (!(JSONObject(it)["success"] as Boolean)) return@purchaseCosmetic
                         initScreen(width, height)
@@ -717,10 +749,10 @@ open class CosmeticGui : UScreen(), HysentialsGui {
     private fun updatePage() {
         inventorySlots.clear()
         if (!inventoryMap.containsKey(type)) return
-        var cosmetics: List<JSONObject> = inventoryMap[type]!!
-        cosmetics = cosmetics.stream().filter { item: JSONObject ->
+        var cosmetics: List<HysentialsSchema.Cosmetic> = inventoryMap[type]!!
+        cosmetics = cosmetics.stream().filter { item: HysentialsSchema.Cosmetic ->
             C.removeColor(
-                item.getString("name")
+                item.name.lowercase()
             ).contains(search.lowercase(Locale.getDefault()))
         }.collect(Collectors.toList())
 
@@ -734,8 +766,13 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 val slot = Slot(inventory, index, guiLeft + 20 + j * 25, guiTop + 20 + i * 26)
                 if (index < page.size) {
                     val cosmetic = page[index]
-                    val item = cosmetic["item"] as ItemStack
-                    slot.putStack(item)
+                    if (cosmetic.item == null) {
+                        println("Cosmetic item ${cosmetic.name} is null")
+                        slot.putStack(null)
+                    } else {
+                        val item = cosmetic.item!!
+                        slot.putStack(item)
+                    }
                 } else {
                     slot.putStack(null)
                 }
@@ -752,33 +789,38 @@ open class CosmeticGui : UScreen(), HysentialsGui {
         inventorySlots.clear()
         guiLeft = (width - xSize) / 2
         guiTop = (height - ySize) / 2
-        Minecraft.getMinecraft().thePlayer.playSound("entity.item.pickup", 10.0f, 0.6f)
+
+        soundHandler.playSound(
+            PositionedSoundRecord.create(
+                ResourceLocation("entity.item.pickup"),
+                0.6f
+            )
+        )
         val uuid = Minecraft.getMinecraft().thePlayer.uniqueID
 
         //sort cosmetics by rarity and if they have it or not
         val cosmetics = BlockWAPIUtils.getCosmetics().sortedWith(
-            compareBy({ hasCosmetic(uuid, it["name"] as String) },
-                { indexFromRarity(it["rarity"] as String) })
+            compareBy({ hasCosmetic(uuid, it.name) },
+                { indexFromRarity(it.rarity) })
         ).asReversed()
         for (o in cosmetics) {
-            var type = o["type"] as String
-            val name = (o["name"] as String).formatCapitalize()
-            val itemID = o["itemID"] as Int
-            val description = o["description"] as String
-            val rarity = o["rarity"] as String
-            val cost = o["cost"] as Int
-            val emerald = if (!Socket.cachedData.has("emeralds")) {
-                0
-            } else {
-                Socket.cachedData!!["emeralds"] as Int
-            }
+            var type = o.type
+            var subType = o.subType ?: type
+            val name = o.name.lowercase()
+            val itemID = o.itemID ?: -1
+            val description = o.description
+            val rarity = o.rarity
+            val cost = o.cost
+            val emerald = Socket.cachedUser?.emeralds ?: 0
             var item: ItemStack? = null
+            val displayName =
+                "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>" + (o.displayName ?: name.formatCapitalize())
             val lore: MutableList<String> = mutableListOf()
             description.split("\n").forEach(lore::add)
-            if (equippedCosmetic(uuid, name.lowercase())) {
+            if (equippedCosmetic(uuid, name)) {
                 lore.add("")
                 lore.add("&aEquipped")
-            } else if (hasCosmetic(uuid, name.lowercase())) {
+            } else if (hasCosmetic(uuid, name)) {
                 lore.add("")
                 lore.add("&eClick to equip!")
             } else {
@@ -804,10 +846,10 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                     lore.add("&cNot purchasable!")
                 }
             }
-            when (type) {
+            when (subType) {
                 "pet" -> {
                     item = GuiItem.makeMonsterEgg(
-                        "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>${name} Pet",
+                        displayName,
                         1,
                         itemID,
                         lore
@@ -817,48 +859,98 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 "cape" -> {
                     item = GuiItem.makeColorfulItem(
                         Material.LEATHER_CHESTPLATE,
-                        "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>${name} Cape",
+                        displayName,
                         1,
                         0,
                         lore
                     )
-                    GuiItem.setColor(item, o["color"] as String)
+                    GuiItem.setColor(item, o.color)
                 }
 
                 "hat" -> {
                     item = GuiItem.makeColorfulItem(
                         Material.LEATHER_HELMET,
-                        "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>${name} Hat",
+                        displayName,
                         1,
                         0,
                         lore
                     )
-                    GuiItem.setColor(item, o["color"] as String)
+                    GuiItem.setColor(item, o.color)
+                }
+
+                "backpack" -> {
+                    item = GuiItem.makeColorfulItem(
+                        Material.LEATHER_CHESTPLATE,
+                        displayName,
+                        1,
+                        0,
+                        lore
+                    )
+                    GuiItem.setColor(item, o.color)
                 }
 
                 "chat" -> {
                     item = GuiItem.makeColorfulItem(
-                        Material.valueOf(o["material"] as String),
-                        "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>${name}",
+                        Material.valueOf(o.material!!),
+                        displayName,
+                        1,
+                        0,
+                        lore
+                    )
+                }
+
+                "bundle" -> {
+                    if (Material.valueOf(o.material!!) == Material.SKULL_ITEM) {
+                        item = GuiItem.makeColorfulSkullItem(
+                            displayName,
+                            o.skullOwner!!,
+                            1,
+                            lore
+                        )
+                    } else {
+                        item = GuiItem.makeColorfulItem(
+                            Material.valueOf(o.material!!),
+                            displayName,
+                            1,
+                            0,
+                            lore
+                        )
+                    }
+                }
+
+                "pantaloons" -> {
+                    item = GuiItem.makeColorfulItem(
+                        Material.LEATHER_LEGGINGS,
+                        displayName,
+                        1,
+                        0,
+                        lore
+                    )
+                    GuiItem.setColor(item, o.color)
+                }
+
+                "boots" -> {
+                    item = GuiItem.makeColorfulItem(
+                        Material.LEATHER_BOOTS,
+                        displayName,
+                        1,
+                        0,
+                        lore
+                    )
+                    GuiItem.setColor(item, o.color)
+                }
+
+                else -> {
+                    item = GuiItem.makeColorfulItem(
+                        Material.valueOf(o.material!!),
+                        displayName,
                         1,
                         0,
                         lore
                     )
                 }
             }
-            o.put("item", item)
-
-            type = if (type == "cape") {
-                "back"
-            } else {
-                type
-            }
-
-            type = if (type == "hat") {
-                "head"
-            } else {
-                type
-            }
+            o.item = item
 
             if (!inventoryMap.containsKey(type)) {
                 inventoryMap[type] = ArrayList()
@@ -868,36 +960,53 @@ open class CosmeticGui : UScreen(), HysentialsGui {
             if (!inventoryMap.containsKey("owned")) {
                 inventoryMap["owned"] = ArrayList()
             }
+
             if (hasCosmetic(uuid, name.lowercase())) {
                 inventoryMap["owned"]?.add(o)
             }
         }
 
         buttons.let {
-            it.add(Button(18, 126, 29, 20, "hysentials:gui/wardrobe/left.png", instance, onHover = {_, _ -> page > 1 }) { _, _, _ ->
-                if (page > 1) {
-                    page--
-                    updatePage()
-                    this.mc.soundHandler.playSound(
-                        PositionedSoundRecord.create(
-                            ResourceLocation("gui.button.press"),
-                            1.0f
+            it.add(
+                Button(
+                    18,
+                    126,
+                    29,
+                    20,
+                    "hysentials:gui/wardrobe/left.png",
+                    instance,
+                    onHover = { _, _ -> page > 1 }) { _, _, _ ->
+                    if (page > 1) {
+                        page--
+                        updatePage()
+                        this.mc.soundHandler.playSound(
+                            PositionedSoundRecord.create(
+                                ResourceLocation("gui.button.press"),
+                                1.0f
+                            )
                         )
-                    )
-                }
-            })
-            it.add(Button(192, 126, 29, 20, "hysentials:gui/wardrobe/right.png", instance, onHover = {_, _ -> page < maxPage}) { _, _, _ ->
-                if (page < maxPage) {
-                    page++
-                    updatePage()
-                    this.mc.soundHandler.playSound(
-                        PositionedSoundRecord.create(
-                            ResourceLocation("gui.button.press"),
-                            1.0f
+                    }
+                })
+            it.add(
+                Button(
+                    192,
+                    126,
+                    29,
+                    20,
+                    "hysentials:gui/wardrobe/right.png",
+                    instance,
+                    onHover = { _, _ -> page < maxPage }) { _, _, _ ->
+                    if (page < maxPage) {
+                        page++
+                        updatePage()
+                        this.mc.soundHandler.playSound(
+                            PositionedSoundRecord.create(
+                                ResourceLocation("gui.button.press"),
+                                1.0f
+                            )
                         )
-                    )
-                }
-            })
+                    }
+                })
             it.add(Button(18, 126, 29, 20, "hysentials:gui/wardrobe/left-light.png", instance) { _, _, _ ->
                 if (page > 1) {
                     page--

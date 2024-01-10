@@ -2,6 +2,7 @@ package cc.woverflow.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.HysentialsUtilsKt;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
@@ -204,12 +205,12 @@ public class ActionGUIHandler {
                     } else {
                         try {
                             JsonObject club = ClubDashboard.getClub();
-                            String otherCode = NetworkUtils.getString("http://127.0.0.1:8080/api/club/action?clubID=" + (club != null ? club.get("id").getAsString() : null) + "&id=" + input.getText());
+                            String otherCode = NetworkUtils.getString(HysentialsUtilsKt.getHYSENTIALS_API() + "/club/action?clubID=" + (club != null ? club.get("id").getAsString() : null) + "&id=" + input.getText());
                             JSONObject otherJson = new JSONObject(otherCode);
                             if (otherJson.has("action")) {
                                 codeToBeCompiled = otherJson.getJSONObject("action").getJSONObject("action").getString("code");
                             } else {
-                                String code = NetworkUtils.getString("http://127.0.0.1:8080/api/action?id=" + input.getText());
+                                String code = NetworkUtils.getString(HysentialsUtilsKt.getHYSENTIALS_API() + "/action?id=" + input.getText());
                                 JSONObject json = new JSONObject(code);
                                 if (json.has("action")) {
                                     codeToBeCompiled = json.getJSONObject("action").getJSONObject("action").getString("code");

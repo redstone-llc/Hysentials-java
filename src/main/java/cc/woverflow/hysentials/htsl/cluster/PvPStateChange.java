@@ -12,8 +12,8 @@ public class PvPStateChange extends Cluster {
         super("PvP State Change", "pvpStateChange", loaders);
         add(close());
         add(command("menu"));
-        add(click(39));
-        add(click(28));
+        add(click(31));
+        add(click(11));
         add(click(16));
         if (loaders != null) {
             loadActions(loaders);

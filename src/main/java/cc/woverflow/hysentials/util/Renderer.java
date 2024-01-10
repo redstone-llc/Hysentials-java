@@ -6,7 +6,6 @@ import cc.polyfrost.oneconfig.renderer.NanoVGHelper;
 import cc.polyfrost.oneconfig.renderer.TextRenderer;
 import cc.woverflow.hysentials.guis.ResolutionUtil;
 import cc.woverflow.hysentials.guis.utils.Position;
-import cc.woverflow.hysentials.user.Player;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.FontRenderer;
@@ -150,6 +149,7 @@ public class Renderer {
     }
 
     public static void drawFrameCentered(Frame frame, double x, double y, double maxWidth, double maxHeight, double offsetX, double offsetY) {
+        if (frame == null) return;
         drawImage(frame.texture, offsetX + ((x - (double) Math.min(frame.width, maxWidth)) / 2), offsetY + ((y - (double) Math.min(frame.height, maxHeight)) / 2), Math.min(frame.width, maxWidth), Math.min(frame.height, maxHeight));
     }
 

@@ -1,6 +1,11 @@
 package cc.woverflow.hysentials.command;
 
+import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.utils.commands.annotations.Greedy;
+import cc.woverflow.hysentials.HysentialsUtilsKt;
+import cc.woverflow.hysentials.schema.HysentialsSchema;
+import cc.woverflow.hysentials.util.BlockWAPIUtils;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
@@ -10,39 +15,40 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.guis.club.ClubDashboard;
-import cc.woverflow.hysentials.util.HypixelAPIUtils;
 import cc.woverflow.hysentials.websocket.Request;
 import cc.woverflow.hysentials.websocket.Socket;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.org.apache.xpath.internal.operations.Mult;
 import net.minecraft.client.Minecraft;
+import net.minecraft.item.ItemStack;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import static cc.woverflow.hysentials.HysentialsUtilsKt.*;
+import static cc.woverflow.hysentials.guis.club.ClubDashboard.clubData;
 import static cc.woverflow.hysentials.guis.club.ClubDashboard.update;
 import static cc.woverflow.hysentials.handlers.redworks.BwRanks.randomString;
 
 @Command(value = "club", description = "Club Commands",
-customHelpMessage = {
-    "§9&m-----------------------------------------------------",
-    "&aClub Commands: &c[BETA]",
-    "&e/club create <name> &7- &bCreate a club with the specified name",
-    "&e/club invite <player> &7- &bInvite a player to your club",
-    "&e/club join <name> &7- &bUsed to accept a club invite",
-    "&e/club leave &7- &bLeave your current club",
-    "&e/club dashboard &7- &bOpen the club dashboard",
-    "&e/club list &7- &bList all players in your club",
-    "§9&m-----------------------------------------------------"
-})
+    customHelpMessage = {
+        "§9&m-----------------------------------------------------",
+        "&aClub Commands: &c[BETA]",
+        "&e/club create <name> &7- &bCreate a club with the specified name",
+        "&e/club invite <player> &7- &bInvite a player to your club",
+        "&e/club join <name> &7- &bUsed to accept a club invite",
+        "&e/club leave &7- &bLeave your current club",
+        "&e/club dashboard &7- &bOpen the club dashboard",
+        "&e/club list &7- &bList all players in your club",
+        "&e/club house <index> help &7- &bManage your club houses",
+        "§9&m-----------------------------------------------------"
+    })
 public class ClubCommand {
     @SubCommand(aliases = {"create"}, description = "Create a club")
     public void create(String name) {
@@ -55,7 +61,7 @@ public class ClubCommand {
             JSONObject json = new JSONObject();
             json.put("name", name);
             json.put("owner", Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString());
-            try (InputStreamReader input = new InputStreamReader(Hysentials.post("http://127.0.0.1:8080/api/club/create"
+            try (InputStreamReader input = new InputStreamReader(Hysentials.post(getHYSENTIALS_API() + "/club/create"
                 + "?id=" + id
                 + "&uuid=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString()
                 + "&key=" + Socket.serverId, json)
@@ -88,6 +94,88 @@ public class ClubCommand {
         ).toString());
     }
 
+    @SubCommand(aliases = {"house"})
+    public void house(int index, @Greedy String args) {
+        if (!Socket.linked) {
+            MUtils.chat("&cYou must be linked to a discord account to use this feature.");
+            return;
+        }
+        if (args.isEmpty()) {
+            MUtils.chat("&cInvalid arguments, use /club house <index> <item|name|username|remove> [args]");
+            return;
+        }
+        String command = args.split(" ")[0];
+        Multithreading.runAsync(() -> {
+            ClubDashboard.getClub();
+            HysentialsSchema.Club club = clubData;
+            JsonObject house = club.getHouses().get(index);
+            JSONObject jsonObject = new JSONObject();
+            JSONObject jsonObject1 = new JSONObject();
+            switch (command.toLowerCase()) {
+                case "help": {
+                    MUtils.chat("&e/club house <index> <item|name|username|remove> [args]");
+                    break;
+                }
+                case "item": {
+                    ItemStack item = Minecraft.getMinecraft().thePlayer.inventory.getCurrentItem();
+                    if (item == null) {
+                        MUtils.chat("&cYou must be holding an item to use this command.");
+                        return;
+                    }
+                    String nbt = item.serializeNBT().toString();
+
+
+                    jsonObject1.put("name", house.get("name"));
+                    jsonObject1.put("username", house.get("username"));
+                    jsonObject1.put("nbt", nbt);
+
+                    jsonObject.put("houses", jsonObject1);
+                    jsonObject.put("update", true);
+                    break;
+                }
+                case "name": {
+                    if (args.split(" ").length < 2) {
+                        MUtils.chat("&cInvalid arguments, use /club house <index> name <name>");
+                        return;
+                    }
+
+                    jsonObject1.put("name", args.split(" ")[1]);
+                    jsonObject1.put("username", house.get("username"));
+                    jsonObject1.put("nbt", house.get("nbt"));
+
+                    jsonObject.put("houses", jsonObject1);
+                    jsonObject.put("update", true);
+                    break;
+                }
+                case "username": {
+                    if (args.split(" ").length < 2) {
+                        MUtils.chat("&cInvalid arguments, use /club house <index> username <username>");
+                        return;
+                    }
+
+                    jsonObject1.put("name", house.get("name"));
+                    jsonObject1.put("username", args.split(" ")[1]);
+                    jsonObject1.put("nbt", house.get("nbt"));
+
+                    jsonObject.put("houses", jsonObject1);
+                    jsonObject.put("update", true);
+                    break;
+                }
+                case "remove": {
+
+                    jsonObject1.put("name", house.get("name"));
+                    jsonObject1.put("username", house.get("username"));
+                    jsonObject1.put("nbt", house.get("nbt"));
+
+                    jsonObject.put("houses", jsonObject1);
+                    jsonObject.put("remove", true);
+                    break;
+                }
+            }
+            update(jsonObject);
+        });
+    }
+
     @SubCommand(aliases = {"list"})
     public void list() {
         if (!Socket.linked) {
@@ -95,7 +183,7 @@ public class ClubCommand {
             return;
         }
         try {
-            String s = NetworkUtils.getString("http://127.0.0.1:8080/api/club?uuid="
+            String s = NetworkUtils.getString(getHYSENTIALS_API() + "/club?uuid="
                 + Minecraft.getMinecraft().getSession().getProfile().getId().toString()
                 + "&key=" + Socket.serverId);
             JSONObject clubData = new JSONObject(s);
@@ -109,7 +197,7 @@ public class ClubCommand {
                 HashMap<String, String> userMap = new HashMap<>();
                 for (int i = 0; i < members.length(); i++) {
                     String uuid = members.getString(i);
-                    String name = HypixelAPIUtils.getUsername(uuid);
+                    String name = BlockWAPIUtils.getUsername(UUID.fromString(uuid));
                     userMap.put(uuid, name);
                 }
 
@@ -124,6 +212,7 @@ public class ClubCommand {
 
         }
     }
+
     @SubCommand(aliases = {"invite"}, description = "Invite a player to your club")
     public void invite(String name) {
         if (!Socket.linked) {
@@ -133,7 +222,7 @@ public class ClubCommand {
         Multithreading.runAsync(() -> {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("invitee", name);
-            ClubDashboard.clubData = ClubDashboard.getClub();
+            ClubDashboard.getClub();
             update(jsonObject);
         });
     }
@@ -147,7 +236,7 @@ public class ClubCommand {
         Multithreading.runAsync(() -> {
             JSONObject json = new JSONObject();
             json.put("leave", true);
-            ClubDashboard.clubData = ClubDashboard.getClub();
+            ClubDashboard.getClub();
             update(json);
         });
     }
@@ -159,7 +248,7 @@ public class ClubCommand {
             return;
         }
         try {
-            String s = NetworkUtils.getString("http://127.0.0.1:8080/api/club?uuid="
+            String s = NetworkUtils.getString(getHYSENTIALS_API() + "/club?uuid="
                 + Minecraft.getMinecraft().getSession().getProfile().getId().toString()
                 + "&key=" + Socket.serverId);
             JsonObject clubData = new JsonParser().parse(s).getAsJsonObject();
@@ -169,6 +258,7 @@ public class ClubCommand {
             }
             new ClubDashboard(clubData).open(Minecraft.getMinecraft().thePlayer);
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

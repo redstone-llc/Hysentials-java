@@ -1,33 +1,29 @@
 package cc.woverflow.hysentials.guis.actionLibrary;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
-import cc.woverflow.hysentials.util.MUtils;
-import cc.polyfrost.oneconfig.utils.NetworkUtils;
+import cc.woverflow.hysentials.schema.HysentialsSchema;
 import cc.woverflow.hysentials.guis.container.Container;
 import cc.woverflow.hysentials.guis.container.GuiItem;
 import cc.woverflow.hysentials.util.Material;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import net.minecraftforge.client.event.MouseEvent;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static net.minecraft.client.Minecraft.getMinecraft;
 
 public class SharedCode extends Container {
-    JsonObject clubData;
-    public SharedCode(JsonObject clubData) {
+    HysentialsSchema.Club clubData;
+    public SharedCode(HysentialsSchema.Club clubData) {
         super("Club Code", 6);
         this.clubData = clubData;
     }
     List<Integer> slots = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 28, 29, 30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 43, 44);
-    JsonArray actions = null;
+    ArrayList<HysentialsSchema.Action> actions = null;
     @Override
     public void setItems() {
         setItem(0, GuiItem.fromStack(
@@ -58,23 +54,23 @@ public class SharedCode extends Container {
 //            GuiItem.makeColorfulItem(Material.REDSTONE, "&aConditional Presets", 1, 0, "&7Edit and create conditionals", "&7that can be saved and shared.", "", "&eClick to open.")
 //        ));
 
-        JsonArray actions = clubData.getAsJsonArray("actions");
+        ArrayList<HysentialsSchema.Action> actions = clubData.getActions();
         this.actions = actions;
         for (int i = 0; i < Math.min(actions.size(), 32); i++) {
-            JsonObject action = actions.get(i).getAsJsonObject();
-            JsonObject actionData = action.getAsJsonObject("action");
-            JsonObject codespace = actionData.getAsJsonObject("codespace");
+            HysentialsSchema.Action action = actions.get(i);
+            HysentialsSchema.ActionData actionData = action.getAction();
+            HysentialsSchema.ActionCodespace codespace = actionData.getCodespace();
             addItem(GuiItem.fromStack(
-                GuiItem.makeColorfulItem(Material.PAPER, "&a" + actionData.get("name").getAsString(), codespace.get("functions").getAsInt(), 0,
-                    "&7Creator: &b" + actionData.get("creator").getAsString(),
-                    "&7Rating: &6" + ((action.get("rating").getAsInt() > 0 ? "+" + action.get("rating").getAsInt() : action.get("rating").getAsInt()) + "✭ &a(+" + action.get("ratingsPositive").getAsInt() + "▲) &c(-" + action.get("ratingsNegative").getAsInt() + "▼)"),
+                GuiItem.makeColorfulItem(Material.PAPER, "&a" + actionData.getName(), codespace.getFunctions(), 0,
+                    "&7Creator: &b" + actionData.getCreator(),
+                    "&7Rating: &6" + ((action.getRating() > 0 ? "+" + action.getRating() : action.getRating()) + "✭ &a(+" + action.getRatingsPositive() + "▲) &c(-" + action.getRatingsNegative() + "▼)"),
                     "&7Codespace Required:",
-                    "&8 ▪ &a" + codespace.get("functions").getAsInt() + " Function Slots",
-                    "   &8+" + codespace.get("conditions").getAsInt() + " Conditionals",
-                    "   &8+" + codespace.get("actions").getAsInt() + " Total Actions",
+                    "&8 ▪ &a" + codespace.getFunctions() + " Function Slots",
+                    "   &8+" + codespace.getConditions() + " Conditionals",
+                    "   &8+" + codespace.getActions() + " Total Actions",
                     "",
                     "&7Function Description:",
-                    "&f" + actionData.get("description").getAsString(),
+                    "&f" + actionData.getDescription(),
                     "",
                     "&eLeft-Click to open.",
                     "&bRight-Click to copy action."
@@ -94,12 +90,12 @@ public class SharedCode extends Container {
             if (slots.contains(event.getSlot())) {
                 int index = slots.indexOf(event.getSlot());
                 if (index < actions.size()) {
-                    JsonObject action = actions.get(index).getAsJsonObject();
+                    HysentialsSchema.Action action = actions.get(index);
                     if (event.getButton() == 0) {
                         getMinecraft().thePlayer.closeScreen();
                         new ClubActionViewer(action, actions, clubData).open(getMinecraft().thePlayer);
                     } else if (event.getButton() == 1) {
-                        StringSelection stringSelection = new StringSelection(action.get("id").getAsString());
+                        StringSelection stringSelection = new StringSelection(action.getId());
                         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                         clipboard.setContents(stringSelection, null);
                         UChat.chat("&aCopied action ID to clipboard.");

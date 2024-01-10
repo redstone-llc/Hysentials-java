@@ -27,7 +27,8 @@ public class MiyaCompanion extends AbstractCosmetic<EntityMiya> {
     @Override
     public boolean canUse(EntityPlayer player) {
         return CosmeticGui.Companion.equippedCosmetic(player.getUniqueID(), "miya")
-            && CosmeticGui.Companion.hasCosmetic(player.getUniqueID(), "miya");
+            && CosmeticGui.Companion.hasCosmetic(player.getUniqueID(), "miya")
+            && !player.isInvisible();
     }
 
     public static long cooldown = 0;

@@ -12,8 +12,8 @@ public class PlayerDeath extends Cluster {
         super("Player Death", "playerDeath", loaders);
         add(close());
         add(command("menu"));
-        add(click(39));
-        add(click(28));
+        add(click(31));
+        add(click(11));
         add(click(12));
         if (loaders != null) {
             loadActions(loaders);

@@ -1,6 +1,7 @@
 package cc.woverflow.hysentials.mixin;
 
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.config.HysentialsConfig;
 import cc.woverflow.hysentials.hook.FontRendererAcessor;
 import net.minecraft.client.gui.FontRenderer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -73,44 +74,44 @@ public abstract class FontRendererMixin implements FontRendererAcessor {
      * @author
      * @reason
      */
-    @Overwrite
-    public int getStringWidth(String text) {
-        if (Hysentials.INSTANCE != null && Hysentials.INSTANCE.imageIconRenderer != null) {
-            return Hysentials.INSTANCE.imageIconRenderer.getStringWidth(text);
-        } else {
-            if (text == null) {
-                return 0;
-            } else {
-                int i = 0;
-                boolean flag = false;
-
-                for(int j = 0; j < text.length(); ++j) {
-                    char c0 = text.charAt(j);
-                    int k = this.getCharWidth(c0);
-                    if (k < 0 && j < text.length() - 1) {
-                        ++j;
-                        c0 = text.charAt(j);
-                        if (c0 != 'l' && c0 != 'L') {
-                            if (c0 == 'r' || c0 == 'R') {
-                                flag = false;
-                            }
-                        } else {
-                            flag = true;
-                        }
-
-                        k = 0;
-                    }
-
-                    i += k;
-                    if (flag && k > 0) {
-                        ++i;
-                    }
-                }
-
-                return i;
-            }
-        }
-    }
+//    @Overwrite
+//    public int getStringWidth(String text) {
+//        if (Hysentials.INSTANCE != null && Hysentials.INSTANCE.imageIconRenderer != null && HysentialsConfig.fancyFormatting) {
+//            return Hysentials.INSTANCE.imageIconRenderer.getStringWidth(text);
+//        } else {
+//            if (text == null) {
+//                return 0;
+//            } else {
+//                int i = 0;
+//                boolean flag = false;
+//
+//                for(int j = 0; j < text.length(); ++j) {
+//                    char c0 = text.charAt(j);
+//                    int k = this.getCharWidth(c0);
+//                    if (k < 0 && j < text.length() - 1) {
+//                        ++j;
+//                        c0 = text.charAt(j);
+//                        if (c0 != 'l' && c0 != 'L') {
+//                            if (c0 == 'r' || c0 == 'R') {
+//                                flag = false;
+//                            }
+//                        } else {
+//                            flag = true;
+//                        }
+//
+//                        k = 0;
+//                    }
+//
+//                    i += k;
+//                    if (flag && k > 0) {
+//                        ++i;
+//                    }
+//                }
+//
+//                return i;
+//            }
+//        }
+//    }
 
     @Override
     public int getTextColor() {

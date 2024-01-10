@@ -125,7 +125,7 @@ public class DailyQuestGui extends Container {
 
         setAction(50, (event) -> {
             event.getEvent().cancel();
-            int emeralds = Socket.cachedData.has("emeralds") ? Socket.cachedData.getInt("emeralds") : 0;
+            int emeralds = (Socket.cachedUser == null) ? 0 : Socket.cachedUser.getEmeralds();
             if (emeralds >= 200) {
                 UChat.chat("§aRe-rolling quests...");
                 QuestHandler.rerollQuest();

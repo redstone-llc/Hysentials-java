@@ -1,9 +1,7 @@
 package cc.woverflow.hysentials.guis.actionLibrary;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
-import cc.woverflow.hysentials.util.MUtils;
-import cc.polyfrost.oneconfig.utils.Multithreading;
-import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.schema.HysentialsSchema;
 import cc.woverflow.hysentials.guis.container.Container;
 import cc.woverflow.hysentials.guis.container.GuiItem;
 import cc.woverflow.hysentials.util.Material;
@@ -11,25 +9,21 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.MouseEvent;
-import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.lwjgl.input.Mouse;
 
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 public class ClubActionViewer extends Container {
-    JsonObject action;
-    JsonArray actions;
-    JsonObject club;
+    HysentialsSchema.Action action;
+    ArrayList<HysentialsSchema.Action> actions;
+    HysentialsSchema.Club club;
 
-    public ClubActionViewer(JsonObject action, JsonArray actions, JsonObject club) {
-        super("Viewing: " + action.get("id").getAsString(), 4);
+    public ClubActionViewer(HysentialsSchema.Action action, ArrayList<HysentialsSchema.Action> actions, HysentialsSchema.Club club) {
+        super("Viewing: " + action.getId(), 4);
         this.action = action;
         this.actions = actions;
         this.club = club;
@@ -37,18 +31,18 @@ public class ClubActionViewer extends Container {
 
     @Override
     public void setItems() {
-        JsonObject actionData = action.getAsJsonObject("action");
-        JsonObject codespace = actionData.getAsJsonObject("codespace");
+        HysentialsSchema.ActionData actionData = action.getAction();
+        HysentialsSchema.ActionCodespace codespace = actionData.getCodespace();
         setItem(13, GuiItem.fromStack(
-            GuiItem.makeColorfulItem(Material.PAPER, "&a" + actionData.get("name").getAsString(), codespace.get("functions").getAsInt(), 0,
-                "&7Creator: &b" + actionData.get("creator").getAsString(),
+            GuiItem.makeColorfulItem(Material.PAPER, "&a" + actionData.getName(), codespace.getFunctions(), 0,
+                "&7Creator: &b" + actionData.getCreator(),
                 "&7Codespace Required:",
-                "&8 ▪ &a" + codespace.get("functions").getAsInt() + " Function Slots",
-                "   &8+" + codespace.get("conditions").getAsInt() + " Conditionals",
-                "   &8+" + codespace.get("actions").getAsInt() + " Total Actions",
+                "&8 ▪ &a" + codespace.getFunctions() + " Function Slots",
+                "   &8+" + codespace.getConditions() + " Conditionals",
+                "   &8+" + codespace.getActions() + " Total Actions",
                 "",
                 "&7Function Description:",
-                "&f" + actionData.get("description").getAsString()
+                "&f" + actionData.getDescription()
             )
         ));
 
@@ -71,7 +65,7 @@ public class ClubActionViewer extends Container {
                 "&eLeft-Click to bookmark."
             )
         ));
-        if (toList(actions).indexOf(action) != 0) {
+        if (actions.indexOf(action) != 0) {
             setItem(47 - 18, GuiItem.fromStack(
                 GuiItem.makeColorfulItem(Material.ARROW, "&aPrevious Action", 1, 0,
                     "&7Click to view the previous action.",
@@ -81,7 +75,7 @@ public class ClubActionViewer extends Container {
             ));
         }
 
-        if (toList(actions).indexOf(action) != actions.size() - 1) {
+        if (actions.indexOf(action) != actions.size() - 1) {
             setItem(51 - 18, GuiItem.fromStack(
                 GuiItem.makeColorfulItem(Material.ARROW, "&aNext Action", 1, 0,
                     "&7Click to view the next action.",
@@ -113,7 +107,7 @@ public class ClubActionViewer extends Container {
 
         setAction(48 - 18, (event) -> {
             event.getEvent().cancel();
-            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(action.get("id").getAsString()), null);
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(action.getId()), null);
             UChat.chat("&aCopied action ID to clipboard.");
         });
 
@@ -130,10 +124,10 @@ public class ClubActionViewer extends Container {
         setAction(47 - 18, (event) -> {
             event.getEvent().cancel();
             Minecraft.getMinecraft().thePlayer.closeScreen();
-            if (toList(actions).indexOf(action) == 0) return;
+            if (actions.indexOf(action) == 0) return;
             float mouseX = Mouse.getX();
             float mouseY = Mouse.getY();
-            action = actions.get(toList(actions).indexOf(action) - 1).getAsJsonObject();
+            action = actions.get(actions.indexOf(action) - 1);
             update();
 //            new ClubActionViewer(actions.getJSONObject(toList(actions).indexOf(action) - 1), actions).open(Minecraft.getMinecraft().thePlayer);
 //            Multithreading.schedule(() -> {
@@ -143,11 +137,11 @@ public class ClubActionViewer extends Container {
 
         setAction(51 - 18, (event) -> {
             event.getEvent().cancel();
-            if (toList(actions).indexOf(action) == actions.size() - 1) return;
+            if (actions.indexOf(action) == actions.size() - 1) return;
             Minecraft.getMinecraft().thePlayer.closeScreen();
             float mouseX = Mouse.getX();
             float mouseY = Mouse.getY();
-            action = actions.get(toList(actions).indexOf(action) + 1).getAsJsonObject();
+            action = actions.get(actions.indexOf(action) + 1);
             update();
 //            new ClubActionViewer(actions.getJSONObject(toList(actions).indexOf(action) + 1), actions).open(Minecraft.getMinecraft().thePlayer);
 //            Multithreading.schedule(() -> {

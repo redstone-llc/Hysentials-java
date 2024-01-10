@@ -58,18 +58,7 @@ public class Compiler {
                     if (line.startsWith("random {") && subaction.equals("")) break;
                     if (line.startsWith("}") && subaction.equals("random")) break;
                     if (line.startsWith("goto")) break;
-//                    boolean stop = false;
-//                    for (String clusterType : clusterTypes) {
-//                        if ((line.startsWith(clusterType + " (") || line.startsWith(clusterType + "{") || line.startsWith(clusterType + " {")) && cluster.equals("")) {
-//                            stop = true;
-//                            break;
-//                        }
-//                        if (line.startsWith("}") && cluster.equals(clusterType)) {
-//                            stop = true;
-//                            break;
-//                        }
-//                    }
-//                    if (stop) break;
+
                     try {
                         if (Loader.loaders.stream().anyMatch(loader -> loader.keyword.equals(action))) {
                             Loader loader = Loader.loaders.stream().filter(l -> l.keyword.equals(action)).findFirst().orElse(null);
@@ -116,38 +105,6 @@ public class Compiler {
                     clustersActions = new Object[]{name, new ArrayList<>()};
                 }
             }
-
-//            for (String type : clusterTypes) {
-//                if (action.equals(type) && subaction.equals("")) {
-//                    String name = null;
-//                    if (type.equals("function") || type.equals("npc")) {
-//                        String arg = line.substring(9, line.length() - 2);
-//                        if (arg.startsWith("(")) {
-//                            arg = arg.substring(1, arg.length() - 1);
-//                        }
-//                        if (arg.endsWith(")")) {
-//                            arg = arg.substring(0, arg.length() - 2);
-//                        }
-//                        name = getArgs(arg).get(0);
-//                    }
-//                    cluster = type;
-//                    clustersActions = new Object[]{name, new ArrayList<>()};
-//                }
-//
-//                if (line.startsWith("}") && cluster.equals(type) && !subaction.equals("if") && !subaction.equals("else") && !subaction.equals("random")) {
-//                    Cluster c = Cluster.loaders.stream().filter(loader -> loader.keyword.equals(type)).findFirst().orElse(null);
-//                    if (c == null) {
-//                        compileErrors.add("&cUnknown cluster type: " + type);
-//                        break;
-//                    }
-//                    c = c.create(i, compileErrors, (String) clustersActions[0], (List<Object[]>) clustersActions[1]);
-//                    clusters.add(c);
-//                    subaction = "";
-//                    clustersActions = null;
-//                    subactions = null;
-//                    cluster = "";
-//                }
-//            }
 
             if (action.equals("if") && !(subaction.equals("if") || subaction.equals("else"))) {
                 subaction = "if";

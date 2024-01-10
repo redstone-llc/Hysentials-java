@@ -2,7 +2,9 @@ package cc.woverflow.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.woverflow.hysentials.HysentialsUtilsKt;
 import cc.woverflow.hysentials.guis.ResolutionUtil;
+import cc.woverflow.hysentials.schema.HysentialsSchema;
 import cc.woverflow.hysentials.util.Input;
 import cc.woverflow.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
@@ -550,12 +552,12 @@ public class Exporter {
                 json.put("creator", Minecraft.getMinecraft().thePlayer.getName());
                 json.put("description", "Exported from Hysentials");
                 JSONObject codespace = new JSONObject();
-                codespace.put("functions", names.size());
+                codespace.put("functions", totalFunctions);
                 codespace.put("conditions", conditionsExportedTotal.size());
                 codespace.put("actions", totalActions);
                 json.put("codespace", codespace);
                 if (export.equals("library")) {
-                    try (InputStreamReader input = new InputStreamReader(Hysentials.post("http://127.0.0.1:8080/api/action?id=" + id, json), StandardCharsets.UTF_8)) {
+                    try (InputStreamReader input = new InputStreamReader(Hysentials.post(HysentialsUtilsKt.getHYSENTIALS_API() + "/action?id=" + id, json), StandardCharsets.UTF_8)) {
                         String s = IOUtils.toString(input);
                         JSONObject object = new JSONObject(s);
                         if (object.getBoolean("success")) {
@@ -589,7 +591,7 @@ public class Exporter {
                     JSONObject object = new JSONObject();
                     object.put("actions", json);
                     Multithreading.runAsync(() -> {
-                        ClubDashboard.clubData = ClubDashboard.getClub();
+                        ClubDashboard.getClub();
                         ClubDashboard.update(object);
                         MUtils.chat("&3[HTSL] &fExported to &bClub Dashboard&f!");
                     });

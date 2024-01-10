@@ -3,16 +3,20 @@ package cc.woverflow.hysentials.util;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
+import cc.woverflow.hysentials.config.hysentialMods.FormattingConfig;
+import cc.woverflow.hysentials.config.hysentialMods.rank.RankStuff;
 import cc.woverflow.hysentials.handlers.imageicons.ImageIcon;
 import com.google.gson.JsonObject;
 import org.json.JSONObject;
 
+import static cc.woverflow.hysentials.handlers.redworks.BwRanksUtils.futuristicRanks;
+
 public enum HypixelRanks {
     //normal ranks
     DEFAULT("§7", "default", "§7", "default"),
-    VIP("[VIP] ", "vip", "§a", "vips"),
-    VIP_PLUS("[VIP§6+§a] ", "vipplus", "§a", "vips"),
-    MVP("[MVP] ", "mvp", "§b", "bluemvps"),
+    VIP("[VIP] ", "vip", "§a", "vip"),
+    VIP_PLUS("[VIP§6+§a] ", "vipplus", "§a", "vip"),
+    MVP("[MVP] ", "mvp", "§b", "bluemvp"),
     MOD("[MOD] ", "mod", "§2", "mod"),
     HELPER("[HELPER] ", "helper", "§9", "helper"),
     ADMIN("[ADMIN] ", "admin", "§c", "admin"),
@@ -20,21 +24,21 @@ public enum HypixelRanks {
     NPC("[NPC] ", "npc", "§8", "npc"),
 
     //mvp
-    MVP_PLUS_BLACK("[MVP§0+§b] ", "mvpplus_black", "§b", "bluemvps"),
-    MVP_PLUS_DARK_BLUE("[MVP§1+§b] ", "mvpplus_darkblue", "§b", "bluemvps"),
-    MVP_PLUS_DARK_GREEN("[MVP§2+§b] ", "mvpplus_darkgreen", "§b", "bluemvps"),
-    MVP_PLUS_DARK_AQUA("[MVP§3+§b] ", "mvpplus_darkaqua", "§b", "bluemvps"),
-    MVP_PLUS_DARK_RED("[MVP§4+§b] ", "mvpplus_darkred", "§b", "bluemvps"),
-    MVP_PLUS_DARK_PURPLE("[MVP§5+§b] ", "mvpplus_darkpurple", "§b", "bluemvps"),
-    MVP_PLUS_GOLD("[MVP§6+§b] ", "mvpplus_gold", "§b", "bluemvps"),
-    MVP_PLUS_GRAY("[MVP§8+§b] ", "mvpplus_gray", "§b", "bluemvps"),
-    MVP_PLUS_BLUE("[MVP§9+§b] ", "mvpplus_blue", "§b", "bluemvps"),
-    MVP_PLUS_GREEN("[MVP§a+§b] ", "mvpplus_green", "§b", "bluemvps"),
-    MVP_PLUS_AQUA("[MVP§b+§b] ", "mvpplus_aqua", "§b", "bluemvps"),
-    MVP_PLUS_RED("[MVP§c+§b] ", "mvpplus_red", "§b", "bluemvps"),
-    MVP_PLUS_LIGHT_PURPLE("[MVP§d+§b] ", "mvpplus_pink", "§b", "bluemvps"),
-    MVP_PLUS_YELLOW("[MVP§e+§b] ", "mvpplus_yellow", "§b", "bluemvps"),
-    MVP_PLUS_WHITE("[MVP§f+§b] ", "mvpplus_white", "§b", "bluemvps"),
+    MVP_PLUS_BLACK("[MVP§0+§b] ", "mvpplus_black", "§b", "bluemvp"),
+    MVP_PLUS_DARK_BLUE("[MVP§1+§b] ", "mvpplus_darkblue", "§b", "bluemvp"),
+    MVP_PLUS_DARK_GREEN("[MVP§2+§b] ", "mvpplus_darkgreen", "§b", "bluemvp"),
+    MVP_PLUS_DARK_AQUA("[MVP§3+§b] ", "mvpplus_darkaqua", "§b", "bluemvp"),
+    MVP_PLUS_DARK_RED("[MVP§4+§b] ", "mvpplus_darkred", "§b", "bluemvp"),
+    MVP_PLUS_DARK_PURPLE("[MVP§5+§b] ", "mvpplus_darkpurple", "§b", "bluemvp"),
+    MVP_PLUS_GOLD("[MVP§6+§b] ", "mvpplus_gold", "§b", "bluemvp"),
+    MVP_PLUS_GRAY("[MVP§8+§b] ", "mvpplus_gray", "§b", "bluemvp"),
+    MVP_PLUS_BLUE("[MVP§9+§b] ", "mvpplus_blue", "§b", "bluemvp"),
+    MVP_PLUS_GREEN("[MVP§a+§b] ", "mvpplus_green", "§b", "bluemvp"),
+    MVP_PLUS_AQUA("[MVP§b+§b] ", "mvpplus_aqua", "§b", "bluemvp"),
+    MVP_PLUS_RED("[MVP§c+§b] ", "mvpplus_red", "§b", "bluemvp"),
+    MVP_PLUS_LIGHT_PURPLE("[MVP§d+§b] ", "mvpplus_pink", "§b", "bluemvp"),
+    MVP_PLUS_YELLOW("[MVP§e+§b] ", "mvpplus_yellow", "§b", "bluemvp"),
+    MVP_PLUS_WHITE("[MVP§f+§b] ", "mvpplus_white", "§b", "bluemvp"),
 
     //mvp++
     MVP_PLUS_PLUS_BLACK("[MVP§0++§6] ", "mvpplusplus_black", "§6", "goldmvp"),
@@ -53,20 +57,20 @@ public enum HypixelRanks {
     MVP_PLUS_PLUS_WHITE("[MVP§f++§6] ", "mvpplusplus_white", "§6", "goldmvp"),
 
     //aqua MVP++
-    AMVP_PLUS_PLUS_BLACK("[MVP§0++§b] ", "amvpplusplus_black", "§b", "bluemvps"),
-    AMVP_PLUS_PLUS_DARK_BLUE("[MVP§1++§b] ", "amvpplusplus_darkblue", "§b", "bluemvps"),
-    AMVP_PLUS_PLUS_DARK_GREEN("[MVP§2++§b] ", "amvpplusplus_darkgreen", "§b", "bluemvps"),
-    AMVP_PLUS_PLUS_DARK_AQUA("[MVP§3++§b] ", "amvpplusplus_darkaqua", "§b", "bluemvps"),
-    AMVP_PLUS_PLUS_DARK_RED("[MVP§4++§b] ", "amvpplusplus_darkred", "§b", "bluemvps"),
-    AMVP_PLUS_PLUS_DARK_PURPLE("[MVP§5++§b] ", "amvpplusplus_darkpurple", "§b", "bluemvps"),
-    AMVP_PLUS_PLUS_GOLD("[MVP§6++§b] ", "amvpplusplus_gold", "§b", "bluemvps"),
-    AMVP_PLUS_PLUS_GRAY("[MVP§8++§b] ", "amvpplusplus_gray", "§b", "bluemvps"),
-    AMVP_PLUS_PLUS_BLUE("[MVP§9++§b] ", "amvpplusplus_blue", "§b", "bluemvps"),
-    AMVP_PLUS_PLUS_GREEN("[MVP§a++§b] ", "amvpplusplus_green", "§b", "bluemvps"),
-    AMVP_PLUS_PLUS_RED("[MVP§c++§b] ", "amvpplusplus_red", "§b", "bluemvps"),
-    AMVP_PLUS_PLUS_LIGHT_PURPLE("[MVP§d++§b] ", "amvpplusplus_pink", "§b", "bluemvps"),
-    AMVP_PLUS_PLUS_YELLOW("[MVP§e++§b] ", "amvpplusplus_yellow", "§b", "bluemvps"),
-    AMVP_PLUS_PLUS_WHITE("[MVP§f++§b] ", "amvpplusplus_white", "§b", "bluemvps"),
+    AMVP_PLUS_PLUS_BLACK("[MVP§0++§b] ", "amvpplusplus_black", "§b", "bluemvp"),
+    AMVP_PLUS_PLUS_DARK_BLUE("[MVP§1++§b] ", "amvpplusplus_darkblue", "§b", "bluemvp"),
+    AMVP_PLUS_PLUS_DARK_GREEN("[MVP§2++§b] ", "amvpplusplus_darkgreen", "§b", "bluemvp"),
+    AMVP_PLUS_PLUS_DARK_AQUA("[MVP§3++§b] ", "amvpplusplus_darkaqua", "§b", "bluemvp"),
+    AMVP_PLUS_PLUS_DARK_RED("[MVP§4++§b] ", "amvpplusplus_darkred", "§b", "bluemvp"),
+    AMVP_PLUS_PLUS_DARK_PURPLE("[MVP§5++§b] ", "amvpplusplus_darkpurple", "§b", "bluemvp"),
+    AMVP_PLUS_PLUS_GOLD("[MVP§6++§b] ", "amvpplusplus_gold", "§b", "bluemvp"),
+    AMVP_PLUS_PLUS_GRAY("[MVP§8++§b] ", "amvpplusplus_gray", "§b", "bluemvp"),
+    AMVP_PLUS_PLUS_BLUE("[MVP§9++§b] ", "amvpplusplus_blue", "§b", "bluemvp"),
+    AMVP_PLUS_PLUS_GREEN("[MVP§a++§b] ", "amvpplusplus_green", "§b", "bluemvp"),
+    AMVP_PLUS_PLUS_RED("[MVP§c++§b] ", "amvpplusplus_red", "§b", "bluemvp"),
+    AMVP_PLUS_PLUS_LIGHT_PURPLE("[MVP§d++§b] ", "amvpplusplus_pink", "§b", "bluemvp"),
+    AMVP_PLUS_PLUS_YELLOW("[MVP§e++§b] ", "amvpplusplus_yellow", "§b", "bluemvp"),
+    AMVP_PLUS_PLUS_WHITE("[MVP§f++§b] ", "amvpplusplus_white", "§b", "bluemvp"),
     ;
 
     private final String prefix;
@@ -92,6 +96,13 @@ public enum HypixelRanks {
         return prefix;
     }
 
+    public String getPrefixReplace() {
+        if (this.equals(DEFAULT)) {
+            return prefix;
+        }
+        return color + prefix;
+    }
+
     public String getIconName() {
         return iconName;
     }
@@ -101,18 +112,18 @@ public enum HypixelRanks {
     }
 
     public String getNametag() {
-        if (HysentialsConfig.futuristicRanks) {
-            JSONObject colorGroup = Hysentials.INSTANCE.rankColors.jsonObject.getJSONObject(hex);
-            return "<" + colorGroup.getString("nametag_color") + ">";
+        if (futuristicRanks(true)) {
+            RankStuff rank = FormattingConfig.getRank(hex);
+            return "<#" + rank.nametagColor.getHex() + ">";
         } else {
             return color;
         }
     }
 
     public String getChat() {
-        if (HysentialsConfig.futuristicRanks) {
-            JSONObject colorGroup = Hysentials.INSTANCE.rankColors.jsonObject.getJSONObject(hex);
-            return "<" + colorGroup.getString("chat_message_color") + ">";
+        if (futuristicRanks(false)) {
+            RankStuff rank = FormattingConfig.getRank(hex);
+            return "<#" + rank.chatMessageColor.getHex() + ">";
         } else {
             return (this.equals(DEFAULT) ? "§7" : "§f");
         }
@@ -123,51 +134,5 @@ public enum HypixelRanks {
             return null;
         }
         return "§f:" + iconName + ": " + getNametag();
-    }
-
-    public enum RankColors {
-        BLACK("§0"),
-        DARK_BLUE("§1"),
-        DARK_GREEN("§2"),
-        DARK_AQUA("§3"),
-        DARK_RED("§4"),
-        DARK_PURPLE("§5"),
-        GOLD("§6"),
-        GRAY("§7"),
-        DARK_GRAY("§8"),
-        BLUE("§9"),
-        GREEN("§a"),
-        AQUA("§b"),
-        RED("§c"),
-        LIGHT_PURPLE("§d"),
-        YELLOW("§e"),
-        WHITE("§f");
-
-        private final String color;
-
-        RankColors(String color) {
-            this.color = color;
-        }
-
-        public String getColor() {
-            return color;
-        }
-
-        public static RankColors getPlusColor(String match) {
-            String noB = match.replace("[", "").replace("]", "").replace(" ", "");
-            String noColor = ChatColor.Companion.stripColorCodes(noB);
-            if (noColor == null) return null;
-
-            if (noColor.equals("MVP++") || noColor.equals("MVP+")) {
-                //get the color before the + sign
-                String color = noB.substring(noB.indexOf("+") - 2, noB.indexOf("+"));
-                for (RankColors rankColor : values()) {
-                    if (rankColor.getColor().equals(color)) {
-                        return rankColor;
-                    }
-                }
-            }
-            return null;
-        }
     }
 }

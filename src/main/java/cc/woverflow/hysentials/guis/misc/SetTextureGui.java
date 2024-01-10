@@ -158,21 +158,17 @@ public class SetTextureGui extends Container {
     protected void drawGuiContainerBackgroundLayer(int mouseX, int mouseY) {
         super.drawGuiContainerBackgroundLayer(mouseX, mouseY);
         GlStateManager.pushMatrix();
-        try {
-            int guiTop = guiTopField.getInt(this.guiChest);
-            int guiWidth = xSizeField.getInt(this.guiChest);
+        int guiTop = this.guiChest.guiTop;
+        int guiWidth = this.guiChest.xSize;
 
-            int margin = 5;
-            int sizeDifference = 10;
+        int margin = 5;
+        int sizeDifference = 10;
 
-            input.width = guiWidth - sizeDifference - margin;
-            input.xPosition = Renderer.screen.getWidth() / 2 - input.width / 2;
-            input.yPosition = guiTop - input.height - margin;
+        input.width = guiWidth - sizeDifference - margin;
+        input.xPosition = Renderer.screen.getWidth() / 2 - input.width / 2;
+        input.yPosition = guiTop - input.height - margin;
 
-            input.drawTextBox();
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        input.drawTextBox();
         GlStateManager.popMatrix();
     }
 

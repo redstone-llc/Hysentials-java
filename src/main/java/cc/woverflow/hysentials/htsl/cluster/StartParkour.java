@@ -12,8 +12,8 @@ public class StartParkour extends Cluster {
         super("Start Parkour", "startParkour", loaders);
         add(close());
         add(command("menu"));
-        add(click(39));
-        add(click(28));
+        add(click(31));
+        add(click(11));
         add(click(23));
         if (loaders != null) {
             loadActions(loaders);

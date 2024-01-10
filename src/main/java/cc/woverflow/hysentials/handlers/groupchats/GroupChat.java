@@ -12,7 +12,7 @@ import cc.woverflow.chatting.chat.ChatTabs;
 import cc.woverflow.chatting.mixin.GuiNewChatAccessor;
 import cc.woverflow.hysentials.Hysentials;
 import cc.woverflow.hysentials.config.HysentialsConfig;
-import cc.woverflow.hysentials.user.Player;
+
 import cc.woverflow.hysentials.util.BlockWAPIUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ChatLine;
@@ -81,49 +81,49 @@ public class GroupChat {
                             tab.setEnabled(false);
                         }
                     }
-                    List<BlockWAPIUtils.Group> groups = BlockWAPIUtils.getGroups();
-                    List<BlockWAPIUtils.Group> foundGroups = new ArrayList<>();
-                    for (BlockWAPIUtils.Group group : groups) {
-                        for (String member : group.getMembers()) {
-                            if (UUID.fromString(member).equals(Minecraft.getMinecraft().thePlayer.getUniqueID())) {
-                                foundGroups.add(group);
-                            }
-                        }
-                    }
-                    if (foundGroups.size() == 0) return;
-
-                    for (BlockWAPIUtils.Group group : foundGroups) {
-                        if (group == null) continue;
-                        List<String> messages = group.getMessages() == null ? new ArrayList<>() : group.getMessages();
-                        Collections.reverse(messages);
-                        if (ChatTabs.INSTANCE.getTabs().stream().anyMatch((tab) -> tab.getName().equals(group.getName().toUpperCase()))) {
-                            continue;
-                        }
-                        ChatTab tab = new ChatTab(
-                            true,
-                            group.getName().toUpperCase(),
-                            true,
-                            false,
-                            Collections.singletonList(group.getName() + " > "),
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            14737632,
-                            16777120,
-                            10526880,
-                            ""
-                        );
-                        tab.setMessages(messages);
-                        tab.initialize();
-
-                        Multithreading.schedule(() -> ChatTabs.INSTANCE.getTabs().add(tab), 500, TimeUnit.MILLISECONDS);
-                    }
+//                    List<BlockWAPIUtils.Group> groups = BlockWAPIUtils.getGroups();
+//                    List<BlockWAPIUtils.Group> foundGroups = new ArrayList<>();
+//                    for (BlockWAPIUtils.Group group : groups) {
+//                        for (String member : group.getMembers()) {
+//                            if (UUID.fromString(member).equals(Minecraft.getMinecraft().thePlayer.getUniqueID())) {
+//                                foundGroups.add(group);
+//                            }
+//                        }
+//                    }
+//                    if (foundGroups.size() == 0) return;
+//
+//                    for (BlockWAPIUtils.Group group : foundGroups) {
+//                        if (group == null) continue;
+//                        List<String> messages = group.getMessages() == null ? new ArrayList<>() : group.getMessages();
+//                        Collections.reverse(messages);
+//                        if (ChatTabs.INSTANCE.getTabs().stream().anyMatch((tab) -> tab.getName().equals(group.getName().toUpperCase()))) {
+//                            continue;
+//                        }
+//                        ChatTab tab = new ChatTab(
+//                            true,
+//                            group.getName().toUpperCase(),
+//                            true,
+//                            false,
+//                            Collections.singletonList(group.getName() + " > "),
+//                            null,
+//                            null,
+//                            null,
+//                            null,
+//                            null,
+//                            null,
+//                            null,
+//                            null,
+//                            null,
+//                            14737632,
+//                            16777120,
+//                            10526880,
+//                            ""
+//                        );
+//                        tab.setMessages(messages);
+//                        tab.initialize();
+//
+//                        Multithreading.schedule(() -> ChatTabs.INSTANCE.getTabs().add(tab), 500, TimeUnit.MILLISECONDS);
+//                    }
                 });
             }
             this.tick = 0;

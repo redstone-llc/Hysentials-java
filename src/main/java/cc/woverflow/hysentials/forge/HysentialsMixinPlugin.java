@@ -1,7 +1,6 @@
 package cc.woverflow.hysentials.forge;
 
 
-import cc.woverflow.hysentials.util.SplashProgress;
 import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.lib.tree.*;
@@ -20,14 +19,14 @@ public class HysentialsMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {
-        try {
-            Class.forName("net.optifine.render.RenderEnv");
-            System.out.println("OptiFine detected, applying OptiFine compat mixin.");
-            isOptiFine = true;
-        } catch (ClassNotFoundException e) {
-            System.out.println("OptiFine not detected, not applying OptiFine compat mixin.");
-            isOptiFine = false;
-        }
+//        try {
+//            Class.forName("net.optifine.render.RenderEnv");
+//            System.out.println("OptiFine detected, applying OptiFine compat mixin.");
+//            isOptiFine = true;
+//        } catch (ClassNotFoundException e) {
+//            System.out.println("OptiFine not detected, not applying OptiFine compat mixin.");
+//            isOptiFine = false;
+//        }
     }
 
     @Override
@@ -37,11 +36,11 @@ public class HysentialsMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.endsWith("_OptiFine")) {
-            return isOptiFine;
-        } else if (mixinClassName.endsWith("_NoOptiFine")) {
-            return !isOptiFine;
-        }
+//        if (mixinClassName.endsWith("_OptiFine")) {
+//            return isOptiFine;
+//        } else if (mixinClassName.endsWith("_NoOptiFine")) {
+//            return !isOptiFine;
+//        }
         return true;
     }
 
@@ -62,12 +61,12 @@ public class HysentialsMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public void postApply(String targetClassName, org.spongepowered.asm.lib.tree.ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-        if (!hasApplied && targetClass != null && Objects.equals(targetClassName, "net.minecraft.client.gui.GuiPlayerTabOverlay")) {
-            for (MethodNode method : targetClass.methods) {
-                final String methodName = FMLDeobfuscatingRemapper.INSTANCE.mapMethodName(targetClass.name, method.name, method.desc);
-                final ListIterator<AbstractInsnNode> iterator = method.instructions.iterator();
-            }
-        }
+//        if (!hasApplied && targetClass != null && Objects.equals(targetClassName, "net.minecraft.client.gui.GuiPlayerTabOverlay")) {
+//            for (MethodNode method : targetClass.methods) {
+//                final String methodName = FMLDeobfuscatingRemapper.INSTANCE.mapMethodName(targetClass.name, method.name, method.desc);
+//                final ListIterator<AbstractInsnNode> iterator = method.instructions.iterator();
+//            }
+//        }
     }
 
     private String mapMethodNameFromNode(AbstractInsnNode node) {

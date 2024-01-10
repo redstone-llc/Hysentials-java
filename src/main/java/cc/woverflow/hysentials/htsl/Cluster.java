@@ -40,7 +40,11 @@ public class Cluster {
         new StartParkour(null);
         new CompleteParkour(null);
         new FishCaught(null);
-
+        new PlayerToggleFlight(null);
+        new PlayerToggleSneak(null);
+        new PlayerChangeHeldItem(null);
+        new PlayerPickUpItem(null);
+        new PlayerDropItem(null);
     }
 
     public static boolean isNAN(String s) {

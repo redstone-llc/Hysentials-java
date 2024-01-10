@@ -3,9 +3,13 @@ package cc.woverflow.hysentials.guis.actionLibrary;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.woverflow.hysentials.Hysentials;
+import cc.woverflow.hysentials.HysentialsUtilsKt;
 import cc.woverflow.hysentials.guis.container.Container;
 import cc.woverflow.hysentials.guis.container.GuiItem;
+import cc.woverflow.hysentials.schema.HysentialsSchema;
 import cc.woverflow.hysentials.util.Material;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.MouseEvent;
 import org.apache.commons.io.IOUtils;
@@ -22,37 +26,36 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ActionViewer extends Container {
-    JSONObject action;
-    JSONArray actions;
+    HysentialsSchema.Action action;
+    List<HysentialsSchema.Action> actions;
 
-    public ActionViewer(JSONObject action, JSONArray actions) {
-        super("Viewing: " + action.getString("id"), 6);
+    public ActionViewer(HysentialsSchema.Action action, List<HysentialsSchema.Action> actions) {
+        super("Viewing: " + action.getId(), 6);
         this.action = action;
         this.actions = actions;
     }
 
     @Override
     public void setItems() {
-        JSONObject actionData = action.getJSONObject("action");
-        JSONObject codespace = actionData.getJSONObject("codespace");
+        HysentialsSchema.ActionData actionData = action.getAction();
+        HysentialsSchema.ActionCodespace codespace = actionData.getCodespace();
         setItem(13, GuiItem.fromStack(
-            GuiItem.makeColorfulItem(Material.PAPER, "&a" + actionData.getString("name"), codespace.getInt("functions"), 0,
-                "&7Creator: &b" + actionData.getString("creator"),
-                "&7Rating: &6" + ((action.getInt("rating") > 0 ? "+" + action.getInt("rating") : action.getInt("rating")) + "✭ &a(+" + action.getInt("ratingsPositive") + "▲) &c(-" + action.getInt("ratingsNegative") + "▼)"),
+            GuiItem.makeColorfulItem(Material.PAPER, "&a" + actionData.getName(), codespace.getFunctions(), 0,
+                "&7Creator: &b" + actionData.getCreator(),
+                "&7Rating: &6" + ((action.getRating() > 0 ? "+" + action.getRating() : action.getRating()) + "✭ &a(+" + action.getRatingsPositive() + "▲) &c(-" + action.getRatingsNegative() + "▼)"),
                 "&7Codespace Required:",
-                "&8 ▪ &a" + codespace.getInt("functions") + " Function Slots",
-                "   &8+" + codespace.getInt("conditions") + " Conditionals",
-                "   &8+" + codespace.getInt("actions") + " Total Actions",
+                "&8 ▪ &a" + codespace.getFunctions() + " Function Slots",
+                "   &8+" + codespace.getConditions() + " Conditionals",
+                "   &8+" + codespace.getActions() + " Total Actions",
                 "",
                 "&7Function Description:",
-                "&f" + actionData.getString("description")
-            )
-        ));
+                "&f" + actionData.getDescription()
+            )));
 
         setItem(32, GuiItem.fromStack(
             GuiItem.makeColorfulItem(Material.STAINED_CLAY, "&cDownvote", 1, 14,
                 "&7Click to down vote this action.",
-                "&7Rating: &6" + ((action.getInt("rating") > 0 ? "+" + action.getInt("rating") : action.getInt("rating")) + "✭ &a(+" + action.getInt("ratingsPositive") + "▲) &c(-" + action.getInt("ratingsNegative") + "▼)"),
+                "&7Rating: &6" + ((action.getRating() > 0 ? "+" + action.getRating() : action.getRating()) + "✭ &a(+" + action.getRatingsPositive() + "▲) &c(-" + action.getRatingsNegative() + "▼)"),
                 "",
                 "&eLeft-Click to down vote."
             )
@@ -61,7 +64,7 @@ public class ActionViewer extends Container {
         setItem(30, GuiItem.fromStack(
             GuiItem.makeColorfulItem(Material.STAINED_CLAY, "&aUpvote", 1, 5,
                 "&7Click to up vote this action.",
-                "&7Rating: &6" + ((action.getInt("rating") > 0 ? "+" + action.getInt("rating") : action.getInt("rating")) + "✭ &a(+" + action.getInt("ratingsPositive") + "▲) &c(-" + action.getInt("ratingsNegative") + "▼)"),
+                "&7Rating: &6" + ((action.getRating() > 0 ? "+" + action.getRating() : action.getRating()) + "✭ &a(+" + action.getRatingsPositive() + "▲) &c(-" + action.getRatingsNegative() + "▼)"),
                 "",
                 "&eLeft-Click to up vote."
             )
@@ -86,7 +89,7 @@ public class ActionViewer extends Container {
                 "&eLeft-Click to bookmark."
             )
         ));
-        if (toList(actions).indexOf(action) != 0) {
+        if (actions.indexOf(action) != 0) {
             setItem(47, GuiItem.fromStack(
                 GuiItem.makeColorfulItem(Material.ARROW, "&aPrevious Action", 1, 0,
                     "&7Click to view the previous action.",
@@ -96,7 +99,7 @@ public class ActionViewer extends Container {
             ));
         }
 
-        if (toList(actions).indexOf(action) != actions.length() - 1) {
+        if (actions.indexOf(action) != actions.size() - 1) {
             setItem(51, GuiItem.fromStack(
                 GuiItem.makeColorfulItem(Material.ARROW, "&aNext Action", 1, 0,
                     "&7Click to view the next action.",
@@ -128,11 +131,12 @@ public class ActionViewer extends Container {
 
         setAction(30, (event) -> {
             event.getEvent().cancel();
-            action.put("ratingsPositive", action.getInt("ratingsPositive") + 1);
-            try (InputStreamReader input = new InputStreamReader(Hysentials.post("http://127.0.0.1:8080/api/action?id=" + action.getString("id") + "&upvote=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString(), new JSONObject()), StandardCharsets.UTF_8)) {
+//            action.put("ratingsPositive", action.getInt("ratingsPositive") + 1);
+            try (InputStreamReader input = new InputStreamReader(Hysentials.post(HysentialsUtilsKt.getHYSENTIALS_API() + "/action?id=" + action.getId() + "&upvote=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString(), new JSONObject()), StandardCharsets.UTF_8)) {
                 String s = IOUtils.toString(input);
-                JSONObject response = new JSONObject(s);
-                if (response.getBoolean("success")) {
+                JsonObject response = new JsonParser().parse(s).getAsJsonObject();
+                if (response.get("success").getAsBoolean()) {
+                    this.action = HysentialsSchema.Action.Companion.deserialize(response.get("action").getAsJsonObject());
                     update();
                 } else {
                     UChat.chat("&cYou have already upvoted this action.");
@@ -144,11 +148,12 @@ public class ActionViewer extends Container {
 
         setAction(32, (event) -> {
             event.getEvent().cancel();
-            action.put("ratingsNegative", action.getInt("ratingsNegative") + 1);
-            try (InputStreamReader input = new InputStreamReader(Hysentials.post("http://127.0.0.1:8080/api/action?id=" + action.getString("id") + "&downvote=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString(), new JSONObject()), StandardCharsets.UTF_8)) {
+//            action.put("ratingsNegative", action.getInt("ratingsNegative"));
+            try (InputStreamReader input = new InputStreamReader(Hysentials.post(HysentialsUtilsKt.getHYSENTIALS_API() + "/action?id=" + action.getId() + "&downvote=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString(), new JSONObject()), StandardCharsets.UTF_8)) {
                 String s = IOUtils.toString(input);
-                JSONObject response = new JSONObject(s);
-                if (response.getBoolean("success")) {
+                JsonObject response = new JsonParser().parse(s).getAsJsonObject();
+                if (response.get("success").getAsBoolean()) {
+                    this.action = HysentialsSchema.Action.Companion.deserialize(response.get("action").getAsJsonObject());
                     update();
                 } else {
                     UChat.chat("&cYou have already downvoted this action.");
@@ -160,7 +165,7 @@ public class ActionViewer extends Container {
 
         setAction(48, (event) -> {
             event.getEvent().cancel();
-            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(action.getString("id")), null);
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(action.getId()), null);
             UChat.chat("&aCopied action ID to clipboard.");
         });
 
@@ -177,10 +182,10 @@ public class ActionViewer extends Container {
         setAction(47, (event) -> {
             event.getEvent().cancel();
             Minecraft.getMinecraft().thePlayer.closeScreen();
-            if (toList(actions).indexOf(action) == 0) return;
+            if (actions.indexOf(action) == 0) return;
             float mouseX = Mouse.getX();
             float mouseY = Mouse.getY();
-            new ActionViewer(actions.getJSONObject(toList(actions).indexOf(action) - 1), actions).open(Minecraft.getMinecraft().thePlayer);
+            new ActionViewer(actions.get(actions.indexOf(action) - 1), actions).open(Minecraft.getMinecraft().thePlayer);
             Multithreading.schedule(() -> {
                 Mouse.setCursorPosition((int) mouseX, (int) mouseY);
             }, 50, TimeUnit.MILLISECONDS);
@@ -188,11 +193,11 @@ public class ActionViewer extends Container {
 
         setAction(51, (event) -> {
             event.getEvent().cancel();
-            if (toList(actions).indexOf(action) == actions.length() - 1) return;
+            if (actions.indexOf(action) == actions.size() - 1) return;
             Minecraft.getMinecraft().thePlayer.closeScreen();
             float mouseX = Mouse.getX();
             float mouseY = Mouse.getY();
-            new ActionViewer(actions.getJSONObject(toList(actions).indexOf(action) + 1), actions).open(Minecraft.getMinecraft().thePlayer);
+            new ActionViewer(actions.get(actions.indexOf(action) + 1), actions).open(Minecraft.getMinecraft().thePlayer);
             Multithreading.schedule(() -> {
                 Mouse.setCursorPosition((int) mouseX, (int) mouseY);
             }, 1, TimeUnit.MILLISECONDS);
