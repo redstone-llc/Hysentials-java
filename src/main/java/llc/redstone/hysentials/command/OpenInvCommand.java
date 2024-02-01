@@ -17,6 +17,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static llc.redstone.hysentials.command.InsertLoreLineCommand.processRedirect;
+
 public class OpenInvCommand extends CommandBase {
     @Override
     public int getRequiredPermissionLevel() {
@@ -41,6 +43,7 @@ public class OpenInvCommand extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
         if (SbbRenderer.housingScoreboard.getHousingName() == null) {
+            if (processRedirect(this, args)) return;
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/openinv " + String.join(" ", args));
             return;
         }

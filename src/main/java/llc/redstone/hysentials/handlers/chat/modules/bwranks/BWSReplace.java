@@ -143,10 +143,8 @@ public class BWSReplace implements ChatReceiveModule {
                         } else if (Pattern.compile(regex2).matcher(s).find(0)) {
                             blockwRank = rank;
                             if (uuidBold == null) uuidBold = user.getValue();
-                            if (BwRanks.replacementMap.containsKey("§7" + name)) {
-                                s = s.replaceAll("(§r§7|§7)" + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": " + italic(uuidBold) + bold(uuidBold));
-                                diagnostics.add("Used regex2 to replace " + name + " with " + replacement + " (BlockW)");
-                            }
+                            s = s.replaceAll("(§r§7|§7)" + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": " + italic(uuidBold) + bold(uuidBold));
+                            diagnostics.add("Used regex2 to replace " + name + " with " + replacement + " (BlockW)");
                         }
 //                  else if (Pattern.compile(regex3).matcher(s).find(0)) {
 //                        didSomething = true;
@@ -165,7 +163,7 @@ public class BWSReplace implements ChatReceiveModule {
                                 HysentialsCommand.messages.add(sibling.getFormattedText() + " -> " + s);
                                 diagnostics.add("Used regex1 to replace " + name + " with " + replacement[0].toString() + " (Hypixel)");
                             }
-                            if (m2.find(0) && BwRanks.replacementMap.containsKey("§7" + name)) {
+                            if (m2.find(0)) {
                                 Object[] replacement = getReplacement("§7", name, uuid, LocrawUtil.INSTANCE.getLocrawInfo().getGameType().equals(LocrawInfo.GameType.SKYBLOCK), false);
                                 HypixelRanks r = (HypixelRanks) replacement[1];
                                 hRank = r;
@@ -286,9 +284,13 @@ public class BWSReplace implements ChatReceiveModule {
                     String message = C.removeColor(messageMatcher.group(4));
 
                     if (toFrom.equals("To")) {
-                        MUtils.chat(":to: <#d96cb2>" + name + "<#e3a8ce>" + ": " + message);
+                        UTextComponent textComponent = new UTextComponent(":to: <#d96cb2>" + name + "<#e3a8ce>" + ": " + message);
+                        textComponent.setClick(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + name + " ");
+                        textComponent.chat();
                     } else {
-                        MUtils.chat(":from: <#d96cb2>" + name + "<#e3a8ce>" + ": " + message);
+                        UTextComponent textComponent = new UTextComponent(":from: <#d96cb2>" + name + "<#e3a8ce>" + ": " + message);
+                        textComponent.setClick(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + name + " ");
+                        textComponent.chat();
                     }
                     event.setCanceled(true);
 

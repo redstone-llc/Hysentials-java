@@ -361,7 +361,7 @@ public class ActionGUIHandler {
             try {
                 if (field_lowerChestInventory.get(chest) instanceof IInventory) {
                     IInventory inventory = (IInventory) field_lowerChestInventory.get(chest);
-                    if (inventory.getName().equals("Edit Actions") || inventory.getName().startsWith("Actions: ")) {
+                    if ((inventory.getName().equals("Edit Actions") || inventory.getName().startsWith("Actions: ")) && inventory.getSizeInventory() == 54) {
                         return true;
                     }
                 }

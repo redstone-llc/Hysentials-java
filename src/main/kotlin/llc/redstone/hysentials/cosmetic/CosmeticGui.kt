@@ -273,7 +273,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                     )
                 }
 
-                type === "bundles" -> {
+                type === "bundle" -> {
                     Renderer.drawImage(
                         bundlesTab,
                         guiLeft + 5.0,

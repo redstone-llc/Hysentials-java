@@ -5,8 +5,10 @@ import cc.polyfrost.oneconfig.utils.Multithreading;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.event.EventBus;
 import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
+import llc.redstone.hysentials.util.Input;
 import llc.redstone.hysentials.util.MUtils;
 import llc.redstone.hysentials.util.Material;
+import llc.redstone.hysentials.util.Renderer;
 import llc.redstone.hysentials.websocket.Socket;
 import com.google.common.collect.Lists;
 import llc.redstone.hysentials.Hysentials;
@@ -45,6 +47,9 @@ public abstract class Container extends InventoryBasic {
     public boolean isOpen;
     public GuiAction defaultAction;
     public ItemStack[] inventoryContents;
+
+    public Consumer<String> guiRequest;
+
     public ItemStack BLACK_STAINED_GLASS_PANE = GuiItem.makeColorfulItem(Material.STAINED_GLASS_PANE, "&0", 1, 15);
 
     public Container(String title, int rows) {
@@ -55,6 +60,12 @@ public abstract class Container extends InventoryBasic {
         guiItems = new HashMap<>();
         slotActions = new HashMap<>();
         INSTANCE = this;
+
+        input = new Input(0, 0, 0, 18);
+        input.setEnabled(true);
+        input.setText("Input");
+        input.setMaxStringLength(100);
+        button = new Input.Button(0, 0, 0, 18, "Complete");
     }
 
     public void setItem(int slot, GuiItem item) {
@@ -111,14 +122,45 @@ public abstract class Container extends InventoryBasic {
         }, expire, TimeUnit.MILLISECONDS);
     }
 
+    protected void guiRequest(String name, Consumer<String> function, long expire) {
+        input.setText(name);
+        input.setFocused(true);
+        guiRequest = function;
+        Multithreading.schedule(() -> {
+            System.out.println("Request expired");
+            guiRequest = null;
+        }, expire, TimeUnit.MILLISECONDS);
+    }
+
     public abstract void setItems();
 
     public abstract void handleMenu(MouseEvent event);
 
     public abstract void setClickActions();
 
-    protected void drawGuiContainerBackgroundLayer(int mouseX, int mouseY) {
+    Input input;
+    Input.Button button;
 
+    protected void drawGuiContainerBackgroundLayer(int mouseX, int mouseY) {
+        if (guiRequest != null) {
+
+            int guiTop = this.guiChest.guiTop;
+            int guiWidth = this.guiChest.xSize;
+            int guiLeft = this.guiChest.guiLeft;
+
+            int margin = 5;
+            int sizeDifference = 10;
+
+            button.width = 50;
+            input.width = guiWidth - sizeDifference - margin - button.width;
+            input.xPosition = guiLeft + margin;
+            input.yPosition = guiTop - input.height - margin;
+            button.xPosition = guiLeft + guiWidth - button.width - margin;
+            button.yPosition = guiTop - button.height - margin;
+
+            input.drawTextBox();
+            button.drawButton(Minecraft.getMinecraft(), mouseX, mouseY);
+        }
     }
 
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
@@ -126,10 +168,20 @@ public abstract class Container extends InventoryBasic {
     }
 
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-
+        if (guiRequest != null) {
+            input.mouseClicked(mouseX, mouseY, mouseButton);
+            if (button.mousePressed(Minecraft.getMinecraft(), mouseX, mouseY)) {
+                guiRequest.accept(input.getText());
+                guiRequest = null;
+            }
+        }
     }
 
     protected boolean keyTyped(char typedChar, int keyCode) throws IOException {
+        if (guiRequest != null) {
+            input.textboxKeyTyped(typedChar, keyCode);
+            return false;
+        }
         return true;
     }
 

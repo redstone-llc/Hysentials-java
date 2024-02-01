@@ -6,23 +6,38 @@ import cc.polyfrost.oneconfig.config.annotations.Button;
 import cc.polyfrost.oneconfig.config.annotations.Checkbox;
 import cc.polyfrost.oneconfig.config.annotations.Color;
 import cc.polyfrost.oneconfig.config.annotations.Number;
+import cc.polyfrost.oneconfig.config.core.ConfigUtils;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
+import cc.polyfrost.oneconfig.config.elements.BasicOption;
+import cc.polyfrost.oneconfig.config.elements.OptionPage;
 import cc.polyfrost.oneconfig.gui.OneConfigGui;
+import cc.polyfrost.oneconfig.hud.BasicHud;
+import cc.polyfrost.oneconfig.hud.SingleTextHud;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.libs.universal.UKeyboard;
+import cc.polyfrost.oneconfig.libs.universal.UMatrixStack;
+import cc.polyfrost.oneconfig.renderer.NanoVGHelper;
+import cc.polyfrost.oneconfig.utils.InputHandler;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.polyfrost.oneconfig.utils.gui.GuiUtils;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.hysentialMods.ChatConfig;
 import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
 import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
+import llc.redstone.hysentials.config.hysentialMods.page.PageAnnotation;
+import llc.redstone.hysentials.config.hysentialMods.page.PageOption;
+import llc.redstone.hysentials.config.hysentialMods.rank.RankAnnotation;
+import llc.redstone.hysentials.config.hysentialMods.rank.RankOption;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
+import llc.redstone.hysentials.macrowheel.overlay.MacroWheelHudConfigThing;
+import llc.redstone.hysentials.macrowheel.overlay.MacroWheelOverlay;
 import llc.redstone.hysentials.updateGui.UpdateChecker;
 
 import llc.redstone.hysentials.util.ImageIconRenderer;
+import llc.redstone.hysentials.util.Renderer;
 import llc.redstone.hysentials.utils.RedstoneRepo;
 import llc.redstone.hysentials.utils.UpdateNotes;
 import cc.woverflow.hytils.HytilsReborn;
@@ -31,11 +46,47 @@ import org.json.JSONObject;
 
 import java.awt.*;
 import java.io.File;
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
 
 import static llc.redstone.hysentials.guis.actionLibrary.ClubActionViewer.toList;
 
 public class HysentialsConfig extends Config {
+
+    @PageAnnotation(
+        name = "Chat, Formatting, and Housing",
+        group = true,
+        category = "Hysentials Mods",
+        subcategory = "Hysentials Mods",
+        description = "Chat related settings."
+    )
+    public transient List<Config> hysentialMods = Arrays.asList(
+        new ChatConfig(),
+        new FormattingConfig(),
+        new HousingConfig()
+    );
+    public transient ChatConfig chatConfig = (ChatConfig) hysentialMods.get(0);
+    public transient FormattingConfig formattingConfig = (FormattingConfig) hysentialMods.get(1);
+    public transient HousingConfig housingConfig = (HousingConfig) hysentialMods.get(2);
+
+
+    @KeyBind(
+        name = "Macro Wheel",
+        category = "General",
+        subcategory = "Keybinds",
+        description = "The keybind to open the macro wheel."
+    )
+    public static OneKeyBind macroWheelKeyBind = new OneKeyBind(UKeyboard.KEY_G);
+
+    @HUD(
+        name = "Macro Wheel HUD",
+        category = "HUD",
+        subcategory = "Macro Wheel"
+    )
+    public MacroWheelHudConfigThing macroWheelHud = new MacroWheelHudConfigThing(true, (Renderer.screen.getWidth() / 2f) - (34*5f) / 2, (Renderer.screen.getHeight() / 2f) - (34*5f) / 2,
+        5f, true, new OneColor(119, 119, 119, 150));
+
     @Text(
         name = "Chat Prefix",
         category = "General",
@@ -88,73 +139,6 @@ public class HysentialsConfig extends Config {
         description = "Enable global chat. This will allow you to chat with other players who are using Hysentials."
     )
     public static boolean globalChatEnabled = true;
-
-
-    @Switch(
-        name = "Fancy Formatting",
-        category = "General",
-        subcategory = "Fancy Formatting",
-        description = "Enable fancy formatting. This will allow you to see rank images, hex colors, and other things."
-    )
-    public static boolean fancyFormatting = true;
-
-    @Switch(
-        name = "Fancy Ranks",
-        category = "General",
-        subcategory = "Fancy Formatting",
-        description = "Enable futuristic ranks. This will allow you to see an image as a users rank, aswell as other things."
-    )
-    public static boolean futuristicRanks = true;
-
-    @Switch(
-        name = "Hex Colors",
-        category = "General",
-        subcategory = "Fancy Formatting",
-        description = "Enable hex colors. This will allow you to see hex colors in chat."
-    )
-    public static boolean hexColors = true;
-
-    @Switch(
-        name = "Channel Formatting",
-        category = "General",
-        subcategory = "Fancy Formatting",
-        description = "Enable channel formatting. This enables fancier formatting for channels."
-    )
-    public static boolean channelFormatting = true;
-
-    @Button(
-        name = "Rank Image Config",
-        category = "General",
-        subcategory = "Fancy Formatting",
-        description = "Opens the rank image config folder.",
-        text = "Open Folder")
-    public void openRankImageConfig() {
-        Desktop desktop = Desktop.getDesktop();
-        File directory = new File("./config/hysentials/imageicons");
-        try {
-            desktop.open(directory);
-        } catch (Exception e) {
-            UChat.chat("&cError opening folder!");
-            e.printStackTrace();
-        }
-    }
-
-    @Button(
-        name = "Hex Color Config",
-        category = "General",
-        subcategory = "Fancy Formatting",
-        description = "Opens the rank hex color config file.",
-        text = "Open File")
-    public void openRankHexConfig() {
-        Desktop desktop = Desktop.getDesktop();
-        File directory = new File("./config/hysentials/colors.json");
-        try {
-            desktop.open(directory);
-        } catch (Exception e) {
-            UChat.chat("&cError opening file!");
-            e.printStackTrace();
-        }
-    }
 
     @Button(
         name = "Install Hytils Reborn",
@@ -410,9 +394,6 @@ public class HysentialsConfig extends Config {
 
     public static boolean wardrobeDarkMode = true;
 
-    public transient ChatConfig chatConfig = new ChatConfig();
-    public transient FormattingConfig formattingConfig = new FormattingConfig();
-    public transient HousingConfig housingConfig = new HousingConfig();
 
     public HysentialsConfig() {
         super(new Mod("Hysentials", ModType.HYPIXEL), "hysentials.json");
@@ -423,18 +404,29 @@ public class HysentialsConfig extends Config {
             Minecraft.getMinecraft().thePlayer.closeScreen();
             Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(new CosmeticGui());
         });
-
-//        addListener("fancyFormatting", () -> {
-//            if (fancyFormatting) {
-//                Minecraft.getMinecraft().fontRendererObj = new ImageIconRenderer();
-//            } else {
-//                Minecraft.getMinecraft().fontRendererObj = Hysentials.minecraftFont;
-//            }
+//        this.registerKeyBind(macroWheelKeyBind, () -> {
+//            Minecraft.getMinecraft().thePlayer.closeScreen();
+//            Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(new MacroWheelOverlay(
+//                macroWheelHud.position.getX(),
+//                macroWheelHud.position.getY(),
+//                macroWheelHud.getScale(),
+//                macroWheelHud.getBgColor()
+//            ));
 //        });
     }
 
+
+
     @Override
-    public void openGui() {
-        GuiUtils.displayScreen(new OneConfigGui(new HysentialsMods()));
+    protected BasicOption getCustomOption(Field field, CustomOption annotation, OptionPage page, Mod mod, boolean migrate) {
+        BasicOption option = null;
+        switch (annotation.id()) {
+            case "customPage":
+                PageAnnotation myOption =  ConfigUtils.findAnnotation(field, PageAnnotation.class);
+                option = PageOption.create(field, this);
+                ConfigUtils.getSubCategory(page, myOption.category(), myOption.subcategory()).options.add(option);
+                break;
+        }
+        return option;
     }
 }

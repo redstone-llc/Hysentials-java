@@ -94,30 +94,30 @@ public class BwRanksUtils {
                     return ":gray: <#d9d9d9>" + teamsM.group(2);
                 case "§e§lY":
                     return ":yellow: <#ebd028>" + teamsM.group(2);
-                case "§a§lW":
+                case "§f§lW":
                     return ":white: <#d9d9d9>" + teamsM.group(2);
-                case "§9§lG":
+                case "§a§lG":
                     return ":green: <#56e656>" + teamsM.group(2);
                 case "§c§lR":
                     return ":red: &c" + teamsM.group(2);
                 case "§d§lP":
                     return ":pink: <#e070e0>" + teamsM.group(2);
-                case "§b§lB":
+                case "§9§lB":
                     return ":blue: &9" + teamsM.group(2);
-                case "§7§lA":
+                case "§b§lA":
                     return ":aqua: <#67e9e9>" + teamsM.group(2);
             }
         }
         return null;
     }
 
-    public static String getPlayerName(NetworkPlayerInfo networkPlayerInfoIn) {
+    public static String getPlayerName(NetworkPlayerInfo networkPlayerInfoIn, boolean refresh) {
         if (networkPlayerInfoIn != null) {
             String displayName = networkPlayerInfoIn.getDisplayName() != null ? networkPlayerInfoIn.getDisplayName().getFormattedText() : null;
             ScorePlayerTeam playerTeam = networkPlayerInfoIn.getPlayerTeam();
             String gameProfileName = networkPlayerInfoIn.getGameProfile() != null ? networkPlayerInfoIn.getGameProfile().getName() : null;
 
-            if (displayName != null) {
+            if (displayName != null && !refresh) {
                 return displayName;
             } else {
                 return ScorePlayerTeam.formatPlayerName(playerTeam, gameProfileName);

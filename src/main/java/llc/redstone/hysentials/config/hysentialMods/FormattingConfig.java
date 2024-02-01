@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.config.hysentialMods;
 
 import cc.polyfrost.oneconfig.config.Config;
+import cc.polyfrost.oneconfig.config.annotations.Button;
 import cc.polyfrost.oneconfig.config.annotations.CustomOption;
 import cc.polyfrost.oneconfig.config.annotations.Switch;
 import cc.polyfrost.oneconfig.config.core.ConfigUtils;
@@ -9,6 +10,7 @@ import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.config.elements.BasicOption;
 import cc.polyfrost.oneconfig.config.elements.OptionPage;
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.config.hysentialMods.rank.RankAnnotation;
@@ -20,6 +22,7 @@ import llc.redstone.hysentials.config.hysentialMods.rank.RankOption;
 import llc.redstone.hysentials.config.hysentialMods.rank.RankStuff;
 import net.minecraft.client.Minecraft;
 
+import java.awt.*;
 import java.io.File;
 import java.lang.reflect.Field;
 
@@ -55,6 +58,40 @@ public class FormattingConfig extends Config {
         description = "Show the fancy rank in chat."
     )
     public static boolean fancyRankInChat = true;
+
+    @Button(
+        name = "Rank Image Config",
+        category = "General",
+        subcategory = "Fancy Formatting",
+        description = "Opens the rank image config folder.",
+        text = "Open Folder")
+    public void openRankImageConfig() {
+        Desktop desktop = Desktop.getDesktop();
+        File directory = new File("./config/hysentials/imageicons");
+        try {
+            desktop.open(directory);
+        } catch (Exception e) {
+            UChat.chat("&cError opening folder!");
+            e.printStackTrace();
+        }
+    }
+
+    @Button(
+        name = "Hex Color Config",
+        category = "General",
+        subcategory = "Fancy Formatting",
+        description = "Opens the rank hex color config file.",
+        text = "Open File")
+    public void openRankHexConfig() {
+        Desktop desktop = Desktop.getDesktop();
+        File directory = new File("./config/hysentials/colors.json");
+        try {
+            desktop.open(directory);
+        } catch (Exception e) {
+            UChat.chat("&cError opening file!");
+            e.printStackTrace();
+        }
+    }
 
 
     @RankAnnotation(
@@ -159,7 +196,7 @@ public class FormattingConfig extends Config {
 
 
     public FormattingConfig() {
-        super(new Mod("Formatting", ModType.UTIL_QOL), "hysentials-formatting.json");
+        super(new Mod("Formatting", ModType.UTIL_QOL, "/assets/hysentials/mods/formats.png", 244, 80), "hysentials-formatting.json");
         initialize();
         addDependency("fancyRankInTab", "futuristicRanks");
         addDependency("fancyRankInChat", "futuristicRanks");

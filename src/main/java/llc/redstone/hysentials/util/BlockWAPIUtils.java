@@ -39,6 +39,7 @@ public class BlockWAPIUtils {
      * Update the actions and cosmetics caches.
      */
     public static void getOnline() {
+        if (Socket.CLIENT == null || !Socket.CLIENT.isOpen()) return;
         try {
             JsonElement cosmetics;
             try {
@@ -66,6 +67,10 @@ public class BlockWAPIUtils {
         } catch (Exception e) {
             return;
         }
+    }
+
+    public static boolean isOnline(UUID uuid) {
+        return Socket.cachedUsersNew.containsKey(uuid.toString());
     }
 
     public static boolean hasCosmetic(UUID uuid, String cosmetic) {
@@ -134,7 +139,7 @@ public class BlockWAPIUtils {
         HELPER(3, "3", "§9[HELPER] ", "§9", "helper"),
         CREATOR(2, "4", "§3[§fCREATOR§3] ", "§3", "creator"),
         TEAM(5, "5", "§6[TEAM] ", "§6", "team"),
-        DEFAULT(1, "replace", "§7", "", null, "");
+        DEFAULT(1, "replace", "§7", "§7", null, "default");
 
         public final int index;
         private final String id;

@@ -14,7 +14,7 @@ class MacroWheelSelector : Container("Macro Wheel Selector", 6) {
 
         val macroSlots = arrayOf(12, 13, 14, 21, 23, 30, 31, 32)
         for (i in 0 until 8) {
-            if (i < macros.size) {
+            if (macros[i] != null) {
                 setItem(macroSlots[i], macro(i))
             } else {
                 setItem(macroSlots[i], emptyMacro(i))
@@ -41,15 +41,16 @@ class MacroWheelSelector : Container("Macro Wheel Selector", 6) {
         ))
     }
 
-    fun macro(index: Int): GuiItem {
+    private fun macro(index: Int): GuiItem {
         return GuiItem.fromStack(
             GuiItem.makeColorfulItem(
             Material.COMMAND,
             "&aMacro #${index + 1}",
             1, 0,
-            "&7Icon: &a${macros[index].icon}",
-            "&7Command: &b/${macros[index].command}",
-            "&7Hover Text: &r${macros[index].hoverText}",
+            "&7Name: &a${macros[index]!!.name}",
+            "&7Icon: &a${macros[index]!!.icon.name}",
+            "&7Command: &b/${macros[index]!!.command}",
+            "&7Hover Text: &r${macros[index]!!.hoverText}",
             "",
             "&eClick to edit!",
             "&eRight click to remove!"
@@ -70,22 +71,25 @@ class MacroWheelSelector : Container("Macro Wheel Selector", 6) {
         }
         val macroSlots = arrayOf(12, 13, 14, 21, 23, 30, 31, 32)
         for (i in 0 until 8) {
-            if (i < macros.size) {
+            if (macros.containsKey(i)) {
                 setAction(macroSlots[i]) {
-                    it.event.cancel()
-                    Minecraft.getMinecraft().thePlayer.closeScreen()
-                    MacroWheelEditor(i).open()
-                }
-                setAction(macroSlots[i]) {
-                    it.event.cancel()
-                    Hysentials.INSTANCE.macroJson.removeMacro(i)
-                    Minecraft.getMinecraft().thePlayer.closeScreen()
-                    MacroWheelSelector().open()
+                    if (it.button == 0) {
+                        it.event.cancel()
+                        Minecraft.getMinecraft().thePlayer.closeScreen()
+                        MacroWheelEditor(i).open()
+                    } else if (it.button == 1) {
+                        it.event.cancel()
+                        Hysentials.INSTANCE.macroJson.removeMacro(i)
+                        Minecraft.getMinecraft().thePlayer.closeScreen()
+                        MacroWheelSelector().open()
+                    }
                 }
             } else {
                 setAction(macroSlots[i]) {
                     it.event.cancel()
                     Minecraft.getMinecraft().thePlayer.closeScreen()
+                    val newMacroWheel = MacroWheelData.MacroWheel(i, "Macro #${i + 1}", "help", Material.COMMAND, "")
+                    Hysentials.INSTANCE.macroJson.addMacro(newMacroWheel)
                     MacroWheelEditor(i).open()
                 }
             }

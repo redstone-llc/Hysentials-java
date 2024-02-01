@@ -81,7 +81,7 @@ public class ChatConfig extends Config {
     public static String globalPrefix = ":globalchat: ";
 
     public ChatConfig() {
-        super(new Mod("Chat", ModType.UTIL_QOL, "/assets/hysentials/chat.png", 244, 80), "hysentials-chat.json");
+        super(new Mod("Chat", ModType.UTIL_QOL, "/assets/hysentials/mods/chat.png", 244, 80), "hysentials-chat.json");
         initialize();
     }
 

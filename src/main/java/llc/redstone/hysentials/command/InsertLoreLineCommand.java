@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.command;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.guis.container.GuiItem;
 import llc.redstone.hysentials.util.BUtils;
 import llc.redstone.hysentials.util.C;
@@ -35,9 +36,22 @@ public class InsertLoreLineCommand extends CommandBase {
         return Arrays.asList("insertll", "ill");
     }
 
+    public static boolean processRedirect(CommandBase commandBase, String[] args) {
+        if (Hysentials.lastMessage != null && Hysentials.lastMessage.startsWith("/")) {
+            String alias = Hysentials.lastMessage.split(" ")[0];
+            if (alias.startsWith("/")) alias = alias.substring(1);
+            if (alias.equals(commandBase.getCommandName()) || commandBase.getCommandAliases().contains(alias)) {
+                Minecraft.getMinecraft().thePlayer.sendChatMessage("/" + alias + " " + String.join(" ", args));
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
         if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative() || BUtils.isSBX()) {
+            if (processRedirect(this, args)) return;
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/insertloreline " + String.join(" ", args));
             return;
         }

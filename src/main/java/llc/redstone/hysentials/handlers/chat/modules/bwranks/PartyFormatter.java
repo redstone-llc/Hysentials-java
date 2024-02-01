@@ -174,6 +174,7 @@ public class PartyFormatter {
             case "§cYou are not in a party right now.":
                 sendMessage(message);
                 event.setCanceled(true);
+                reset();
                 return true;
             default:
                 return false;

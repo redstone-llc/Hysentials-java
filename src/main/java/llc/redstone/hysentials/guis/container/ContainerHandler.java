@@ -48,7 +48,7 @@ public class ContainerHandler {
         if (s == null) return;
         int slot = s.getSlotIndex();
         if (!s.getHasStack()) return;
-        INSTANCE.defaultAction.execute(new GuiAction.GuiClickEvent(event.getCi(), slot, INSTANCE.guiChest.inventorySlots.inventoryItemStacks.get(slot), event.getButton()));
+        if (INSTANCE.defaultAction != null) INSTANCE.defaultAction.execute(new GuiAction.GuiClickEvent(event.getCi(), slot, INSTANCE.guiChest.inventorySlots.inventoryItemStacks.get(slot), event.getButton()));
         if (INSTANCE.slotActions.containsKey(slot)) {
             GuiAction action = INSTANCE.slotActions.get(slot);
             action.execute(new GuiAction.GuiClickEvent(event.getCi(), slot, INSTANCE.guiChest.inventorySlots.inventoryItemStacks.get(slot), event.getButton()));

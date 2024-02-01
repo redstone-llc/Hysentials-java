@@ -35,6 +35,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -64,6 +65,7 @@ public class Socket {
     public static int relogAttempts = 0;
 
     public static boolean manualDisconnect = false;
+    public static ScheduledFuture<?> future;
 
     public static void init() {
         new DoorbellAuthenticate();
@@ -110,6 +112,9 @@ public class Socket {
                 public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
                     System.out.println("Connected to websocket server");
                     relogAttempts = 0;
+                    if (future != null) {
+                        future.cancel(false);
+                    }
                     JSONObject obj = new JSONObject();
                     obj.put("method", "login");
                     obj.put("username", Minecraft.getMinecraft().getSession().getUsername());
@@ -219,14 +224,20 @@ public class Socket {
                                 } else {
                                     Socket.linked = true;
                                 }
+
+                                Socket.cachedUsersNew.clear();
+                                Socket.cachedUsers.clear();
+                                Socket.cachedUser = null;
                                 break;
                             }
                             case "data": {
 //                                cachedData = json.getJSONObject("data");
                                 JsonParser jsonParser = new JsonParser();
                                 cachedUser = HysentialsSchema.User.Companion.deserialize(jsonParser.parse(json.getJSONObject("data").toString()).getAsJsonObject());
+
                                 cachedServerData = json.getJSONObject("server");
-                                List<HysentialsSchema.User> users = new ArrayList<>();
+
+                                cachedUsersNew.clear();
                                 for (Object o : toList(json.getJSONArray("users"))) {
                                     cachedUsersNew.put(((JSONObject) o).getString("uuid"), HysentialsSchema.User.Companion.deserialize(jsonParser.parse(o.toString()).getAsJsonObject()));
                                 }
@@ -245,19 +256,24 @@ public class Socket {
                                     }
 
                                     BlockWAPIUtils.Rank rank = BlockWAPIUtils.getRank(json.getString("uuid"));
+                                    String oldUsername = json.getString("username");
+                                    IChatComponent comp = new UTextComponent(ChatConfig.globalPrefix);
                                     String username = json.getString("username");
+                                    if (BlockWAPIUtils.isOnline(UUID.fromString(json.getString("uuid")))) {
+                                        username = BlockWAPIUtils.getUsername(UUID.fromString(json.getString("uuid")));
+                                    }
+
                                     if (!ChatConfig.globalChatSuffix) {
-                                        username = username.split(" ")[0];
+                                        oldUsername = oldUsername.split(" ")[0];
                                     }
                                     String hex = "&6";
                                     if (FormattingConfig.fancyRendering()) {
                                         hex = "<#fff1d4>";
                                     }
-                                    IChatComponent comp = new UTextComponent(ChatConfig.globalPrefix)
-                                        .appendSibling(
+                                    comp.appendSibling(
                                             new UTextComponent(
-                                                "&6" + username
-                                            ).setHover(HoverEvent.Action.SHOW_TEXT, (rank.getPrefixCheck() + BlockWAPIUtils.getUsername(UUID.fromString(json.getString("uuid")))))
+                                                "&6" + oldUsername
+                                            ).setHover(HoverEvent.Action.SHOW_TEXT, (rank.getPrefixCheck() + username))
                                         )
                                         .appendSibling(
                                             new UTextComponent(
@@ -438,7 +454,12 @@ public class Socket {
         } catch (Exception e) {
             e.printStackTrace();
             relogAttempts++;
-            createSocket();
+            if (relogAttempts > 2) {
+                MUtils.chat(HysentialsConfig.chatPrefix + " §cFailed to connect to websocket server. This is probably because it is offline. Please try again later with `/hs reconnect`.");
+                return;
+            }
+            MUtils.chat(HysentialsConfig.chatPrefix + " §cDisconnected from websocket server. Attempting to reconnect in 20 seconds");
+            Multithreading.submitScheduled(Socket::createSocket, 20, TimeUnit.SECONDS);
         }
     }
 

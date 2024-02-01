@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static llc.redstone.hysentials.command.InsertLoreLineCommand.processRedirect;
+
 public class RemoveGlowCommand extends CommandBase {
     @Override
     public int getRequiredPermissionLevel() {

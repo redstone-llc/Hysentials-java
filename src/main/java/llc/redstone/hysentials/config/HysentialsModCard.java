@@ -56,9 +56,8 @@ public class HysentialsModCard extends BasicElement {
     private final ColorAnimation colorToggle;
     private boolean active, disabled, favorite;
     private boolean isHoveredMain = false;
-    private final HysentialsMods page;
 
-    public HysentialsModCard(@NotNull Mod mod, boolean active, boolean disabled, boolean favorite, HysentialsMods page) {
+    public HysentialsModCard(@NotNull Mod mod, boolean active, boolean disabled, boolean favorite) {
         super(244, 244, false);
         this.modData = mod;
         this.active = active;
@@ -67,7 +66,6 @@ public class HysentialsModCard extends BasicElement {
         this.disabled = disabled;
         this.favorite = favorite;
         toggled = active;
-        this.page = page;
     }
 
     @Override
@@ -77,9 +75,6 @@ public class HysentialsModCard extends BasicElement {
         NanoVGHelper nanoVGHelper = NanoVGHelper.INSTANCE;
 
         String cleanName = modData.name.replaceAll("§.", "");
-        if (modData.name.equals("Hysentials")) {
-            cleanName = "Old Hysentials";
-        }
         Scissor scissor = scissorHelper.scissor(vg, x, y, width, height);
 
         isHoveredMain = inputHandler.isAreaHovered(x, y, width, 87);
@@ -132,10 +127,6 @@ public class HysentialsModCard extends BasicElement {
 
     public void onClick() {
         if (isHoveredMain) {
-            if (modData.name.equals("Hysentials")) {
-                BwRanks.shouldOpen = false;
-                BwRanks.shouldClose = false;
-            }
             OneConfigGui.INSTANCE.openPage(new ModConfigPage(modData.defaultPage));
         }
     }

@@ -35,6 +35,7 @@ import net.minecraftforge.client.GuiIngameForge;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
@@ -76,6 +77,7 @@ public class SBBoxesEditor extends HysentialsGui {
         regexCreator = new RegexCreator();
     }
 
+    ArrayList<ScoreboardWrapper.ScoreWrapper> lines = ScoreboardWrapper.getScoreboard().getSortedScores(ScoreboardWrapper.getSidebar()).stream().map(ScoreboardWrapper.ScoreWrapper::new).collect(Collectors.toCollection(ArrayList::new));
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         super.drawScreen(mouseX, mouseY, partialTicks);
@@ -116,7 +118,6 @@ public class SBBoxesEditor extends HysentialsGui {
         int startX = pos[0];
         int startY = pos[1];
         int endX = pos[2];
-        ArrayList<ScoreboardWrapper.ScoreWrapper> lines = ScoreboardWrapper.getScoreboard().getSortedScores(ScoreboardWrapper.getSidebar()).stream().map(ScoreboardWrapper.ScoreWrapper::new).collect(Collectors.toCollection(ArrayList::new));
 
         if (HysentialsConfig.scoreboard) {
             for (int i = 0; i < lines.size(); i++) {
@@ -229,7 +230,6 @@ public class SBBoxesEditor extends HysentialsGui {
             }
             collapseIcon.click(mouseX, mouseY);
             expandIcon.click(mouseX, mouseY);
-            ArrayList<ScoreboardWrapper.ScoreWrapper> lines = ScoreboardWrapper.getScoreboard().getSortedScores(ScoreboardWrapper.getSidebar()).stream().map(ScoreboardWrapper.ScoreWrapper::new).collect(Collectors.toCollection(ArrayList::new));
 
             for (int i = 0; i < lines.size(); i++) {
                 if (isMouseOverLine(mouseX, mouseY, i)) {
@@ -259,6 +259,35 @@ public class SBBoxesEditor extends HysentialsGui {
                     object.put("lines", array);
                     Hysentials.INSTANCE.sbBoxes.jsonObject = object;
                     Hysentials.INSTANCE.sbBoxes.save();
+                }
+            }
+        }
+    }
+
+    //scrolling
+    @Override
+    public void handleMouseInput() throws IOException {
+        super.handleMouseInput();
+        if (scroll) {
+            int i = Mouse.getEventDWheel();
+            if (i != 0) {
+                if (i > 1) {
+                    i = 1;
+                }
+                if (i < -1) {
+                    i = -1;
+                }
+                if (i > 0) {
+                    i = -1;
+                } else {
+                    i = 1;
+                }
+                this.scrollAmount += -i * 10;
+                if (this.scrollAmount > 0) {
+                    this.scrollAmount = 0;
+                }
+                if (this.scrollAmount < (-30 * SBBoxes.boxes.size() - 3 * SBBoxes.boxes.size() + 10) + 462) {
+                    this.scrollAmount = (-30 * SBBoxes.boxes.size() - 3 * SBBoxes.boxes.size() + 10) + 462;
                 }
             }
         }
@@ -316,9 +345,8 @@ public class SBBoxesEditor extends HysentialsGui {
     private ArrayList<Float> getXSnappingLines() {
         ArrayList<Float> lines = new ArrayList<>();
         lines.add(UResolution.getScaledWidth() / 2f);
-        ArrayList<ScoreboardWrapper.ScoreWrapper> ls = ScoreboardWrapper.getScoreboard().getSortedScores(ScoreboardWrapper.getSidebar()).stream().map(ScoreboardWrapper.ScoreWrapper::new).collect(Collectors.toCollection(ArrayList::new));
 
-        for (ScoreboardWrapper.ScoreWrapper l : ls) {
+        for (ScoreboardWrapper.ScoreWrapper l : this.lines) {
             SBBoxes hud = SBBoxes.getFromMatch(l.getName());
             if (hud == null) continue;
             if (!hud.isEnabled() || editingHuds.containsKey(hud)) continue;
@@ -352,9 +380,8 @@ public class SBBoxesEditor extends HysentialsGui {
     private ArrayList<Float> getYSnappingLines() {
         ArrayList<Float> lines = new ArrayList<>();
         lines.add(UResolution.getScaledHeight() / 2f);
-        ArrayList<ScoreboardWrapper.ScoreWrapper> ls = ScoreboardWrapper.getScoreboard().getSortedScores(ScoreboardWrapper.getSidebar()).stream().map(ScoreboardWrapper.ScoreWrapper::new).collect(Collectors.toCollection(ArrayList::new));
 
-        for (ScoreboardWrapper.ScoreWrapper l : ls) {
+        for (ScoreboardWrapper.ScoreWrapper l : this.lines) {
             SBBoxes hud = SBBoxes.getFromMatch(l.getName());
             if (hud == null) continue;
             if (!hud.isEnabled() || editingHuds.containsKey(hud)) continue;
@@ -382,7 +409,7 @@ public class SBBoxesEditor extends HysentialsGui {
             GuiIngameHysentials.renderObjective = false;
             int x = res.getScaledWidth();
             int radius = new Integer[]{0, 2, 4}[HysentialsConfig.scoreboardBorderRadius];
-            List<ScoreboardWrapper.ScoreWrapper> lines = ScoreboardWrapper.getLines(true);
+            List<ScoreboardWrapper.ScoreWrapper> lines = new ArrayList<>(ScoreboardWrapper.getLines(true));
             List<String[]> formattedLines = new ArrayList<>();
 
             for (ScoreboardWrapper.ScoreWrapper line : lines) {

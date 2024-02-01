@@ -65,8 +65,7 @@ public class HousingConfig extends Config {
     )
     public static boolean housingNameScoreboard = true;
     public HousingConfig() {
-        //, "/assets/hysentials/housing.png", 244, 80
-        super(new Mod("Housing", ModType.UTIL_QOL), "hysentials-housing.json");
+        super(new Mod("Housing", ModType.UTIL_QOL, "/assets/hysentials/mods/housing.png", 244, 80), "hysentials-housing.json");
         initialize();
     }
 

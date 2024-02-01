@@ -6,7 +6,6 @@ import cc.polyfrost.oneconfig.gui.pages.ModsPage;
 import cc.polyfrost.oneconfig.gui.pages.Page;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.config.HysentialsMods;
 import llc.redstone.hysentials.profileViewer.DefaultProfileGui;
 import llc.redstone.hysentials.Hysentials;
 import net.minecraft.client.Minecraft;

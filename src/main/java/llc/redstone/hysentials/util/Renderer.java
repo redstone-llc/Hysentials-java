@@ -255,6 +255,13 @@ public class Renderer {
             + clamp((int) blue));
     }
 
+    public static int color(int red, int green, int blue, int alpha) {
+        return (clamp(alpha) * 0x1000000
+            + clamp(red) * 0x10000
+            + clamp(green) * 0x100
+            + clamp(blue));
+    }
+
     static int clamp(int value) {
         return Math.max(0, Math.min(255, value));
     }

@@ -23,7 +23,7 @@ public abstract class RenderLivingMixin<T extends EntityLivingBase> extends Rend
     public String renderName(IChatComponent instance, T entity, double x, double y, double z) {
         if (entity instanceof EntityPlayer) {
             NetworkPlayerInfo playerInfo = Minecraft.getMinecraft().getNetHandler().getPlayerInfo((entity.getUniqueID()));
-            return BwRanksUtils.getPlayerName(playerInfo);
+            return BwRanksUtils.getPlayerName(playerInfo, false);
         }
         return entity.getDisplayName().getFormattedText();
     }

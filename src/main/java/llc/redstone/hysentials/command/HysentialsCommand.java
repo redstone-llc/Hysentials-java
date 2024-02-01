@@ -120,6 +120,11 @@ public class HysentialsCommand extends CommandBase {
                 break;
             }
 
+            case "macrowheel": {
+                new MacroWheelSelector().open();
+                break;
+            }
+
             case "config": {
                 Hysentials.INSTANCE.getConfig().openGui();
                 break;
@@ -274,6 +279,7 @@ public class HysentialsCommand extends CommandBase {
                 text.appendText(pageS);
                 text.appendText("&e/hysentials help <page> &b- &bShows this help page.\n");
                 text.appendText("&e/hysentials config &b- &bOpens the Hysentials config.\n");
+                text.appendText("&e/hysentials macrowheel &7- &bOpens the Macro Wheel Editor.\n");
                 text.appendText("&e/hysentials reload &7- &bReloads the configs.\n");
                 text.appendText("&e/hysentials reconnect &7- &bReconnects to the websocket.\n");
                 text.appendText("&e/hysentials link &7- &bAccept a link request from discord.\n");
@@ -282,13 +288,13 @@ public class HysentialsCommand extends CommandBase {
                 text.appendText("&e/hysentials menu &7- &bOpens the Hysentials menu.\n");
                 text.appendText("&e/hysentials discord &7- &bShows the discord invite link.\n");
                 text.appendText("&e/hysentials editor <file> &7- &bOpens the HTSL code editor.\n");
-                text.appendText("&e/hysentials import <file> &7- &bImports a HTSL action.\n");
                 text.appendText("§9&m-----------------------------------------------------");
                 break;
             }
             case 2: {
                 String pageS = ChatLib.getCenteredText("&6Hysentials (Page 2/" + maxPage + ")\n");
                 text.appendText(pageS);
+                text.appendText("&e/hysentials import <file> &7- &bImports a HTSL action.\n");
                 text.appendText("&e/globalchat <message> &7- &bSends a message to global chat.\n");
                 text.appendText("&e/hysentials quests &7- &bOpens the Quests menu.\n");
                 text.appendText("&e/sbboxes editor &7- &bOpens the Scoreboard Boxes editor.\n");
@@ -299,13 +305,13 @@ public class HysentialsCommand extends CommandBase {
                 text.appendText("&e/club join <name> &7- &bUsed to accept a club invite\n");
                 text.appendText("&e/club leave &7- &bLeave your current club\n");
                 text.appendText("&e/club dashboard &7- &bOpen the club dashboard\n");
-                text.appendText("&e/club list &7- &bList all players in your club\n");
                 text.appendText("§9&m-----------------------------------------------------");
                 break;
             }
             case 3: {
                 String pageS = ChatLib.getCenteredText("&6Hysentials (Page 3/" + maxPage + ")\n");
                 text.appendText(pageS);
+                text.appendText("&e/club list &7- &bList all players in your club\n");
                 text.appendText("&e/glow &7- &bToggles the enchant glint on held item.\n");
                 text.appendText("&e/removeglow &7- &bRemoves the enchant glint on held item.\n");
                 text.appendText("&e/ill <line> <value> &7- &bInsert lore line.\n");
@@ -314,7 +320,7 @@ public class HysentialsCommand extends CommandBase {
                 text.appendText("&e/sll <line> <value> &7- &bSet lore line.\n");
                 text.appendText("&e/rename <name> &7- &bSet name on held item.\n");
                 text.appendText("&e/openinv <player> &7- &bView the held item and armor of a player.\n");
-                //3 more can be added here
+                //2 more can be added here
                 text.appendText("§9&m-----------------------------------------------------");
             }
         }
@@ -325,7 +331,22 @@ public class HysentialsCommand extends CommandBase {
     private static void handleTest(String command, String args) {
         if (Minecraft.getMinecraft().thePlayer.getName().equals("EndKloon") || Minecraft.getMinecraft().thePlayer.getName().equals("Sin_ender")) {
             switch (command.toLowerCase()) {
-
+                case "switch": {
+                    boolean isCurrentlyLocal = HysentialsUtilsKt.getHYSENTIALS_API().equals("http://localhost:8080/api");
+                    if (HysentialsUtilsKt.isLocalOn()) {
+                        HysentialsUtilsKt.setHYSENTIALS_API(!isCurrentlyLocal ? "ws://localhost:8080/ws" : "ws://backend.redstone.llc/ws");
+                        HysentialsUtilsKt.setWEBSOCKET(!isCurrentlyLocal ? "ws://localhost:8080/ws" : "ws://backend.redstone.llc/ws");
+                        Socket.CLIENT.sendClose();
+                        Socket.createSocket();
+                    } else if (isCurrentlyLocal) {
+                        HysentialsUtilsKt.setHYSENTIALS_API("http://backend.redstone.llc/api");
+                        HysentialsUtilsKt.setWEBSOCKET("ws://backend.redstone.llc/ws");
+                        Socket.CLIENT.sendClose();
+                        Socket.createSocket();
+                    } else {
+                        Hysentials.INSTANCE.sendMessage("&cLocal is not on and you are already on the main server!");
+                    }
+                }
                 case "doorbell": {
                     Socket.CLIENT.sendText(
                         new Request(

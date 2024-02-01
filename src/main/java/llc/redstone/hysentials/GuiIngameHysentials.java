@@ -6,9 +6,15 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import cc.polyfrost.oneconfig.libs.universal.UResolution;
+import cc.polyfrost.oneconfig.renderer.NanoVGHelper;
+import cc.polyfrost.oneconfig.utils.InputHandler;
 import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.guis.hsplayerlist.GuiOnlineList;
 import llc.redstone.hysentials.config.HysentialsConfig;
+import llc.redstone.hysentials.macrowheel.overlay.MacroWheelOverlay;
+import llc.redstone.hysentials.macrowheel.overlay.MacroWheelOverlayKt;
+import llc.redstone.hysentials.util.Input;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -17,6 +23,7 @@ import net.minecraft.client.gui.GuiIngame;
 import net.minecraft.client.gui.GuiOverlayDebug;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.resources.I18n;
@@ -32,17 +39,15 @@ import net.minecraft.potion.Potion;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.FoodStats;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StringUtils;
+import net.minecraft.util.*;
 import net.minecraftforge.client.GuiIngameForge;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
 
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 public class GuiIngameHysentials extends GuiIngame
@@ -183,7 +188,48 @@ public class GuiIngameHysentials extends GuiIngame
         GlStateManager.disableLighting();
         GlStateManager.enableAlpha();
 
+        if (HysentialsConfig.macroWheelKeyBind.isActive() && mc.currentScreen == null) {
+            if (!MacroWheelOverlayKt.getStopped()) {
+                MacroWheelOverlay overlay = MacroWheelOverlay.Companion.newI();
+                InputHandler inputHandler = new InputHandler();
+                inputHandler.scale(UResolution.getScaleFactor(), UResolution.getScaleFactor());
+                if (!wasMacroWheelActive) {
+                    Minecraft.getMinecraft().mouseHelper.ungrabMouseCursor();
+                    Minecraft.getMinecraft().mouseHelper.deltaX = 0;
+                    Minecraft.getMinecraft().mouseHelper.deltaY = 0;
+                    wasMacroWheelActive = true;
+                }
+                drawMacroWheel(overlay, partialTicks, inputHandler);
+                final ScaledResolution scaledresolution = new ScaledResolution(this.mc);
+                int i1 = scaledresolution.getScaledWidth();
+                int j1 = scaledresolution.getScaledHeight();
+                final int k1 = Mouse.getX() * i1 / this.mc.displayWidth;
+                final int l1 = j1 - Mouse.getY() * j1 / this.mc.displayHeight - 1;
+                drawPostMacroWheel(overlay, new GuiScreenEvent.DrawScreenEvent.Post(
+                    null, k1, l1, partialTicks
+                ), inputHandler);
+            }
+        } else if (wasMacroWheelActive || MacroWheelOverlayKt.getStopped()) {
+            MacroWheelOverlayKt.setStopped(false);
+            wasMacroWheelActive = false;
+            if (Minecraft.getMinecraft().currentScreen == null) {
+                Minecraft.getMinecraft().mouseHelper.grabMouseCursor();
+            }
+        }
+
         post(ALL);
+    }
+
+    public static boolean wasMacroWheelActive = false;
+
+    public void drawMacroWheel(MacroWheelOverlay overlay, float partialTicks, InputHandler inputHandler) {
+        NanoVGHelper.INSTANCE.setupAndDraw(true, (vg) -> {
+            overlay.draw(vg, partialTicks, inputHandler);
+        });
+    }
+
+    public void drawPostMacroWheel(MacroWheelOverlay overlay, GuiScreenEvent.DrawScreenEvent.Post event, InputHandler inputHandler) {
+        overlay.drawPost(event, inputHandler);
     }
 
     public ScaledResolution getResolution()
@@ -798,7 +844,7 @@ public class GuiIngameHysentials extends GuiIngame
 
     protected boolean renderHysentialsPlayerList(int width, int height)
     {
-        if (HysentialsConfig.onlinePlayersKeyBind.isActive()) {
+        if (HysentialsConfig.onlinePlayersKeyBind.isActive() && Minecraft.getMinecraft().currentScreen == null) {
             hysentialsOnlineList.updatePlayerList(true);
             ScaledResolution res = new ScaledResolution(Minecraft.getMinecraft());
             hysentialsOnlineList.renderPlayerlist(res.getScaledWidth());

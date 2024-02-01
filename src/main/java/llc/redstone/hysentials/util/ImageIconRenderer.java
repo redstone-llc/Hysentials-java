@@ -49,27 +49,28 @@ public class ImageIconRenderer extends FontRenderer {
         if (text.startsWith("§aHymojis: \n")) {
             uuid = UUID.fromString("ad80d7cf-8115-4e2a-b15d-e5cc0bf6a9a2");
         }
-        if (Minecraft.getMinecraft().currentScreen instanceof GuiChat) {
-            uuid = (Minecraft.getMinecraft().thePlayer == null) ? null : Minecraft.getMinecraft().thePlayer.getUniqueID();
-        }
-        try {
-            if (BwRanks.replacementMap.size() > 0) {
-                String finalText = text.replace("§r", "");
-                for (Map.Entry<String, DuoVariable<UUID, String>> entry : BwRanks.replacementMap.entrySet()) {
-                    if (finalText.startsWith(entry.getKey())) {
-                        text = text.replace(entry.getKey(), entry.getValue().second);
-                        uuid = entry.getValue().first;
-                    }
-                }
-            }
-        } catch (ConcurrentModificationException ignored) {
-        }
+//        if (Minecraft.getMinecraft().currentScreen instanceof GuiChat) {
+//            uuid = (Minecraft.getMinecraft().thePlayer == null) ? null : Minecraft.getMinecraft().thePlayer.getUniqueID();
+//        }
+//        try {
+//            if (BwRanks.replacementMap.size() > 0) {
+//                String finalText = text.replace("§r", "");
+//                for (Map.Entry<String, DuoVariable<UUID, String>> entry : BwRanks.replacementMap.entrySet()) {
+//                    if (finalText.startsWith(entry.getKey())) {
+//                        text = text.replace(entry.getKey(), entry.getValue().second);
+//                        uuid = entry.getValue().first;
+//                    }
+//                }
+//            }
+//        } catch (ConcurrentModificationException ignored) {
+//        }
         boolean lookingForQuestionMark = false;
         for (int i = 0; i < text.length(); ++i) {
             char c0 = text.charAt(i);
             int i1;
             int j1;
             int textColor = accessor.getTextColor();
+
             String sub = text.substring(i + 1);
             if (c0 == ':' && sub.contains(":") && !sub.substring(0, sub.indexOf(":")).isEmpty()) {
                 String str = sub.substring(0, sub.indexOf(":"));
@@ -92,7 +93,7 @@ public class ImageIconRenderer extends FontRenderer {
             }
             if (c0 == 60 && i + 8 < text.length()) {
                 String hex = text.substring(i + 2, i + 8);
-                if (text.charAt(i + 1) == '#' && hex.matches("[0-9a-fA-F]+")) {
+                if (text.charAt(i + 1) == '#' && checkIfHexadecimal(hex)) {
                     accessor.setRandomStyle(false);
                     accessor.setBoldStyle(false);
                     accessor.setStrikethroughStyle(false);
@@ -238,19 +239,19 @@ public class ImageIconRenderer extends FontRenderer {
         if (Minecraft.getMinecraft().currentScreen instanceof GuiChat) {
             uuid = (Minecraft.getMinecraft().thePlayer == null) ? null : Minecraft.getMinecraft().thePlayer.getUniqueID();
         }
-        try {
-            if (BwRanks.replacementMap.size() > 0) {
-                String finalText = text.replace("§r", "");
-
-                for (Map.Entry<String, DuoVariable<UUID, String>> entry : BwRanks.replacementMap.entrySet()) {
-                    if (finalText.startsWith(entry.getKey())) {
-                        text = text.replace(entry.getKey(), entry.getValue().second);
-                        uuid = entry.getValue().first;
-                    }
-                }
-            }
-        } catch (ConcurrentModificationException ignored) {
-        }
+//        try {
+//            if (BwRanks.replacementMap.size() > 0) {
+//                String finalText = text.replace("§r", "");
+//
+//                for (Map.Entry<String, DuoVariable<UUID, String>> entry : BwRanks.replacementMap.entrySet()) {
+//                    if (finalText.startsWith(entry.getKey())) {
+//                        text = text.replace(entry.getKey(), entry.getValue().second);
+//                        uuid = entry.getValue().first;
+//                    }
+//                }
+//            }
+//        } catch (ConcurrentModificationException ignored) {
+//        }
         if (text == null) {
             return 0;
         } else {
@@ -276,11 +277,12 @@ public class ImageIconRenderer extends FontRenderer {
                                     int height = icon.getHeight();
                                     float scaledHeight = (float) 9 / height;
                                     int scaledWidth = (int) (width * scaledHeight);
-                                    if (icon.emoji && uuid != null && CosmeticGui.Companion.hasCosmetic(uuid, "hymojis")) {
-                                        j += str.length() + 2;
-                                        i += scaledWidth + 4;
-                                        continue;
-                                    } else if (!icon.emoji) {
+//                                    if (icon.emoji && uuid != null && CosmeticGui.Companion.hasCosmetic(uuid, "hymojis")) {
+//                                        j += str.length() + 2;
+//                                        i += scaledWidth + 4;
+//                                        continue;
+//                                    } else
+                                    if (!icon.emoji) {
                                         j += str.length() + 2;
                                         i += scaledWidth + 4;
                                         continue;
@@ -291,10 +293,13 @@ public class ImageIconRenderer extends FontRenderer {
                     }
                     if (c0 == 60 && j + 7 < text.length()) {
                         String s = text.substring(j, j + 9);
-                        if (s.matches("<#([0-9a-fA-F]){6}>")) {
-                            j += 7;
-                            i -= 5;
-                            continue;
+                        if (s.charAt(0) == '<' && s.charAt(1) == '#' && s.charAt(8) == '>') {
+                            String potentialHex = s.substring(2, 8);
+                            if (checkIfHexadecimal(potentialHex)) {
+                                j += 7;
+                                i -= 5;
+                                continue;
+                            }
                         }
                     }
                 } catch (Exception ignored) {
@@ -325,6 +330,20 @@ public class ImageIconRenderer extends FontRenderer {
 
             return i;
         }
+    }
+
+    public static boolean checkIfHexadecimal(String potentialHex) {
+        for (char ch: potentialHex.toCharArray()) {
+            boolean isHex =
+                ('0' <= ch && ch <= '9') ||
+                    ('a' <= ch && ch <= 'f') ||
+                    ('A' <= ch && ch <= 'F');
+
+            if (!isHex) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public int getCharWidth(char character) {
@@ -465,7 +484,7 @@ public class ImageIconRenderer extends FontRenderer {
                 if (c0 != '#') continue;
                 if (i + 8 < text.length()) {
                     String hex = text.substring(i + 2, i + 8);
-                    if (text.charAt(i + 1) == '#' && hex.matches("[0-9a-fA-F]+")) {
+                    if (text.charAt(i + 1) == '#' && checkIfHexadecimal(hex)) {
                         s = "<#" + hex + ">";
                     }
                     i += 8;

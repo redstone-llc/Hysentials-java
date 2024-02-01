@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static llc.redstone.hysentials.command.InsertLoreLineCommand.processRedirect;
 import static llc.redstone.hysentials.command.RenameCommand.setCreativeAction;
 import static llc.redstone.hysentials.guis.container.GuiItem.getLore;
 import static llc.redstone.hysentials.guis.container.GuiItem.setLore;
@@ -42,6 +43,7 @@ public class SetLoreLineCommand extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
         if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative() || BUtils.isSBX()) {
+            if (processRedirect(this, args)) return;
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/setloreline " + String.join(" ", args));
             return;
         }

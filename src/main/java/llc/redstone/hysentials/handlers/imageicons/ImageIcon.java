@@ -4,6 +4,7 @@ import llc.redstone.hysentials.cosmetic.CosmeticGui;
 import llc.redstone.hysentials.util.MUtils;
 import llc.redstone.hysentials.util.ImageIconRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiOverlayDebug;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
@@ -67,17 +68,18 @@ public class ImageIcon {
             this.dynamicTexture = new DynamicTexture(image);
             stream.close();
             ImageIO.write(image, "png", file);
-            this.resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(this.name, this.dynamicTexture);
+//            this.resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(this.name, this.dynamicTexture);
         } else {
             BufferedImage image = javax.imageio.ImageIO.read(file);
             this.width = image.getWidth();
             this.height = image.getHeight();
             this.dynamicTexture = new DynamicTexture(image);
-            this.resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(this.name, this.dynamicTexture);
+//            this.resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(this.name, this.dynamicTexture);
         }
     }
 
     public static void reloadIcons() {
+        System.out.println("Reloading image icons...");
         try {
             for (ImageIcon icon : ImageIcon.imageIcons.values()) {
                 File file = new File("./config/hysentials/imageicons/" + icon.name + ".png");
@@ -86,7 +88,7 @@ public class ImageIcon {
                     icon.width = image.getWidth();
                     icon.height = image.getHeight();
                     icon.dynamicTexture = new DynamicTexture(image);
-                    icon.resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(icon.name, icon.dynamicTexture);
+//                    icon.resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(icon.name, icon.dynamicTexture);
                 }
             }
         } catch (IOException e) {
@@ -127,16 +129,20 @@ public class ImageIcon {
     }
 
     public int renderImage(float x, float y, boolean shadow, int oldColor, UUID uuid, float alpha) {
-        if (emoji && uuid != null && !CosmeticGui.Companion.hasCosmetic(uuid, "hymojis")) {
-            return -1;
-        }
-        Minecraft.getMinecraft().getTextureManager().bindTexture(this.resourceLocation);
+        if (emoji) return -1;
+
+//        if (emoji && uuid != null && !CosmeticGui.Companion.hasCosmetic(uuid, "hymojis")) {
+//            return -1;
+//        }
         int width = this.getWidth();
         int height = this.getHeight();
-        float scaledHeight = (float) 9/height;
+        float scaledHeight = (float) 9 / height;
 
-        GlStateManager.pushMatrix();
-        GlStateManager.scale(scaledHeight, scaledHeight, scaledHeight);
+//        GlStateManager.pushMatrix();
+
+        dynamicTexture.updateDynamicTexture();
+
+//        GlStateManager.scale(scaledHeight, scaledHeight, scaledHeight);
         int textColor = Integer.parseInt("FFFFFF", 16);
         if (shadow) {
             textColor = (textColor & 16579836) >> 2 | textColor & -16777216;
@@ -144,22 +150,24 @@ public class ImageIcon {
         GlStateManager.color((float) (textColor >> 16) / 255.0F, (float) (textColor >> 8 & 255) / 255.0F, (float) (textColor & 255) / 255.0F, alpha);
         drawModalRectWithCustomSizedTexture(x * (1 / scaledHeight), y * (1 / scaledHeight), 0, 0, width, height, width, height);
         GlStateManager.color((float) (oldColor >> 16) / 255.0F, (float) (oldColor >> 8 & 255) / 255.0F, (float) (oldColor & 255) / 255.0F, alpha);
+//        GlStateManager.popMatrix();
 
-        GlStateManager.popMatrix();
-        return (int) (getWidth() * scaledHeight);
+        return (int) (width * scaledHeight);
     }
 
     public static void drawModalRectWithCustomSizedTexture(double x, double y, float u, float v, int width, int height, float textureWidth, float textureHeight) {
         float f = 1.0F / textureWidth;
         float g = 1.0F / textureHeight;
-        Tessellator tessellator = Tessellator.getInstance();
-        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
-        worldRenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        worldRenderer.pos((double) x, (double) (y + height), 0.0).tex((double) (u * f), (double) ((v + (float) height) * g)).endVertex();
-        worldRenderer.pos((double) (x + width), (double) (y + height), 0.0).tex((double) ((u + (float) width) * f), (double) ((v + (float) height) * g)).endVertex();
-        worldRenderer.pos((double) (x + width), (double) y, 0.0).tex((double) ((u + (float) width) * f), (double) (v * g)).endVertex();
-        worldRenderer.pos((double) x, (double) y, 0.0).tex((double) (u * f), (double) (v * g)).endVertex();
-        tessellator.draw();
+        GL11.glBegin(GL11.GL_QUADS);
+        GL11.glTexCoord2f(u * f, v * g);
+        GL11.glVertex2d(x, y);
+        GL11.glTexCoord2f(u * f, (v + height) * g);
+        GL11.glVertex2d(x, y + height);
+        GL11.glTexCoord2f((u + width) * f, (v + height) * g);
+        GL11.glVertex2d(x + width, y + height);
+        GL11.glTexCoord2f((u + width) * f, v * g);
+        GL11.glVertex2d(x + width, y);
+        GL11.glEnd();
     }
 
     public static ImageIcon getIcon(String name) {

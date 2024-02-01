@@ -143,6 +143,21 @@ public class Navigator {
         return null;
     }
 
+    public static int getContainerSize() {
+        if (Minecraft.getMinecraft().currentScreen instanceof GuiChest) {
+            GuiChest chest = (GuiChest) Minecraft.getMinecraft().currentScreen;
+            try {
+                if (field_lowerChestInventory.get(chest) instanceof IInventory) {
+                    IInventory inventory = (IInventory) field_lowerChestInventory.get(chest);
+                    return inventory.getSizeInventory();
+                }
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return -1;
+    }
+
     public static void setSelecting(String option) {
         isSelecting = true;
         optionBeingSelected = option;

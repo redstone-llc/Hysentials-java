@@ -11,7 +11,6 @@ import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.config.HysentialsMods;
 import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
 import llc.redstone.hysentials.util.*;
 import llc.redstone.hysentials.utils.StringUtilsKt;
@@ -60,6 +59,7 @@ public class BwRanks {
         customTeamMap.clear();
     }
 
+
     int tick2 = 0;
     public static boolean shouldClose = false;
     public static boolean shouldOpen = true;
@@ -68,26 +68,6 @@ public class BwRanks {
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.START || Minecraft.getMinecraft().thePlayer == null || !BUtils.isHypixelOrSBX()) {
             return;
-        }
-        if (Minecraft.getMinecraft().currentScreen instanceof OneConfigGui) {
-            try {
-                OneConfigGui gui = (OneConfigGui) Minecraft.getMinecraft().currentScreen;
-                Page page = (Page) field_currentPage.get(gui);
-                if (page instanceof ModConfigPage) {
-                    ModConfigPage modPage = (ModConfigPage) page;
-                    if (modPage.getPage().mod.name.equals("Hysentials") && !shouldClose && shouldOpen) {
-                        gui.openPage(new HysentialsMods());
-                        shouldClose = true;
-                    } else if (modPage.getPage().mod.name.equals("Hysentials") && shouldClose) {
-                        gui.openPage(new ModsPage());
-                        shouldClose = false;
-                    }
-                } else if ((page instanceof ModsPage || page instanceof HysentialsMods) && !shouldOpen) {
-                    shouldOpen = true;
-                }
-            } catch (Exception e) {
-            }
-
         }
         if (++this.tick == 80) {
             // Update online cache every 4 seconds

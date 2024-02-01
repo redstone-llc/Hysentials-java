@@ -1,6 +1,7 @@
 package llc.redstone.hysentials;
 
 import cc.polyfrost.oneconfig.events.EventManager;
+import cc.polyfrost.oneconfig.internal.hud.HudCore;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.capes.CapeHandler;
@@ -9,7 +10,6 @@ import llc.redstone.hysentials.cosmetic.CosmeticManager;
 import llc.redstone.hysentials.cosmetics.backpack.BackpackCosmetic;
 import llc.redstone.hysentials.cosmetics.hamster.HamsterCompanion;
 import llc.redstone.hysentials.cosmetics.hats.blackcat.BlackCat;
-import llc.redstone.hysentials.cosmetics.hats.blackcat.BlackCatModel;
 import llc.redstone.hysentials.cosmetics.hats.blackcat.LayerBlackCatHat;
 import llc.redstone.hysentials.cosmetics.hats.cat.CatHat;
 import llc.redstone.hysentials.cosmetics.kzero.KzeroBundle;
@@ -18,9 +18,8 @@ import llc.redstone.hysentials.cosmetics.pepper.PepperCompanion;
 import llc.redstone.hysentials.cosmetics.hats.technocrown.TechnoCrown;
 import llc.redstone.hysentials.guis.club.ClubDashboardHandler;
 import llc.redstone.hysentials.guis.container.ContainerHandler;
-import llc.redstone.hysentials.guis.hsplayerlist.GuiOnlineList;
-import llc.redstone.hysentials.guis.utils.SBBoxes;
 import llc.redstone.hysentials.handlers.chat.modules.misc.Limit256;
+import llc.redstone.hysentials.handlers.guis.GuiScreenPost;
 import llc.redstone.hysentials.handlers.htsl.*;
 import llc.redstone.hysentials.handlers.misc.QuestHandler;
 import llc.redstone.hysentials.handlers.redworks.FormatPlayerName;
@@ -40,7 +39,6 @@ import llc.redstone.hysentials.handlers.chat.ChatHandler;
 import llc.redstone.hysentials.handlers.chat.modules.bwranks.BWSReplace;
 import llc.redstone.hysentials.handlers.display.GuiDisplayHandler;
 import llc.redstone.hysentials.handlers.guis.GameMenuOpen;
-import llc.redstone.hysentials.handlers.htsl.*;
 import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
 import llc.redstone.hysentials.handlers.language.LanguageHandler;
 import llc.redstone.hysentials.handlers.lobby.HousingLagReducer;
@@ -49,20 +47,8 @@ import llc.redstone.hysentials.handlers.sbb.Actionbar;
 import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
 import llc.redstone.hysentials.htsl.Cluster;
 import llc.redstone.hysentials.cosmetics.cubit.CubitCompanion;
-import llc.redstone.hysentials.util.*;
 import llc.redstone.hysentials.util.blockw.OnlineCache;
 import llc.redstone.hysentials.websocket.Socket;
-import llc.redstone.hysentials.command.*;
-import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.cosmetics.hats.cat.CatHat;
-import llc.redstone.hysentials.cosmetics.hats.technocrown.TechnoCrown;
-import llc.redstone.hysentials.guis.ResolutionUtil;
-import llc.redstone.hysentials.guis.club.ClubDashboardHandler;
-import llc.redstone.hysentials.guis.misc.PlayerInvHandler;
-import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
-import llc.redstone.hysentials.handlers.language.LanguageHandler;
-import llc.redstone.hysentials.handlers.redworks.BwRanks;
-import llc.redstone.hysentials.htsl.Cluster;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiMainMenu;
@@ -106,11 +92,12 @@ public class Hysentials {
     public static Hysentials INSTANCE;
     public static GuiMainMenu guiMainMenu;
     public static File jarFile;
+    public static String lastMessage = "";
 
     public static String modDir = "./config/hysentials";
 
     private HysentialsConfig config;
-    private final Logger logger = LogManager.getLogger("Hysentials");
+    public static final Logger logger = LogManager.getLogger("Hysentials");
 
     private final LanguageHandler languageHandler = new LanguageHandler();
     private final OnlineCache onlineCache = new OnlineCache();
@@ -257,6 +244,15 @@ public class Hysentials {
         new ImageIcon("legendary", new ResourceLocation("textures/icons/legendary.png"));
         new ImageIcon("exclusive", new ResourceLocation("textures/icons/exclusive.png"));
 
+        new ImageIcon("gray", new ResourceLocation("textures/icons/gray.png"));
+        new ImageIcon("yellow", new ResourceLocation("textures/icons/yellow.png"));
+        new ImageIcon("white", new ResourceLocation("textures/icons/white.png"));
+        new ImageIcon("green", new ResourceLocation("textures/icons/green.png"));
+        new ImageIcon("red", new ResourceLocation("textures/icons/red.png"));
+        new ImageIcon("pink", new ResourceLocation("textures/icons/pink.png"));
+        new ImageIcon("blue", new ResourceLocation("textures/icons/blue.png"));
+        new ImageIcon("aqua", new ResourceLocation("textures/icons/aqua.png"));
+
         new ImageIcon("moan", new ResourceLocation("textures/emoji/1005491490027487333.png"), true);
         new ImageIcon("super_neutral", new ResourceLocation("textures/emoji/1013063272473317377.png"), true);
         new ImageIcon("neutral", new ResourceLocation("textures/emoji/1013063271143714866.png"), true);
@@ -339,7 +335,6 @@ public class Hysentials {
         final llc.redstone.hysentials.event.EventBus hyBus = llc.redstone.hysentials.event.EventBus.INSTANCE;
         RevampedGameMenu.initGUI();
         SBBoxesEditor.initGUI();
-
         // general stuff
         eventBus.register(languageHandler);
 //        if (isChatting) {
@@ -356,6 +351,7 @@ public class Hysentials {
         eventBus.register(new GameMenuOpen());
         eventBus.register(new SbbRenderer());
         eventBus.register(new llc.redstone.hysentials.handlers.SbbRenderer());
+        eventBus.register(new GuiScreenPost());
 
 
         eventBus.register(new Actionbar());

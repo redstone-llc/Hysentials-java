@@ -1,9 +1,12 @@
 package llc.redstone.hysentials.mixin;
 
+import cc.polyfrost.oneconfig.events.event.WorldLoadEvent;
 import llc.redstone.hysentials.event.events.RenderItemInGuiEvent;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.EventBus;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

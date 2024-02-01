@@ -46,7 +46,7 @@ public class ClaimCommand extends CommandBase {
                 if (data.has("message")) {
                     MUtils.chat(HysentialsConfig.chatPrefix + " " + data.get("message").toString());
                 }
-                Minecraft.getMinecraft().thePlayer.sendChatMessage("/claim");
+//                Minecraft.getMinecraft().thePlayer.sendChatMessage("/claim");
             }
         }));
     }

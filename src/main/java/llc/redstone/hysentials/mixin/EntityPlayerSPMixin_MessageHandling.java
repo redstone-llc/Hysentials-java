@@ -18,19 +18,22 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-@Mixin(EntityPlayerSP.class)
+@Mixin(value = EntityPlayerSP.class, priority = Integer.MAX_VALUE)
 public class EntityPlayerSPMixin_MessageHandling {
     @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
     private void handleSentMessages(String message, CallbackInfo ci) {
+        Hysentials.lastMessage = message;
+        if (hysentials$sendMessage(message) == null) ci.cancel();
+
         if (GlobalChatStuff.GlobalSendMessage.onMessageSend(message) == null) ci.cancel();
         if (Hysentials.INSTANCE.getChatHandler().handleSentMessage(message) == null) ci.cancel();
         if (ClubDashboard.handleSentMessage(message) == null) ci.cancel();
 
-        if (hysentials$sendMessage(message) == null) ci.cancel();
     }
 
     @Unique
     private String hysentials$sendMessage(String message) {
+        if (message.startsWith("/")) return message;
         for (Map.Entry<UUID, Function<String, String>> entry : Container.chatRequests.entrySet()) {
             if (entry.getValue() != null) {
                 Container.chatRequests.remove(entry.getKey());

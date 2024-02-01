@@ -19,7 +19,7 @@ group = "net.sinender"
 archivesBaseName = mod_name
 
 blossom {
-    String className = "src/main/java/cc/woverflow/hysentials/Hysentials.java"
+    String className = "src/main/java/llc/redstone/hysentials/Hysentials.java"
     replaceToken("@VER@", project.version, className)
     replaceToken("@NAME@", mod_name, className)
     replaceToken("@ID@", mod_id, className)

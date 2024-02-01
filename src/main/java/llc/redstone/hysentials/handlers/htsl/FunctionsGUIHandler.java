@@ -69,6 +69,7 @@ public class FunctionsGUIHandler {
         if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
             return;
         if (Navigator.getContainerName() == null || !Navigator.getContainerName().equals("Functions")) return;
+        if (Navigator.getContainerSize() != 54) return;
         GlStateManager.pushMatrix();
         Slot slot = Minecraft.getMinecraft().thePlayer.openContainer.getSlot(48);
 
