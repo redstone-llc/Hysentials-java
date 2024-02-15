@@ -53,7 +53,6 @@ public class HousingScoreboard {
                 }
             }
         } catch (Exception ignored) {
-            throw new RuntimeException(ignored);
         }
         return null;
     }

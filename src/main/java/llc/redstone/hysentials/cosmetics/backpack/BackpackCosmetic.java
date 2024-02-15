@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.cosmetics.backpack;
 
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
+import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
 import llc.redstone.hysentials.cosmetics.AbstractCosmetic;
 import llc.redstone.hysentials.cosmetics.hats.cat.CatHat;
 import llc.redstone.hysentials.cosmetics.hats.cat.CatModel;
@@ -27,8 +28,8 @@ public class BackpackCosmetic {
         texture = new ResourceLocation("hysentials:backpacks/" + name + ".png");
     }
     public boolean canUse(EntityPlayer player) {
-        return CosmeticGui.Companion.equippedCosmetic(player.getUniqueID(), name)
-            && CosmeticGui.Companion.hasCosmetic(player.getUniqueID(), name);
+        return CosmeticUtilsKt.equippedCosmetic(player.getUniqueID(), name)
+            && CosmeticUtilsKt.hasCosmetic(player.getUniqueID(), name);
     }
 
     public static void loadBackpacks() {

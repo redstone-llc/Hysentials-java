@@ -40,7 +40,7 @@ public class GlobalChatCommand extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
         if (!BUtils.isHypixelOrSBX()) {
-            MUtils.chat(HysentialsConfig.chatPrefix + "&cYou are not in a Hypixel server!");
+            MUtils.chat(HysentialsConfig.chatPrefix + "&cYou are not on a Hypixel server!");
             return;
         }
         if (!ChatConfig.globalChat || !Hysentials.INSTANCE.getConfig().chatConfig.enabled) {

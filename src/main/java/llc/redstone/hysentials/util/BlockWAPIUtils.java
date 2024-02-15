@@ -34,6 +34,7 @@ import static llc.redstone.hysentials.handlers.chat.modules.bwranks.BWSReplace.d
 public class BlockWAPIUtils {
     public static List<HysentialsSchema.Action> actions = new ArrayList<>();
     public static List<HysentialsSchema.Cosmetic> cosmetics = new ArrayList<>();
+    public static HysentialsSchema.Club currentHousingsClub;
 
     /**
      * Update the actions and cosmetics caches.
@@ -137,13 +138,14 @@ public class BlockWAPIUtils {
         ADMIN(6, "1", "§c[ADMIN] ", "§c", "admin"),
         MOD(4, "2", "§2[MOD] ", "§2", "mod"),
         HELPER(3, "3", "§9[HELPER] ", "§9", "helper"),
-        CREATOR(2, "4", "§3[§fCREATOR§3] ", "§3", "creator"),
+        CREATOR("§3[§fC§3] ", 2, "4", "§3[§fCREATOR§3] ", "§3", "creator"),
         TEAM(5, "5", "§6[TEAM] ", "§6", "team"),
         DEFAULT(1, "replace", "§7", "§7", null, "default");
 
         public final int index;
         private final String id;
         private final String prefix;
+        private final String simplePrefix;
         private final String color;
         private final String hex;
 
@@ -155,6 +157,16 @@ public class BlockWAPIUtils {
             this.prefix = prefix;
             this.color = color;
             this.hex = hex;
+            this.simplePrefix = (prefix.equals(color) ? color : color + "[" + C.removeColor(prefix.replaceAll("[\\[\\]]", "")).charAt(0) + "] ");
+        }
+
+        Rank(String simplePrefix, int index, String id, String prefix, String color, String hex) {
+            this.index = index;
+            this.id = id;
+            this.prefix = prefix;
+            this.color = color;
+            this.hex = hex;
+            this.simplePrefix = simplePrefix;
         }
 
         Rank(int index, String id, String prefix, String color, String placeholder, String hex) {
@@ -164,6 +176,7 @@ public class BlockWAPIUtils {
             this.color = color;
             this.placeholder = placeholder;
             this.hex = hex;
+            this.simplePrefix = (prefix.equals(color) ? color : color + "[" + C.removeColor(prefix.replaceAll("[\\[\\]]", "")).charAt(0) + "] ");
         }
 
         public String getId() {
@@ -171,7 +184,7 @@ public class BlockWAPIUtils {
         }
 
         public String getPrefix(String name) {
-            return prefix;
+            return (FormattingConfig.simplisticRankInChat ? simplePrefix : prefix);
         }
 
         public String getPrefix() {

@@ -21,15 +21,15 @@ public class EditorConfig extends Config {
     public SBBoxes line;
     @Checkbox(
         name = "enabled",
-        description = "Enable the line",
+        description = "Enable the line.",
         category = "editor",
         subcategory = "general"
     )
     public boolean enabled = true;
 
     @Text(
-        name = "regex",
-        description = "The regex to match the line. Don't edit this unless you know regex",
+        name = "RegEx",
+        description = "The RegEx to match the line. Don't edit this unless you know RegEx.",
         category = "editor",
         subcategory = "general",
         size = 1,
@@ -39,7 +39,7 @@ public class EditorConfig extends Config {
 
     @Text(
         name = "display",
-        description = "The text that will be displayed",
+        description = "The text that will be displayed.",
         category = "editor",
         subcategory = "general",
         size = 1,
@@ -49,7 +49,7 @@ public class EditorConfig extends Config {
 
     @Text(
         name = "title",
-        description = "Title of the scoreboard to match. Leave blank to match all",
+        description = "Title of the scoreboard to match. Leave blank to match all.",
         category = "editor",
         subcategory = "general"
     )
@@ -57,7 +57,7 @@ public class EditorConfig extends Config {
 
     @Number(
         name = "x",
-        description = "X position of the line",
+        description = "X position of the line.",
         category = "editor",
         subcategory = "position",
         min = 0,
@@ -67,7 +67,7 @@ public class EditorConfig extends Config {
 
     @Number(
         name = "y",
-        description = "Y position of the line",
+        description = "Y position of the line.",
         category = "editor",
         subcategory = "position",
         min = 0,
@@ -77,7 +77,7 @@ public class EditorConfig extends Config {
 
     @Slider(
         name = "scale",
-        description = "Scale of the line",
+        description = "Scale of the line.",
         category = "editor",
         subcategory = "position",
         min = 0,
@@ -87,7 +87,7 @@ public class EditorConfig extends Config {
 
     @Button(
         name = "Delete",
-        description = "Delete this line",
+        description = "Delete this line.",
         category = "editor",
         subcategory = "delete",
         text = "Delete"

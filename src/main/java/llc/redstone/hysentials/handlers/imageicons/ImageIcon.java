@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.handlers.imageicons;
 
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
+import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
 import llc.redstone.hysentials.util.MUtils;
 import llc.redstone.hysentials.util.ImageIconRenderer;
 import net.minecraft.client.Minecraft;
@@ -51,7 +52,7 @@ public class ImageIcon {
         this(name, resourceLocation, false);
     }
 
-    private void handleImageIcon() throws IOException {
+    public void handleImageIcon() throws IOException {
         File file = new File("./config/hysentials/" + (emoji ? "emojis" : "imageicons") + "/" + name + ".png");
         if (!file.exists() || (name.equals("party") && javax.imageio.ImageIO.read(file).getWidth() != 48)) {
             if (!file.getParentFile().exists()) {
@@ -129,20 +130,18 @@ public class ImageIcon {
     }
 
     public int renderImage(float x, float y, boolean shadow, int oldColor, UUID uuid, float alpha) {
-        if (emoji) return -1;
-
-//        if (emoji && uuid != null && !CosmeticGui.Companion.hasCosmetic(uuid, "hymojis")) {
-//            return -1;
-//        }
+        if (emoji && uuid != null && !CosmeticUtilsKt.hasCosmetic(uuid, "hymojis")) {
+            return -1;
+        }
         int width = this.getWidth();
         int height = this.getHeight();
         float scaledHeight = (float) 9 / height;
 
-//        GlStateManager.pushMatrix();
+        GlStateManager.pushMatrix();
 
         dynamicTexture.updateDynamicTexture();
 
-//        GlStateManager.scale(scaledHeight, scaledHeight, scaledHeight);
+        GlStateManager.scale(scaledHeight, scaledHeight, scaledHeight);
         int textColor = Integer.parseInt("FFFFFF", 16);
         if (shadow) {
             textColor = (textColor & 16579836) >> 2 | textColor & -16777216;
@@ -150,7 +149,7 @@ public class ImageIcon {
         GlStateManager.color((float) (textColor >> 16) / 255.0F, (float) (textColor >> 8 & 255) / 255.0F, (float) (textColor & 255) / 255.0F, alpha);
         drawModalRectWithCustomSizedTexture(x * (1 / scaledHeight), y * (1 / scaledHeight), 0, 0, width, height, width, height);
         GlStateManager.color((float) (oldColor >> 16) / 255.0F, (float) (oldColor >> 8 & 255) / 255.0F, (float) (oldColor & 255) / 255.0F, alpha);
-//        GlStateManager.popMatrix();
+        GlStateManager.popMatrix();
 
         return (int) (width * scaledHeight);
     }

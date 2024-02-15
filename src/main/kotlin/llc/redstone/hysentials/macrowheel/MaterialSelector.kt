@@ -24,7 +24,7 @@ class MaterialSelector(private var macro: MacroWheelData.MacroWheel) : Paginatio
         return items
     }
 
-    override fun getAction(): BiConsumer<GuiAction.GuiClickEvent, ItemStack> {
+    override fun getAction(index: Int): BiConsumer<GuiAction.GuiClickEvent, ItemStack> {
         return BiConsumer { event, item ->
             val material = Material.valueOf(
                 C.removeColor(item.displayName)

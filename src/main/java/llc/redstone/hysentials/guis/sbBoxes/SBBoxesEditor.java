@@ -10,6 +10,7 @@ import llc.redstone.hysentials.GuiIngameHysentials;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.EditorConfig;
 import llc.redstone.hysentials.config.HysentialsConfig;
+import llc.redstone.hysentials.config.hysentialMods.ScorebarsConfig;
 import llc.redstone.hysentials.guis.HysentialsGui;
 import llc.redstone.hysentials.guis.utils.GrabOffset;
 import llc.redstone.hysentials.guis.utils.Position;
@@ -83,7 +84,7 @@ public class SBBoxesEditor extends HysentialsGui {
         super.drawScreen(mouseX, mouseY, partialTicks);
         GlStateManager.pushMatrix();
         ScaledResolution res = new ScaledResolution(mc);
-        int radius = new Integer[]{0, 2, 4}[HysentialsConfig.scoreboardBoxesBorderRadius];
+        int radius = new Integer[]{0, 2, 4}[ScorebarsConfig.scoreboardBoxesBorderRadius];
 
         int lineWidth = Math.max(1, Math.round(Math.min(UResolution.getWindowWidth() / 1920f, UResolution.getWindowHeight() / 1080f)));
         if (isDragging) {
@@ -119,7 +120,7 @@ public class SBBoxesEditor extends HysentialsGui {
         int startY = pos[1];
         int endX = pos[2];
 
-        if (HysentialsConfig.scoreboard) {
+        if (ScorebarsConfig.scoreboard) {
             for (int i = 0; i < lines.size(); i++) {
                 if (isMouseOverLine(mouseX, mouseY, i)) {
                     ScoreboardWrapper.ScoreWrapper line = lines.get(lines.size() - i - 1);
@@ -405,10 +406,10 @@ public class SBBoxesEditor extends HysentialsGui {
         ScoreObjective objective = ScoreboardWrapper.getSidebar();
         ScaledResolution res = new ScaledResolution(Minecraft.getMinecraft());
 
-        if (HysentialsConfig.scoreboard) {
+        if (ScorebarsConfig.scoreboard) {
             GuiIngameHysentials.renderObjective = false;
             int x = res.getScaledWidth();
-            int radius = new Integer[]{0, 2, 4}[HysentialsConfig.scoreboardBorderRadius];
+            int radius = new Integer[]{0, 2, 4}[ScorebarsConfig.scoreboardBorderRadius];
             List<ScoreboardWrapper.ScoreWrapper> lines = new ArrayList<>(ScoreboardWrapper.getLines(true));
             List<String[]> formattedLines = new ArrayList<>();
 
@@ -425,7 +426,7 @@ public class SBBoxesEditor extends HysentialsGui {
             int width = Math.max(titleWidth, formattedLines.stream()
                 .mapToInt(line ->
                     Minecraft.getMinecraft().fontRendererObj.getStringWidth(line[0])
-                        + (HysentialsConfig.redNumbers ? 9 + Minecraft.getMinecraft().fontRendererObj.getStringWidth(line[1]) : 0)
+                        + (ScorebarsConfig.redNumbers ? 9 + Minecraft.getMinecraft().fontRendererObj.getStringWidth(line[1]) : 0)
                 ).max().orElse(0)) + 4 + 2 * radius;
             int height = 11 + 2 * radius + 10 * lines.size();
             int originalX = x;
@@ -466,7 +467,7 @@ public class SBBoxesEditor extends HysentialsGui {
 
     public boolean isMouseOverLine(int mouseX, int mouseY, int line) {
         int[] pos = getScoreboardPosition();
-        int i = pos[1] + (HysentialsConfig.scoreboard ? 10 : 9) * line;
+        int i = pos[1] + (ScorebarsConfig.scoreboard ? 10 : 9) * line;
         return mouseX >= pos[0] && mouseX <= pos[2] && mouseY >= i && mouseY <= i + 9;
     }
 

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package llc.redstone.hysentials.guis.container;
 
 import net.minecraft.client.Minecraft;

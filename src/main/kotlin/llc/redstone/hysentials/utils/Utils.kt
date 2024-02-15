@@ -58,11 +58,15 @@ object Utils {
     fun getExpForLevel(level: Int): Int {
         var previous = 1000
         var amount = 0.0
-        var multiplier = 1.15
+        var multiplier = 1.1
         for (i in 0 until level) {
             previous = (previous + amount).toInt()
-            amount = (150 * multiplier).toInt().toDouble()
-            multiplier += if (i > 10) 0.1 else 0.15
+            amount = (100 * multiplier).toInt().toDouble()
+            when {
+                i % 20 == 0 && i < 50 -> multiplier += 0.1
+                i % 5 == 0 && i > 100 -> multiplier += 0.1
+                i % 2 == 0 && i > 150 -> multiplier += 0.1
+            }
         }
         return previous
     }

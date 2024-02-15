@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.mixin;
 
 import llc.redstone.hysentials.config.HysentialsConfig;
+import llc.redstone.hysentials.config.hysentialMods.CosmeticConfig;
 import llc.redstone.hysentials.cosmetics.kzero.KzeroBundle;
 import llc.redstone.hysentials.config.HysentialsConfig;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,7 +17,7 @@ public class PlayerModelMixin {
 
     @Inject(method = "renderCape", at = @At("HEAD"), cancellable = true)
     public void renderCloak(float p_renderCape_1_, CallbackInfo info) {
-        if (!HysentialsConfig.disableCustomCapes) info.cancel();
+        if (!CosmeticConfig.disableCustomCapes) info.cancel();
 
     }
 }

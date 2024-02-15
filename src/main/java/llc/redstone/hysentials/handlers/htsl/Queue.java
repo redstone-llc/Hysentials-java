@@ -2,6 +2,7 @@ package llc.redstone.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.checker.units.qual.N;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
 import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
 import llc.redstone.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
@@ -99,7 +100,7 @@ public class Queue {
         if (event.phase != TickEvent.Phase.START) return;
         if (event.type != TickEvent.Type.CLIENT) return;
         if (queue.size() != 0) timeWithoutOperation++;
-        if ((greaterThan(timeWithoutOperation, HysentialsConfig.guiTimeout)) && queue.size() > 0 && !HysentialsConfig.htslSafeMode && Navigator.guiToOpen == null) {
+        if ((greaterThan(timeWithoutOperation, HousingConfig.guiTimeout)) && queue.size() > 0 && !HousingConfig.htslSafeMode && Navigator.guiToOpen == null) {
             fails.add("&cOperation timed out. &f(too long without GUI click)");
             doneLoading();
         }

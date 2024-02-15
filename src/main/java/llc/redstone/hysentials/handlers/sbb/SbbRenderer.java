@@ -1,47 +1,26 @@
 package llc.redstone.hysentials.handlers.sbb;
 
 import cc.polyfrost.oneconfig.config.core.OneColor;
-import cc.polyfrost.oneconfig.libs.universal.ChatColor;
-import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.guis.utils.SBBoxes;
-import llc.redstone.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.guis.sbBoxes.SBBoxesEditor;
 import llc.redstone.hysentials.handlers.redworks.HousingScoreboard;
 import llc.redstone.hysentials.util.Renderer;
 import llc.redstone.hysentials.util.ScoreboardWrapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.guis.sbBoxes.SBBoxesEditor;
-import llc.redstone.hysentials.handlers.redworks.HousingScoreboard;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.MouseEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
-import scala.Int;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import static llc.redstone.hysentials.guis.actionLibrary.ClubActionViewer.toList;
 import static net.minecraft.client.Minecraft.getMinecraft;
 
 public class SbbRenderer {

@@ -30,7 +30,7 @@ public abstract class PaginationContainer extends Container {
 
     public abstract List<ItemStack> getItems();
 
-    public abstract BiConsumer<GuiAction.GuiClickEvent, ItemStack> getAction();
+    public abstract BiConsumer<GuiAction.GuiClickEvent, ItemStack> getAction(int index);
 
     @Override
     public void setItems() {
@@ -44,7 +44,7 @@ public abstract class PaginationContainer extends Container {
 
         newItems.sort(Comparator.comparing(ItemStack::getDisplayName));
 
-        paginationList = new PaginationList<>(newItems, ((rows - 2) * 7) - 1);
+        paginationList = new PaginationList<>(newItems, ((rows - 2) * 7));
         maxPages = paginationList.size();
         if (page > maxPages) {
             page = maxPages;
@@ -116,7 +116,7 @@ public abstract class PaginationContainer extends Container {
                 return null;
             }, 30000);
         });
-        int[] slots = new int[((rows - 2) * 7)];
+        int[] slots = new int[((rows - 2) * 7 + 1)];
         for (int i = 0; i < rows - 2; i++) {
             for (int j = 0; j < 7; j++) {
                 slots[((i * 7) + j)] = ((i + 1) * 9) + j;
@@ -129,7 +129,7 @@ public abstract class PaginationContainer extends Container {
             setAction(slot, event -> {
                 event.getEvent().cancel();
                 ItemStack item = paginationList.getPage(page).get(finalI - 1);
-                getAction().accept(event, item);
+                getAction(finalI - 1).accept(event, item);
             });
         }
 

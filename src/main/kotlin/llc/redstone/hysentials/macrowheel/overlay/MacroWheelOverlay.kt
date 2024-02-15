@@ -14,6 +14,7 @@ import llc.redstone.hysentials.util.Renderer
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.RenderHelper
+import net.minecraft.client.resources.model.IBakedModel
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraftforge.client.ClientCommandHandler
@@ -123,13 +124,18 @@ class MacroWheelOverlay(
                     )
 
                     if (inputHandler.isMouseDown(0)) {
-                        val command = ClientCommandHandler.instance.executeCommand(
-                            Minecraft.getMinecraft().thePlayer,
-                            macro.command
-                        )
-                        if (command != 1) {
-                            Minecraft.getMinecraft().thePlayer.sendChatMessage("/" + macro.command)
+                        for (command in Hysentials.commands) {
+                            if (command.commandName == macro.command.split(" ")[0]) {
+                                command.processCommand(
+                                    Minecraft.getMinecraft().thePlayer,
+                                    macro.command.substring(macro.command.indexOf(" ") + 1).split(" ").toTypedArray()
+                                )
+                                stop()
+                                return
+                            }
                         }
+
+                        Minecraft.getMinecraft().thePlayer.sendChatMessage("/" + macro.command)
                         stop()
                     } else if (inputHandler.isMouseDown(1)) {
                         MacroWheelEditor(i).open()

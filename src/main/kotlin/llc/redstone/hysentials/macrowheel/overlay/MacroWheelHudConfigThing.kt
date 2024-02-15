@@ -48,7 +48,7 @@ class MacroWheelHudConfigThing(
 
     override fun draw(matrices: UMatrixStack?, x: Float, y: Float, scale: Float, example: Boolean) {
         NanoVGHelper.INSTANCE.setupAndDraw(true) {
-            MacroWheelOverlay(x, y, scale, bgColor).draw(
+            MacroWheelOverlay(x + 0.5f, y + 0.5f, scale, bgColor).draw(
                 it, 0f, InputHandler()
             )
         }

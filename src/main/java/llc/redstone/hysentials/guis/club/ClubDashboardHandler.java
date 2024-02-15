@@ -2,16 +2,20 @@ package llc.redstone.hysentials.guis.club;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.utils.Multithreading;
+import com.google.gson.JsonParser;
 import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
 import llc.redstone.hysentials.handlers.htsl.Navigator;
 import com.google.gson.JsonObject;
+import llc.redstone.hysentials.util.BUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static llc.redstone.hysentials.guis.club.ClubDashboard.clubhouseSelect;
@@ -46,7 +50,8 @@ public class ClubDashboardHandler {
                 if (Navigator.getContainerName().split("'").length == 2) {
                     username = Navigator.getContainerName().split("'")[0];
                 }
-                String nbt = itemStack.serializeNBT().toString();
+
+                JSONObject nbt = BUtils.nbtCompoundToJson(!itemStack.hasTagCompound() ? new NBTTagCompound() : itemStack.serializeNBT());
                 JSONObject jsonObject = new JSONObject();
                 JSONObject jsonObject1 = new JSONObject();
                 jsonObject1.put("name", ChatColor.Companion.stripControlCodes(name));

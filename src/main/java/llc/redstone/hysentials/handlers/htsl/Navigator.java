@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
+import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
 import llc.redstone.hysentials.handlers.chat.modules.misc.GuiChat256;
 import llc.redstone.hysentials.htsl.Loader;
 import llc.redstone.hysentials.util.MUtils;
@@ -105,7 +106,7 @@ public class Navigator {
     }
 
     public static void click(int slotId) {
-        if (HysentialsConfig.htslSafeMode) {
+        if (HousingConfig.htslSafeMode) {
             SLOT_TO_MANUALLY_CLICK = slotId;
             try {
                 setArrowToSlot(slotId);
@@ -292,7 +293,7 @@ public class Navigator {
 
     public static void inputAnvil(String text) {
         GuiScreen screen = Minecraft.getMinecraft().currentScreen;
-        if (HysentialsConfig.htslSafeMode) {
+        if (HousingConfig.htslSafeMode) {
             if (!(screen instanceof GuiRepair)) return;
             SLOT_TO_MANUALLY_CLICK = ANVIL_SLOT;
         }
@@ -302,7 +303,7 @@ public class Navigator {
     }
 
     public static void inputChat(String text) {
-        if (HysentialsConfig.htslSafeMode) {
+        if (HousingConfig.htslSafeMode) {
             String finalText = text;
             Multithreading.schedule(() -> {
                 Minecraft.getMinecraft().displayGuiScreen(new GuiChat(finalText));
@@ -318,7 +319,7 @@ public class Navigator {
     }
 
     public static void command(String command) {
-        if (HysentialsConfig.htslSafeMode) {
+        if (HousingConfig.htslSafeMode) {
             String finalCommand = "/" + command;
             Multithreading.schedule(() -> {
                 Minecraft.getMinecraft().displayGuiScreen(new GuiChat(finalCommand));
@@ -389,7 +390,7 @@ public class Navigator {
             return;
         }
         if (event.gui instanceof GuiRepair) {
-            if (lastItemAddedTimestamp == 0 || (System.currentTimeMillis() - lastItemAddedTimestamp) < HysentialsConfig.guiCooldown) {
+            if (lastItemAddedTimestamp == 0 || (System.currentTimeMillis() - lastItemAddedTimestamp) < HousingConfig.guiCooldown) {
                 return;
             }
             isReady = true;
@@ -402,7 +403,7 @@ public class Navigator {
 //        if (containerName.equals("Housing Menu")) {
 //            return;
 //        } I AM DUMB LOL
-        if (lastItemAddedTimestamp == 0 || (System.currentTimeMillis() - lastItemAddedTimestamp) < HysentialsConfig.guiCooldown) {
+        if (lastItemAddedTimestamp == 0 || (System.currentTimeMillis() - lastItemAddedTimestamp) < HousingConfig.guiCooldown) {
             return;
         }
         isReady = true;

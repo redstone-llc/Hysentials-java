@@ -6,6 +6,8 @@ import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.capes.CapeHandler;
 import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
+import llc.redstone.hysentials.config.hysentialMods.IconsConfig;
+import llc.redstone.hysentials.config.hysentialMods.icons.IconStuff;
 import llc.redstone.hysentials.cosmetic.CosmeticManager;
 import llc.redstone.hysentials.cosmetics.backpack.BackpackCosmetic;
 import llc.redstone.hysentials.cosmetics.hamster.HamsterCompanion;
@@ -21,6 +23,7 @@ import llc.redstone.hysentials.guis.container.ContainerHandler;
 import llc.redstone.hysentials.handlers.chat.modules.misc.Limit256;
 import llc.redstone.hysentials.handlers.guis.GuiScreenPost;
 import llc.redstone.hysentials.handlers.htsl.*;
+import llc.redstone.hysentials.handlers.misc.HousingJoinHandler;
 import llc.redstone.hysentials.handlers.misc.QuestHandler;
 import llc.redstone.hysentials.handlers.redworks.FormatPlayerName;
 import llc.redstone.hysentials.macrowheel.MacroWheelData;
@@ -54,6 +57,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.renderer.entity.layers.LayerArmorBase;
 import net.minecraft.client.renderer.entity.layers.LayerBipedArmor;
+import net.minecraft.command.ICommand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -77,6 +81,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 @Mod(
     modid = Hysentials.MOD_ID,
@@ -106,6 +112,7 @@ public class Hysentials {
 
     public final GuiDisplayHandler guiDisplayHandler = new GuiDisplayHandler();
     public final CosmeticManager cosmeticManager = new CosmeticManager();
+    public static List<ICommand> commands;
 
     public ImageIconRenderer imageIconRenderer;
     public JsonData sbBoxes;
@@ -140,7 +147,9 @@ public class Hysentials {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
+        registerImages();
         config = new HysentialsConfig();
+        updateAndAdd();
         File file = new File(modDir, "./config/hysentials");
         if (!file.exists() && !file.mkdirs()) {
             throw new RuntimeException("Failed to create config directory! Please report this to sinender on Discord");
@@ -172,22 +181,27 @@ public class Hysentials {
         Socket.createSocket();
 
         CommandManager.INSTANCE.registerCommand(new GroupChatCommand());
-        ClientCommandHandler.instance.registerCommand(new HysentialsCommand());
-        ClientCommandHandler.instance.registerCommand(new GlobalChatCommand());
-        ClientCommandHandler.instance.registerCommand(new HypixelChatCommand());
-        ClientCommandHandler.instance.registerCommand(new VisitCommand());
-        ClientCommandHandler.instance.registerCommand(new VisitPlayerCommand());
-        ClientCommandHandler.instance.registerCommand(new RemoveGlowCommand());
-        ClientCommandHandler.instance.registerCommand(new GlowCommand());
-        ClientCommandHandler.instance.registerCommand(new SetLoreLineCommand());
-        ClientCommandHandler.instance.registerCommand(new RenameCommand());
-        ClientCommandHandler.instance.registerCommand(new RemoveNameCommand());
-        ClientCommandHandler.instance.registerCommand(new InsertLoreLineCommand());
-        ClientCommandHandler.instance.registerCommand(new RemoveLoreLineCommand());
-        ClientCommandHandler.instance.registerCommand(new OpenInvCommand());
-        ClientCommandHandler.instance.registerCommand(new SetTextureCommand());
-        ClientCommandHandler.instance.registerCommand(new HymojiCommand());
-        ClientCommandHandler.instance.registerCommand(new ClaimCommand());
+        commands = new ArrayList<>();
+        commands.add(new HysentialsCommand());
+        commands.add(new GlobalChatCommand());
+        commands.add(new HypixelChatCommand());
+        commands.add(new VisitCommand());
+        commands.add(new VisitPlayerCommand());
+        commands.add(new RemoveGlowCommand());
+        commands.add(new QwestiiTestCommand());
+        commands.add(new GlowCommand());
+        commands.add(new SetLoreLineCommand());
+        commands.add(new RenameCommand());
+        commands.add(new RemoveNameCommand());
+        commands.add(new InsertLoreLineCommand());
+        commands.add(new RemoveLoreLineCommand());
+        commands.add(new OpenInvCommand());
+        commands.add(new SetTextureCommand());
+        commands.add(new HymojiCommand());
+        commands.add(new ClaimCommand());
+        for (ICommand command : commands) {
+            ClientCommandHandler.instance.registerCommand(command);
+        }
         CommandManager.INSTANCE.registerCommand(new SBBoxesCommand());
         CommandManager.INSTANCE.registerCommand(new ActionLibraryCommand());
         CommandManager.INSTANCE.registerCommand(new ClubCommand());
@@ -209,7 +223,12 @@ public class Hysentials {
         isHytils = Loader.isModLoaded("hytils-reborn");
         chatHandler.init();
 
-        registerImages();
+        imageIconRenderer = new ImageIconRenderer();
+        minecraftFont = Minecraft.getMinecraft().fontRendererObj;
+        if (FormattingConfig.fancyRendering()) {
+            Minecraft.getMinecraft().fontRendererObj = imageIconRenderer;
+        }
+
         llc.redstone.hysentials.htsl.Loader.registerLoaders();
         Cluster.registerClusters();
 
@@ -218,6 +237,10 @@ public class Hysentials {
 
         LayerArmorBase armorBase;
         LayerBipedArmor bipedArmor;
+
+        if (config.macroWheelHud.position.getX() == 0 && config.macroWheelHud.position.getY() == 0) {
+            config.macroWheelHud.position.setPosition((Renderer.screen.getWidth() / 2f) - (34*5f) / 2, (Renderer.screen.getHeight() / 2f) - (34*5f) / 2);
+        }
     }
 
     @Mod.EventHandler
@@ -226,6 +249,26 @@ public class Hysentials {
     }
 
     public static FontRenderer minecraftFont;
+
+    public static void updateAndAdd() {
+        try {
+            for (ImageIcon icon : ImageIcon.imageIcons.values()) {
+                icon.handleImageIcon();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        for (IconStuff icon : Hysentials.INSTANCE.config.iconsConfig.icons) {
+            if (icon.custom) {
+                if (icon.localPath == null || icon.name.isEmpty() || ImageIcon.imageIcons.containsKey(icon.name)) continue;
+                ImageIcon icon1 = new ImageIcon(icon.name, null, false);
+                icon1.width = icon.width;
+                icon1.height = icon.height;
+            }
+        }
+    }
+
     private void registerImages() {
         new ImageIcon("front", new ResourceLocation("textures/icons/front.png"));
         new ImageIcon("back", new ResourceLocation("textures/icons/back.png"));
@@ -323,11 +366,6 @@ public class Hysentials {
         for (int i = 0; i < 10; i++) {
             new ImageIcon(String.valueOf(i), new ResourceLocation("textures/icons/" + i + ".png"));
         }
-        imageIconRenderer = new ImageIconRenderer();
-        minecraftFont = Minecraft.getMinecraft().fontRendererObj;
-        if (FormattingConfig.fancyRendering()) {
-            Minecraft.getMinecraft().fontRendererObj = imageIconRenderer;
-        }
     }
 
     private void registerHandlers() {
@@ -352,6 +390,7 @@ public class Hysentials {
         eventBus.register(new SbbRenderer());
         eventBus.register(new llc.redstone.hysentials.handlers.SbbRenderer());
         eventBus.register(new GuiScreenPost());
+        eventBus.register(new HousingJoinHandler());
 
 
         eventBus.register(new Actionbar());

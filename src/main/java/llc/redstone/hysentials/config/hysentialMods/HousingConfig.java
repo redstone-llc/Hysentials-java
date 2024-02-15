@@ -64,6 +64,15 @@ public class HousingConfig extends Config {
         description = "Adds the housing name to the scoreboards title."
     )
     public static boolean housingNameScoreboard = true;
+
+    @Switch(
+        name = "Shift+Right Click OpenInv",
+        category = "Housing",
+        subcategory = "General",
+        description = "Toggles the ability to open a players inventory by shift right clicking them."
+    )
+    public static boolean shiftRightClickInv = true;
+
     public HousingConfig() {
         super(new Mod("Housing", ModType.UTIL_QOL, "/assets/hysentials/mods/housing.png", 244, 80), "hysentials-housing.json");
         initialize();

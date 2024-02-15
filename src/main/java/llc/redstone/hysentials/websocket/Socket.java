@@ -113,7 +113,7 @@ public class Socket {
                     System.out.println("Connected to websocket server");
                     relogAttempts = 0;
                     if (future != null) {
-                        future.cancel(false);
+                        future.cancel(true);
                     }
                     JSONObject obj = new JSONObject();
                     obj.put("method", "login");
@@ -143,7 +143,7 @@ public class Socket {
                         return;
                     }
                     MUtils.chat(HysentialsConfig.chatPrefix + " §cDisconnected from websocket server. Attempting to reconnect in 20 seconds");
-                    Multithreading.schedule(Socket::createSocket, 20, TimeUnit.SECONDS);
+                    future = Multithreading.submitScheduled(Socket::createSocket, 20, TimeUnit.SECONDS);
                 }
 
                 @Override
@@ -459,7 +459,7 @@ public class Socket {
                 return;
             }
             MUtils.chat(HysentialsConfig.chatPrefix + " §cDisconnected from websocket server. Attempting to reconnect in 20 seconds");
-            Multithreading.submitScheduled(Socket::createSocket, 20, TimeUnit.SECONDS);
+            future = Multithreading.submitScheduled(Socket::createSocket, 20, TimeUnit.SECONDS);
         }
     }
 

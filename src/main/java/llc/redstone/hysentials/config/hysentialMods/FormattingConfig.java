@@ -59,6 +59,22 @@ public class FormattingConfig extends Config {
     )
     public static boolean fancyRankInChat = true;
 
+    @Switch(
+        name = "Simplistic Rank in Tab",
+        category = "General",
+        subcategory = "Fancy Formatting",
+        description = "Show the simplistic rank in tab. These are only for hysentials ranks and custom ranks."
+    )
+    public static boolean simplisticRankInTab = false;
+
+    @Switch(
+        name = "Simplistic Rank in Chat",
+        category = "General",
+        subcategory = "Fancy Formatting",
+        description = "Show the simplistic rank in chat. These are only for hysentials ranks and custom ranks."
+    )
+    public static boolean simplisticRankInChat = false;
+
     @Button(
         name = "Rank Image Config",
         category = "General",

@@ -3,7 +3,10 @@ package llc.redstone.hysentials.handlers.chat.modules.bwranks;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
+import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
+import llc.redstone.hysentials.cosmetic.CosmeticManager;
+import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.util.*;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UMessage;
@@ -86,7 +89,7 @@ public class BWSReplace implements ChatReceiveModule {
             String s = sibling.getFormattedText();
             diagnostics.add("Checking sibling: " + s);
 
-            if (HysentialsConfig.removeAsterisk && (s.startsWith("§r§7* ") || s.startsWith("§7* "))) {
+            if (HousingConfig.removeAsterisk && (s.startsWith("§r§7* ") || s.startsWith("§7* "))) {
                 s = s.replaceFirst("(§7|§r§7)\\* ", "");
             }
 
@@ -226,12 +229,12 @@ public class BWSReplace implements ChatReceiveModule {
     }
 
     private static String bold(UUID id) {
-        boolean bold = id != null && CosmeticGui.Companion.equippedCosmetic(id, "bold messages");
+        boolean bold = id != null && CosmeticUtilsKt.equippedCosmetic(id, "bold messages");
         return bold ? "§l" : "";
     }
 
     private static String italic(UUID id) {
-        boolean italic = id != null && CosmeticGui.Companion.equippedCosmetic(id, "italic messages");
+        boolean italic = id != null && CosmeticUtilsKt.equippedCosmetic(id, "italic messages");
         return italic ? "§o" : "";
     }
 

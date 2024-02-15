@@ -188,7 +188,7 @@ public class GuiIngameHysentials extends GuiIngame
         GlStateManager.disableLighting();
         GlStateManager.enableAlpha();
 
-        if (HysentialsConfig.macroWheelKeyBind.isActive() && mc.currentScreen == null) {
+        if (HysentialsConfig.macroWheelKeyBind.isActive() && mc.currentScreen == null && cooldown < System.currentTimeMillis()) {
             if (!MacroWheelOverlayKt.getStopped()) {
                 MacroWheelOverlay overlay = MacroWheelOverlay.Companion.newI();
                 InputHandler inputHandler = new InputHandler();
@@ -215,11 +215,13 @@ public class GuiIngameHysentials extends GuiIngame
             if (Minecraft.getMinecraft().currentScreen == null) {
                 Minecraft.getMinecraft().mouseHelper.grabMouseCursor();
             }
+            cooldown = System.currentTimeMillis() + 1000;
         }
 
         post(ALL);
     }
 
+    public static long cooldown = System.currentTimeMillis();
     public static boolean wasMacroWheelActive = false;
 
     public void drawMacroWheel(MacroWheelOverlay overlay, float partialTicks, InputHandler inputHandler) {

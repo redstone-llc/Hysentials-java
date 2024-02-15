@@ -3,6 +3,7 @@ package llc.redstone.hysentials.handlers.htsl;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.HysentialsUtilsKt;
+import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
 import llc.redstone.hysentials.guis.ResolutionUtil;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.util.Input;
@@ -147,7 +148,7 @@ public class Exporter {
         if (export == null) return;
         if (Queue.queue.size() != 0) return;
         timeWithoutOperation++;
-        if ((Queue.greaterThan(timeWithoutOperation, HysentialsConfig.guiTimeout)) && !HysentialsConfig.htslSafeMode && !manualItemClick) {
+        if ((Queue.greaterThan(timeWithoutOperation, HousingConfig.guiTimeout)) && !HousingConfig.htslSafeMode && !manualItemClick) {
             fails.add("&cOperation timed out. &f(too long without GUI click)");
             finish(false);
             return;

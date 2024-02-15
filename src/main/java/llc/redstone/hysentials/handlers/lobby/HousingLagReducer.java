@@ -5,6 +5,7 @@ import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.config.HysentialsConfig;
+import llc.redstone.hysentials.config.hysentialMods.LobbyConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -27,7 +28,7 @@ public class HousingLagReducer {
             return;
         }
         if (++this.tick == 10) {
-            if (!HysentialsConfig.housingLagReducer) {
+            if (!LobbyConfig.housingLagReducer) {
                 hiddenArmorStands.clear();
                 this.tick = 0;
                 return;

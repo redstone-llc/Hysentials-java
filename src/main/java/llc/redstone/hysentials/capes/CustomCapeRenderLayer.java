@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.capes;
 
 import llc.redstone.hysentials.config.HysentialsConfig;
+import llc.redstone.hysentials.config.hysentialMods.CosmeticConfig;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
 import llc.redstone.hysentials.util.BlockWAPIUtils;
 import llc.redstone.hysentials.config.HysentialsConfig;
@@ -51,9 +52,9 @@ public class CustomCapeRenderLayer implements LayerRenderer<AbstractClientPlayer
 
         if (!abstractClientPlayer.hasPlayerInfo() || abstractClientPlayer.isInvisible()
             || !abstractClientPlayer.isWearing(EnumPlayerModelParts.CAPE)
+            || (BlockWAPIUtils.isWearingType(abstractClientPlayer.getUniqueID(), "backpack"))
             || abstractClientPlayer.getLocationCape() == null
-            || BlockWAPIUtils.isWearingType(abstractClientPlayer.getUniqueID(), "backpack")
-            || HysentialsConfig.disableCustomCapes) {
+            || CosmeticConfig.disableCustomCapes) {
             return;
         }
 
@@ -67,7 +68,7 @@ public class CustomCapeRenderLayer implements LayerRenderer<AbstractClientPlayer
             GlStateManager.bindTexture(CapeHandler.textureMap.get(abstractClientPlayer.getUniqueID()).getGlTextureId());
         }
 
-        if (HysentialsConfig.blockyCapes == 1) {
+        if (CosmeticConfig.blockyCapes == 1) {
             smoothCapeRenderer.renderSmoothCape(this, abstractClientPlayer, deltaTick);
         } else {
             ModelRenderer[] parts = customCape;
@@ -166,7 +167,7 @@ public class CustomCapeRenderLayer implements LayerRenderer<AbstractClientPlayer
     }
 
     float getNatrualWindSwing(int part) {
-        if (HysentialsConfig.windEffect) {
+        if (CosmeticConfig.windEffect) {
             long highlightedPart = (System.currentTimeMillis() / 3) % 360;
             float relativePart = (float) (part + 1) / partCount;
             return (float) (Math.sin(Math.toRadians((relativePart) * 360 - (highlightedPart))) * 3);

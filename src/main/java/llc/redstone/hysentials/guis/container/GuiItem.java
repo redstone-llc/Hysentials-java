@@ -102,6 +102,16 @@ public class GuiItem {
         return item;
     }
 
+    public static ItemStack makeItem(Material material, String displayName, int amount, int durability, String... lore) {
+        ItemStack item = new ItemStack(Item.getItemById(material.getId()), amount, (short) durability);
+        item.setStackDisplayName(displayName);
+
+        hideFlag(item, 34);
+        setLore(item, Arrays.asList(lore));
+
+        return item;
+    }
+
     public static ItemStack makeColorfulSkullItem(String displayname, String owner, int amount, List<String> lore) {
         ItemStack item = makeColorfulItem(Material.SKULL_ITEM, displayname, amount, 3, lore);
 

@@ -31,7 +31,7 @@ class UpdateChecker {
                     updateGetter.run()
                     if (updateGetter.updateObj != null) {
                         Minecraft.getMinecraft().addScheduledTask {
-                            Minecraft.getMinecraft().displayGuiScreen(RequestUpdateGui(true))
+                            Minecraft.getMinecraft().displayGuiScreen(RequestUpdateGui(inGame = true, deleteOld = true))
                         }
                     }
                 }

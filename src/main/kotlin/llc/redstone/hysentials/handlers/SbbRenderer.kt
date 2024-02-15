@@ -5,8 +5,7 @@ import cc.polyfrost.oneconfig.libs.universal.UChat.chat
 import llc.redstone.hysentials.GuiIngameHysentials
 import llc.redstone.hysentials.Hysentials
 import llc.redstone.hysentials.config.HysentialsConfig
-import llc.redstone.hysentials.guis.actionLibrary.ClubActionViewer
-import llc.redstone.hysentials.guis.actionLibrary.ClubActionViewer.*
+import llc.redstone.hysentials.config.hysentialMods.ScorebarsConfig
 import llc.redstone.hysentials.guis.sbBoxes.SBBoxesEditor
 import llc.redstone.hysentials.guis.utils.SBBoxes
 import llc.redstone.hysentials.handlers.redworks.HousingScoreboard
@@ -32,10 +31,10 @@ class SbbRenderer {
         GL11.glPushMatrix()
         try {
             Actionbar.actionBar()
-            if (HysentialsConfig.scoreboard && HysentialsConfig.showScoreboard) {
+            if (ScorebarsConfig.scoreboard && ScorebarsConfig.showScoreboard) {
                 Scoreboard.scoreboard()
             } else {
-                GuiIngameHysentials.renderObjective = HysentialsConfig.showScoreboard
+                GuiIngameHysentials.renderObjective = ScorebarsConfig.showScoreboard
             }
             val lines = ScoreboardWrapper.getScoreboard().getSortedScores(
                 ScoreboardWrapper.getSidebar()).stream()

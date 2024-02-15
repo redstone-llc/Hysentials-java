@@ -19,6 +19,7 @@
 import cc.polyfrost.oneconfig.libs.checker.units.qual.A;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
+import llc.redstone.hysentials.GuiIngameHysentials;
 import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.macrowheel.overlay.MacroWheelOverlay;
 import llc.redstone.hysentials.macrowheel.overlay.MacroWheelOverlayKt;
@@ -63,14 +64,14 @@ public class MinecraftMixin_LeftClickInteract {
 
     @Inject(method = "clickMouse", at = @At("HEAD"), cancellable = true)
     private void clickMouse(CallbackInfo ci) {
-        if (HysentialsConfig.macroWheelKeyBind.isActive() && !MacroWheelOverlayKt.getStopped()) {
+        if (HysentialsConfig.macroWheelKeyBind.isActive() && !MacroWheelOverlayKt.getStopped() && GuiIngameHysentials.cooldown < System.currentTimeMillis()) {
             ci.cancel();
         }
     }
 
     @Inject(method = "rightClickMouse", at = @At("HEAD"), cancellable = true)
     private void rightClickMouse(CallbackInfo ci) {
-        if (HysentialsConfig.macroWheelKeyBind.isActive() && !MacroWheelOverlayKt.getStopped()) {
+        if (HysentialsConfig.macroWheelKeyBind.isActive() && !MacroWheelOverlayKt.getStopped() && GuiIngameHysentials.cooldown < System.currentTimeMillis()) {
             ci.cancel();
         }
     }

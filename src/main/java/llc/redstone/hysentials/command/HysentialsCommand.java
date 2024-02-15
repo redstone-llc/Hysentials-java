@@ -25,11 +25,10 @@ import llc.redstone.hysentials.macrowheel.MacroWheelSelector;
 import llc.redstone.hysentials.profileViewer.DefaultProfileGui;
 import llc.redstone.hysentials.quest.Quest;
 import llc.redstone.hysentials.schema.HysentialsSchema;
-import llc.redstone.hysentials.util.JsonData;
-import llc.redstone.hysentials.util.MUtils;
-import llc.redstone.hysentials.util.SBBJsonData;
-import llc.redstone.hysentials.util.ScoreboardWrapper;
+import llc.redstone.hysentials.util.*;
+import llc.redstone.hysentials.util.Renderer;
 import llc.redstone.hysentials.utils.ChatLib;
+import llc.redstone.hysentials.utils.ScreenshotUtilsKt;
 import llc.redstone.hysentials.websocket.Request;
 import llc.redstone.hysentials.websocket.Socket;
 import com.google.gson.JsonElement;
@@ -48,6 +47,9 @@ import net.minecraft.client.gui.GuiMultiplayer;
 import net.minecraft.client.multiplayer.GuiConnecting;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -71,6 +73,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -120,7 +124,7 @@ public class HysentialsCommand extends CommandBase {
                 break;
             }
 
-            case "macrowheel": {
+            case "commandwheel": {
                 new MacroWheelSelector().open();
                 break;
             }
@@ -156,10 +160,10 @@ public class HysentialsCommand extends CommandBase {
                         Socket.linking = false;
                         Socket.data = null;
                         Socket.linked = true;
-                        MUtils.chat(HysentialsConfig.chatPrefix + " §aSuccessfully linked your discord account to your minecraft account!");
+                        MUtils.chat(HysentialsConfig.chatPrefix + " §aSuccessfully linked your Discord account!");
                     });
                 } else {
-                    MUtils.chat(HysentialsConfig.chatPrefix + " §cYou are not currently linking your account! You must run /link in the discord to link your account.");
+                    MUtils.chat(HysentialsConfig.chatPrefix + " §cYou are not currently linked to your Discord account! You must run /link in the Discord to link it.");
                 }
                 break;
             }
@@ -187,11 +191,11 @@ public class HysentialsCommand extends CommandBase {
             }
 
             case "discord": {
-                UTextComponent text = new UTextComponent(HysentialsConfig.chatPrefix + " §aJoin the discord here: ");
+                UTextComponent text = new UTextComponent(HysentialsConfig.chatPrefix + " §aJoin the Discord here: ");
                 text.appendSibling(
                     new UTextComponent("§b§nhttps://discord.gg/mtAXV24bqM")
                         .setClick(ClickEvent.Action.OPEN_URL, "https://discord.gg/mtAXV24bqM")
-                        .setHover(HoverEvent.Action.SHOW_TEXT, "§7Click to open the discord invite link."
+                        .setHover(HoverEvent.Action.SHOW_TEXT, "§7Click to open the Discord"
                         ));
                 UChat.chat(text);
                 break;
@@ -206,7 +210,7 @@ public class HysentialsCommand extends CommandBase {
                 if (args.length > 1) {
                     handleImport(args[1]);
                 } else {
-                    UChat.chat(HysentialsConfig.chatPrefix + " §cYou must specify an id as an argument!");
+                    UChat.chat(HysentialsConfig.chatPrefix + " §cYou must specify an ID as an argument!");
                     UChat.chat(HysentialsConfig.chatPrefix + " §cUsage: /hysentials import <id>");
                 }
                 break;
@@ -272,14 +276,14 @@ public class HysentialsCommand extends CommandBase {
     public void helpPage(int page) {
         UTextComponent text = new UTextComponent("");
         int maxPage = 3;
-        text.appendText("§9&m-----------------------------------------------------\n");
+        text.appendText("§9&m                                                           \n");
         switch (page) {
             case 1: {
                 String pageS = ChatLib.getCenteredText("&6Hysentials (Page 1/" + maxPage + ")\n");
                 text.appendText(pageS);
                 text.appendText("&e/hysentials help <page> &b- &bShows this help page.\n");
                 text.appendText("&e/hysentials config &b- &bOpens the Hysentials config.\n");
-                text.appendText("&e/hysentials macrowheel &7- &bOpens the Macro Wheel Editor.\n");
+                text.appendText("&e/hysentials commandwheel &7- &bOpens the Command Wheel Editor.\n"); //here too
                 text.appendText("&e/hysentials reload &7- &bReloads the configs.\n");
                 text.appendText("&e/hysentials reconnect &7- &bReconnects to the websocket.\n");
                 text.appendText("&e/hysentials link &7- &bAccept a link request from discord.\n");
@@ -288,7 +292,7 @@ public class HysentialsCommand extends CommandBase {
                 text.appendText("&e/hysentials menu &7- &bOpens the Hysentials menu.\n");
                 text.appendText("&e/hysentials discord &7- &bShows the discord invite link.\n");
                 text.appendText("&e/hysentials editor <file> &7- &bOpens the HTSL code editor.\n");
-                text.appendText("§9&m-----------------------------------------------------");
+                text.appendText("§9&m                                                           ");
                 break;
             }
             case 2: {
@@ -305,7 +309,7 @@ public class HysentialsCommand extends CommandBase {
                 text.appendText("&e/club join <name> &7- &bUsed to accept a club invite\n");
                 text.appendText("&e/club leave &7- &bLeave your current club\n");
                 text.appendText("&e/club dashboard &7- &bOpen the club dashboard\n");
-                text.appendText("§9&m-----------------------------------------------------");
+                text.appendText("§9&m                                                           ");
                 break;
             }
             case 3: {
@@ -321,7 +325,7 @@ public class HysentialsCommand extends CommandBase {
                 text.appendText("&e/rename <name> &7- &bSet name on held item.\n");
                 text.appendText("&e/openinv <player> &7- &bView the held item and armor of a player.\n");
                 //2 more can be added here
-                text.appendText("§9&m-----------------------------------------------------");
+                text.appendText("§9&m                                                           ");
             }
         }
         text.chat();
@@ -346,7 +350,22 @@ public class HysentialsCommand extends CommandBase {
                     } else {
                         Hysentials.INSTANCE.sendMessage("&cLocal is not on and you are already on the main server!");
                     }
+                    break;
                 }
+
+                case "file": {
+                    File base = new File("./config/hysentials/imageicons/");
+                    JFileChooser chooser = new JFileChooser(base);
+                    FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                        "PNG", "png");
+                    chooser.setFileFilter(filter);
+                    int returnVal = chooser.showOpenDialog(null);
+                    if(returnVal == JFileChooser.APPROVE_OPTION) {
+                        Hysentials.INSTANCE.sendMessage("&aSelected file: " + chooser.getSelectedFile().getPath());
+                    }
+                    break;
+                }
+
                 case "doorbell": {
                     Socket.CLIENT.sendText(
                         new Request(
@@ -358,7 +377,7 @@ public class HysentialsCommand extends CommandBase {
                     break;
                 }
 
-                case "macrowheel": {
+                case "commandwheel": {
                     new MacroWheelSelector().open();
                     break;
                 }

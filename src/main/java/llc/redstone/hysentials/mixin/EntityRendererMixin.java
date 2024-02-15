@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.mixin;
 
+import llc.redstone.hysentials.GuiIngameHysentials;
 import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.macrowheel.overlay.MacroWheelOverlayKt;
 import net.minecraft.client.renderer.EntityRenderer;
@@ -14,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class EntityRendererMixin {
     @Redirect(method = "updateCameraAndRender", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/MouseHelper;mouseXYChange()V"))
     private void updateCameraAndRenderInject(MouseHelper instance) {
-        if (!HysentialsConfig.macroWheelKeyBind.isActive() && !MacroWheelOverlayKt.getStopped()) {
+        if (!HysentialsConfig.macroWheelKeyBind.isActive() && !MacroWheelOverlayKt.getStopped() && GuiIngameHysentials.cooldown < System.currentTimeMillis()) {
             instance.mouseXYChange();
         }
     }

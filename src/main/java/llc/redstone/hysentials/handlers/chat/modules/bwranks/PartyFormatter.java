@@ -48,6 +48,7 @@ public class PartyFormatter {
         List<String> sibilings = event.message.getSiblings().stream().map(e -> e.getFormattedText().replaceAll("§r", "")).collect(Collectors.toList());
         if (msg.startsWith("§9§m-----------------------------------------------------") && msg.contains("\n")) {
             if (sibilings.get(2).equals("§ehas invited you to join their party!\n")) {
+                boolean hadLines = msg.contains("§9§m-----------------------------------------------------\n");
                 msg = msg.replace("§9§m-----------------------------------------------------\n", "");
                 msg = msg.replace("§9§m-----------------------------------------------------", "");
 
@@ -68,7 +69,7 @@ public class PartyFormatter {
                 comp.setHover(HoverEvent.Action.SHOW_TEXT, hover);
                 comp1.appendSibling(comp);
 
-                if (ChatConfig.hideLines) {
+                if (ChatConfig.hideLines || !hadLines) {
                     comp1.chat();
                 } else {
                     UChat.chat("§9§m-----------------------------------------------------");

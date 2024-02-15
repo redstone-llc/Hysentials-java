@@ -243,6 +243,14 @@ public class Renderer {
         retainTransforms = false;
     }
 
+    public static int shadow (long color1, long color2) {
+        return (int) (color1 & 16579836 >> 2 | color2 & -16777216);
+    }
+
+
+    public static long color (String hex) {
+        return Long.parseLong(hex, 16);
+    }
 
     public static long color(long red, long green, long blue) {
         return color(red, green, blue, 255);

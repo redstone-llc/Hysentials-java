@@ -24,9 +24,7 @@ import cc.polyfrost.oneconfig.utils.InputHandler;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import cc.polyfrost.oneconfig.utils.gui.GuiUtils;
 import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.config.hysentialMods.ChatConfig;
-import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
-import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
+import llc.redstone.hysentials.config.hysentialMods.*;
 import llc.redstone.hysentials.config.hysentialMods.page.PageAnnotation;
 import llc.redstone.hysentials.config.hysentialMods.page.PageOption;
 import llc.redstone.hysentials.config.hysentialMods.rank.RankAnnotation;
@@ -50,7 +48,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
-import static llc.redstone.hysentials.guis.actionLibrary.ClubActionViewer.toList;
+import static llc.redstone.hysentials.guis.actionLibrary.ActionViewer.toList;
 
 public class HysentialsConfig extends Config {
 
@@ -66,13 +64,34 @@ public class HysentialsConfig extends Config {
         new FormattingConfig(),
         new HousingConfig()
     );
+    @PageAnnotation(
+        name = "Lobby, Scoreboards, and Cosmetics",
+        group = true,
+        category = "Hysentials Mods",
+        subcategory = "Hysentials Mods",
+        description = "Lobby related settings."
+    )
+    public transient List<Config> hysentialMods2 = Arrays.asList(
+        new LobbyConfig(),
+        new ScorebarsConfig(),
+        new CosmeticConfig()
+    );
+    @PageAnnotation(
+        name = "Icons",
+        category = "Hysentials Mods",
+        subcategory = "Hysentials Mods",
+        description = "Icon related settings."
+    )
+    public transient IconsConfig iconsConfig = new IconsConfig();
     public transient ChatConfig chatConfig = (ChatConfig) hysentialMods.get(0);
     public transient FormattingConfig formattingConfig = (FormattingConfig) hysentialMods.get(1);
     public transient HousingConfig housingConfig = (HousingConfig) hysentialMods.get(2);
-
+    public transient LobbyConfig lobbyConfig = (LobbyConfig) hysentialMods2.get(0);
+    public transient ScorebarsConfig scorebarsConfig = (ScorebarsConfig) hysentialMods2.get(1);
+    public transient CosmeticConfig cosmeticConfig = (CosmeticConfig) hysentialMods2.get(2);
 
     @KeyBind(
-        name = "Macro Wheel",
+        name = "Command Wheel",
         category = "General",
         subcategory = "Keybinds",
         description = "The keybind to open the macro wheel."
@@ -80,11 +99,11 @@ public class HysentialsConfig extends Config {
     public static OneKeyBind macroWheelKeyBind = new OneKeyBind(UKeyboard.KEY_G);
 
     @HUD(
-        name = "Macro Wheel HUD",
+        name = "Command Wheel HUD",
         category = "HUD",
-        subcategory = "Macro Wheel"
+        subcategory = "Command Wheel"
     )
-    public MacroWheelHudConfigThing macroWheelHud = new MacroWheelHudConfigThing(true, (Renderer.screen.getWidth() / 2f) - (34*5f) / 2, (Renderer.screen.getHeight() / 2f) - (34*5f) / 2,
+    public MacroWheelHudConfigThing macroWheelHud = new MacroWheelHudConfigThing(true, 0, 0,
         5f, true, new OneColor(119, 119, 119, 150));
 
     @Text(
@@ -144,7 +163,7 @@ public class HysentialsConfig extends Config {
         name = "Install Hytils Reborn",
         category = "General",
         subcategory = "Hytils",
-        description = "Installs Hytils Reborn for you.",
+        description = "Installs the Hytils Reborn mod for you.",
         text = "Install")
     public void installHytils() {
         if (!Hysentials.INSTANCE.isHytils) {
@@ -192,7 +211,7 @@ public class HysentialsConfig extends Config {
         name = "Additional Configs",
         category = "General",
         subcategory = "Hytils",
-        description = "Opens the Hytils config page.",
+        description = "Opens the Hytils Reborn config page.",
         text = "OPEN")
     public void openHytilsConfig() {
         if (Hysentials.INSTANCE.isHytils) {
@@ -203,196 +222,7 @@ public class HysentialsConfig extends Config {
     }
 
 
-    @Switch(
-        name = "Remove Asterisk",
-        category = "Housing",
-        subcategory = "General",
-        description = "Removes the asterisk from chat messages sent to the player."
-    )
-    public static boolean removeAsterisk = true;
-
-    @Switch(
-        name = "Housing Name Scoreboard",
-        category = "Housing",
-        subcategory = "General",
-        description = "Adds the housing name to the scoreboards title."
-    )
-    public static boolean housingNameScoreboard = true;
-
-    @Switch(
-        name = "Shift+Right Click OpenInv",
-        category = "Housing",
-        subcategory = "General",
-        description = "Toggles the ability to open a players inventory by shift right clicking them."
-    )
-    public static boolean shiftRightClickInv = true;
-
-    @Switch(
-        name = "Show Pets in game",
-        category = "Comsetics",
-        subcategory = "Pets",
-        description = "Will allow pets to be shown in game."
-    )
-    public static boolean showPets = false;
-
-    @Switch(
-        name = "Disable Custom Capes",
-        category = "Comsetics",
-        subcategory = "Capes",
-        description = "Will disable custom capes including their animations."
-    )
-    public static boolean disableCustomCapes = false;
-    @Dropdown(
-        name = "Cape Animation",
-        category = "Comsetics",
-        subcategory = "Capes",
-        description = "Which animation the capes should render with.",
-        options = {"Blocky Animation", "Silky Animation"}
-    )
-    public static int blockyCapes = 0;
-
-    @Switch(
-        name = "Wind Effect",
-        category = "Comsetics",
-        subcategory = "Capes",
-        description = "Will give the capes a windy effect making it look like they are blowing in the wind."
-    )
-    public static boolean windEffect = true;
-
-
-    // LOBBY
-
-    @Switch(
-        name = "Housing Lag Reducer",
-        category = "Lobby",
-        subcategory = "General",
-        description = "Will reduce the lag in the housing lobby, by hiding armorstands further than 20 blocks away from the player."
-    )
-    public static boolean housingLagReducer = true;
-
-    // Scoreboard Boxes
-    @Color(
-        name = "Color Picker",
-        description = "Color for the boxes",
-        category = "SBBoxes",
-        subcategory = "General",
-        allowAlpha = true
-    )
-    public static OneColor boxColor = new OneColor(0, 0, 0, 125);
-
-    @Checkbox(
-        name = "Box Shadows",
-        description = "Enables box shadows",
-        category = "SBBoxes",
-        subcategory = "General"
-    )
-    public static boolean boxShadows = true;
-
-    @Checkbox(
-        name = "Scoreboard Boxes",
-        description = "Enables scoreboard boxes",
-        category = "SBBoxes",
-        subcategory = "Boxes"
-    )
-    public static boolean scoreboardBoxes = true;
-
-    @Checkbox(
-        name = "Show Scoreboard",
-        description = "Enables scoreboard",
-        category = "SBBoxes",
-        subcategory = "Boxes"
-    )
-    public static boolean showScoreboard = true;
-
-    @Dropdown(
-        name = "Border Radius",
-        description = "Border radius of the boxes",
-        category = "SBBoxes",
-        subcategory = "Boxes",
-        options = {"0", "2", "4"}
-    )
-    public static int scoreboardBoxesBorderRadius = 1;
-
-    @Checkbox(
-        name = "Action Bar",
-        description = "Enables better action bar",
-        category = "SBBoxes",
-        subcategory = "Action Bar"
-    )
-    public static boolean actionBar = true;
-
-    @Dropdown(
-        name = "Border Radius",
-        description = "Border radius of the action bar",
-        category = "SBBoxes",
-        subcategory = "Action Bar",
-        options = {"0", "2", "4"}
-    )
-    public static int actionBarBorderRadius = 1;
-
-    @Checkbox(
-        name = "Scoreboard",
-        description = "Enables better scoreboard",
-        category = "SBBoxes",
-        subcategory = "Scoreboard"
-    )
-    public static boolean scoreboard = true;
-
-    @Checkbox(
-        name = "Red Numbers",
-        description = "Enables Scoreboard numbers",
-        category = "SBBoxes",
-        subcategory = "Scoreboard"
-    )
-    public static boolean redNumbers = true;
-
-    @Dropdown(
-        name = "Border Radius",
-        description = "Border radius of the scoreboard",
-        category = "SBBoxes",
-        subcategory = "Scoreboard",
-        options = {"0", "2", "4"}
-    )
-    public static int scoreboardBorderRadius = 1;
-
-    // HTSL
-    @Checkbox(
-        name = "HTSL Enabled",
-        category = "Housing",
-        subcategory = "HTSL",
-        description = "Enable HTSL. This will allow you to use the HTSL language."
-    )
-    public static boolean htslEnabled = true;
-
-    @Checkbox(
-        name = "Use Safemode",
-        category = "Housing",
-        subcategory = "HTSL",
-        description = "Will show you where to click while loading in an action, this requires manual input and is no longer considered a \"macro\".\n\n&aSafeMode is recommended if you want to be extra careful not to break the rules."
-    )
-    public static boolean htslSafeMode = false;
-
-    @Number(
-        name = "Gui Cooldown",
-        category = "Housing",
-        subcategory = "HTSL",
-        description = "Amount of cooldown between clicking an item in a GUI.\n\nvalues under 20 will result in more errors.",
-        min = 0,
-        max = 100
-    )
-    public static int guiCooldown = 20;
-
-    @Number(
-        name = "Gui Timeout",
-        category = "Housing",
-        subcategory = "HTSL",
-        description = "Amount of ticks after not clicking anything in the GUI before declaring an error and timing out.\n\n&eIf you have lots of lagspikes / slow internet and HTSL keeps timing out you should increase this",
-        min = 60,
-        max = 200
-    )
-    public static int guiTimeout = 60;
-
-    public static boolean wardrobeDarkMode = true;
+    public static boolean wardrobeDarkMode = true; //dont touch this
 
 
     public HysentialsConfig() {
@@ -404,15 +234,6 @@ public class HysentialsConfig extends Config {
             Minecraft.getMinecraft().thePlayer.closeScreen();
             Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(new CosmeticGui());
         });
-//        this.registerKeyBind(macroWheelKeyBind, () -> {
-//            Minecraft.getMinecraft().thePlayer.closeScreen();
-//            Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(new MacroWheelOverlay(
-//                macroWheelHud.position.getX(),
-//                macroWheelHud.position.getY(),
-//                macroWheelHud.getScale(),
-//                macroWheelHud.getBgColor()
-//            ));
-//        });
     }
 
 

@@ -44,12 +44,12 @@ public abstract class PlayerRendererMixin extends RendererLivingEntity<AbstractC
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onCreate(CallbackInfo info) {
+        addLayer(new CustomCapeRenderLayer((RenderPlayer)(Object)this, getMainModel()));
         addLayer(new LayerTechnoCrown((RenderPlayer)(Object)this));
         addLayer(new LayerCatHat((RenderPlayer)(Object)this));
         addLayer(new LayerBackPack((RenderPlayer)(Object)this));
         addLayer(new LayerBlackCatHat((RenderPlayer)(Object)this));
         addLayer(new KzeroLayer((RenderPlayer)(Object)this));
-        addLayer(new CustomCapeRenderLayer((RenderPlayer)(Object)this, getMainModel()));
     }
 
     @Inject(method = "getEntityTexture(Lnet/minecraft/client/entity/AbstractClientPlayer;)Lnet/minecraft/util/ResourceLocation;", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/entity/AbstractClientPlayer;getLocationSkin()Lnet/minecraft/util/ResourceLocation;"), cancellable = true)

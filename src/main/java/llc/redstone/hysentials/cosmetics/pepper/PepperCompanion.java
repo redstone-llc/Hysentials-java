@@ -2,6 +2,7 @@ package llc.redstone.hysentials.cosmetics.pepper;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
+import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
 import llc.redstone.hysentials.cosmetics.AbstractCosmetic;
 import llc.redstone.hysentials.cosmetics.cubit.EntityCubit;
 import llc.redstone.hysentials.util.BUtils;
@@ -32,8 +33,8 @@ public class PepperCompanion extends AbstractCosmetic<EntityPepper> {
 
     @Override
     public boolean canUse(EntityPlayer player) {
-        return CosmeticGui.Companion.equippedCosmetic(player.getUniqueID(), "pepper")
-            && CosmeticGui.Companion.hasCosmetic(player.getUniqueID(), "pepper")
+        return CosmeticUtilsKt.equippedCosmetic(player.getUniqueID(), "pepper")
+            && CosmeticUtilsKt.hasCosmetic(player.getUniqueID(), "pepper")
             && !player.isInvisible();
     }
 

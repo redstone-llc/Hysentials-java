@@ -45,16 +45,16 @@ import static llc.redstone.hysentials.handlers.redworks.BwRanks.randomString;
 
 @Command(value = "club", description = "Club Commands",
     customHelpMessage = {
-        "§9&m-----------------------------------------------------",
-        "&aClub Commands: &c[BETA]",
-        "&e/club create <name> &7- &bCreate a club with the specified name",
-        "&e/club invite <player> &7- &bInvite a player to your club",
-        "&e/club join <name> &7- &bUsed to accept a club invite",
-        "&e/club leave &7- &bLeave your current club",
-        "&e/club dashboard &7- &bOpen the club dashboard",
-        "&e/club list &7- &bList all players in your club",
-        "&e/club house <index> help &7- &bManage your club houses",
-        "§9&m-----------------------------------------------------"
+        "§9&m                                                        ",
+        "&aClub Commands &c[BETA]",
+        "&e/club create <name> &7- &bCreate a club with the specified name.",
+        "&e/club invite <player> &7- &bInvite a player to your club.",
+        "&e/club join <name> &7- &bUsed to accept a club invite.",
+        "&e/club leave &7- &bLeave your current club.",
+        "&e/club dashboard &7- &bOpen the club dashboard.",
+        "&e/club list &7- &bList all players in your club.",
+        "&e/club house <index> help &7- &bManage your club houses.",
+        "§9&m                                                        "
     })
 public class ClubCommand {
     @SubCommand(aliases = {"create"}, description = "Create a club")
@@ -90,7 +90,7 @@ public class ClubCommand {
     @SubCommand(aliases = {"join"}, description = "Join a club")
     public void join(String name) {
         if (!Socket.linked) {
-            MUtils.chat("&cYou must be linked to a discord account to use this feature.");
+            MUtils.chat("&cYou must be linked to a Discord account to use this feature.");
             return;
         }
         Socket.CLIENT.sendText(new Request(
@@ -104,7 +104,7 @@ public class ClubCommand {
     @SubCommand(aliases = {"house"})
     public void house(int index, @Greedy String args) {
         if (!Socket.linked) {
-            MUtils.chat("&cYou must be linked to a discord account to use this feature.");
+            MUtils.chat("&cYou must be linked to a Discord account to use this feature.");
             return;
         }
         if (args.isEmpty()) {
@@ -115,7 +115,7 @@ public class ClubCommand {
         Multithreading.runAsync(() -> {
             ClubDashboard.getClub();
             HysentialsSchema.Club club = ClubDashboard.clubData;
-            JsonObject house = club.getHouses().get(index);
+            HysentialsSchema.House house = club.getHouses().get(index);
             JSONObject jsonObject = new JSONObject();
             JSONObject jsonObject1 = new JSONObject();
             switch (command.toLowerCase()) {
@@ -132,8 +132,8 @@ public class ClubCommand {
                     String nbt = item.serializeNBT().toString();
 
 
-                    jsonObject1.put("name", house.get("name"));
-                    jsonObject1.put("username", house.get("username"));
+                    jsonObject1.put("name", house.getName());
+                    jsonObject1.put("username", house.getUsername());
                     jsonObject1.put("nbt", nbt);
 
                     jsonObject.put("houses", jsonObject1);
@@ -147,8 +147,8 @@ public class ClubCommand {
                     }
 
                     jsonObject1.put("name", args.split(" ")[1]);
-                    jsonObject1.put("username", house.get("username"));
-                    jsonObject1.put("nbt", house.get("nbt"));
+                    jsonObject1.put("username", house.getUsername());
+                    jsonObject1.put("nbt", house.getNbt());
 
                     jsonObject.put("houses", jsonObject1);
                     jsonObject.put("update", true);
@@ -160,9 +160,9 @@ public class ClubCommand {
                         return;
                     }
 
-                    jsonObject1.put("name", house.get("name"));
+                    jsonObject1.put("name", house.getName());
                     jsonObject1.put("username", args.split(" ")[1]);
-                    jsonObject1.put("nbt", house.get("nbt"));
+                    jsonObject1.put("nbt", house.getNbt());
 
                     jsonObject.put("houses", jsonObject1);
                     jsonObject.put("update", true);
@@ -170,9 +170,9 @@ public class ClubCommand {
                 }
                 case "remove": {
 
-                    jsonObject1.put("name", house.get("name"));
-                    jsonObject1.put("username", house.get("username"));
-                    jsonObject1.put("nbt", house.get("nbt"));
+                    jsonObject1.put("name", house.getName());
+                    jsonObject1.put("username", house.getUsername());
+                    jsonObject1.put("nbt", house.getNbt());
 
                     jsonObject.put("houses", jsonObject1);
                     jsonObject.put("remove", true);
@@ -186,7 +186,7 @@ public class ClubCommand {
     @SubCommand(aliases = {"list"})
     public void list() {
         if (!Socket.linked) {
-            MUtils.chat("&cYou must be linked to a discord account to use this feature.");
+            MUtils.chat("&cYou must be linked to a Discord account to use this feature.");
             return;
         }
         try {
@@ -220,10 +220,10 @@ public class ClubCommand {
         }
     }
 
-    @SubCommand(aliases = {"invite"}, description = "Invite a player to your club")
+    @SubCommand(aliases = {"invite"}, description = "Invite a player to your club.")
     public void invite(String name) {
         if (!Socket.linked) {
-            MUtils.chat("&cYou must be linked to a discord account to use this feature.");
+            MUtils.chat("&cYou must be linked to a Discord account to use this feature.");
             return;
         }
         Multithreading.runAsync(() -> {
@@ -234,10 +234,10 @@ public class ClubCommand {
         });
     }
 
-    @SubCommand(aliases = {"leave"}, description = "Leave a club")
+    @SubCommand(aliases = {"leave"}, description = "Leave a club.")
     public void leave() {
         if (!Socket.linked) {
-            MUtils.chat("&cYou must be linked to a discord account to use this feature.");
+            MUtils.chat("&cYou must be linked to a Discord account to use this feature.");
             return;
         }
         Multithreading.runAsync(() -> {
@@ -248,10 +248,10 @@ public class ClubCommand {
         });
     }
 
-    @SubCommand(aliases = {"dashboard", "db"}, description = "Open the club dashboard")
+    @SubCommand(aliases = {"dashboard", "db"}, description = "Open the club dashboard.")
     public void dashboard() {
         if (!Socket.linked) {
-            MUtils.chat("&cYou must be linked to a discord account to use this feature.");
+            MUtils.chat("&cYou must be linked to a Discord account to use this feature.");
             return;
         }
         try {

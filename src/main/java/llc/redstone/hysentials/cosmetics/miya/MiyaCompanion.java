@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.cosmetics.miya;
 
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
+import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
 import llc.redstone.hysentials.cosmetics.AbstractCosmetic;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
 import llc.redstone.hysentials.cosmetics.AbstractCosmetic;
@@ -28,8 +29,8 @@ public class MiyaCompanion extends AbstractCosmetic<EntityMiya> {
 
     @Override
     public boolean canUse(EntityPlayer player) {
-        return CosmeticGui.Companion.equippedCosmetic(player.getUniqueID(), "miya")
-            && CosmeticGui.Companion.hasCosmetic(player.getUniqueID(), "miya")
+        return CosmeticUtilsKt.equippedCosmetic(player.getUniqueID(), "miya")
+            && CosmeticUtilsKt.hasCosmetic(player.getUniqueID(), "miya")
             && !player.isInvisible();
     }
 

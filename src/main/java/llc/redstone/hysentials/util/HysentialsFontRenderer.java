@@ -88,6 +88,12 @@ public class HysentialsFontRenderer {
         GL11.glPopMatrix();
     }
 
+    public void drawStringShadow(String text, float x, float y, int color) {
+        int shadowColor = (color & 16579836) >> 2 | color & -16777216;;
+        drawString(text, x + 1, y, shadowColor);
+        drawString(text, x, y, color);
+    }
+
     public int drawString(String text, float x, float y, int color) {
         if (text == null) return 0;
 

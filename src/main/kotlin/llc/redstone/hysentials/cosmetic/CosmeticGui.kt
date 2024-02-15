@@ -14,14 +14,13 @@ import llc.redstone.hysentials.utils.formatCapitalize
 import llc.redstone.hysentials.utils.splitToWords
 import llc.redstone.hysentials.websocket.Socket
 import com.google.common.collect.Lists
+import llc.redstone.hysentials.utils.drawEntityOnScreen
+import llc.redstone.hysentials.utils.startsWithAny
 import net.minecraft.client.Minecraft
 import net.minecraft.client.audio.PositionedSoundRecord
 import net.minecraft.client.renderer.GlStateManager
-import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.resources.model.IBakedModel
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.init.Items
 import net.minecraft.inventory.Slot
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumChatFormatting
@@ -38,81 +37,32 @@ open class CosmeticGui : UScreen(), HysentialsGui {
         var instance: CosmeticGui? = null
         var buttons = ArrayList<Button>()
 
-        fun equippedCosmetic(uuid: UUID, name: String): Boolean {
-            try {
-                val cosmetics = BlockWAPIUtils.getCosmetics()
-                cosmetics.find { it.name == name }?.let {
-                    if (it.equipped.contains(uuid.toString())) {
-                        return true
-                    }
-                }
-            } catch (_: Exception) {
-            }
-            return false
-        }
-
-        fun hasCosmetic(uuid: UUID, name: String): Boolean {
-            try {
-                val cosmetics = BlockWAPIUtils.getCosmetics()
-                cosmetics.find { it.name == name }?.let {
-                    if (it.users.contains(uuid.toString())) {
-                        return true
-                    }
-                }
-            } catch (_: Exception) {
-            }
-            return false
-        }
-
-        fun getOwnedCosmetics(uuid: UUID): ArrayList<HysentialsSchema.Cosmetic> {
-            val cosmetics = BlockWAPIUtils.getCosmetics()
-            val ownedCosmetics = ArrayList<HysentialsSchema.Cosmetic>()
-            for (cosmetic in cosmetics) {
-                if (cosmetic.users.contains(uuid.toString())) {
-                    ownedCosmetics.add(cosmetic)
-                }
-            }
-            return ownedCosmetics
-        }
-
-        fun getEquippedCosmetics(uuid: UUID): ArrayList<HysentialsSchema.Cosmetic> {
-            val cosmetics = BlockWAPIUtils.getCosmetics()
-            val equippedCosmetics = ArrayList<HysentialsSchema.Cosmetic>()
-            for (cosmetic in cosmetics) {
-                if (cosmetic.equipped.contains(uuid.toString())) {
-                    equippedCosmetics.add(cosmetic)
-                }
-            }
-            return equippedCosmetics
-        }
-
-        fun colorFromRarity(rarity: String): String {
-            return when (rarity) {
-                "COMMON" -> "#828282"
-                "RARE" -> "#0099DB"
-                "EPIC" -> "#8B5CF6"
-                "LEGENDARY" -> "#F49E0B"
-                "EXCLUSIVE" -> "#EA323C"
-                else -> "#FFFFFF"
-            }
-        }
-
-        fun indexFromRarity(rarity: String): Int {
-            return when (rarity) {
-                "COMMON" -> 0
-                "RARE" -> 1
-                "EPIC" -> 2
-                "LEGENDARY" -> 3
-                "EXCLUSIVE" -> 4
-                else -> 0
-            }
-        }
-
         var search: String = ""
         var page: Int = 1
         var maxPage: Int = 1
         var type: String = "owned"
         var inventorySlots: ArrayList<Slot> = Lists.newArrayList()
+        var paginationList: PaginationList<HysentialsSchema.Cosmetic>? = null
+
+        var ownedTabReal = CosmeticTab("owned", "Owned", ResourceLocation("hysentials:gui/wardrobe/tab/owned.png"), "32a852", 10.0, 10.0, 5.0, 4.0)
+        var headTabReal = CosmeticTab("head", "Headwear", ResourceLocation("hysentials:gui/wardrobe/tab/headwear.png"), "1787e3", 9.0, 10.0, 5.0, 22.0)
+        var backTabReal = CosmeticTab("back", "Chestwear", ResourceLocation("hysentials:gui/wardrobe/tab/chestwear.png"), "e69927", 9.0, 9.0, 5.0, 38.0)
+        var pantaloonsTabReal = CosmeticTab("pantaloons", "Pantaloons", ResourceLocation("hysentials:gui/wardrobe/tab/pantaloons.png"), "8327e6", 9.0, 11.0, 5.0, 53.0)
+        var bootsTabReal = CosmeticTab("boots", "Boots", ResourceLocation("hysentials:gui/wardrobe/tab/boots.png"), "ea323b", 11.0, 7.0, 4.0, 70.0)
+        var petsTabReal = CosmeticTab("pet", "Pets", ResourceLocation("hysentials:gui/wardrobe/tab/pets.png"), "e4ea32", 9.0, 10.0, 5.0, 83.0)
+        var chatTabReal = CosmeticTab("chat", "Chatbox", ResourceLocation("hysentials:gui/wardrobe/tab/chatbox.png"), "32eade", 9.0, 7.0, 5.0, 99.0)
+        var bundlesTabReal = CosmeticTab("bundle", "Bundles", ResourceLocation("hysentials:gui/wardrobe/tab/bundles.png"), "e832e6", 9.0, 10.0, 5.0, 112.0)
+
+        var tabs = listOf(
+            ownedTabReal,
+            headTabReal,
+            backTabReal,
+            pantaloonsTabReal,
+            bootsTabReal,
+            petsTabReal,
+            chatTabReal,
+            bundlesTabReal
+        )
     }
 
     var xSize = 290
@@ -125,33 +75,14 @@ open class CosmeticGui : UScreen(), HysentialsGui {
     var inventoryMap: HashMap<String, ArrayList<HysentialsSchema.Cosmetic>> = HashMap()
     var cosmeticBackground = ResourceLocation("hysentials:gui/wardrobe/background.png")
     var lightBackground = ResourceLocation("hysentials:gui/wardrobe/background-light.png")
-    var selectedSlot = ResourceLocation("hysentials:gui/wardrobe/selected_slot.png")
-
-    // Tabs
-    var ownedTab = ResourceLocation("hysentials:gui/wardrobe/tab/owned.png")
-    var headTab = ResourceLocation("hysentials:gui/wardrobe/tab/headwear.png")
-    var backTab = ResourceLocation("hysentials:gui/wardrobe/tab/chestwear.png")
-    var pantaloonsTab = ResourceLocation("hysentials:gui/wardrobe/tab/pantaloons.png")
-    var bootsTab = ResourceLocation("hysentials:gui/wardrobe/tab/boots.png")
-    var petsTab = ResourceLocation("hysentials:gui/wardrobe/tab/pets.png")
-    var chatTab = ResourceLocation("hysentials:gui/wardrobe/tab/chatbox.png")
-    var bundlesTab = ResourceLocation("hysentials:gui/wardrobe/tab/bundles.png")
-
 
     var mcFive = HysentialsFontRenderer("Minecraft Five", 12f)
     var fontRenderer: ImageIconRenderer? = Hysentials.INSTANCE.imageIconRenderer
 
-    var paginationList: PaginationList<HysentialsSchema.Cosmetic>? = null
-
     var focused: Boolean = false
     var blinkTimer: Int = 0
 
-    val input: Input = Input(
-        0,
-        0,
-        0,
-        0
-    ).let {
+    val input: Input = Input(0, 0, 0, 0).let {
         it.setEnabled(true)
         it.isFocused = true
         it
@@ -183,157 +114,30 @@ open class CosmeticGui : UScreen(), HysentialsGui {
         }
         try {
             if (HysentialsConfig.wardrobeDarkMode) {
-                Renderer.drawImage(
-                    cosmeticBackground,
-                    guiLeft.toDouble(),
-                    guiTop.toDouble(),
-                    xSize.toDouble(),
-                    ySize.toDouble()
-                )
+                Renderer.drawImage(cosmeticBackground, guiLeft.toDouble(), guiTop.toDouble(), xSize.toDouble(), ySize.toDouble())
             } else {
-                Renderer.drawImage(
-                    lightBackground,
-                    guiLeft.toDouble(),
-                    guiTop.toDouble(),
-                    xSize.toDouble(),
-                    ySize.toDouble()
-                )
+                Renderer.drawImage(lightBackground, guiLeft.toDouble(), guiTop.toDouble(), xSize.toDouble(), ySize.toDouble())
             }
 
             val emerald = Socket.cachedUser?.emeralds ?: 0
 
-            when {
-                type === "owned" -> {
-                    Renderer.drawImage(
-                        ownedTab,
-                        guiLeft + 5.0,
-                        guiTop + 4.0,
-                        10.0,
-                        10.0
-                    )
-                }
 
-                type === "head" -> {
-                    Renderer.drawImage(
-                        headTab,
-                        guiLeft + 5.0,
-                        guiTop + 22.0,
-                        9.0,
-                        10.0
-                    )
-                }
-
-                type === "back" -> {
-                    Renderer.drawImage(
-                        backTab,
-                        guiLeft + 5.0,
-                        guiTop + 38.0,
-                        9.0,
-                        9.0
-                    )
-                }
-
-                type === "pantaloons" -> {
-                    Renderer.drawImage(
-                        pantaloonsTab,
-                        guiLeft + 5.0,
-                        guiTop + 53.0,
-                        9.0,
-                        11.0
-                    )
-                }
-
-                type === "boots" -> {
-                    Renderer.drawImage(
-                        bootsTab,
-                        guiLeft + 4.0,
-                        guiTop + 70.0,
-                        11.0,
-                        7.0
-                    )
-                }
-
-                type === "pet" -> {
-                    Renderer.drawImage(
-                        petsTab,
-                        guiLeft + 5.0,
-                        guiTop + 83.0,
-                        9.0,
-                        10.0
-                    )
-                }
-
-                type === "chat" -> {
-                    Renderer.drawImage(
-                        chatTab,
-                        guiLeft + 5.0,
-                        guiTop + 99.0,
-                        9.0,
-                        7.0
-                    )
-                }
-
-                type === "bundle" -> {
-                    Renderer.drawImage(
-                        bundlesTab,
-                        guiLeft + 5.0,
-                        guiTop + 112.0,
-                        9.0,
-                        10.0
-                    )
-                }
+            for (tab in tabs) {
+                tab.draw(guiLeft, guiTop)
             }
 
-            var typeFinal = type
-            if (typeFinal === "back") {
-                typeFinal = "chest wear"
-            }
-            if (typeFinal === "head") {
-                typeFinal = "head wear"
-            }
-            if (typeFinal === "pet") {
-                typeFinal = "pets"
-            }
-            mcFive.drawString(
-                " > ${typeFinal.splitToWords().uppercase()} ($page/$maxPage)",
-                guiLeft + 72f,
-                guiTop + 5f,
-                0x1b1a18
-            )
-            mcFive.drawString(
-                " > ${typeFinal.splitToWords().uppercase()} ($page/$maxPage)",
-                guiLeft + 71f,
-                guiTop + 5f,
-                0xFFFFFF
-            )
+            val typeFinal = tabFromType(type)?.displayName ?: "Owned"
+            mcFive.drawStringShadow(" > ${typeFinal.splitToWords().uppercase()} ($page/$maxPage)", guiLeft + 71f, guiTop + 5f, 0xFFFFFF)
 
 
             var largeFormat = DecimalFormat("#,###")
-            mcFive.drawString(
-                " ${largeFormat.format(emerald)}",
-                guiLeft + 72f,
-                guiTop + 149f,
-                0x153F15
-            )
-            mcFive.drawString(
-                " ${largeFormat.format(emerald)}",
-                guiLeft + 71f,
-                guiTop + 149f,
-                0x55FF55
-            )
+            mcFive.drawStringShadow(" ${largeFormat.format(emerald)}", guiLeft + 71f, guiTop + 149f, 0x55FF55)
 
             GlStateManager.enableLighting()
             GlStateManager.enableDepth()
             RenderHelper.enableStandardItemLighting()
             GlStateManager.enableRescaleNormal()
-            drawEntityOnScreen(
-                guiLeft + 256,
-                guiTop + 124,
-                40,
-                xAngle,
-                -yAngle,
-                mc.thePlayer
-            )
+            drawEntityOnScreen(guiLeft + 256, guiTop + 124, 40, xAngle, -yAngle, mc.thePlayer)
 
             for (slot in inventorySlots) {
                 drawSlot(slot, mouseX, mouseY, partialTicks)
@@ -373,38 +177,14 @@ open class CosmeticGui : UScreen(), HysentialsGui {
 
             var rX = mouseX.toFloat() - guiLeft
             var rY = mouseY.toFloat() - guiTop
+
+            for (tab in tabs) {
+                if (tab.isHovered(rX.toDouble(), rY.toDouble())) {
+                    drawHoveringText(listOf("§8➔ <#${tab.color}>${tab.displayName} Cosmetics"), mouseX, mouseY, fontRenderer)
+                }
+            }
+
             when {
-                rX in 5.0..15.0 && rY in 4.0..14.0 && type !== "owned" -> {
-                    drawHoveringText(listOf("§8➔ <#32a852>Owned Cosmetics"), mouseX, mouseY, fontRenderer)
-                }
-
-                rX in 5.0..14.0 && rY in 22.0..31.0 && type !== "head" -> {
-                    drawHoveringText(listOf("§8➔ <#1787e3>Headwear"), mouseX, mouseY, fontRenderer)
-                }
-
-                rX in 5.0..14.0 && rY in 38.0..47.0 && type !== "back" -> {
-                    drawHoveringText(listOf("§8➔ <#e69927>Chestwear"), mouseX, mouseY, fontRenderer)
-                }
-
-                rX in 5.0..14.0 && rY in 53.0..64.0 && type !== "pantaloons" -> {
-                    drawHoveringText(listOf("§8➔ <#8327e6>Bottomwear"), mouseX, mouseY, fontRenderer)
-                }
-
-                rX in 4.0..15.0 && rY in 70.0..77.0 && type !== "boots" -> {
-                    drawHoveringText(listOf("§8➔ <#ea323b>Shoes"), mouseX, mouseY, fontRenderer)
-                }
-
-                rX in 5.0..14.0 && rY in 83.0..93.0 && type !== "pet" -> {
-                    drawHoveringText(listOf("§8➔ <#e4ea32>Pets"), mouseX, mouseY, fontRenderer)
-                }
-
-                rX in 5.0..14.0 && rY in 99.0..106.0 && type !== "chat" -> {
-                    drawHoveringText(listOf("§8➔ <#32eade>Chatting"), mouseX, mouseY, fontRenderer)
-                }
-
-                rX in 5.0..14.0 && rY in 112.0..122.0 && type !== "bundle" -> {
-                    drawHoveringText(listOf("§8➔ <#e832e6>Bundles"), mouseX, mouseY, fontRenderer)
-                }
 
                 rX in 277.0..284.0 && rY in 5.0..11.0 -> {
                     drawHoveringText(
@@ -454,8 +234,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 )
             }
 
-            mcFive.drawString(search.uppercase(), guiLeft + 62f, guiTop + 131f, 0x1b1a18)
-            mcFive.drawString(search.uppercase(), guiLeft + 61f, guiTop + 131f, 0xFFFFFF)
+            mcFive.drawStringShadow(search.uppercase(), guiLeft + 61f, guiTop + 131f, 0xFFFFFF)
 
             Renderer.translate(guiLeft.toDouble(), guiTop.toDouble(), 0.0)
             buttons.forEach {
@@ -471,77 +250,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
         GlStateManager.popMatrix()
     }
 
-    open fun drawEntityOnScreen(posX: Int, posY: Int, scale: Int, xAngle: Float, yAngle: Float, ent: EntityLivingBase) {
-        GlStateManager.enableColorMaterial()
-        GlStateManager.pushMatrix()
-        GlStateManager.translate(posX.toFloat(), posY.toFloat(), 50.0f)
-        GlStateManager.scale((-scale).toFloat(), scale.toFloat(), scale.toFloat())
-        GlStateManager.rotate(180.0f, 0.0f, 0.0f, 1.0f)
-        val f = ent.renderYawOffset
-        val g = ent.rotationYaw
-        val h = ent.rotationPitch
-        val i = ent.prevRotationYawHead
-        val j = ent.rotationYawHead
 
-        ent.renderYawOffset = 0.0f
-        ent.rotationYaw = 0.0f
-        ent.rotationPitch = 0.0f
-        ent.prevRotationYawHead = 0.0f
-        ent.rotationYawHead = 0.0f
-        GlStateManager.rotate(135.0f, 0.0f, 1.0f, 0.0f)
-        RenderHelper.enableStandardItemLighting()
-        GlStateManager.rotate(-135.0f, 0.0f, 1.0f, 0.0f)
-        GlStateManager.rotate(-Math.atan((yAngle / 40.0f).toDouble()).toFloat() * 20.0f, 1.0f, 0.0f, 0.0f)
-        val renderManager = Minecraft.getMinecraft().renderManager
-        GlStateManager.rotate(xAngle, 0.0f, 1.0f, 0.0f)
-//        GlStateManager.rotate(yAngle, 1.0f, 0.0f, 0.0f)
-        renderManager.setPlayerViewY(180.0f + yAngle)
-        renderManager.isRenderShadow = false
-        renderManager.renderEntityWithPosYaw(ent, 0.0, 0.0, 0.0, 0.0f, 1.0f)
-        renderManager.isRenderShadow = true
-        GlStateManager.rotate(-xAngle, 0.0f, 1.0f, 0.0f)
-//        GlStateManager.rotate(-yAngle, 1.0f, 0.0f, 0.0f)
-        ent.renderYawOffset = f
-        ent.rotationYaw = g
-        ent.rotationPitch = h
-        ent.prevRotationYawHead = i
-        ent.rotationYawHead = j
-        GlStateManager.popMatrix()
-        RenderHelper.disableStandardItemLighting()
-        GlStateManager.disableRescaleNormal()
-        GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit)
-        GlStateManager.disableTexture2D()
-        GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit)
-    }
-
-    private fun drawSlot(slotIn: Slot, mouseX: Int, mouseY: Int, partialTicks: Float) {
-        val i: Int = slotIn.xDisplayPosition
-        val j: Int = slotIn.yDisplayPosition
-        GlStateManager.disableLighting()
-        GlStateManager.disableDepth()
-        GlStateManager.colorMask(true, true, true, false)
-        val page = paginationList!!.getPage(page)
-        if (page.size > slotIn.slotIndex) {
-            val cosmetic = page[slotIn.slotIndex]
-            val name = cosmetic.name
-            val uuid = Minecraft.getMinecraft().thePlayer.uniqueID
-            if (equippedCosmetic(uuid, name)) {
-                Renderer.drawImage(selectedSlot, i.toDouble(), j.toDouble(), 25.0, 26.0)
-            }
-        }
-        val itemstack: ItemStack = slotIn.stack ?: return
-
-        val ibakedmodel: IBakedModel = Minecraft.getMinecraft().renderItem.itemModelMesher.getItemModel(itemstack)
-        val width = ibakedmodel.particleTexture.iconWidth
-        val height = ibakedmodel.particleTexture.iconHeight
-        itemRender.renderItemAndEffectIntoGUI(itemstack, i + (25 - width) / 2, j + (26 - height) / 2)
-        itemRender.renderItemOverlayIntoGUI(fontRendererObj, itemstack, i + (25 - width) / 2, j + (26 - height) / 2, "")
-
-        itemRender.zLevel = 0.0f
-        GlStateManager.enableLighting()
-        GlStateManager.enableDepth()
-        GlStateManager.colorMask(true, true, true, true)
-    }
 
     override fun onMouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int) {
         super.onMouseClicked(mouseX, mouseY, mouseButton)
@@ -552,109 +261,26 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 it.click(mouseX, mouseY, mouseButton)
             }
         }
-
         if (mouseButton == 0) {
 
             val rX = mouseX - guiLeft
             val rY = mouseY - guiTop
 
+            for (tab in tabs) {
+                if (tab.isHovered(rX, rY)) {
+                    type = tab.name
+                    page = 1
+                    updatePage()
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
+                }
+            }
+
             when {
-                rX in 5.0..15.0 && rY in 4.0..14.0 && type !== "owned" -> {
-                    type = "owned"
-                    page = 1
-                    updatePage()
-                    this.mc.soundHandler.playSound(
-                        PositionedSoundRecord.create(
-                            ResourceLocation("gui.button.press"),
-                            1.0f
-                        )
-                    )
-                }
-
-                rX in 5.0..14.0 && rY in 22.0..31.0 && type !== "head" -> {
-                    type = "head"
-                    page = 1
-                    updatePage()
-                    this.mc.soundHandler.playSound(
-                        PositionedSoundRecord.create(
-                            ResourceLocation("gui.button.press"),
-                            1.0f
-                        )
-                    )
-                }
-
-                rX in 5.0..14.0 && rY in 38.0..47.0 && type !== "back" -> {
-                    type = "back"
-                    page = 1
-                    updatePage()
-                    this.mc.soundHandler.playSound(
-                        PositionedSoundRecord.create(
-                            ResourceLocation("gui.button.press"),
-                            1.0f
-                        )
-                    )
-                }
-
-                rX in 5.0..14.0 && rY in 53.0..64.0 && type !== "pantaloons" -> {
-                    type = "pantaloons"
-                    page = 1
-                    updatePage()
-                    this.mc.soundHandler.playSound(
-                        PositionedSoundRecord.create(
-                            ResourceLocation("gui.button.press"),
-                            1.0f
-                        )
-                    )
-                }
-
-                rX in 4.0..15.0 && rY in 70.0..77.0 && type !== "boots" -> {
-                    type = "boots"
-                    page = 1
-                    updatePage()
-                    this.mc.soundHandler.playSound(
-                        PositionedSoundRecord.create(
-                            ResourceLocation("gui.button.press"),
-                            1.0f
-                        )
-                    )
-                }
-
-                rX in 5.0..14.0 && rY in 83.0..93.0 && type !== "pet" -> {
-                    type = "pet"
-                    page = 1
-                    updatePage()
-                    this.mc.soundHandler.playSound(
-                        PositionedSoundRecord.create(
-                            ResourceLocation("gui.button.press"),
-                            1.0f
-                        )
-                    )
-                }
-
-                rX in 5.0..14.0 && rY in 99.0..106.0 && type !== "chat" -> {
-                    type = "chat"
-                    page = 1
-                    updatePage()
-                    this.mc.soundHandler.playSound(
-                        PositionedSoundRecord.create(
-                            ResourceLocation("gui.button.press"),
-                            1.0f
-                        )
-                    )
-                }
-
-                rX in 5.0..14.0 && rY in 112.0..122.0 && type !== "bundle" -> {
-                    type = "bundle"
-                    page = 1
-                    updatePage()
-                    this.mc.soundHandler.playSound(
-                        PositionedSoundRecord.create(
-                            ResourceLocation("gui.button.press"),
-                            1.0f
-                        )
-                    )
-                }
-
                 rX in 223.0..288.0 && rY in 20.0..159.0 -> {
                     isDragging = true
                     dragPos = Pair(mouseX, mouseY)
@@ -829,132 +455,43 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 lore.add("")
                 lore.add("&eClick to equip!")
             } else {
+                val costString = if (cost == -1) "FREE" else "$cost⏣"
+                if (cost != -1) {
+                    lore.add("")
+                    lore.add("&7Cost: &a$costString")
+                    lore.add("")
+                }
+
                 if (cost > 0) {
-                    if (emerald < cost) {
-                        lore.add("")
-                        lore.add("&7Cost: &a$cost⏣")
-                        lore.add("")
-                        lore.add("&cNot enough emeralds!")
-                    } else {
-                        lore.add("")
-                        lore.add("&7Cost: &a$cost⏣")
-                        lore.add("")
-                        lore.add("&eClick to purchase!")
-                    }
+                    lore.add(if (emerald >= cost) "&aClick to purchase!" else "&cNot enough emeralds!")
                 } else if (cost == 0) {
-                    lore.add("")
-                    lore.add("&7Cost: &aFREE")
-                    lore.add("")
                     lore.add("&eClick to purchase!")
-                } else {
+                } else if (cost == -1){
                     lore.add("")
                     lore.add("&cNot purchasable!")
                 }
             }
             when (subType) {
                 "pet" -> {
-                    item = GuiItem.makeMonsterEgg(
-                        displayName,
-                        1,
-                        itemID,
-                        lore
-                    )
-                }
-
-                "cape" -> {
-                    item = GuiItem.makeColorfulItem(
-                        Material.LEATHER_CHESTPLATE,
-                        displayName,
-                        1,
-                        0,
-                        lore
-                    )
-                    GuiItem.setColor(item, o.color)
-                }
-
-                "hat" -> {
-                    item = GuiItem.makeColorfulItem(
-                        Material.LEATHER_HELMET,
-                        displayName,
-                        1,
-                        0,
-                        lore
-                    )
-                    GuiItem.setColor(item, o.color)
-                }
-
-                "backpack" -> {
-                    item = GuiItem.makeColorfulItem(
-                        Material.LEATHER_CHESTPLATE,
-                        displayName,
-                        1,
-                        0,
-                        lore
-                    )
-                    GuiItem.setColor(item, o.color)
-                }
-
-                "chat" -> {
-                    item = GuiItem.makeColorfulItem(
-                        Material.valueOf(o.material!!),
-                        displayName,
-                        1,
-                        0,
-                        lore
-                    )
+                    item = GuiItem.makeMonsterEgg(displayName, 1, itemID, lore)
                 }
 
                 "bundle" -> {
                     if (Material.valueOf(o.material!!) == Material.SKULL_ITEM) {
-                        item = GuiItem.makeColorfulSkullItem(
-                            displayName,
-                            o.skullOwner!!,
-                            1,
-                            lore
-                        )
+                        item = GuiItem.makeColorfulSkullItem(displayName, o.skullOwner!!, 1, lore)
                     } else {
-                        item = GuiItem.makeColorfulItem(
-                            Material.valueOf(o.material!!),
-                            displayName,
-                            1,
-                            0,
-                            lore
-                        )
+                        item = GuiItem.makeColorfulItem(Material.valueOf(o.material!!), displayName, 1, 0, lore)
                     }
-                }
-
-                "pantaloons" -> {
-                    item = GuiItem.makeColorfulItem(
-                        Material.LEATHER_LEGGINGS,
-                        displayName,
-                        1,
-                        0,
-                        lore
-                    )
-                    GuiItem.setColor(item, o.color)
-                }
-
-                "boots" -> {
-                    item = GuiItem.makeColorfulItem(
-                        Material.LEATHER_BOOTS,
-                        displayName,
-                        1,
-                        0,
-                        lore
-                    )
-                    GuiItem.setColor(item, o.color)
-                }
+                }// Make file. Please.
 
                 else -> {
-                    item = GuiItem.makeColorfulItem(
-                        Material.valueOf(o.material!!),
-                        displayName,
-                        1,
-                        0,
-                        lore
-                    )
+                    item = GuiItem.makeColorfulItem(Material.valueOf(o.material!!), displayName, 1, 0, lore)
                 }
             }
+            if (o.material?.startsWith("LEATHER") == true) {
+                GuiItem.setColor(item, o.color)
+            }
+
             o.item = item
 
             if (!inventoryMap.containsKey(type)) {
@@ -984,56 +521,29 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                     if (page > 1) {
                         page--
                         updatePage()
-                        this.mc.soundHandler.playSound(
-                            PositionedSoundRecord.create(
-                                ResourceLocation("gui.button.press"),
-                                1.0f
-                            )
-                        )
+                        this.mc.soundHandler.playSound(PositionedSoundRecord.create(ResourceLocation("gui.button.press"), 1.0f))
                     }
                 })
-            it.add(
-                Button(
-                    192,
-                    126,
-                    29,
-                    20,
-                    "hysentials:gui/wardrobe/right.png",
-                    instance,
+            it.add(Button(192, 126, 29, 20, "hysentials:gui/wardrobe/right.png", instance,
                     onHover = { _, _ -> page < maxPage }) { _, _, _ ->
                     if (page < maxPage) {
                         page++
                         updatePage()
-                        this.mc.soundHandler.playSound(
-                            PositionedSoundRecord.create(
-                                ResourceLocation("gui.button.press"),
-                                1.0f
-                            )
-                        )
+                        this.mc.soundHandler.playSound(PositionedSoundRecord.create(ResourceLocation("gui.button.press"), 1.0f))
                     }
                 })
             it.add(Button(18, 126, 29, 20, "hysentials:gui/wardrobe/left-light.png", instance) { _, _, _ ->
                 if (page > 1) {
                     page--
                     updatePage()
-                    this.mc.soundHandler.playSound(
-                        PositionedSoundRecord.create(
-                            ResourceLocation("gui.button.press"),
-                            1.0f
-                        )
-                    )
+                    this.mc.soundHandler.playSound(PositionedSoundRecord.create(ResourceLocation("gui.button.press"), 1.0f))
                 }
             })
             it.add(Button(192, 126, 29, 20, "hysentials:gui/wardrobe/right-light.png", instance) { _, _, _ ->
                 if (page < maxPage) {
                     page++
                     updatePage()
-                    this.mc.soundHandler.playSound(
-                        PositionedSoundRecord.create(
-                            ResourceLocation("gui.button.press"),
-                            1.0f
-                        )
-                    )
+                    this.mc.soundHandler.playSound(PositionedSoundRecord.create(ResourceLocation("gui.button.press"), 1.0f))
                 }
             })
         }

@@ -56,8 +56,9 @@ public class HysentialsModCard extends BasicElement {
     private final ColorAnimation colorToggle;
     private boolean active, disabled, favorite;
     private boolean isHoveredMain = false;
+    private int amount;
 
-    public HysentialsModCard(@NotNull Mod mod, boolean active, boolean disabled, boolean favorite) {
+    public HysentialsModCard(@NotNull Mod mod, boolean active, boolean disabled, boolean favorite, int amount) {
         super(244, 244, false);
         this.modData = mod;
         this.active = active;
@@ -66,6 +67,7 @@ public class HysentialsModCard extends BasicElement {
         this.disabled = disabled;
         this.favorite = favorite;
         toggled = active;
+        this.amount = amount;
     }
 
     @Override

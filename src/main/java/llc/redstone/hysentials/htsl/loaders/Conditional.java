@@ -212,7 +212,7 @@ public class Conditional extends Loader {
                     sequence.add(LoaderObject.option(conditionData[1].toString()));
                 }
                 if (conditionData[2] != null && !conditionData[2].equals("equal_to")) {
-                    sequence.add(LoaderObject.click(11));
+                    sequence.add(LoaderObject.click(12));
                     switch (conditionData[2].toString()) {
                         case "less_than": {
                             sequence.add(LoaderObject.click(10));
@@ -234,7 +234,7 @@ public class Conditional extends Loader {
                 }
 
                 if (conditionData[3] != null) {
-                    sequence.add(LoaderObject.click(12));
+                    sequence.add(LoaderObject.click(13));
                     sequence.add(LoaderObject.anvil(conditionData[3].toString()));
                 }
                 sequence.add(LoaderObject.back());

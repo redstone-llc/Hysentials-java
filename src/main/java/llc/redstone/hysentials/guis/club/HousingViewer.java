@@ -37,10 +37,14 @@ public class HousingViewer extends Container {
 
     @Override
     public void setItems() {
-        List<JsonObject> houses = clubData.getHouses();
+        List<HysentialsSchema.House> houses = clubData.getHouses();
         for (int i = 0; i < Math.min(houses.size(), 5); i++) {
-            JsonObject house = houses.get(i).getAsJsonObject();
-            ItemStack item = ClubDashboard.getItemfromNBT(house.get("nbt").getAsString());
+            HysentialsSchema.House house = houses.get(i);
+            ItemStack item = ClubDashboard.getItemfromNBT(house.getNbt());
+            if (item == null) {
+                System.out.println("Item is null for house " + house.getName());
+                continue;
+            }
             if (clubData.getOwner().equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString())) {
                 List<String> lore = getLore(item);
                 lore.add("§bRight click to remove");
@@ -61,23 +65,23 @@ public class HousingViewer extends Container {
     public void setClickActions() {
         setDefaultAction((event) -> {
             event.getEvent().cancel();
-            List<JsonObject> houses = clubData.getHouses();
+            List<HysentialsSchema.House> houses = clubData.getHouses();
             for (int i = 0; i < Math.min(houses.size(), 5); i++) {
-                JsonObject house = houses.get(i).getAsJsonObject();
+                HysentialsSchema.House house = houses.get(i);
                 int slot = slotsMap.get(houses.size()).get(i);
                 if (event.getSlot() == slot) {
                     if (clubData.getOwner().equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString()) && event.getButton() == 1) {
                         JSONObject data = new JSONObject();
-                        data.put("houses", house);
+                        data.put("houses", house.serialize());
                         data.put("remove", true);
                         Multithreading.runAsync(() -> {
                             ClubDashboard.getClub();
                             ClubDashboard.update(data);
-                            new HousingViewer(ClubDashboard.clubData).open();
+                            update();
                         });
                     } else {
                         Minecraft.getMinecraft().thePlayer.closeScreen();
-                        Minecraft.getMinecraft().thePlayer.sendChatMessage("/visit " + house.get("username").getAsString() + " " + house.get("name").getAsString());
+                        Minecraft.getMinecraft().thePlayer.sendChatMessage("/visit " + house.getUsername() + " " + house.getName());
                     }
                 }
             }

@@ -12,29 +12,29 @@ import llc.redstone.hysentials.config.HysentialsConfig;
 import net.minecraft.client.Minecraft;
 
 @Command(value = "groupchat", aliases = {"grc", "group"}, customHelpMessage = {
-    "§9§m-----------------------------------------------------",
+    "§9§m                                                     ",
     "§aGroup Commands:",
     "§e/group join <name> §8- §bAccepts a group invitation",
-    "§e/group chat <group> <chat message> §8- §bSend a chat message to your group chat channel",
-    "§e/group create <name> §8- §bCreates a group with the specified name",
-    "§e/group settings <group> <allInvite/silence/filter/private> <value> §8- §bChange group settings",
-    "§e/group demote <group> <player> §8- §bDemotes the player to the previous rank",
-    "§e/group disband <group> §8- §bDisbands the group",
-    "§e/group help §8- §bPrints this help message",
-    "§e/group invite <group> <player> §8- §bInvites the player to your group",
-    "§e/group kick <group> <player> <reason> §8- §bKicks the player from your group",
-    "§e/group leave <group> §8- §bLeaves your current group",
-    "§e/group promote <group> <player> §8- §bPromotes the player to the next rank",
-    "§e/group online <group> §8- §bShow the current online members of your group",
-    "§e/group rename <group> <name> §8- §bRenames the group",
-    "§e/group transfer <group> <player> §8- §bTransfers ownership of the group to another player",
-    "§e/group hide <group> §8- §bHide the group from displaying messages in chat",
-    "§e/group unhide <group> §8- §bUnhide the group from displaying messages in chat",
-    "§e/group color <group> <color> §8- §bChange the prefix color of the group",
-    "§9§m-----------------------------------------------------"
+    "§e/group chat <group> <chat message> §8- §bSend a chat message to your group chat channel.",
+    "§e/group create <name> §8- §bCreates a group with the specified name.",
+    "§e/group settings <group> <allInvite/silence/filter/private> <value> §8- §bChange group settings.",
+    "§e/group demote <group> <player> §8- §bDemotes the player to the previous rank.",
+    "§e/group disband <group> §8- §bDisbands the group.",
+    "§e/group help §8- §bPrints this help message.",
+    "§e/group invite <group> <player> §8- §bInvites the player to your group.",
+    "§e/group kick <group> <player> <reason> §8- §bKicks the player from your group.",
+    "§e/group leave <group> §8- §bLeaves your current group.",
+    "§e/group promote <group> <player> §8- §bPromotes the player to the next rank.",
+    "§e/group online <group> §8- §bShow the current online members of your group.",
+    "§e/group rename <group> <name> §8- §bRenames the group.",
+    "§e/group transfer <group> <player> §8- §bTransfers ownership of the group to another player.",
+    "§e/group hide <group> §8- §bHide the group from displaying messages in chat.",
+    "§e/group unhide <group> §8- §bAllow the group to display messages in chat.",
+    "§e/group color <group> <color> §8- §bChange the prefix color of the group.",
+    "§9§m                                                     "
 })
 public class GroupChatCommand {
-    @SubCommand(description = "Join a group chat", aliases = "join")
+    @SubCommand(description = "Join a group chat.", aliases = "join")
     public void join(String name) {
         Socket.CLIENT.sendText(new Request(
             "method", "groupJoin",
@@ -44,7 +44,7 @@ public class GroupChatCommand {
         ).toString());
     }
 
-    @SubCommand(description = "Chat in a group chat", aliases = "chat")
+    @SubCommand(description = "Chat in a group chat.", aliases = "chat")
     public void chat(String group, @Greedy String message) {
         Socket.CLIENT.sendText(new Request(
             "method", "groupChat",
@@ -59,7 +59,7 @@ public class GroupChatCommand {
         }));
     }
 
-    @SubCommand(description = "Create a group chat", aliases = "create")
+    @SubCommand(description = "Create a group chat.", aliases = "create")
     public void create(String name) {
         Socket.CLIENT.sendText(new Request(
             "method", "groupCreate",
@@ -72,7 +72,7 @@ public class GroupChatCommand {
         }));
     }
 
-    @SubCommand(description = "Set the settings of the group", aliases = {"settings", "s"})
+    @SubCommand(description = "Set the settings of the group.", aliases = {"settings", "s"})
     public void settings( String name, @Description(autoCompletesTo = {"allInvite", "silence", "filter", "private"}) String setting, @Description(autoCompletesTo = {"true", "false"}) String value) {
         Socket.CLIENT.sendText(new Request(
             "method", "groupSettings",
@@ -87,7 +87,7 @@ public class GroupChatCommand {
         }));
     }
 
-    @SubCommand(description = "Demote a player in the group", aliases = {"demote", "d"})
+    @SubCommand(description = "Demote a player in the group.", aliases = {"demote", "d"})
     public void demote(String name, String player) {
         Socket.CLIENT.sendText(new Request(
             "method", "groupDemote",
@@ -101,7 +101,7 @@ public class GroupChatCommand {
         }));
     }
 
-    @SubCommand(description = "Disband a group", aliases = {"disband", "dis"})
+    @SubCommand(description = "Disband a group.", aliases = {"disband", "dis"})
     public void disband(String name) {
         Socket.CLIENT.sendText(new Request(
             "method", "groupDisband",
@@ -114,7 +114,7 @@ public class GroupChatCommand {
         }));
     }
 
-    @SubCommand(description = "Invite a player to a group chat", aliases = {"invite", "i"})
+    @SubCommand(description = "Invite a player to a group chat.", aliases = {"invite", "i"})
     public void invite(String name, String player) {
         Socket.CLIENT.sendText(new Request(
             "method", "groupInvite",
@@ -128,7 +128,7 @@ public class GroupChatCommand {
         }));
     }
 
-    @SubCommand(description = "Kick a player from a group chat", aliases = {"kick", "k"})
+    @SubCommand(description = "Kick a player from a group chat.", aliases = {"kick", "k"})
     public void kick(String name, String player, String reason) {
         Socket.CLIENT.sendText(new Request(
             "method", "groupKick",
@@ -143,7 +143,7 @@ public class GroupChatCommand {
         }));
     }
 
-    @SubCommand(description = "Leave a group chat", aliases = {"leave", "l"})
+    @SubCommand(description = "Leave a group chat.", aliases = {"leave", "l"})
     public void leave(String name) {
         Socket.CLIENT.sendText(new Request(
             "method", "groupLeave",
@@ -156,7 +156,7 @@ public class GroupChatCommand {
         }));
     }
 
-    @SubCommand(description = "Promote a player in the group", aliases = {"promote", "p"})
+    @SubCommand(description = "Promote a player in the group.", aliases = {"promote", "p"})
     public void promote(String name, String player) {
         Socket.CLIENT.sendText(new Request(
             "method", "groupPromote",
@@ -170,7 +170,7 @@ public class GroupChatCommand {
         }));
     }
 
-    @SubCommand(description = "Display online players in a group", aliases = {"online", "o"})
+    @SubCommand(description = "Display online players in a group.", aliases = {"online", "o"})
     public void online(String name) {
         Socket.CLIENT.sendText(new Request(
             "method", "groupOnline",
@@ -183,7 +183,7 @@ public class GroupChatCommand {
         }));
     }
 
-    @SubCommand(description = "Renames a group", aliases = {"rename", "r"})
+    @SubCommand(description = "Renames a group.", aliases = {"rename", "r"})
     public void rename(String name, String newName) {
         Socket.CLIENT.sendText(new Request(
             "method", "groupRename",
@@ -240,7 +240,7 @@ public class GroupChatCommand {
         }));
     }
 
-    @SubCommand(description = "Set the color of the groups prefix", aliases = "color")
+    @SubCommand(description = "Set the color of the groups prefix.", aliases = "color")
     public void color( String name, String color) {
         Socket.CLIENT.sendText(new Request(
             "method", "groupColor",

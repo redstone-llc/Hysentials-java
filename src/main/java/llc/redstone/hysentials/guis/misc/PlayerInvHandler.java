@@ -4,6 +4,7 @@ import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.HysentialsConfig;
+import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
 import llc.redstone.hysentials.handlers.htsl.Navigator;
 import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
@@ -45,7 +46,7 @@ public class PlayerInvHandler {
             NBTTagCompound tag = item.getTagCompound();
             NBTTagCompound extraAttributes = tag.getCompoundTag("ExtraAttributes");
             if (extraAttributes != null && !extraAttributes.hasKey("HOUSING_MENU") && SbbRenderer.housingScoreboard.getHousingName() != null) {
-                if (Minecraft.getMinecraft().thePlayer.isSneaking() && HysentialsConfig.shiftRightClickInv) {
+                if (Minecraft.getMinecraft().thePlayer.isSneaking() && HousingConfig.shiftRightClickInv) {
                     new PlayerInventory((EntityPlayer) event.target).open();
                     event.setCanceled(true);
                     event.setCanceled(true);
@@ -53,7 +54,7 @@ public class PlayerInvHandler {
                 return;
             }
         } else if (SbbRenderer.housingScoreboard.getHousingName() != null) {
-            if (Minecraft.getMinecraft().thePlayer.isSneaking() && HysentialsConfig.shiftRightClickInv) {
+            if (Minecraft.getMinecraft().thePlayer.isSneaking() && HousingConfig.shiftRightClickInv) {
                 new PlayerInventory((EntityPlayer) event.target).open();
                 event.setCanceled(true);
                 event.setCanceled(true);

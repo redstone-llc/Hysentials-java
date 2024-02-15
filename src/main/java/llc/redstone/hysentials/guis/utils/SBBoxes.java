@@ -6,6 +6,7 @@ import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack;
 import cc.polyfrost.oneconfig.renderer.TextRenderer;
 import llc.redstone.hysentials.config.HysentialsConfig;
+import llc.redstone.hysentials.config.hysentialMods.ScorebarsConfig;
 import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
 import llc.redstone.hysentials.util.Renderer;
 import llc.redstone.hysentials.util.ScoreboardWrapper;
@@ -56,8 +57,8 @@ public class SBBoxes {
 
     public void draw() {
         SbbRenderer.drawBox(position.getX(), position.getY(), getWidth(display), getHeight(display),
-            HysentialsConfig.boxColor, HysentialsConfig.boxShadows,
-            new Integer[]{0, 2, 4}[HysentialsConfig.scoreboardBoxesBorderRadius]
+            ScorebarsConfig.boxColor, ScorebarsConfig.boxShadows,
+            new Integer[]{0, 2, 4}[ScorebarsConfig.scoreboardBoxesBorderRadius]
         );
         TextRenderer.drawScaledString(display, position.getX() + ((getWidth(display) - getStringWidth(display)) / 2), position.getY() + ((getHeight(display) - (9 * scale)) / 2), 0xFFFFFF, TextRenderer.TextType.NONE, scale);
     }

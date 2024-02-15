@@ -48,6 +48,12 @@ class MacroWheelData {
         it.put("macros", JSONObject())
         it
     }) {
+        init {
+            if (jsonObject.get("macros") !is JSONObject) {
+                jsonObject.put("macros", JSONObject())
+                save()
+            }
+        }
         fun addMacro(macro: MacroWheel) {
             val json = jsonObject.getJSONObject("macros")
             json.put(macro.index.toString(), macro.serialize())

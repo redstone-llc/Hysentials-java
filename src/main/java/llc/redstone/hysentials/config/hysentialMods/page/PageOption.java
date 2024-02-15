@@ -45,7 +45,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class PageOption extends BasicOption {
-    private List<BasicElement> element = new ArrayList<>();
+    private List<HysentialsModCard> element = new ArrayList<>();
     private List<Config> config;
 
 
@@ -63,7 +63,7 @@ public class PageOption extends BasicOption {
         if (config != null) {
             for (Config config : config) {
                 if (config != null) {
-                    element.add(new HysentialsModCard(config.mod, true, !config.enabled, false));
+                    element.add(new HysentialsModCard(config.mod, true, !config.enabled, false, this.config.size()));
                 }
             }
         }
@@ -78,9 +78,19 @@ public class PageOption extends BasicOption {
     public void draw(long vg, int x, int y, InputHandler inputHandler) {
         if (OneConfigGui.INSTANCE == null) return;
         final NanoVGHelper nanoVGHelper = NanoVGHelper.INSTANCE;
-        for (BasicElement element : element) {
-            element.draw(vg, x, y, inputHandler);
-            x += 260;
+        for (HysentialsModCard element : element) {
+            if (config.size() == 1) {
+                //draw in the center gui is 1024x696
+                element.draw(vg, x + 1024 / 2f - 260 /2f, y, inputHandler);
+            } else if (config.size() == 2) {
+                //draw 2 in the center
+                element.draw(vg, x + 1024 / 2f - 260 * 4/3f, y, inputHandler);
+                x += 260;
+            } else if (config.size() == 3) {
+                //draw 3 in the center
+                element.draw(vg, x + 1024 / 2f - 260 * 1.5f, y, inputHandler);
+                x += 260;
+            }
         }
     }
 

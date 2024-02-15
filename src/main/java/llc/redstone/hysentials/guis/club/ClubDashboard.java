@@ -6,7 +6,6 @@ import llc.redstone.hysentials.schema.HysentialsSchema.Club;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.guis.actionLibrary.SharedCode;
 import llc.redstone.hysentials.guis.container.Container;
 import llc.redstone.hysentials.guis.container.GuiItem;
 import llc.redstone.hysentials.util.Material;
@@ -15,15 +14,19 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import net.minecraft.client.Minecraft;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.client.event.MouseEvent;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ClubDashboard extends Container {
@@ -38,6 +41,13 @@ public class ClubDashboard extends Container {
         }
         ClubDashboard.clubData = HysentialsSchema.Club.Companion.deserialize(clubData.getAsJsonObject("club"));
     }
+
+    public ClubDashboard(HysentialsSchema.Club clubData) {
+        super("Club Dashboard", 3);
+        instance = this;
+        ClubDashboard.clubData = clubData;
+    }
+
 
     @Override
     public void setItems() {
@@ -74,13 +84,15 @@ public class ClubDashboard extends Container {
                 )));
 
             setItem(15, GuiItem.fromStack(
-                GuiItem.makeColorfulItem(Material.STORAGE_MINECART, "&aView Shared Code", 1, 0,
+                GuiItem.makeColorfulItem(Material.EMPTY_MAP, "&aText Replace", 1, 0,
                     "&8Option",
                     "",
-                    "&7View all of your conditions and functions",
-                    "&7that are shared within your club!",
+                    "&7Replace any text rendered in game,",
+                    "&7this includes items, chat, and more!",
+                    "&7This effects all of the houses in the club!",
+                    "&7Current Replacements: &a" + clubData.getReplaceText().size() + "&7/&e100",
                     "",
-                    "&eClick to view!"
+                    "&eClick to edit!"
                 )));
             setItem(16, GuiItem.fromStack(
                 GuiItem.makeColorfulItem(Material.DARK_OAK_DOOR_ITEM, "&aClubhouses", 1, 0,
@@ -96,11 +108,12 @@ public class ClubDashboard extends Container {
                 )));
         } else {
             setItem(13, GuiItem.fromStack(
-                GuiItem.makeColorfulItem(Material.STORAGE_MINECART, "&aView Shared Code", 1, 0,
+                GuiItem.makeColorfulItem(Material.BARRIER, "&cCurrently nothing yet", 1, 0,
                     "&8Option",
                     "",
-                    "&7View all of your conditions and functions",
-                    "&7that are shared within your club!",
+                    "&7This feature is not yet available!",
+                    "&7We are still trying to figure out",
+                    "&7what to put here!",
                     "",
                     "&eClick to view!"
                 )));
@@ -166,16 +179,13 @@ public class ClubDashboard extends Container {
                     invitePlayers = false;
                     UChat.chat("&cInvite request has expired!");
                 }, 5, TimeUnit.MINUTES);
-            } else {
-                Minecraft.getMinecraft().thePlayer.closeScreen();
-                new SharedCode(clubData).open();
             }
         });
 
         setAction(15, (event) -> {
             event.getEvent().cancel();
             Minecraft.getMinecraft().thePlayer.closeScreen();
-            new SharedCode(clubData).open();
+            new ClubReplace(null).open();
         });
 
         setAction(16, (event) -> {
@@ -274,10 +284,35 @@ public class ClubDashboard extends Container {
         return obj;
     }
 
-    public static ItemStack getItemfromNBT(String nbt) {
+    public static ItemStack getItemfromNBT(JsonObject nbt) {
         ItemStack itemStack = null;
         try {
-            itemStack = ItemStack.loadItemStackFromNBT(JsonToNBT.getTagFromJson(nbt));
+            if (nbt == null) {
+                return null;
+            }
+            if (nbt.has("id") && nbt.has("Count") && nbt.has("Damage")) {
+                itemStack = new ItemStack(Item.getByNameOrId(nbt.get("id").getAsString()), nbt.get("Count").getAsInt(), (short) nbt.get("Damage").getAsInt());
+
+                if (nbt.has("tag")) {
+                    NBTTagCompound nbtTagCompound = JsonToNBT.getTagFromJson(nbt.get("tag").toString());
+                    itemStack.setTagCompound(nbtTagCompound);
+
+                    JsonObject tag = nbt.get("tag").getAsJsonObject();
+                    if (tag.has("display")) {
+                        JsonObject display = tag.get("display").getAsJsonObject();
+                        if (display.has("Name")) {
+                            itemStack.setStackDisplayName(display.get("Name").getAsString());
+                        }
+                        if (display.has("Lore")) {
+                            List<String> lore = new ArrayList<>();
+                            for (int i = 0; i < display.get("Lore").getAsJsonArray().size(); i++) {
+                                lore.add(display.get("Lore").getAsJsonArray().get(i).getAsString());
+                            }
+                            GuiItem.setLore(itemStack, lore);
+                        }
+                    }
+                }
+            }
         } catch (NBTException e) {
             throw new RuntimeException(e);
         }

@@ -2,6 +2,7 @@ package llc.redstone.hysentials.cosmetics.cubit;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
+import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
 import llc.redstone.hysentials.cosmetics.AbstractCosmetic;
 import llc.redstone.hysentials.util.BUtils;
 import llc.redstone.hysentials.websocket.Socket;
@@ -33,8 +34,8 @@ public class CubitCompanion extends AbstractCosmetic<EntityCubit> {
 
     @Override
     public boolean canUse(EntityPlayer player) {
-        return CosmeticGui.Companion.equippedCosmetic(player.getUniqueID(), "cubit")
-            && CosmeticGui.Companion.hasCosmetic(player.getUniqueID(), "cubit")
+        return CosmeticUtilsKt.equippedCosmetic(player.getUniqueID(), "cubit")
+            && CosmeticUtilsKt.hasCosmetic(player.getUniqueID(), "cubit")
             && !player.isInvisible();
     }
 

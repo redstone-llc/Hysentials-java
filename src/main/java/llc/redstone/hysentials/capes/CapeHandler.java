@@ -2,6 +2,7 @@ package llc.redstone.hysentials.capes;
 
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
+import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.websocket.Socket;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
@@ -30,11 +31,11 @@ public class CapeHandler {
             for (String id : Socket.cachedUsersNew.keySet()) {
                 UUID uuid = UUID.fromString(id);
                 boolean wearingCape = false;
-                for (HysentialsSchema.Cosmetic cosmetic : CosmeticGui.Companion.getEquippedCosmetics(uuid)) {
+                for (HysentialsSchema.Cosmetic cosmetic : CosmeticUtilsKt.getEquippedCosmetics(uuid)) {
                     if (cosmetic.getSubType() != null && cosmetic.getSubType().equals("cape")) {
                         wearingCape = true;
                         String name = cosmetic.getName();
-                        if (CosmeticGui.Companion.hasCosmetic(uuid, name)) {
+                        if (CosmeticUtilsKt.hasCosmetic(uuid, name)) {
                             ResourceLocation location = new ResourceLocation(cosmetic.getResource());
                             resourceMap.put(uuid, cosmetic.getResource());
                             try {

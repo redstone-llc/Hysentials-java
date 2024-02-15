@@ -87,8 +87,18 @@ public class HysentialsLevel extends Container {
                 }
             }
         }
-        if (rewards.toString().equals(""))
-            rewards = new StringBuilder("     &8+&a25 Emeralds");
+        if (rewards.toString().equals("")) {
+            final int[] thresholds = {10, 25, 50, 75};
+            final int[] rewardss = {25, 50, 75, 100, 150};
+
+            int idx = 0;
+            while (idx < thresholds.length && level > thresholds[idx]) {
+                idx++;
+            }
+
+            int reward = rewardss[idx];
+            rewards = new StringBuilder("     &8+&a" + reward + " Emeralds");
+        }
         return rewards.toString();
     }
 

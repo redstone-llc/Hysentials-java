@@ -18,6 +18,7 @@
 package llc.redstone.hysentials.cosmetics.hamster;
 
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
+import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
 import llc.redstone.hysentials.cosmetics.AbstractCosmetic;
 import llc.redstone.hysentials.event.InvokeEvent;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
@@ -64,8 +65,8 @@ public class HamsterCompanion extends AbstractCosmetic<EntityHamster> {
 
     @Override
     public boolean canUse(EntityPlayer player) {
-        return CosmeticGui.Companion.equippedCosmetic(player.getUniqueID(), "hamster")
-            && CosmeticGui.Companion.hasCosmetic(player.getUniqueID(), "hamster")
+        return CosmeticUtilsKt.equippedCosmetic(player.getUniqueID(), "hamster")
+            && CosmeticUtilsKt.hasCosmetic(player.getUniqueID(), "hamster")
             && !player.isInvisible();
     }
 

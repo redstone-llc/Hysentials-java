@@ -7,7 +7,7 @@ import llc.redstone.hysentials.util.Material
 import net.minecraft.client.Minecraft
 import net.minecraftforge.client.event.MouseEvent
 
-class MacroWheelSelector : Container("Macro Wheel Selector", 6) {
+class MacroWheelSelector : Container("Command Wheel Selector", 6) {
     val macros = Hysentials.INSTANCE.macroJson.getMacros()
     override fun setItems() {
         fill(GuiItem.fromStack(BLACK_STAINED_GLASS_PANE))

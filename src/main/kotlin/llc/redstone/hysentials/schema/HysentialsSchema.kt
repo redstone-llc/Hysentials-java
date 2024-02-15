@@ -6,6 +6,7 @@ import com.neovisionaries.ws.client.WebSocket
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import net.minecraft.item.ItemStack
+import org.json.JSONObject
 
 class HysentialsSchema {
     data class User(
@@ -217,9 +218,10 @@ class HysentialsSchema {
         var changeTime: Double,
         var members: ArrayList<String>,
         var alias: String,
-        var actions: ArrayList<Action>, //TODO Replace with action class later
-        var houses: ArrayList<JsonObject>,
+        var houses: ArrayList<House>,
         var invites: ArrayList<String>,
+        var regex: Boolean = false,
+        var replaceText: HashMap<String, String>,
         @Transient var isOwner: Boolean = false,
     ) {
         companion object {
@@ -231,10 +233,41 @@ class HysentialsSchema {
                     obj["changeTime"].asDouble,
                     obj["members"].asJsonArray.map { it.asString }.toCollection(ArrayList()),
                     obj["alias"].asString,
-                    obj["actions"].asJsonArray.map { Action.deserialize(it.asJsonObject) }.toCollection(ArrayList()),
-                    obj["houses"].asJsonArray.map { it.asJsonObject }.toCollection(ArrayList()),
+                    obj["houses"].asJsonArray.map { House.deserialize(it.asJsonObject) }.toCollection(ArrayList()),
                     obj["invites"].asJsonArray.map { it.asString }.toCollection(ArrayList()),
+                    obj["regex"]?.asBoolean ?: false,
+                    obj["replaceText"].asJsonObject.let {
+                        val map = HashMap<String, String>()
+                        it.entrySet().forEach { entry ->
+                            map[entry.key] = entry.value.asString
+                        }
+                        map
+                    },
                     obj["isOwner"]?.asBoolean ?: false,
+                )
+            }
+        }
+    }
+
+    data class House(
+        var nbt: JsonObject,
+        var name: String,
+        var username: String
+    ) {
+        fun serialize(): JSONObject {
+            val obj = JSONObject()
+            obj.put("nbt", JSONObject(nbt.toString()))
+            obj.put("name", name)
+            obj.put("username", username)
+            return obj
+        }
+
+        companion object {
+            fun deserialize(obj: JsonObject): House {
+                return House(
+                    obj.getAsJsonObject("nbt"),
+                    obj["name"].asString,
+                    obj["username"].asString
                 )
             }
         }

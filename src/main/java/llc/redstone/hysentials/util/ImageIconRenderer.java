@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.util;
 
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
+import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
 import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
 import llc.redstone.hysentials.handlers.redworks.BwRanks;
 import llc.redstone.hysentials.hook.FontRendererAcessor;
@@ -49,21 +50,38 @@ public class ImageIconRenderer extends FontRenderer {
         if (text.startsWith("§aHymojis: \n")) {
             uuid = UUID.fromString("ad80d7cf-8115-4e2a-b15d-e5cc0bf6a9a2");
         }
-//        if (Minecraft.getMinecraft().currentScreen instanceof GuiChat) {
-//            uuid = (Minecraft.getMinecraft().thePlayer == null) ? null : Minecraft.getMinecraft().thePlayer.getUniqueID();
-//        }
-//        try {
-//            if (BwRanks.replacementMap.size() > 0) {
-//                String finalText = text.replace("§r", "");
-//                for (Map.Entry<String, DuoVariable<UUID, String>> entry : BwRanks.replacementMap.entrySet()) {
-//                    if (finalText.startsWith(entry.getKey())) {
-//                        text = text.replace(entry.getKey(), entry.getValue().second);
-//                        uuid = entry.getValue().first;
-//                    }
-//                }
-//            }
-//        } catch (ConcurrentModificationException ignored) {
-//        }
+        if (Minecraft.getMinecraft().currentScreen instanceof GuiChat) {
+            uuid = (Minecraft.getMinecraft().thePlayer == null) ? null : Minecraft.getMinecraft().thePlayer.getUniqueID();
+        }
+        try {
+            if (BwRanks.replacementMap.size() > 0) {
+                String finalText = text.replace("§r", "");
+                for (Map.Entry<String, DuoVariable<UUID, String>> entry : BwRanks.replacementMap.entrySet()) {
+                    if (finalText.startsWith(entry.getKey())) {
+                        text = text.replace(entry.getKey(), entry.getValue().second);
+                        uuid = entry.getValue().first;
+                    }
+                }
+            }
+
+            if (BlockWAPIUtils.currentHousingsClub != null) {
+                for (String key : BlockWAPIUtils.currentHousingsClub.getReplaceText().keySet()) {
+                    String finalText = text.replace("§r", "");
+                    String value = BlockWAPIUtils.currentHousingsClub.getReplaceText().get(key);
+                    if (value == null) {
+                        continue;
+                    }
+                    value = value.replace("&", "§");
+                    key = key.replace("&", "§");
+                    if (BlockWAPIUtils.currentHousingsClub.getRegex()) {
+                        text = finalText.replaceAll(key, value);
+                    } else {
+                        text = finalText.replace(key, value);
+                    }
+                }
+            }
+        } catch (ConcurrentModificationException ignored) {
+        }
         boolean lookingForQuestionMark = false;
         for (int i = 0; i < text.length(); ++i) {
             char c0 = text.charAt(i);
@@ -239,19 +257,36 @@ public class ImageIconRenderer extends FontRenderer {
         if (Minecraft.getMinecraft().currentScreen instanceof GuiChat) {
             uuid = (Minecraft.getMinecraft().thePlayer == null) ? null : Minecraft.getMinecraft().thePlayer.getUniqueID();
         }
-//        try {
-//            if (BwRanks.replacementMap.size() > 0) {
-//                String finalText = text.replace("§r", "");
-//
-//                for (Map.Entry<String, DuoVariable<UUID, String>> entry : BwRanks.replacementMap.entrySet()) {
-//                    if (finalText.startsWith(entry.getKey())) {
-//                        text = text.replace(entry.getKey(), entry.getValue().second);
-//                        uuid = entry.getValue().first;
-//                    }
-//                }
-//            }
-//        } catch (ConcurrentModificationException ignored) {
-//        }
+        try {
+            if (BwRanks.replacementMap.size() > 0) {
+                String finalText = text.replace("§r", "");
+
+                for (Map.Entry<String, DuoVariable<UUID, String>> entry : BwRanks.replacementMap.entrySet()) {
+                    if (finalText.startsWith(entry.getKey())) {
+                        text = text.replace(entry.getKey(), entry.getValue().second);
+                        uuid = entry.getValue().first;
+                    }
+                }
+            }
+
+            if (BlockWAPIUtils.currentHousingsClub != null) {
+                for (String key : BlockWAPIUtils.currentHousingsClub.getReplaceText().keySet()) {
+                    String finalText = text.replace("§r", "");
+                    String value = BlockWAPIUtils.currentHousingsClub.getReplaceText().get(key);
+                    if (value == null) {
+                        continue;
+                    }
+                    value = value.replace("&", "§");
+                    key = key.replace("&", "§");
+                    if (BlockWAPIUtils.currentHousingsClub.getRegex()) {
+                        text = finalText.replaceAll(key, value);
+                    } else {
+                        text = finalText.replace(key, value);
+                    }
+                }
+            }
+        } catch (ConcurrentModificationException ignored) {
+        }
         if (text == null) {
             return 0;
         } else {
@@ -277,12 +312,11 @@ public class ImageIconRenderer extends FontRenderer {
                                     int height = icon.getHeight();
                                     float scaledHeight = (float) 9 / height;
                                     int scaledWidth = (int) (width * scaledHeight);
-//                                    if (icon.emoji && uuid != null && CosmeticGui.Companion.hasCosmetic(uuid, "hymojis")) {
-//                                        j += str.length() + 2;
-//                                        i += scaledWidth + 4;
-//                                        continue;
-//                                    } else
-                                    if (!icon.emoji) {
+                                    if (icon.emoji && uuid != null && CosmeticUtilsKt.hasCosmetic(uuid, "hymojis")) {
+                                        j += str.length() + 2;
+                                        i += scaledWidth + 4;
+                                        continue;
+                                    } else if (!icon.emoji) {
                                         j += str.length() + 2;
                                         i += scaledWidth + 4;
                                         continue;

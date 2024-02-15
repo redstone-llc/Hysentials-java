@@ -2,6 +2,7 @@ package llc.redstone.hysentials.cosmetics;
 
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import llc.redstone.hysentials.config.HysentialsConfig;
+import llc.redstone.hysentials.config.hysentialMods.CosmeticConfig;
 import llc.redstone.hysentials.util.BUtils;
 import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.handlers.npc.NPC;
@@ -60,7 +61,7 @@ public abstract class AbstractCosmetic <E extends Entity>{
         WorldClient theWorld = Minecraft.getMinecraft().theWorld;
         if (theWorld == null) return;
         if (!BUtils.isHypixelOrSBX()) return;
-        if (!HysentialsConfig.showPets && !BUtils.isSBX() && !(LocrawUtil.INSTANCE.getLocrawInfo() != null && LocrawUtil.INSTANCE.getLocrawInfo().getGameMode().equals("lobby"))) {
+        if (!CosmeticConfig.showPets && !BUtils.isSBX() && !(LocrawUtil.INSTANCE.getLocrawInfo() != null && LocrawUtil.INSTANCE.getLocrawInfo().getGameMode().equals("lobby"))) {
             for (EntityPlayer player : theWorld.playerEntities) {
                 if (player == null) continue;
                 if (player.isDead) continue;

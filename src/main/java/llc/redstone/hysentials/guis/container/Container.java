@@ -138,8 +138,8 @@ public abstract class Container extends InventoryBasic {
 
     public abstract void setClickActions();
 
-    Input input;
-    Input.Button button;
+    protected Input input;
+    protected Input.Button button;
 
     protected void drawGuiContainerBackgroundLayer(int mouseX, int mouseY) {
         if (guiRequest != null) {

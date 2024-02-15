@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.handlers.sbb;
 
 import llc.redstone.hysentials.config.HysentialsConfig;
+import llc.redstone.hysentials.config.hysentialMods.ScorebarsConfig;
 import llc.redstone.hysentials.util.Renderer;
 import llc.redstone.hysentials.config.HysentialsConfig;
 import net.minecraft.client.Minecraft;
@@ -16,7 +17,7 @@ public class Actionbar {
     @SubscribeEvent
     public void onMessageReceived(ClientChatReceivedEvent event) {
         if (((int) event.type) != 2) return;
-        if (HysentialsConfig.actionBar) {
+        if (ScorebarsConfig.actionBar) {
             event.setCanceled(true);
             actionBarMessage = event.message.getFormattedText();
             lastUpdated = System.currentTimeMillis();
@@ -37,9 +38,9 @@ public class Actionbar {
             y - 5,
             width + padding,
             18,
-            HysentialsConfig.boxColor,
-            HysentialsConfig.boxShadows,
-            new Integer[]{0, 2, 4}[HysentialsConfig.actionBarBorderRadius]
+            ScorebarsConfig.boxColor,
+            ScorebarsConfig.boxShadows,
+            new Integer[]{0, 2, 4}[ScorebarsConfig.actionBarBorderRadius]
         );
         Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(actionBarMessage, x, y, (int) Renderer.color(255, 255, 255, 255));
 

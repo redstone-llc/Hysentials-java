@@ -7,7 +7,6 @@ import cc.polyfrost.oneconfig.utils.Multithreading
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil
 import llc.redstone.hysentials.Hysentials
 import llc.redstone.hysentials.cosmetic.CosmeticGui
-import llc.redstone.hysentials.cosmetic.CosmeticGui.Companion.colorFromRarity
 import llc.redstone.hysentials.guis.actionLibrary.ActionViewer.toList
 import llc.redstone.hysentials.guis.container.GuiItem
 import llc.redstone.hysentials.guis.misc.HysentialsLevel
@@ -18,6 +17,8 @@ import llc.redstone.hysentials.util.Renderer.drawImage
 import llc.redstone.hysentials.utils.formatCapitalize
 import llc.redstone.hysentials.websocket.Socket
 import com.google.common.collect.Lists
+import llc.redstone.hysentials.cosmetic.colorFromRarity
+import llc.redstone.hysentials.cosmetic.getEquippedCosmetics
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
@@ -295,6 +296,7 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                 x += badgeWidth + separation
             }
         } catch (e: Exception) {
+            mc.thePlayer.closeScreen()
             e.printStackTrace()
         }
         val inventoryplayer = mc.thePlayer.inventory
@@ -438,7 +440,7 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                 )
             )
 
-            val cosmetics = CosmeticGui.getEquippedCosmetics(player.uniqueID).sortedBy { it.type }
+            val cosmetics = getEquippedCosmetics(player.uniqueID).sortedBy { it.type }
             for (index in 0..3) {
                 if (index >= cosmetics.size) {
                     Slot(inventory, index, guiLeft + 152, guiTop + 12 + index * 18)
