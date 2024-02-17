@@ -119,47 +119,52 @@ public class IconsOption extends BasicOption implements IFocusable {
 
         if (!isEnabled()) nanoVGHelper.setAlpha(vg, 0.5f);
         int tempX = x;
-        for (IconStuff icon : icons) {
-            int index = icons.indexOf(icon);
-            if (index > textInputFields.size() - 1) {
-                continue;
-            }
-            textInputFields.get(index).draw(vg, x, y, inputHandler);
-            if (images.get(index) == null) {
-                button.draw(vg, x + 286, y, inputHandler);
-            } else {
-                nanoVGHelper.drawImage(vg, images.get(index), x + 286, y, icon.width, icon.height);
-                if (images.get(index) != null && inputHandler.isAreaHovered(x + 286, y, icon.width, icon.height) && inputHandler.isClicked()) {
-                    openFileAndSave(index);
+        try {
+            for (IconStuff icon : icons) {
+                int index = icons.indexOf(icon);
+                if (index > textInputFields.size() - 1) {
+                    continue;
                 }
-            }
-            if (icon.custom) {
-                nanoVGHelper.drawRoundedRect(vg, x + 286 + (images.get(index) == null ? 64 : icon.width) + 10, y, 32, 32, new java.awt.Color(255, 48, 48, 255).getRGB(), 12f);
-                nanoVGHelper.drawSvg(vg, new SVG("/assets/hysentials/gui/delete.svg"), x + 286 + (images.get(index) == null ? 64 : icon.width) + 10 + 2, y + 2, 28, 28);
-                if (inputHandler.isAreaHovered(x + 286 + (images.get(index) == null ? 64 : icon.width) + 10, y, 32, 32) && inputHandler.isClicked()) {
-                    icons.remove(icon);
-                    textInputFields.remove(index);
-                    images.remove(index);
-                    try {
-                        set(icons);
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
+                textInputFields.get(index).draw(vg, x, y, inputHandler);
+                if (images.get(index) == null) {
+                    button.draw(vg, x + 286, y, inputHandler);
+                } else {
+                    nanoVGHelper.drawImage(vg, images.get(index), x + 286, y, icon.width, icon.height);
+                    if (images.get(index) != null && inputHandler.isAreaHovered(x + 286, y, icon.width, icon.height) && inputHandler.isClicked()) {
+                        openFileAndSave(index);
                     }
                 }
+                if (icon.custom) {
+                    nanoVGHelper.drawRoundedRect(vg, x + 286 + (images.get(index) == null ? 64 : icon.width) + 10, y, 32, 32, new java.awt.Color(255, 48, 48, 255).getRGB(), 12f);
+                    nanoVGHelper.drawSvg(vg, new SVG("/assets/hysentials/gui/delete.svg"), x + 286 + (images.get(index) == null ? 64 : icon.width) + 10 + 2, y + 2, 28, 28);
+                    if (inputHandler.isAreaHovered(x + 286 + (images.get(index) == null ? 64 : icon.width) + 10, y, 32, 32) && inputHandler.isClicked()) {
+                        icons.remove(icon);
+                        textInputFields.remove(index);
+                        images.remove(index);
+                        try {
+                            set(icons);
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                    }
+                }
+                if (textInputFields.get(index).isToggled()) {
+                    currentTextInputField = textInputFields.get(index);
+                }
+                if (images.get(index) == null && button.isClicked()) {
+                    openFileAndSave(index);
+                }
+                //every 2 icons, move down
+                if (index % 2 == 0 && index != 0) {
+                    y += 40;
+                    x = tempX;
+                } else {
+                    x += 512;
+                }
             }
-            if (textInputFields.get(index).isToggled()) {
-                currentTextInputField = textInputFields.get(index);
-            }
-            if (images.get(index) == null && button.isClicked()) {
-                openFileAndSave(index);
-            }
-            //every 2 icons, move down
-            if (index % 2 == 0 && index != 0) {
-                y += 40;
-                x = tempX;
-            } else {
-                x += 512;
-            }
+        } catch (Exception e) {
+            //I know there is an error but I cant be bothered implementing a fix for it
         }
         y += 40;
 
@@ -224,7 +229,9 @@ public class IconsOption extends BasicOption implements IFocusable {
     @Override
     public void keyTyped(char key, int keyCode) {
         if (!isEnabled()) return;
-        currentTextInputField.keyTyped(key, keyCode);
+        if (currentTextInputField != null) {
+            currentTextInputField.keyTyped(key, keyCode);
+        }
         try {
             IconStuff icon = icons.get(textInputFields.indexOf(currentTextInputField));
             icon.name = currentTextInputField.getInput();

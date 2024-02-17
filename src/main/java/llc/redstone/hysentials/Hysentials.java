@@ -262,6 +262,7 @@ public class Hysentials {
         for (IconStuff icon : Hysentials.INSTANCE.config.iconsConfig.icons) {
             if (icon.custom) {
                 if (icon.localPath == null || icon.name.isEmpty() || ImageIcon.imageIcons.containsKey(icon.name)) continue;
+                if (!new File(icon.localPath).exists()) continue;
                 ImageIcon icon1 = new ImageIcon(icon.name, null, false);
                 icon1.width = icon.width;
                 icon1.height = icon.height;
