@@ -222,6 +222,7 @@ class HysentialsSchema {
         var invites: ArrayList<String>,
         var regex: Boolean = false,
         var replaceText: HashMap<String, String>,
+        var icons: HashMap<String, String>,
         @Transient var isOwner: Boolean = false,
     ) {
         companion object {
@@ -237,6 +238,13 @@ class HysentialsSchema {
                     obj["invites"].asJsonArray.map { it.asString }.toCollection(ArrayList()),
                     obj["regex"]?.asBoolean ?: false,
                     obj["replaceText"].asJsonObject.let {
+                        val map = HashMap<String, String>()
+                        it.entrySet().forEach { entry ->
+                            map[entry.key] = entry.value.asString
+                        }
+                        map
+                    },
+                    obj["icons"].asJsonObject.let {
                         val map = HashMap<String, String>()
                         it.entrySet().forEach { entry ->
                             map[entry.key] = entry.value.asString

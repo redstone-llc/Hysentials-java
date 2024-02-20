@@ -84,7 +84,7 @@ public class PageOption extends BasicOption {
                 element.draw(vg, x + 1024 / 2f - 260 /2f, y, inputHandler);
             } else if (config.size() == 2) {
                 //draw 2 in the center
-                element.draw(vg, x + 1024 / 2f - 260 * 4/3f, y, inputHandler);
+                element.draw(vg, x + 1024 / 2f - 260, y, inputHandler);
                 x += 260;
             } else if (config.size() == 3) {
                 //draw 3 in the center

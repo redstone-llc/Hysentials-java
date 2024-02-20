@@ -4,6 +4,7 @@ import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.hysentialMods.ChatConfig;
+import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
 import llc.redstone.hysentials.handlers.redworks.BwRanksUtils;
 import llc.redstone.hysentials.util.MUtils;
 import net.minecraft.event.ClickEvent;
@@ -41,10 +42,19 @@ public class PartyFormatter {
         components.clear();
     }
 
+    private static String prefix() {
+        String prefix = ChatConfig.partyPrefix;
+        if (prefix.startsWith(":") && prefix.endsWith(":") && !FormattingConfig.fancyRendering()) {
+            prefix = "&9Party &8> ";
+        }
+        return prefix;
+    }
+
     public static boolean checkMessage(ClientChatReceivedEvent event) {
         if (!Hysentials.INSTANCE.getConfig().chatConfig.enabled || !ChatConfig.partyFormatting) return false;
 
         String msg = event.message.getFormattedText().replaceAll("§r", "");
+
         List<String> sibilings = event.message.getSiblings().stream().map(e -> e.getFormattedText().replaceAll("§r", "")).collect(Collectors.toList());
         if (msg.startsWith("§9§m-----------------------------------------------------") && msg.contains("\n")) {
             if (sibilings.get(2).equals("§ehas invited you to join their party!\n")) {
@@ -55,7 +65,7 @@ public class PartyFormatter {
                 String prefixName = msg.split("\n")[1].split(" §e")[0];
                 String name = removePrefix(prefixName);
 
-                UChat.chat(ChatConfig.partyPrefix + "&9" + name + " &einvited you to join their party!");
+                UChat.chat(prefix() + "&9" + name + " &einvited you to join their party!");
 
                 String command = "/party accept " + name;
                 String hover = "Click to run\n" + command;
@@ -147,7 +157,7 @@ public class PartyFormatter {
                 prefix = BwRanksUtils.getReplace(partyMatcher.group(1), name, null);
             }
             String mes = partyMatcher.group(3);
-            MUtils.chat(ChatConfig.partyPrefix + "&9" + prefix + name + "<#c0def5>" + ": " + mes);
+            MUtils.chat(prefix() + "&9" + prefix + name + (FormattingConfig.hexRendering() ? "<#c0def5>" : "&f") + ": " + mes);
 
             return true;
         }
@@ -156,10 +166,10 @@ public class PartyFormatter {
 
     private static void sendMessage(String s) {
         if (ChatConfig.hideLines) {
-            UChat.chat(ChatConfig.partyPrefix + s);
+            UChat.chat(prefix() + s);
         } else {
             UChat.chat("§9§m-----------------------------------------------------");
-            UChat.chat(ChatConfig.partyPrefix + s);
+            UChat.chat(prefix() + s);
             UChat.chat("§9§m-----------------------------------------------------");
         }
     }

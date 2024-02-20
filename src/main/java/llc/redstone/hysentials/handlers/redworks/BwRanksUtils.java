@@ -165,14 +165,7 @@ public class BwRanksUtils {
     public static String getReplace(String prefix, String name, UUID uuid) {
         BlockWAPIUtils.Rank rank = null;
         if (uuid != null) {
-            if (Socket.cachedUsers.stream().anyMatch(u -> u.getString("uuid").equals(uuid.toString()))) {
-                String r = Socket.cachedUsers.stream().filter(u -> u.getString("uuid").equals(uuid.toString())).findFirst().get().getString("rank");
-                if (r != null) {
-                    rank = BlockWAPIUtils.Rank.valueOf(r.toUpperCase());
-                }
-            } else {
-                rank = BlockWAPIUtils.getRank(uuid);
-            }
+            rank = BlockWAPIUtils.getRank(uuid);
         }
 
         if (rank != null && rank != BlockWAPIUtils.Rank.DEFAULT) {
@@ -190,7 +183,7 @@ public class BwRanksUtils {
             return HypixelRanks.DEFAULT.getPrefixReplace();
         } else {
             for (HypixelRanks r : HypixelRanks.values()) {
-                if ((r.getColor() + r.getPrefix()).replace(" ", "").equals(prefix.replace("§r", ""))) {
+                if ((r.getColor() + r.getPrefix()).replace(" ", "").equals(prefix.replace("§r", "").replace(" ", ""))) {
                     if (futuristicRanks(null)) {
                         return r.getAsPlaceholder();
                     }

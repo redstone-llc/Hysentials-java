@@ -81,6 +81,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -263,7 +265,7 @@ public class Hysentials {
             if (icon.custom) {
                 if (icon.localPath == null || icon.name.isEmpty() || ImageIcon.imageIcons.containsKey(icon.name)) continue;
                 if (!new File(icon.localPath).exists()) continue;
-                ImageIcon icon1 = new ImageIcon(icon.name, null, false);
+                ImageIcon icon1 = new ImageIcon(icon.name, icon.localPath, false);
                 icon1.width = icon.width;
                 icon1.height = icon.height;
             }

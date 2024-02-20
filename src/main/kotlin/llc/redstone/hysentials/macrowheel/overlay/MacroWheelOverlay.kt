@@ -20,7 +20,6 @@ import net.minecraft.item.ItemStack
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.client.event.GuiScreenEvent
 
-//middle of the screen
 var stopped = false;
 class MacroWheelOverlay(
     val x: Float,

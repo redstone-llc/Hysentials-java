@@ -30,6 +30,7 @@ public class ImageIcon {
     public static Random random = new Random();
 
     private ResourceLocation resourceLocation;
+    private String path;
     private DynamicTexture dynamicTexture;
     private final String name;
     public int width;
@@ -48,13 +49,28 @@ public class ImageIcon {
         ImageIcon.imageIcons.put(name, this);
     }
 
+    public ImageIcon(String name, String path, boolean emoji) {
+        this.name = name;
+        this.emoji = emoji;
+        this.path = path;
+        try {
+            handleImageIcon();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        ImageIcon.imageIcons.put(name, this);
+    }
+
     public ImageIcon(String name, ResourceLocation resourceLocation) {
         this(name, resourceLocation, false);
     }
 
     public void handleImageIcon() throws IOException {
         File file = new File("./config/hysentials/" + (emoji ? "emojis" : "imageicons") + "/" + name + ".png");
-        if (!file.exists() || (name.equals("party") && javax.imageio.ImageIO.read(file).getWidth() != 48)) {
+        if (path != null) {
+            file = new File(path);
+        }
+        if ((!file.exists() && resourceLocation != null) || (name.equals("party") && javax.imageio.ImageIO.read(file).getWidth() != 48)) {
             if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
@@ -71,6 +87,9 @@ public class ImageIcon {
             ImageIO.write(image, "png", file);
 //            this.resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(this.name, this.dynamicTexture);
         } else {
+            if (!file.exists() && resourceLocation == null) {
+                throw new RuntimeException("ImageIcon " + name + " does not exist in file destination! " + file.getAbsolutePath());
+            }
             BufferedImage image = javax.imageio.ImageIO.read(file);
             this.width = image.getWidth();
             this.height = image.getHeight();
@@ -84,6 +103,9 @@ public class ImageIcon {
         try {
             for (ImageIcon icon : ImageIcon.imageIcons.values()) {
                 File file = new File("./config/hysentials/imageicons/" + icon.name + ".png");
+                if (icon.path != null) {
+                    file = new File(icon.path);
+                }
                 if (file.exists()) {
                     BufferedImage image = javax.imageio.ImageIO.read(file);
                     icon.width = image.getWidth();
@@ -115,19 +137,6 @@ public class ImageIcon {
     }
 
     public static Pattern stringPattern = Pattern.compile(":([a-z_\\-0-9?]+):", 2);
-
-    public static List<ImageIcon> getIconsFromText(String text) {
-        List<ImageIcon> icons = new ArrayList<>();
-        Matcher matcher = stringPattern.matcher(text);
-        if (matcher.find()) {
-            String group = matcher.group(1);
-            ImageIcon imageIcon = getIcon(group);
-            if (imageIcon != null) {
-                icons.add(imageIcon);
-            }
-        }
-        return icons;
-    }
 
     public int renderImage(float x, float y, boolean shadow, int oldColor, UUID uuid, float alpha) {
         if (emoji && uuid != null && !CosmeticUtilsKt.hasCosmetic(uuid, "hymojis")) {

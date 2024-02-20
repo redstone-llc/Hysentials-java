@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.util;
 
+import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
 import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
 import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
@@ -64,22 +65,25 @@ public class ImageIconRenderer extends FontRenderer {
                 }
             }
 
-            if (BlockWAPIUtils.currentHousingsClub != null) {
-                for (String key : BlockWAPIUtils.currentHousingsClub.getReplaceText().keySet()) {
-                    String finalText = text.replace("§r", "");
-                    String value = BlockWAPIUtils.currentHousingsClub.getReplaceText().get(key);
-                    if (value == null) {
-                        continue;
-                    }
-                    value = value.replace("&", "§");
-                    key = key.replace("&", "§");
-                    if (BlockWAPIUtils.currentHousingsClub.getRegex()) {
-                        text = finalText.replaceAll(key, value);
-                    } else {
-                        text = finalText.replace(key, value);
-                    }
+            HashMap<String, String> allActiveReplacements = Hysentials.INSTANCE.getConfig().replaceConfig.getAllActiveReplacements();
+            for (String key : allActiveReplacements.keySet()) {
+                String finalText = text.replace("§r", "");
+                String value = allActiveReplacements.get(key);
+                if (value == null) {
+                    continue;
+                }
+                if (value.isEmpty() || key.isEmpty()) {
+                    continue;
+                }
+                value = value.replace("&", "§");
+                key = key.replace("&", "§");
+                if (Hysentials.INSTANCE.getConfig().replaceConfig.isRegexEnabled()) {
+                    text = finalText.replaceAll(key, value);
+                } else {
+                    text = finalText.replace(key, value);
                 }
             }
+
         } catch (ConcurrentModificationException ignored) {
         }
         boolean lookingForQuestionMark = false;
@@ -269,20 +273,22 @@ public class ImageIconRenderer extends FontRenderer {
                 }
             }
 
-            if (BlockWAPIUtils.currentHousingsClub != null) {
-                for (String key : BlockWAPIUtils.currentHousingsClub.getReplaceText().keySet()) {
-                    String finalText = text.replace("§r", "");
-                    String value = BlockWAPIUtils.currentHousingsClub.getReplaceText().get(key);
-                    if (value == null) {
-                        continue;
-                    }
-                    value = value.replace("&", "§");
-                    key = key.replace("&", "§");
-                    if (BlockWAPIUtils.currentHousingsClub.getRegex()) {
-                        text = finalText.replaceAll(key, value);
-                    } else {
-                        text = finalText.replace(key, value);
-                    }
+            HashMap<String, String> allActiveReplacements = Hysentials.INSTANCE.getConfig().replaceConfig.getAllActiveReplacements();
+            for (String key : allActiveReplacements.keySet()) {
+                String finalText = text.replace("§r", "");
+                String value = allActiveReplacements.get(key);
+                if (value == null) {
+                    continue;
+                }
+                if (value.isEmpty() || key.isEmpty()) {
+                    continue;
+                }
+                value = value.replace("&", "§");
+                key = key.replace("&", "§");
+                if (Hysentials.INSTANCE.getConfig().replaceConfig.isRegexEnabled()) {
+                    text = finalText.replaceAll(key, value);
+                } else {
+                    text = finalText.replace(key, value);
                 }
             }
         } catch (ConcurrentModificationException ignored) {
@@ -367,7 +373,7 @@ public class ImageIconRenderer extends FontRenderer {
     }
 
     public static boolean checkIfHexadecimal(String potentialHex) {
-        for (char ch: potentialHex.toCharArray()) {
+        for (char ch : potentialHex.toCharArray()) {
             boolean isHex =
                 ('0' <= ch && ch <= '9') ||
                     ('a' <= ch && ch <= 'f') ||

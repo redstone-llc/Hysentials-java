@@ -277,4 +277,8 @@ public class FormattingConfig extends Config {
     public static boolean fancyRendering() {
         return (futuristicRanks || hexColors) && Hysentials.INSTANCE.getConfig().formattingConfig.enabled;
     }
+
+    public static boolean hexRendering() {
+        return hexColors && Hysentials.INSTANCE.getConfig().formattingConfig.enabled;
+    }
 }

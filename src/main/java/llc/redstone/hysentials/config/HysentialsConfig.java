@@ -77,12 +77,19 @@ public class HysentialsConfig extends Config {
         new CosmeticConfig()
     );
     @PageAnnotation(
-        name = "Icons",
+        name = "Icons and Replace",
         category = "Hysentials Mods",
         subcategory = "Hysentials Mods",
-        description = "Icon related settings."
+        description = "Icon and replace related settings.",
+        group = true
     )
-    public transient IconsConfig iconsConfig = new IconsConfig();
+    public transient List<Config> hysentialMods3 = Arrays.asList(
+        new IconsConfig(),
+        new ReplaceConfig()
+    );
+
+    public transient IconsConfig iconsConfig = (IconsConfig) hysentialMods3.get(0);
+    public transient ReplaceConfig replaceConfig = (ReplaceConfig) hysentialMods3.get(1);
     public transient ChatConfig chatConfig = (ChatConfig) hysentialMods.get(0);
     public transient FormattingConfig formattingConfig = (FormattingConfig) hysentialMods.get(1);
     public transient HousingConfig housingConfig = (HousingConfig) hysentialMods.get(2);

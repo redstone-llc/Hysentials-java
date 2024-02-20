@@ -215,7 +215,7 @@ public class GuiIngameHysentials extends GuiIngame
             if (Minecraft.getMinecraft().currentScreen == null) {
                 Minecraft.getMinecraft().mouseHelper.grabMouseCursor();
             }
-            cooldown = System.currentTimeMillis() + 1000;
+//            cooldown = System.currentTimeMillis() + 1000;
         }
 
         post(ALL);
