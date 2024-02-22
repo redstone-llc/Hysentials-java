@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.function.Consumer;
 
 import static cc.polyfrost.oneconfig.renderer.TextRenderer.drawBorderedText;
+import static java.lang.Math.*;
 
 public class Renderer {
     public Renderer() {
@@ -92,8 +93,42 @@ public class Renderer {
         GlStateManager.popMatrix();
     }
 
+    private static final float TWO_PI = 2.0f * (float) PI;
 
+    public static void drawCircle(long color, float x, float y, float radius, int steps, int drawMode) {
+        float theta = TWO_PI / steps;
+        float cos = (float) cos(theta);
+        float sin = (float) sin(theta);
 
+        float xHolder;
+        float circleX = 1f;
+        float circleY = 0f;
+
+        GlStateManager.enableBlend();
+        GlStateManager.disableTexture2D();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+
+        doColor(color);
+
+        worldRenderer.begin(drawMode, DefaultVertexFormats.POSITION);
+
+        for (int i = 0; i <= steps; i++) {
+            worldRenderer.pos(x, y, 0.0).endVertex();
+            worldRenderer.pos((circleX * radius + x), (circleY * radius + y), 0.0).endVertex();
+            xHolder = circleX;
+            circleX = cos * circleX - sin * circleY;
+            circleY = sin * xHolder + cos * circleY;
+            worldRenderer.pos((circleX * radius + x), (circleY * radius + y), 0.0).endVertex();
+        }
+
+        tessellator.draw();
+
+        GlStateManager.color(1f, 1f, 1f, 1f);
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+
+        finishDraw();
+    }
 
     public static void drawRect(long color, float x, float y, float width, float height) {
         float[] pos = {x, y, x + width, y + height};

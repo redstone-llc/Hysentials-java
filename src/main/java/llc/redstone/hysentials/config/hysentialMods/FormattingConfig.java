@@ -1,9 +1,9 @@
 package llc.redstone.hysentials.config.hysentialMods;
 
 import cc.polyfrost.oneconfig.config.Config;
+import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.annotations.Button;
-import cc.polyfrost.oneconfig.config.annotations.CustomOption;
-import cc.polyfrost.oneconfig.config.annotations.Switch;
+import cc.polyfrost.oneconfig.config.annotations.Color;
 import cc.polyfrost.oneconfig.config.core.ConfigUtils;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.data.Mod;
@@ -117,6 +117,40 @@ public class FormattingConfig extends Config {
     )
     public static boolean hoverOutlineColor = true;
 
+    @Switch(
+        name = "Slot Decoration",
+        category = "General",
+        subcategory = "Slot Decoration",
+        description = "Enable slot decorations."
+    )
+    public static boolean slotDecoration = true;
+
+    @Dropdown(
+        name = "Slot Decoration Style",
+        category = "General",
+        subcategory = "Slot Decoration",
+        description = "Change the style of the slot decoration.",
+        options = {"Circle", "Rectangle"}
+    )
+    public static int slotDecorationStyle = 0;
+
+    @Color(
+        name = "Slot Decoration Alpha",
+        category = "General",
+        subcategory = "Slot Decoration",
+        description = "Change the alpha of the slot decoration color."
+    )
+    public static OneColor slotDecorationColor = new OneColor(0, 0, 0, 200);
+
+    @Slider(
+        name = "Slot Decoration Color Offset",
+        category = "General",
+        subcategory = "Slot Decoration",
+        description = "Change the color offset of the slot decoration color.",
+        min = -255,
+        max = 255
+    )
+    public static int slotDecorationColorOffset = -20;
 
     @RankAnnotation(
         name = "Default Rank",

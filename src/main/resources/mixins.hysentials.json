@@ -23,6 +23,7 @@
     "PlayerRendererMixin",
     "RenderItemMixin",
     "RenderLivingMixin",
-    "RenderMixin"
+    "RenderMixin",
+    "SlotDecorationMixin"
   ]
 }
