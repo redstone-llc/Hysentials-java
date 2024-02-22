@@ -18,6 +18,8 @@ import llc.redstone.hysentials.cosmetics.kzero.KzeroBundle;
 import llc.redstone.hysentials.cosmetics.miya.MiyaCompanion;
 import llc.redstone.hysentials.cosmetics.pepper.PepperCompanion;
 import llc.redstone.hysentials.cosmetics.hats.technocrown.TechnoCrown;
+import llc.redstone.hysentials.cosmetics.wings.dragon.DragonCosmetic;
+import llc.redstone.hysentials.cosmetics.wings.tdarth.TdarthCosmetic;
 import llc.redstone.hysentials.guis.club.ClubDashboardHandler;
 import llc.redstone.hysentials.guis.container.ContainerHandler;
 import llc.redstone.hysentials.handlers.chat.modules.misc.Limit256;
@@ -50,7 +52,6 @@ import llc.redstone.hysentials.handlers.sbb.Actionbar;
 import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
 import llc.redstone.hysentials.htsl.Cluster;
 import llc.redstone.hysentials.cosmetics.cubit.CubitCompanion;
-import llc.redstone.hysentials.util.blockw.OnlineCache;
 import llc.redstone.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -108,8 +109,6 @@ public class Hysentials {
     public static final Logger logger = LogManager.getLogger("Hysentials");
 
     private final LanguageHandler languageHandler = new LanguageHandler();
-    private final OnlineCache onlineCache = new OnlineCache();
-
     private final ChatHandler chatHandler = new ChatHandler();
 
     public final GuiDisplayHandler guiDisplayHandler = new GuiDisplayHandler();
@@ -136,6 +135,8 @@ public class Hysentials {
     public TechnoCrown technoCrown;
     public BlackCat blackCat;
     public KzeroBundle kzeroBundle;
+    public TdarthCosmetic tdarthCosmetic;
+    public DragonCosmetic dragonCosmetic;
 
 
 
@@ -417,6 +418,8 @@ public class Hysentials {
         eventBus.register(hamsterCompanion = new HamsterCompanion());
         eventBus.register(technoCrown = new TechnoCrown());
         eventBus.register(kzeroBundle = new KzeroBundle());
+        eventBus.register(tdarthCosmetic = new TdarthCosmetic());
+        eventBus.register(dragonCosmetic = new DragonCosmetic());
         blackCat = LayerBlackCatHat.hat;
         CatHat.loadCatHats();
         BackpackCosmetic.loadBackpacks();
@@ -470,10 +473,6 @@ public class Hysentials {
 
     public Logger getLogger() {
         return logger;
-    }
-
-    public OnlineCache getOnlineCache() {
-        return onlineCache;
     }
 
 

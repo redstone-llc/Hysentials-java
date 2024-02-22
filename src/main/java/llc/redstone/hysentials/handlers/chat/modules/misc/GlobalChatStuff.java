@@ -23,6 +23,11 @@ public class GlobalChatStuff {
         public void onMessageReceived(@NotNull ClientChatReceivedEvent event) {
             if (event.type != 0 && event.type != 1) return;
             if (HypixelChatCommand.isInGlobalChat) {
+                if (getStrippedMessage(event.message).equals("\nPlease enter the text you wish to set in chat!\n [PREVIOUS] [CANCEL]")) {
+                    BWSReplace.diagnostics.add("Setting isInGlobalChat to false (0)");
+                    HypixelChatCommand.isInGlobalChat = false;
+                    MUtils.chat("&aYou are now in the &6" + HypixelChatCommand.gotoChannel.toUpperCase() + " &achannel!");
+                }
                 if (getStrippedMessage(event.message).equals("You're already in this channel!")) {
                     BWSReplace.diagnostics.add("Setting isInGlobalChat to false (1)");
                     event.setCanceled(true);

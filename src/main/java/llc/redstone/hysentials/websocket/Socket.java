@@ -49,8 +49,8 @@ public class Socket {
     public static HysentialsSchema.AuthUser user;
     //Client's player data (levels, ranks, etc)
     public static HysentialsSchema.User cachedUser = null;
+    public static List<JSONObject> cachedUsers = new ArrayList<>(); //TODO: Remove all of the old standards
     //All online hysentials users
-    public static List<JSONObject> cachedUsers = new ArrayList<>();
     public static HashMap<String, HysentialsSchema.User> cachedUsersNew = new HashMap<>();
     public static JSONObject cachedRewards = new JSONObject();
     public static JSONObject cachedServerData = new JSONObject();
@@ -68,6 +68,7 @@ public class Socket {
     public static ScheduledFuture<?> future;
 
     public static void init() {
+        //TODO: Move all of the websocket parts to separate classes
         new DoorbellAuthenticate();
     }
 

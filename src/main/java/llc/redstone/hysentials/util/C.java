@@ -31,11 +31,52 @@ public class C {
     private C() {
     }
 
+    public static String toHex(String color) {
+        switch (color) {
+            case "§0":
+                return "#000000";
+            case "§1":
+                return "#0000AA";
+            case "§2":
+                return "#00AA00";
+            case "§3":
+                return "#00AAAA";
+            case "§4":
+                return "#AA0000";
+            case "§5":
+                return "#AA00AA";
+            case "§6":
+                return "#FFAA00";
+            case "§7":
+                return "#AAAAAA";
+            case "§8":
+                return "#555555";
+            case "§9":
+                return "#5555FF";
+            case "§a":
+                return "#55FF55";
+            case "§b":
+                return "#55FFFF";
+            case "§c":
+                return "#FF5555";
+            case "§d":
+                return "#FF55FF";
+            case "§e":
+                return "#FFFF55";
+            default:
+                return "#FFFFFF";
+        }
+    }
+
     public static String translate(String text) {
         return text.replace("&", "§");
     }
 
     public static String removeColor(String text) {
         return text.replaceAll("§[0-9a-fA-Fk-oK-ORr]", "");
+    }
+
+    public static String removeControlCodes(String text) {
+        return text.replaceAll("§[k-oK-ORr]", "");
     }
 }

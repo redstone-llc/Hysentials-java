@@ -152,14 +152,19 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                     player.uniqueID
                 )
 
-                val guildTag = try {
+                var guildTag = try {
                     if (guildData!!["guild"] == true && guildData!!["tag"] != null) {
-                        "${guildData!!["tag_color"]}${guildData!!["tag"]}"
+                        var returnString = "${guildData!!["tag_color"]}${guildData!!["tag"]}"
+                        returnString
                     } else {
                         ""
                     }
                 } catch (e: Exception) {
                     ""
+                }
+
+                if (guildTag == "null") {
+                    guildTag = ""
                 }
 
 

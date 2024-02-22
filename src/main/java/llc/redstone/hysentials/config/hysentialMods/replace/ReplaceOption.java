@@ -78,6 +78,7 @@ public class ReplaceOption extends BasicOption implements IFocusable {
                 replace.replaceField = new ArrayList<>();
                 replace.withField = new ArrayList<>();
                 replace.removeButton = new ArrayList<>();
+                replace.confirmButton = new ArrayList<>();
 
                 List<String> keys = new ArrayList<>(replace.replacements.keySet());
                 keys.sort(String::compareTo);
@@ -90,41 +91,27 @@ public class ReplaceOption extends BasicOption implements IFocusable {
         }
     }
 
+    //874/2=437
     public void addElements(ReplaceStuff replace, String key, String value, boolean clubsPage) {
-        TextInputField replaceField = new TextInputField(460, 32, false, "String to replace");
+        TextInputField replaceField = new TextInputField(390, 32, false, "String to replace");
         replaceField.setInput(key);
         if (clubsPage && replace.clubReplacements.contains(key)) {
             replaceField.disable(true);
         }
         replace.replaceField.add(replaceField);
 
-        TextInputField withField = new TextInputField(460, 32, false, "String to replace with");
+        TextInputField withField = new TextInputField(390, 32, false, "String to replace with");
         withField.setInput(value);
         replace.withField.add(withField);
 
         replace.removeButton.add(new DeleteElement(32, 32));
-    }
 
-    public void updateElements(ReplaceStuff replace, String key, String value, boolean clubsPage) {
-        List<String> keys = new ArrayList<>(replace.replacements.keySet());
-        keys.sort(String::compareTo);
-        int index = keys.indexOf(key);
-        replace.replaceField.get(index).setInput(key);
-        replace.withField.get(index).setInput(value);
+        replace.confirmButton.add(new BasicButton(96, 32, "Confirm", BasicButton.ALIGNMENT_CENTER, ColorPalette.PRIMARY));
     }
 
     public static ReplaceOption create(Field field, Object parent) {
         ReplaceAnnotation color = field.getAnnotation(ReplaceAnnotation.class);
         return new ReplaceOption(field, parent, color.name(), color.description(), color.category(), color.subcategory());
-    }
-
-    public  void removeElements(ReplaceStuff replaceStuff, String key) {
-        List<String> keys = new ArrayList<>(replaceStuff.replacements.keySet());
-        keys.sort(String::compareTo);
-        int index = keys.indexOf(key);
-        replaceStuff.replaceField.remove(index);
-        replaceStuff.withField.remove(index);
-        replaceStuff.removeButton.remove(index);
     }
 
     @Override
@@ -148,15 +135,23 @@ public class ReplaceOption extends BasicOption implements IFocusable {
                     TextInputField replaceField = replace.replaceField.get(i);
                     TextInputField withField = replace.withField.get(i);
                     DeleteElement deleteElement = replace.removeButton.get(i);
+                    BasicButton confirmButton = replace.confirmButton.get(i);
 
                     replaceField.draw(vg, x, y, inputHandler);
-                    withField.draw(vg, x + 475, y, inputHandler);
+                    withField.draw(vg, x + 400, y, inputHandler);
 
+                    confirmButton.draw(vg, x + 800, y, inputHandler);
+                    if (confirmButton.isClicked()) {
+                        update(replace, i);
+                    }
 
-                    deleteElement.draw(vg, x + 950, y, inputHandler);
+                    deleteElement.draw(vg, x + 900, y, inputHandler);
                     if (deleteElement.isClicked()) {
                         replace.replacements.remove(replaceField.getInput());
                         replace.replaceField.remove(i);
+                        replace.withField.remove(i);
+                        replace.removeButton.remove(i);
+                        replace.confirmButton.remove(i);
 
                         if (clubsPage && replace.clubReplacements.contains(replaceField.getInput())) {
                             replace.deleted.add(replaceField.getInput());
@@ -195,29 +190,22 @@ public class ReplaceOption extends BasicOption implements IFocusable {
         if (currentTextInputField != null) {
             currentTextInputField.keyTyped(key, keyCode);
         }
+    }
+
+    public void update(ReplaceStuff replaceStuff, int index) {
+        TextInputField replaceField = replaceStuff.replaceField.get(index);
+        TextInputField withField = replaceStuff.withField.get(index);
+        String editKey = replaceStuff.replacements.keySet().toArray(new String[0])[index];
+        if (editKey.equals(replaceField.getInput())) {
+            replaceStuff.replacements.put(replaceField.getInput(), withField.getInput());
+        } else {
+            replaceStuff.replacements.put(replaceField.getInput(), withField.getInput());
+            replaceStuff.replacements.remove(editKey);
+        }
         try {
-            ReplaceStuff icon = replacements.stream().filter(i -> i.isWithField(currentTextInputField) != null).findFirst().orElse(null);
-            if (icon != null) {
-                System.out.println(icon.replacements + " " + icon.isWithField(currentTextInputField) + " " + currentTextInputField.getInput());
-                List<String> keys = new ArrayList<>(icon.replacements.keySet());
-                keys.sort(String::compareTo);
-                if (icon.isWithField(currentTextInputField) == null) return;
-                int index = icon.isWithField(currentTextInputField) ? icon.withField.indexOf(currentTextInputField) : icon.replaceField.indexOf(currentTextInputField);
-                if (index == -1) return;
-                System.out.println(index + " " + keys.get(index) + " " + currentTextInputField.getInput() + " " + icon.replacements.get(keys.get(index)));
-                if (icon.isWithField(currentTextInputField)) {
-                    icon.replacements.put(keys.get(index), currentTextInputField.getInput());
-                } else {
-                    if (icon.replacements.containsKey(currentTextInputField.getInput()) || currentTextInputField.getInput().isEmpty()) {
-                        return;
-                    }
-                    icon.replacements.put(currentTextInputField.getInput(), icon.replacements.get(keys.get(index)));
-                    icon.replacements.remove(keys.get(index));
-                }
-                System.out.println(icon.replacements);
-            }
             set(replacements);
-        } catch (IllegalAccessException ignored) {
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
         }
     }
 

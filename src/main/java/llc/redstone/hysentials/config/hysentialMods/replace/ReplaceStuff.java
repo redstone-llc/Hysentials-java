@@ -17,6 +17,7 @@ public class ReplaceStuff {
     transient public List<TextInputField> replaceField = new ArrayList<>();
     transient public List<TextInputField> withField = new ArrayList<>();
     transient public List<DeleteElement> removeButton = new ArrayList<>();
+    transient public List<BasicButton> confirmButton = new ArrayList<>();
 
     transient public BasicButton addIcon;
 

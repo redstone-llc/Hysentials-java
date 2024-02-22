@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 
 import static llc.redstone.hysentials.handlers.imageicons.ImageIcon.stringPattern;
+import static llc.redstone.hysentials.util.C.toHex;
 
 public class ImageIconRenderer extends FontRenderer {
     FontRendererAcessor accessor = (FontRendererAcessor) this;
@@ -506,6 +507,9 @@ public class ImageIconRenderer extends FontRenderer {
 
         while ((i = text.indexOf(167, i + 1)) != -1) {
             if (i < j - 1) {
+                if (i + 3 < j - 1 && isFormatColor(text.charAt(i + 3))) {
+                    continue;
+                }
                 char c0 = text.charAt(i + 1);
                 if (isFormatColor(c0)) {
                     s = "§" + c0;
@@ -534,6 +538,47 @@ public class ImageIconRenderer extends FontRenderer {
 
 
         return s;
+    }
+
+    public static String getHexFromString(String text, boolean getFirst) {
+        int i = 0;
+        String color = "";
+        while (i < text.length()) {
+            if (text.charAt(i) == '§' && "0123456789abcdef".indexOf(text.charAt(i + 1)) > -1) {
+                if (i + 3 < text.length() && text.charAt(i + 2) == '§' && "0123456789abcdef".indexOf(text.charAt(i + 3)) > -1) {
+                    i += 2; //If there is a double color code, skip the first one so it doesn't get added to the color
+                    continue;
+                }
+                color = toHex("§" + text.charAt(i + 1));
+                if (getFirst) {
+                    break;
+                }
+            }
+            i++;
+        }
+
+        i = -1;
+        int j = text.length();
+
+        while ((i = text.indexOf('<', i + 1)) != -1) {
+            if (i < j - 1) {
+                char c0 = text.charAt(i + 1);
+                if (c0 != '#') continue;
+                if (i + 8 < text.length()) {
+                    String hex = text.substring(i + 2, i + 8);
+                    if (text.charAt(i + 1) == '#' && checkIfHexadecimal(hex)) {
+                        color = "#" + hex;
+                    }
+                    i += 8;
+
+                    if (getFirst) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return color;
     }
 
     //        String s = "";

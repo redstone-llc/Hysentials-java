@@ -53,6 +53,7 @@ public class CustomCapeRenderLayer implements LayerRenderer<AbstractClientPlayer
         if (!abstractClientPlayer.hasPlayerInfo() || abstractClientPlayer.isInvisible()
             || !abstractClientPlayer.isWearing(EnumPlayerModelParts.CAPE)
             || (BlockWAPIUtils.isWearingType(abstractClientPlayer.getUniqueID(), "backpack"))
+            || (BlockWAPIUtils.isWearingType(abstractClientPlayer.getUniqueID(), "wings"))
             || abstractClientPlayer.getLocationCape() == null
             || CosmeticConfig.disableCustomCapes) {
             return;

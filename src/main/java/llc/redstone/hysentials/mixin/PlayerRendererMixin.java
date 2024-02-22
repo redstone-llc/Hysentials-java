@@ -7,6 +7,8 @@ import llc.redstone.hysentials.cosmetics.hats.cat.LayerCatHat;
 import llc.redstone.hysentials.cosmetics.hats.technocrown.LayerTechnoCrown;
 import llc.redstone.hysentials.cosmetics.kzero.KzeroBundle;
 import llc.redstone.hysentials.cosmetics.kzero.KzeroLayer;
+import llc.redstone.hysentials.cosmetics.wings.dragon.LayerDragonWings;
+import llc.redstone.hysentials.cosmetics.wings.tdarth.LayerTdarthWings;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,6 +52,8 @@ public abstract class PlayerRendererMixin extends RendererLivingEntity<AbstractC
         addLayer(new LayerBackPack((RenderPlayer)(Object)this));
         addLayer(new LayerBlackCatHat((RenderPlayer)(Object)this));
         addLayer(new KzeroLayer((RenderPlayer)(Object)this));
+        addLayer(new LayerTdarthWings((RenderPlayer)(Object)this));
+        addLayer(new LayerDragonWings((RenderPlayer)(Object)this));
     }
 
     @Inject(method = "getEntityTexture(Lnet/minecraft/client/entity/AbstractClientPlayer;)Lnet/minecraft/util/ResourceLocation;", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/entity/AbstractClientPlayer;getLocationSkin()Lnet/minecraft/util/ResourceLocation;"), cancellable = true)

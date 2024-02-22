@@ -44,6 +44,13 @@ public class ReplaceConfig extends Config {
             new ReplaceStuff("Global")
     ));
 
+    @Info(
+        text = "If you are the club owner, you can edit this through the Club Dashboard.",
+        type = InfoType.INFO,
+        category = "Clubs",
+        subcategory = "",
+        size = 0
+    )
     @ReplaceAnnotation(
         name = "Club Replace",
         description = "Replace things in clubs",

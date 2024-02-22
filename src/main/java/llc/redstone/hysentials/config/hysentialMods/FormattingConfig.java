@@ -109,6 +109,14 @@ public class FormattingConfig extends Config {
         }
     }
 
+    @Switch(
+        name = "Hover Outline Color",
+        category = "General",
+        subcategory = "Misc",
+        description = "Change the outline color based on the items color."
+    )
+    public static boolean hoverOutlineColor = true;
+
 
     @RankAnnotation(
         name = "Default Rank",

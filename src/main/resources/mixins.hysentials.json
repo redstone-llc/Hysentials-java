@@ -15,6 +15,7 @@
     "GuiNewChatAccessor",
     "GuiScreenMixin",
     "GuiUtilRCMixin",
+    "HoverTextMixin",
     "MinecraftMixin_LeftClickInteract",
     "MixinRenderManager",
     "PlayerMixin",
