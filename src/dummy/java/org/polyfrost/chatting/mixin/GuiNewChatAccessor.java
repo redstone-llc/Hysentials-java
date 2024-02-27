@@ -1,4 +1,4 @@
-package cc.woverflow.chatting.mixin;
+package org.polyfrost.chatting.mixin;
 
 import java.util.List;
 

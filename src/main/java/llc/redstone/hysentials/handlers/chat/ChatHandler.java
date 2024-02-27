@@ -31,19 +31,11 @@ public class ChatHandler {
     }
 
     public void init () {
-//        if (Hysentials.INSTANCE.isChatting) {
-//            this.registerModule(new GroupChatMessage());
-//        }
+        if (Hysentials.INSTANCE.isChatting) {
+            this.registerModule(new GroupChatMessage());
+        }
         this.registerModule(new GlobalChatStuff.GlobalInChannel());
         this.registerModule(new FriendReplace());
-//        this.registerModule(new ExecuteGatherer());
-//        this.registerModule(new GuildBridge());
-//        this.registerModule(new HousingBridge());
-        // Blockers
-
-
-
-        // Priority
 
         this.sendModules.sort(Comparator.comparingInt(ChatModule::getPriority));
     }

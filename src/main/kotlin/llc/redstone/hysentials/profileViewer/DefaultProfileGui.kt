@@ -152,7 +152,7 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                     player.uniqueID
                 )
 
-                var guildTag = try {
+                var guildTag: String = try {
                     if (guildData!!["guild"] == true && guildData!!["tag"] != null) {
                         var returnString = "${guildData!!["tag_color"]}${guildData!!["tag"]}"
                         returnString
@@ -163,13 +163,9 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                     ""
                 }
 
-                if (guildTag == "null") {
-                    guildTag = ""
-                }
-
 
                 var largeFormat = DecimalFormat("#,###")
-                var lore = "§f${rankUser}${player.name} $guildTag\n" +
+                var lore = "§f${rankUser}${player.name} ${if (guildTag != "null") guildTag else ""}\n" +
                         "&7Hypixel Level: &e${(hypixelData!!["level"] as BigDecimal).toDouble().roundToInt()}\n"
                 if (hysentialData != null) {
                     lore += "&7Hysentials Level: &e${getLevel(hysentialData!!["exp"] as Int).roundToInt()}\n" +
@@ -195,7 +191,7 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
             }
 
 
-            val separation = 5 // Set the desired separation in pixels
+            val separation = 5
 
             // Calculate the total width of all badges
             val totalWidth = badges.sumOf { badge -> badge.third.first } + (badges.size - 1) * separation
@@ -219,6 +215,12 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
             }
 
             for (slot in inventorySlots) {
+                RenderItemUtils.drawSlotDecoration(
+                    slot.xDisplayPosition,
+                    slot.yDisplayPosition,
+                    slot.stack,
+                    false
+                )
                 drawSlot(slot, mouseX, mouseY, partialTicks)
                 if (getSlot(
                         mouseX.toFloat() - guiLeft,
@@ -454,60 +456,7 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                 val o = cosmetics[index]
                 val slot = Slot(inventory, index, guiLeft + 152, guiTop + 12 + index * 18)
 
-                val lore: MutableList<String> = mutableListOf()
-                val description = o.description
-                val cost = o.cost
-                val emerald = Socket.cachedUser?.emeralds?:0
-                description.split("\n").forEach(lore::add)
-                if (cost > 0) {
-                    if (emerald < cost) {
-                        lore.add("")
-                        lore.add("&7Cost: &a$cost⏣")
-                    } else {
-                        lore.add("")
-                        lore.add("&7Cost: &a$cost⏣")
-                    }
-                } else if (cost == 0) {
-                    lore.add("")
-                    lore.add("&7Cost: &aFREE")
-                }
-                val type = o.type
-                val rarity = o.rarity
-                val name = (o.name).formatCapitalize()
-                val itemID = o.itemID
-                var item: ItemStack? = null
-                when (type) {
-                    "pet" -> {
-                        item = GuiItem.makeMonsterEgg(
-                            "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>${name} Pet",
-                            1,
-                            itemID!!,
-                            lore
-                        )
-                    }
-
-                    "cape" -> {
-                        item = GuiItem.makeColorfulItem(
-                            Material.LEATHER_CHESTPLATE,
-                            "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>${name} Cape",
-                            1,
-                            0,
-                            lore
-                        )
-                        GuiItem.setColor(item, o.color)
-                    }
-
-                    "hat" -> {
-                        item = GuiItem.makeColorfulItem(
-                            Material.LEATHER_HELMET,
-                            "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>${name} Hat",
-                            1,
-                            0,
-                            lore
-                        )
-                        GuiItem.setColor(item, o.color)
-                    }
-                }
+                val item = o.toItem(player.uniqueID)
                 slot.putStack(item)
                 inventorySlots.add(slot)
             }

@@ -435,64 +435,9 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 { indexFromRarity(it.rarity) })
         ).asReversed()
         for (o in cosmetics) {
-            var type = o.type
-            var subType = o.subType ?: type
-            val name = o.name.lowercase()
-            val itemID = o.itemID ?: -1
-            val description = o.description
-            val rarity = o.rarity
-            val cost = o.cost
-            val emerald = Socket.cachedUser?.emeralds ?: 0
-            var item: ItemStack? = null
-            val displayName =
-                "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>" + (o.displayName ?: name.formatCapitalize())
-            val lore: MutableList<String> = mutableListOf()
-            description.split("\n").forEach(lore::add)
-            if (equippedCosmetic(uuid, name)) {
-                lore.add("")
-                lore.add("&aEquipped")
-            } else if (hasCosmetic(uuid, name)) {
-                lore.add("")
-                lore.add("&eClick to equip!")
-            } else {
-                val costString = if (cost == -1) "FREE" else "$cost⏣"
-                if (cost != -1) {
-                    lore.add("")
-                    lore.add("&7Cost: &a$costString")
-                    lore.add("")
-                }
-
-                if (cost > 0) {
-                    lore.add(if (emerald >= cost) "&aClick to purchase!" else "&cNot enough emeralds!")
-                } else if (cost == 0) {
-                    lore.add("&eClick to purchase!")
-                } else if (cost == -1){
-                    lore.add("")
-                    lore.add("&cNot purchasable!")
-                }
-            }
-            when (subType) {
-                "pet" -> {
-                    item = GuiItem.makeMonsterEgg(displayName, 1, itemID, lore)
-                }
-
-                "bundle" -> {
-                    if (Material.valueOf(o.material!!) == Material.SKULL_ITEM) {
-                        item = GuiItem.makeColorfulSkullItem(displayName, o.skullOwner!!, 1, lore)
-                    } else {
-                        item = GuiItem.makeColorfulItem(Material.valueOf(o.material!!), displayName, 1, 0, lore)
-                    }
-                }// Make file. Please.
-
-                else -> {
-                    item = GuiItem.makeColorfulItem(Material.valueOf(o.material!!), displayName, 1, 0, lore)
-                }
-            }
-            if (o.material?.startsWith("LEATHER") == true) {
-                GuiItem.setColor(item, o.color)
-            }
-
-            o.item = item
+            val name = o.name
+            val type = o.type
+            o.item = o.toItem(uuid)
 
             if (!inventoryMap.containsKey(type)) {
                 inventoryMap[type] = ArrayList()

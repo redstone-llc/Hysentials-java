@@ -33,6 +33,10 @@ public abstract class HoverTextMixin {
         if (FormattingConfig.hoverOutlineColor && (startColor == 0x505000FF || endColor == end)) {
             String line = C.removeControlCodes(textLines.get(0)); //remove anything that doesn't effect color
             line = ImageIconRenderer.getHexFromString(line, true);
+            if (line == null || line.isEmpty()) {
+                drawGradientRect(zLevel, left, top, right, bottom, startColor, endColor);
+                return;
+            }
             Color c = Color.decode(line);
             int c2 = 255 << 24 | c.getRed() << 16 | c.getGreen() << 8 | c.getBlue();
             drawGradientRect(zLevel, left, top, right, bottom, c2, c2);

@@ -1,37 +1,34 @@
 package llc.redstone.hysentials.handlers.groupchats;
 
+import cc.polyfrost.oneconfig.config.core.ConfigUtils;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import com.google.gson.*;
+import llc.redstone.hysentials.config.hysentialMods.ChatConfig;
 import llc.redstone.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
-import cc.woverflow.chatting.chat.ChatTab;
-import cc.woverflow.chatting.chat.ChatTabs;
-import cc.woverflow.chatting.mixin.GuiNewChatAccessor;
+import org.polyfrost.chatting.chat.ChatTab;
+import org.polyfrost.chatting.chat.ChatTabs;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.HysentialsConfig;
 
-import llc.redstone.hysentials.util.BlockWAPIUtils;
-import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.util.MUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ChatLine;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
-import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
-import org.lwjgl.Sys;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class GroupChat {
@@ -47,43 +44,45 @@ public class GroupChat {
         if (++this.tick == 80) {
             if (Hysentials.INSTANCE.isChatting) {
                 Multithreading.runAsync(() -> {
-                    if (HysentialsConfig.globalChatEnabled) {
-                        if (!ChatTabs.INSTANCE.getTabs().stream().anyMatch((tab) -> tab.getName().equals("GLOBAL"))) {
-                            ChatTab tab = new ChatTab(
-                                true,
-                                "GLOBAL",
-                                true,
-                                false,
-                                Collections.singletonList("Global" + " > "),
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                16755200,
-                                16777120,
-                                10526880,
-                                ""
-                            );
-                            tab.initialize();
+                    try {
+                        if (ChatConfig.globalChat) {
+                            if (!ChatTabs.INSTANCE.getTabs().stream().anyMatch((tab) -> tab.getName().equals("GLOBAL"))) {
+                                ChatTab tab = new ChatTab(
+                                    true,
+                                    "GLOBAL",
+                                    true,
+                                    false,
+                                    Arrays.asList("GLOBAL > ", ":globalchat:", ChatConfig.globalPrefix),
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    16755200,
+                                    16777120,
+                                    10526880,
+                                    ""
+                                );
 
-                            Multithreading.schedule(() -> ChatTabs.INSTANCE.getTabs().add(tab), 500, TimeUnit.MILLISECONDS);
+                                tab.initialize();
+
+                                Multithreading.schedule(() -> ChatTabs.INSTANCE.getTabs().add(tab), 500, TimeUnit.MILLISECONDS);
+                            } else {
+                                ChatTab tab = ChatTabs.INSTANCE.getTabs().stream().filter((t) -> t.getName().equals("GLOBAL")).findFirst().orElse(null);
+                                if (tab != null) {
+                                    tab.setEnabled(true);
+                                }
+                            }
                         } else {
                             ChatTab tab = ChatTabs.INSTANCE.getTabs().stream().filter((t) -> t.getName().equals("GLOBAL")).findFirst().orElse(null);
                             if (tab != null) {
-                                tab.setEnabled(true);
+                                tab.setEnabled(false);
                             }
                         }
-                    } else {
-                        ChatTab tab = ChatTabs.INSTANCE.getTabs().stream().filter((t) -> t.getName().equals("GLOBAL")).findFirst().orElse(null);
-                        if (tab != null) {
-                            tab.setEnabled(false);
-                        }
-                    }
 //                    List<BlockWAPIUtils.Group> groups = BlockWAPIUtils.getGroups();
 //                    List<BlockWAPIUtils.Group> foundGroups = new ArrayList<>();
 //                    for (BlockWAPIUtils.Group group : groups) {
@@ -127,6 +126,9 @@ public class GroupChat {
 //
 //                        Multithreading.schedule(() -> ChatTabs.INSTANCE.getTabs().add(tab), 500, TimeUnit.MILLISECONDS);
 //                    }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 });
             }
             this.tick = 0;

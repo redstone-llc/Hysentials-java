@@ -51,6 +51,7 @@ public class ReplaceConfig extends Config {
         subcategory = "",
         size = 0
     )
+    public String clubInfo = "";
     @ReplaceAnnotation(
         name = "Club Replace",
         description = "Replace things in clubs",

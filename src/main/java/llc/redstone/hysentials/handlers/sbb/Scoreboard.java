@@ -1,13 +1,11 @@
 package llc.redstone.hysentials.handlers.sbb;
 
-import llc.redstone.hysentials.GuiIngameHysentials;
 import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
 import llc.redstone.hysentials.config.hysentialMods.ScorebarsConfig;
 import llc.redstone.hysentials.handlers.redworks.HousingScoreboard;
 import llc.redstone.hysentials.util.Renderer;
 import llc.redstone.hysentials.util.ScoreboardWrapper;
-import llc.redstone.hysentials.GuiIngameHysentials;
 import llc.redstone.hysentials.config.HysentialsConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
@@ -20,7 +18,7 @@ import java.util.List;
 public class Scoreboard {
     public static void scoreboard() {
         ScaledResolution res = new ScaledResolution(Minecraft.getMinecraft());
-        GuiIngameHysentials.renderObjective = false;
+        GuiIngameForge.renderObjective = false;
         int x = res.getScaledWidth();
         int radius = new Integer[]{0, 2, 4}[ScorebarsConfig.scoreboardBorderRadius];
         List<ScoreboardWrapper.ScoreWrapper> lines = ScoreboardWrapper.getLines(false);

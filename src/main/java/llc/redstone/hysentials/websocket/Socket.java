@@ -305,16 +305,6 @@ public class Socket {
                                 break;
                             }
 
-                            case "groupChat": {
-                                GroupChat.chat(json);
-                                break;
-                            }
-
-                            case "groupInvite": {
-                                GroupChat.invite(json);
-                                break;
-                            }
-
                             case "clubInvite": {
                                 JSONObject club = json.getJSONObject("club");
                                 MUtils.chat("&b-----------------------------------------------------");
@@ -339,7 +329,8 @@ public class Socket {
                                 if (json.has("type")) {
                                     switch (json.getString("type")) {
                                         case "level": {
-                                            HysentialsLevel.checkLevel(json);
+                                            HysentialsLevel.checkLevel(json.getJSONObject("data"));
+                                            System.out.println("Level data: " + json.getJSONObject("data"));
                                             break;
                                         }
                                     }

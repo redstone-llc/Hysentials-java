@@ -6,7 +6,6 @@ import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UKeyboard;
 import cc.polyfrost.oneconfig.libs.universal.UResolution;
 import cc.polyfrost.oneconfig.utils.Multithreading;
-import llc.redstone.hysentials.GuiIngameHysentials;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.EditorConfig;
 import llc.redstone.hysentials.config.HysentialsConfig;
@@ -32,6 +31,7 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.GuiIngameForge;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -69,12 +69,15 @@ public class SBBoxesEditor extends HysentialsGui {
     }
 
     public static void initGUI() {
-        collapseIcon = new Renderer.IconButton("https://i.imgur.com/9KWjNaB.png", 20, 20, (i) -> {
-            scroll = false;
-        });
-        expandIcon = new Renderer.IconButton("https://i.imgur.com/96VPpZ7.png", 20, 20, (i) -> {
-            scroll = true;
-        });
+        try {
+            collapseIcon = new Renderer.IconButton(new ResourceLocation("hysentials:gui/sbbBack.png"), 20, 20, (i) -> {
+                scroll = false;
+            });
+            expandIcon = new Renderer.IconButton(new ResourceLocation("hysentials:gui/sbbForwards.png"), 20, 20, (i) -> {
+                scroll = true;
+            });
+        } catch (Exception ignored) {
+        }
         regexCreator = new RegexCreator();
     }
 
@@ -407,7 +410,7 @@ public class SBBoxesEditor extends HysentialsGui {
         ScaledResolution res = new ScaledResolution(Minecraft.getMinecraft());
 
         if (ScorebarsConfig.scoreboard) {
-            GuiIngameHysentials.renderObjective = false;
+            GuiIngameForge.renderObjective = false;
             int x = res.getScaledWidth();
             int radius = new Integer[]{0, 2, 4}[ScorebarsConfig.scoreboardBorderRadius];
             List<ScoreboardWrapper.ScoreWrapper> lines = new ArrayList<>(ScoreboardWrapper.getLines(true));

@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.handlers.misc;
 
+import cc.polyfrost.oneconfig.utils.Multithreading;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -108,55 +109,57 @@ public class HousingJoinHandler {
     public static HashMap<String, List<String>> clubIcons = new HashMap<>();
     private void cacheIcons(HysentialsSchema.Club club) {
         if (club.getIcons() != null) {
-            if (!new File("./config/Hysentials/imageicons/clubs").exists()) {
-                new File("./config/Hysentials/imageicons/clubs").mkdirs();
-            }
-            if (!new File("./config/Hysentials/imageicons/clubs/" + club.getId()).exists()) {
-                new File("./config/Hysentials/imageicons/clubs/" + club.getId()).mkdirs();
-            }
-            for (String key : club.getIcons().keySet()) {
-                String url = club.getIcons().get(key);
-                if (url != null) {
-                    clubIcons.computeIfAbsent(club.getId(), k -> new ArrayList<>());
-                    if (clubIcons.get(club.getId()).contains(key)) {
-                        continue;
-                    }
-                    try (BufferedInputStream in = new BufferedInputStream(setupConnection(url, "OneConfig/1.0.0", 5000, false));
-                         FileOutputStream fileOutputStream = new FileOutputStream("./config/Hysentials/imageicons/clubs/" + club.getId() + "/" + key + ".png")) {
-                        byte[] data = new byte[1024];
-                        int count;
-                        while ((count = in.read(data, 0, 1024)) != -1) {
-                            fileOutputStream.write(data, 0, count);
+            Multithreading.runAsync(() -> {
+                if (!new File("./config/Hysentials/imageicons/clubs").exists()) {
+                    new File("./config/Hysentials/imageicons/clubs").mkdirs();
+                }
+                if (!new File("./config/Hysentials/imageicons/clubs/" + club.getId()).exists()) {
+                    new File("./config/Hysentials/imageicons/clubs/" + club.getId()).mkdirs();
+                }
+                for (String key : club.getIcons().keySet()) {
+                    String url = club.getIcons().get(key);
+                    if (url != null) {
+                        clubIcons.computeIfAbsent(club.getId(), k -> new ArrayList<>());
+                        if (clubIcons.get(club.getId()).contains(key)) {
+                            continue;
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    File file = new File("./config/Hysentials/imageicons/clubs/" + club.getId() + "/" + key + ".png");
-                    if (file.exists()) {
-                        clubIcons.compute(club.getId(), (k, v) -> {
-                            if (v == null) {
-                                v = new ArrayList<>();
+                        try (BufferedInputStream in = new BufferedInputStream(setupConnection(url, "OneConfig/1.0.0", 5000, false));
+                             FileOutputStream fileOutputStream = new FileOutputStream("./config/Hysentials/imageicons/clubs/" + club.getId() + "/" + key + ".png")) {
+                            byte[] data = new byte[1024];
+                            int count;
+                            while ((count = in.read(data, 0, 1024)) != -1) {
+                                fileOutputStream.write(data, 0, count);
                             }
-                            v.add(key);
-                            return v;
-                        });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        File file = new File("./config/Hysentials/imageicons/clubs/" + club.getId() + "/" + key + ".png");
+                        if (file.exists()) {
+                            clubIcons.compute(club.getId(), (k, v) -> {
+                                if (v == null) {
+                                    v = new ArrayList<>();
+                                }
+                                v.add(key);
+                                return v;
+                            });
+                        }
                     }
                 }
-            }
 
 
-            for (String icon : clubIcons.get(club.getId())) {
-                File file = new File("./config/Hysentials/imageicons/clubs/" + club.getId() + "/" + icon + ".png");
-                if (!file.exists()) continue;
-                try {
-                    BufferedImage image = ImageIO.read(file);
-                    ImageIcon icon1 = new ImageIcon(icon, "./config/Hysentials/imageicons/clubs/" + club.getId() + "/" + icon + ".png", false);
-                    icon1.width = image.getWidth();
-                    icon1.height = image.getHeight();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                for (String icon : clubIcons.get(club.getId())) {
+                    File file = new File("./config/Hysentials/imageicons/clubs/" + club.getId() + "/" + icon + ".png");
+                    if (!file.exists()) continue;
+                    try {
+                        BufferedImage image = ImageIO.read(file);
+                        ImageIcon icon1 = new ImageIcon(icon, "./config/Hysentials/imageicons/clubs/" + club.getId() + "/" + icon + ".png", false);
+                        icon1.width = image.getWidth();
+                        icon1.height = image.getHeight();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            }
+            });
         }
     }
 

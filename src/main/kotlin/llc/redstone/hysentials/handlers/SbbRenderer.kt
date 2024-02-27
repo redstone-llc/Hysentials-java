@@ -2,7 +2,6 @@ package llc.redstone.hysentials.handlers
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor.Companion.stripControlCodes
 import cc.polyfrost.oneconfig.libs.universal.UChat.chat
-import llc.redstone.hysentials.GuiIngameHysentials
 import llc.redstone.hysentials.Hysentials
 import llc.redstone.hysentials.config.HysentialsConfig
 import llc.redstone.hysentials.config.hysentialMods.ScorebarsConfig
@@ -34,7 +33,7 @@ class SbbRenderer {
             if (ScorebarsConfig.scoreboard && ScorebarsConfig.showScoreboard) {
                 Scoreboard.scoreboard()
             } else {
-                GuiIngameHysentials.renderObjective = ScorebarsConfig.showScoreboard
+                GuiIngameForge.renderObjective = ScorebarsConfig.showScoreboard
             }
             val lines = ScoreboardWrapper.getScoreboard().getSortedScores(
                 ScoreboardWrapper.getSidebar()).stream()

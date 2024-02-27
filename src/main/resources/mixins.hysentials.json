@@ -10,7 +10,7 @@
     "EntityPlayerSPMixin_MessageHandling",
     "EntityRendererMixin",
     "FontRendererMixin",
-    "GuiIngameMixin",
+    "GuiIngameForgeMixin",
     "GuiMainMenuMixin",
     "GuiNewChatAccessor",
     "GuiScreenMixin",
@@ -24,6 +24,7 @@
     "RenderItemMixin",
     "RenderLivingMixin",
     "RenderMixin",
+    "SlotDecorationHotbarMixin",
     "SlotDecorationMixin"
   ]
 }

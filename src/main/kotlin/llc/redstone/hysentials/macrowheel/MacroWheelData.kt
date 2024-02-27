@@ -3,9 +3,7 @@ package llc.redstone.hysentials.macrowheel
 import llc.redstone.hysentials.Hysentials
 import llc.redstone.hysentials.util.JsonData
 import llc.redstone.hysentials.util.Material
-import org.json.JSONArray
 import org.json.JSONObject
-import javax.crypto.Mac
 
 class MacroWheelData {
     data class MacroWheel(
@@ -16,6 +14,10 @@ class MacroWheelData {
         var hoverText: String
     ) {
         companion object {
+            @JvmStatic
+            var cooldown: Long = System.currentTimeMillis()
+            @JvmStatic
+            var wasMacroWheelActive: Boolean = false
             fun deserialize(json: JSONObject): MacroWheel {
                 return MacroWheel(
                     json.getInt("index"),

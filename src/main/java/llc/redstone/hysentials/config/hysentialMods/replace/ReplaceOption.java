@@ -175,6 +175,7 @@ public class ReplaceOption extends BasicOption implements IFocusable {
                     replace.replacements.put("", "");
                     addElements(replace, "", "", clubsPage);
                 }
+                y += 40;
             }
         } catch (Exception e) {
             e.printStackTrace();

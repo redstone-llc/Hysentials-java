@@ -125,22 +125,32 @@ public class FormattingConfig extends Config {
     )
     public static boolean slotDecoration = true;
 
+    @Switch(
+        name = "Show in Hotbar",
+        category = "General",
+        subcategory = "Slot Decoration",
+        description = "Show the slot decoration in the hotbar."
+    )
+    public static boolean showInHotbar = true;
+
     @Dropdown(
         name = "Slot Decoration Style",
         category = "General",
         subcategory = "Slot Decoration",
         description = "Change the style of the slot decoration.",
-        options = {"Circle", "Rectangle"}
+        options = {"Circle", "Rectangle", "Partial Outline", "Full Outline"}
     )
-    public static int slotDecorationStyle = 0;
+    public static int slotDecorationStyle = 1;
 
-    @Color(
+    @Slider(
         name = "Slot Decoration Alpha",
         category = "General",
         subcategory = "Slot Decoration",
-        description = "Change the alpha of the slot decoration color."
+        description = "Change the alpha of the slot decoration color.",
+        min = 0,
+        max = 255
     )
-    public static OneColor slotDecorationColor = new OneColor(0, 0, 0, 200);
+    public static int slotDecorationAlpha = 50;
 
     @Slider(
         name = "Slot Decoration Color Offset",
@@ -150,7 +160,7 @@ public class FormattingConfig extends Config {
         min = -255,
         max = 255
     )
-    public static int slotDecorationColorOffset = -20;
+    public static int slotDecorationColorOffset = 0;
 
     @RankAnnotation(
         name = "Default Rank",

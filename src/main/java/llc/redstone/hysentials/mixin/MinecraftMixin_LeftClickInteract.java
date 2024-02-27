@@ -1,26 +1,10 @@
-/*
- * Hytils Reborn - Hypixel focused Quality of Life mod.
- * Copyright (C) 2020, 2021, 2022  Polyfrost, Sk1er LLC and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */package llc.redstone.hysentials.mixin;
+package llc.redstone.hysentials.mixin;
 
 import cc.polyfrost.oneconfig.libs.checker.units.qual.A;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
-import llc.redstone.hysentials.GuiIngameHysentials;
 import llc.redstone.hysentials.config.HysentialsConfig;
+import llc.redstone.hysentials.macrowheel.MacroWheelData;
 import llc.redstone.hysentials.macrowheel.overlay.MacroWheelOverlay;
 import llc.redstone.hysentials.macrowheel.overlay.MacroWheelOverlayKt;
 import net.minecraft.client.Minecraft;
@@ -64,14 +48,14 @@ public class MinecraftMixin_LeftClickInteract {
 
     @Inject(method = "clickMouse", at = @At("HEAD"), cancellable = true)
     private void clickMouse(CallbackInfo ci) {
-        if (HysentialsConfig.macroWheelKeyBind.isActive() && !MacroWheelOverlayKt.getStopped() && GuiIngameHysentials.cooldown < System.currentTimeMillis()) {
+        if (HysentialsConfig.macroWheelKeyBind.isActive() && !MacroWheelOverlayKt.getStopped() && MacroWheelData.MacroWheel.getCooldown() < System.currentTimeMillis()) {
             ci.cancel();
         }
     }
 
     @Inject(method = "rightClickMouse", at = @At("HEAD"), cancellable = true)
     private void rightClickMouse(CallbackInfo ci) {
-        if (HysentialsConfig.macroWheelKeyBind.isActive() && !MacroWheelOverlayKt.getStopped() && GuiIngameHysentials.cooldown < System.currentTimeMillis()) {
+        if (HysentialsConfig.macroWheelKeyBind.isActive() && !MacroWheelOverlayKt.getStopped() && MacroWheelData.MacroWheel.getCooldown() < System.currentTimeMillis()) {
             ci.cancel();
         }
     }

@@ -23,6 +23,7 @@ import llc.redstone.hysentials.cosmetics.wings.tdarth.TdarthCosmetic;
 import llc.redstone.hysentials.guis.club.ClubDashboardHandler;
 import llc.redstone.hysentials.guis.container.ContainerHandler;
 import llc.redstone.hysentials.handlers.chat.modules.misc.Limit256;
+import llc.redstone.hysentials.handlers.groupchats.GroupChat;
 import llc.redstone.hysentials.handlers.guis.GuiScreenPost;
 import llc.redstone.hysentials.handlers.htsl.*;
 import llc.redstone.hysentials.handlers.misc.HousingJoinHandler;
@@ -62,8 +63,10 @@ import net.minecraft.command.ICommand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLModContainer;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -121,6 +124,7 @@ public class Hysentials {
     public MacroWheelData.MacroJson macroJson;
     public boolean isPatcher;
     public boolean isChatting;
+    public boolean isCVGT1_5_3;
     public boolean isHytils;
     private boolean loadedCall;
 
@@ -215,15 +219,31 @@ public class Hysentials {
             discordRPC = new DiscordRPC();
         }
 
-        registerHandlers();
         Quest.registerQuests();
+        System.out.println("Hysentials has been initialized!");
     }
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         isPatcher = Loader.isModLoaded("patcher");
         isChatting = Loader.isModLoaded("chatting");
+        if (isChatting) {
+            ModContainer container = Loader.instance().getActiveModList().stream().filter(modContainer -> modContainer.getModId().equals("chatting")).findFirst().orElse(null);
+            if (container != null) {
+                String version = container.getVersion();
+                version = version.split("-")[0];
+                //make sure version is later than 1.5.0
+                if (version.compareTo("1.5.0") > 0) {
+                    isChatting = true;
+                } else {
+                    isChatting = false;
+                }
+
+                isCVGT1_5_3 = version.compareTo("1.5.3") > 0;
+            }
+        }
         isHytils = Loader.isModLoaded("hytils-reborn");
+        registerHandlers();
         chatHandler.init();
 
         imageIconRenderer = new ImageIconRenderer();
@@ -375,62 +395,68 @@ public class Hysentials {
     private void registerHandlers() {
         final EventBus eventBus = MinecraftForge.EVENT_BUS;
         final llc.redstone.hysentials.event.EventBus hyBus = llc.redstone.hysentials.event.EventBus.INSTANCE;
-        RevampedGameMenu.initGUI();
-        SBBoxesEditor.initGUI();
-        // general stuff
-        eventBus.register(languageHandler);
-//        if (isChatting) {
-//            eventBus.register(new GroupChat());
-//        }
-        // chat
-        eventBus.register(chatHandler);
+        try {
+            SBBoxesEditor.initGUI();
+            // general stuff
+            eventBus.register(languageHandler);
+            try {
+                if (isChatting) {
+                    eventBus.register(new GroupChat());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                isChatting = false;
+                System.out.println("Failed to register GroupChat due to old version of Chatting mod. Please update Chatting to the latest version.");
+            }
+            // chat
+            eventBus.register(chatHandler);
 
-        eventBus.register(new HousingLagReducer());
-        // lobby
-        eventBus.register(guiDisplayHandler);
-        eventBus.register(new ResolutionUtil());
-        eventBus.register(new BwRanks());
-        eventBus.register(new GameMenuOpen());
-        eventBus.register(new SbbRenderer());
-        eventBus.register(new llc.redstone.hysentials.handlers.SbbRenderer());
-        eventBus.register(new GuiScreenPost());
-        eventBus.register(new HousingJoinHandler());
+            eventBus.register(new HousingLagReducer());
+            // lobby
+            eventBus.register(guiDisplayHandler);
+            eventBus.register(new ResolutionUtil());
+            eventBus.register(new BwRanks());
+            eventBus.register(new GameMenuOpen());
+            eventBus.register(new SbbRenderer());
+            eventBus.register(new llc.redstone.hysentials.handlers.SbbRenderer());
+            eventBus.register(new GuiScreenPost());
+            eventBus.register(new HousingJoinHandler());
 
 
-        eventBus.register(new Actionbar());
-        eventBus.register(new ActionLibrary());
-        eventBus.register(new Queue());
-        eventBus.register(new Navigator());
-        eventBus.register(new ActionGUIHandler());
-        eventBus.register(new FunctionsGUIHandler());
-        eventBus.register(new Exporter());
-        eventBus.register(new HousingMenuHandler());
-        eventBus.register(new ClubDashboardHandler());
-        eventBus.register(new PlayerInvHandler());
-        eventBus.register(new BWSReplace());
-        eventBus.register(new MUtils());
-        eventBus.register(new Limit256());
-        eventBus.register(new QuestHandler());
-        eventBus.register(new CapeHandler());
-        eventBus.register(cubitCompanion = new CubitCompanion());
-        eventBus.register(pepperCompanion = new PepperCompanion());
-        eventBus.register(miyaCompanion = new MiyaCompanion());
-        eventBus.register(hamsterCompanion = new HamsterCompanion());
-        eventBus.register(technoCrown = new TechnoCrown());
-        eventBus.register(kzeroBundle = new KzeroBundle());
-        eventBus.register(tdarthCosmetic = new TdarthCosmetic());
-        eventBus.register(dragonCosmetic = new DragonCosmetic());
-        blackCat = LayerBlackCatHat.hat;
-        CatHat.loadCatHats();
-        BackpackCosmetic.loadBackpacks();
-        eventBus.register(new ContainerHandler());
-        eventBus.register(new FormatPlayerName());
+            eventBus.register(new Actionbar());
+            eventBus.register(new ActionLibrary());
+            eventBus.register(new Queue());
+            eventBus.register(new Navigator());
+            eventBus.register(new ActionGUIHandler());
+            eventBus.register(new FunctionsGUIHandler());
+            eventBus.register(new Exporter());
+            eventBus.register(new HousingMenuHandler());
+            eventBus.register(new ClubDashboardHandler());
+            eventBus.register(new PlayerInvHandler());
+            eventBus.register(new BWSReplace());
+            eventBus.register(new MUtils());
+            eventBus.register(new Limit256());
+            eventBus.register(new QuestHandler());
+            eventBus.register(new CapeHandler());
+            eventBus.register(cubitCompanion = new CubitCompanion());
+            eventBus.register(pepperCompanion = new PepperCompanion());
+            eventBus.register(miyaCompanion = new MiyaCompanion());
+            eventBus.register(hamsterCompanion = new HamsterCompanion());
+            eventBus.register(technoCrown = new TechnoCrown());
+            eventBus.register(kzeroBundle = new KzeroBundle());
+            eventBus.register(tdarthCosmetic = new TdarthCosmetic());
+            eventBus.register(dragonCosmetic = new DragonCosmetic());
+            blackCat = LayerBlackCatHat.hat;
+            CatHat.loadCatHats();
+            BackpackCosmetic.loadBackpacks();
+            eventBus.register(new ContainerHandler());
+            eventBus.register(new FormatPlayerName());
 
-        new Renderer();
+            new Renderer();
 
-        EventManager.INSTANCE.register(new BwRanks());
+            EventManager.INSTANCE.register(new BwRanks());
 
-        HysentialsUtilsKt.init();
+            HysentialsUtilsKt.init();
 
 //        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 //            JSONArray array = new JSONArray();
@@ -444,6 +470,9 @@ public class Hysentials {
 //
 //            macroJson.save();
 //        }));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void sendMessage(String message) {

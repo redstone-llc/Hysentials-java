@@ -228,38 +228,37 @@ public class HysentialsLevel extends Container {
 
 
     public static void checkLevel(JSONObject json) {
-        if (json.has("exp") && getExp() != json.getInt("exp")) {
-            int previousExp = getExp();
-            int currentExp = json.getInt("exp");
-            int differenceExp = currentExp - previousExp;
+        int previousExp = getExp();
+        int currentExp = json.getInt("exp");
+        int differenceExp = currentExp - previousExp;
 
-            int previousEmeralds = (Socket.cachedUser != null ? Socket.cachedUser.getEmeralds() : 0);
-            int currentEmeralds = json.getInt("emeralds");
-            int differenceEmeralds = currentEmeralds - previousEmeralds;
+        int previousEmeralds = (Socket.cachedUser != null ? Socket.cachedUser.getEmeralds() : 0);
+        int currentEmeralds = json.getInt("emeralds");
+        int differenceEmeralds = currentEmeralds - previousEmeralds;
 
-            int previousLevel = (int) getLevel();
-            if (Socket.cachedUser != null) {
-                Socket.cachedUser.setExp(json.getInt("exp"));
-                Socket.cachedUser.setEmeralds(json.getInt("emeralds"));
-            }
-            int currentLevel = (int) getLevel();
-            int differenceLevel = currentLevel - previousLevel;
+        int previousLevel = (int) getLevel();
+        if (Socket.cachedUser != null) {
+            Socket.cachedUser.setExp(json.getInt("exp"));
+            Socket.cachedUser.setEmeralds(json.getInt("emeralds"));
+        }
+        int currentLevel = (int) getLevel();
+        int differenceLevel = currentLevel - previousLevel;
 
-            UChat.chat("");
-            UChat.chat("&a&lHysentials Level Update!");
-            if (differenceEmeralds > 0) UChat.chat("&a+" + differenceEmeralds + "⏣ Emeralds");
-            if (differenceExp > 0) UChat.chat("&6+" + differenceExp + " Hysentials XP");
-            UChat.chat("");
+        if (differenceLevel == 0 && differenceEmeralds == 0 && differenceExp == 0) return;
+        UChat.chat("");
+        UChat.chat("&a&lHysentials Level Update!");
+        if (differenceEmeralds > 0) UChat.chat("&a+" + differenceEmeralds + "⏣ Emeralds");
+        if (differenceExp > 0) UChat.chat("&6+" + differenceExp + " Hysentials XP");
+        UChat.chat("");
 
-            if (differenceLevel > 0) {
-                for (int i = previousLevel + 1; i <= currentLevel; i++) {
-                    UChat.chat("");
-                    UChat.chat("&6&lHYSENTIALS LEVEL UP!");
-                    UChat.chat("&7You are now &6Hysentials Level " + i + "&7.");
-                    UChat.chat("&a &b &c &a&lRewards");
-                    Arrays.asList(getRewards(i).split("\n")).forEach(UChat::chat);
-                    UChat.chat("");
-                }
+        if (differenceLevel > 0) {
+            for (int i = previousLevel + 1; i <= currentLevel; i++) {
+                UChat.chat("");
+                UChat.chat("&6&lHYSENTIALS LEVEL UP!");
+                UChat.chat("&7You are now &6Hysentials Level " + i + "&7.");
+                UChat.chat("&a &b &c &a&lRewards");
+                Arrays.asList(getRewards(i).split("\n")).forEach(UChat::chat);
+                UChat.chat("");
             }
         }
     }

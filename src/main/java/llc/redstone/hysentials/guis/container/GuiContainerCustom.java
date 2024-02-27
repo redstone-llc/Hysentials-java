@@ -9,6 +9,8 @@ import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+
+import llc.redstone.hysentials.util.RenderItemUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
@@ -185,6 +187,12 @@ public abstract class GuiContainerCustom extends GuiScreen {
         int i = slotIn.xDisplayPosition;
         int j = slotIn.yDisplayPosition;
         ItemStack itemstack = slotIn.getStack();
+        RenderItemUtils.drawSlotDecoration(
+            i,
+            j,
+            itemstack,
+            false
+        );
         boolean flag = false;
         boolean flag1 = slotIn == this.clickedSlot && this.draggedStack != null && !this.isRightMouseClick;
         ItemStack itemstack1 = this.mc.thePlayer.inventory.getItemStack();

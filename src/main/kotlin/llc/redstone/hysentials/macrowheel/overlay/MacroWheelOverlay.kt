@@ -4,7 +4,6 @@ import cc.polyfrost.oneconfig.config.core.OneColor
 import cc.polyfrost.oneconfig.libs.universal.UResolution
 import cc.polyfrost.oneconfig.renderer.NanoVGHelper
 import cc.polyfrost.oneconfig.utils.InputHandler
-import llc.redstone.hysentials.GuiIngameHysentials
 import llc.redstone.hysentials.Hysentials
 import llc.redstone.hysentials.macrowheel.MacroWheelData
 import llc.redstone.hysentials.macrowheel.MacroWheelEditor
@@ -161,7 +160,7 @@ class MacroWheelOverlay(
 
     fun stop () {
         stopped = true
-        GuiIngameHysentials.wasMacroWheelActive = false
+        MacroWheelData.MacroWheel.wasMacroWheelActive = false
         if (Minecraft.getMinecraft().currentScreen == null) {
             Minecraft.getMinecraft().mouseHelper.grabMouseCursor()
         }

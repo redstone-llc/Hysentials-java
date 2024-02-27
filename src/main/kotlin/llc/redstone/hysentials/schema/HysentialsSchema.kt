@@ -5,8 +5,16 @@ import com.google.gson.JsonPrimitive
 import com.neovisionaries.ws.client.WebSocket
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import llc.redstone.hysentials.cosmetic.colorFromRarity
+import llc.redstone.hysentials.cosmetic.equippedCosmetic
+import llc.redstone.hysentials.cosmetic.hasCosmetic
+import llc.redstone.hysentials.guis.container.GuiItem
+import llc.redstone.hysentials.util.Material
+import llc.redstone.hysentials.utils.formatCapitalize
+import llc.redstone.hysentials.websocket.Socket
 import net.minecraft.item.ItemStack
 import org.json.JSONObject
+import java.util.UUID
 
 class HysentialsSchema {
     data class User(
@@ -106,6 +114,68 @@ class HysentialsSchema {
                     obj["skullOwner"]?.asString,
                 )
             }
+        }
+
+        fun toItem(uuid: UUID): ItemStack {
+            var type = type
+            var subType = subType ?: type
+            val name = name.lowercase()
+            val itemID = itemID ?: -1
+            val description = description
+            val rarity = rarity
+            val cost = cost
+            val emerald = Socket.cachedUser?.emeralds ?: 0
+            lateinit var item: ItemStack
+            val displayName =
+                "&f:${rarity.lowercase()}: <${colorFromRarity(rarity)}>" + (displayName ?: name.formatCapitalize())
+            val lore: MutableList<String> = mutableListOf()
+            description.split("\n").forEach(lore::add)
+            if (equippedCosmetic(uuid, name)) {
+                lore.add("")
+                lore.add("&aEquipped")
+            } else if (hasCosmetic(uuid, name)) {
+                lore.add("")
+                lore.add("&eClick to equip!")
+            } else {
+                val costString = if (cost == -1) "FREE" else "$cost⏣"
+                if (cost != -1) {
+                    lore.add("")
+                    lore.add("&7Cost: &a$costString")
+                    lore.add("")
+                }
+
+                if (cost > 0) {
+                    lore.add(if (emerald >= cost) "&aClick to purchase!" else "&cNot enough emeralds!")
+                } else if (cost == 0) {
+                    lore.add("&eClick to purchase!")
+                } else if (cost == -1){
+                    lore.add("")
+                    lore.add("&cNot purchasable!")
+                }
+            }
+            when (subType) {
+                "pet" -> {
+                    item = GuiItem.makeMonsterEgg(displayName, 1, itemID, lore)
+                }
+
+                "bundle" -> {
+                    if (Material.valueOf(material!!) == Material.SKULL_ITEM) {
+                        item = GuiItem.makeColorfulSkullItem(displayName, skullOwner!!, 1, lore)
+                    } else {
+                        item = GuiItem.makeColorfulItem(Material.valueOf(material!!), displayName, 1, 0, lore)
+                    }
+                }// Make file. Please.
+
+                else -> {
+                    item = GuiItem.makeColorfulItem(Material.valueOf(material!!), displayName, 1, 0, lore)
+                }
+            }
+            if (material?.startsWith("LEATHER") == true) {
+                GuiItem.setColor(item, color)
+            }
+
+//            this.item = item
+            return item
         }
     }
 

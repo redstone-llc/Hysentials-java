@@ -13,6 +13,8 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.ITextureObject;
+import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
@@ -157,7 +159,7 @@ public class Renderer {
         finishDraw();
     }
 
-    public static void drawImage(DynamicTexture image, double x, double y, double width, double height) {
+    public static void drawImage(ITextureObject image, double x, double y, double width, double height) {
         if (colorized == null)
             GlStateManager.color(1f, 1f, 1f, 1f);
         GlStateManager.enableBlend();
@@ -368,7 +370,7 @@ public class Renderer {
     }
 
     public static class IconButton {
-        DynamicTexture texture;
+        ITextureObject texture;
         Consumer<Integer> callback;
         int width, height;
         int x, y;
@@ -379,6 +381,14 @@ public class Renderer {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+            this.callback = callback;
+            this.width = width;
+            this.height = height;
+        }
+
+        public IconButton(ResourceLocation image, int width, int height, Consumer<Integer> callback) {
+            Minecraft.getMinecraft().getTextureManager().loadTexture(image, new SimpleTexture(image));
+            this.texture = Minecraft.getMinecraft().getTextureManager().getTexture(image);
             this.callback = callback;
             this.width = width;
             this.height = height;

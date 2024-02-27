@@ -69,6 +69,8 @@ class MacroWheelHudConfigThing(
         return 34f * scale
     }
 
-
+    override fun shouldShow(): Boolean {
+        return false
+    }
 
 }
