@@ -479,12 +479,23 @@ public class Renderer {
     public static class Frame {
         int width, height;
         BufferedImage image;
-        DynamicTexture texture;
+        ITextureObject texture;
         public Frame(BufferedImage image) {
             this.image = image;
             this.width = image.getWidth();
             this.height = image.getHeight();
             this.texture = new DynamicTexture(image);
+        }
+
+        public Frame(ResourceLocation location) {
+            Minecraft.getMinecraft().getTextureManager().loadTexture(location, new SimpleTexture(location));
+            this.texture = Minecraft.getMinecraft().getTextureManager().getTexture(location);
+            try {
+                this.image = ImageIO.read(Minecraft.getMinecraft().getResourceManager().getResource(location).getInputStream());
+                this.width = image.getWidth();
+                this.height = image.getHeight();
+            } catch (IOException e) {
+            }
         }
     }
 }

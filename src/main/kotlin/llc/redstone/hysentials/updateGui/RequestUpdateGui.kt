@@ -139,9 +139,9 @@ class RequestUpdateGui(private var inGame: Boolean, private var deleteOld: Boole
             updateImage = if (updateNotes?.image != null) {
                 Frame(ImageIO.read(URL(updateNotes.image)))
             } else if (updateNotes != null) {
-                Frame(ImageIO.read(URL("https://i.imgur.com/Qq9kXpe.png")))
+                Frame(ResourceLocation("hysentials:gui/updater_background.png"))
             } else {
-                Frame(ImageIO.read(URL("https://i.imgur.com/Qq9kXpe.png")))
+                Frame(ResourceLocation("hysentials:gui/updater_background.png"))
             }
         } catch (e: IOException) {
             e.printStackTrace()
