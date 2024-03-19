@@ -19,6 +19,7 @@ import llc.redstone.hysentials.websocket.Socket
 import com.google.common.collect.Lists
 import llc.redstone.hysentials.cosmetic.colorFromRarity
 import llc.redstone.hysentials.cosmetic.getEquippedCosmetics
+import llc.redstone.hysentials.schema.HysentialsSchema
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
@@ -72,7 +73,7 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
     var theSlot: Slot? = null
     var inventorySlots: ArrayList<Slot> = Lists.newArrayList()
     var hypixelData: JSONObject? = null
-    var hysentialData: JSONObject? = null
+    var hysentialData: HysentialsSchema.User? = null
     var guildData: JSONObject? = null
     val fontRenderer: ImageIconRenderer = Hysentials.INSTANCE.imageIconRenderer
 
@@ -168,8 +169,8 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                 var lore = "§f${rankUser}${player.name} ${if (guildTag != "null") guildTag else ""}\n" +
                         "&7Hypixel Level: &e${(hypixelData!!["level"] as BigDecimal).toDouble().roundToInt()}\n"
                 if (hysentialData != null) {
-                    lore += "&7Hysentials Level: &e${getLevel(hysentialData!!["exp"] as Int).roundToInt()}\n" +
-                            "&7Emeralds: &a${largeFormat.format(hysentialData!!["emeralds"] as Int)}"
+                    lore += "&7Hysentials Level: &e${getLevel(hysentialData!!.exp).roundToInt()}\n" +
+                            "&7Emeralds: &a${largeFormat.format(hysentialData!!.emeralds)}"
                 }
                 lore = lore.addFormatting()
                 val loreList = lore.split("\n")
@@ -402,11 +403,11 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
             }
             guildData = JSONObject(guild)
 
-            hysentialData = Socket.cachedUsers.firstOrNull { it["uuid"] == player.uniqueID.toString() }
+            hysentialData = Socket.cachedUsersNew.values.firstOrNull { it.uuid == player.uniqueID.toString() }
 
             badges = ArrayList()
 
-            if (hysentialData != null && hysentialData!!.getBoolean("isEarlySupporter")) badges.add(
+            if (hysentialData != null && hysentialData!!.isEarlySupporter) badges.add(
                 TriVariable(
                     "early-supporter",
                     "<#ff3e3e>Early Supporter",
@@ -414,7 +415,7 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                 )
             )
 
-            if (hysentialData != null && hysentialData!!.getBoolean("isBoosting")) badges.add(
+            if (hysentialData != null && hysentialData!!.isBoosting) badges.add(
                 TriVariable(
                     "booster",
                     "<#dc69da>Discord Booster",

@@ -1,9 +1,11 @@
 package llc.redstone.hysentials.config.hysentialMods;
 
 import cc.polyfrost.oneconfig.config.Config;
+import cc.polyfrost.oneconfig.config.annotations.Color;
 import cc.polyfrost.oneconfig.config.annotations.Switch;
 import cc.polyfrost.oneconfig.config.annotations.Text;
 import cc.polyfrost.oneconfig.config.core.ConfigUtils;
+import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.gui.OneConfigGui;
@@ -17,9 +19,27 @@ public class ChatConfig extends Config {
         name = "Chat Limit 256",
         category = "General",
         subcategory = "General",
-        description = "Enable chat limit 256. This will allow you to send messages up to 256 characters long. (This will only work on supported servers)"
+        description = "Enable chat limit 256. This will allow you to send messages up to 256 characters long. (This will only work on supported servers)",
+        size = 0
     )
     public static boolean chatLimit256 = true;
+
+    @Switch(
+        name = "Level Prefix Colors",
+        description = "Enable/Disable level prefix colors.",
+        category = "General",
+        subcategory = "General"
+    )
+    public static boolean levelPrefixColors = true;
+
+    @Color(
+        name = "Default Level Color",
+        description = "The default color for level prefixes.",
+        category = "General",
+        subcategory = "General",
+        allowAlpha = false
+    )
+    public static OneColor defaultLevelColor = new OneColor("#FFFFFF");
 
     @Switch(
             name = "Party Formatting",
@@ -53,6 +73,39 @@ public class ChatConfig extends Config {
         subcategory = "General"
     )
     public static boolean partyChatPrefix = true;
+
+    @Switch(
+        name = "Guild Formatting",
+        description = "Enable/Disable guild formatting.",
+        category = "Guild",
+        subcategory = "General"
+    )
+    public static boolean guildFormatting = true;
+
+    @Text(
+        name = "Guild Prefix",
+        description = "The prefix for all guild related chat messages.",
+        category = "Guild",
+        subcategory = "General",
+        placeholder = ":guildprefix: "
+    )
+    public static String guildPrefix = ":guildprefix: ";
+
+    @Switch(
+        name = "Player Guild Chat Prefix",
+        description = "Enable/Disable player prefixes in guild chat.",
+        category = "Guild",
+        subcategory = "General"
+    )
+    public static boolean guildChatPrefix = false;
+
+    @Switch(
+        name = "Guild Chat Suffix",
+        description = "Enable/Disable guild suffixes in guild chat.",
+        category = "Guild",
+        subcategory = "General"
+    )
+    public static boolean guildChatSuffix = true;
 
     @Switch(
         name = "Global Chat",

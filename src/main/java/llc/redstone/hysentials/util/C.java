@@ -31,41 +31,62 @@ public class C {
     private C() {
     }
 
-    public static String toHex(String color) {
+    public static String toHex(String color, boolean includeSymbol) {
+        String hex;
         switch (color) {
             case "§0":
-                return "#000000";
+                hex = "000000";
+                break;
             case "§1":
-                return "#0000AA";
+                hex = "0000AA";
+                break;
             case "§2":
-                return "#00AA00";
+                hex = "00AA00";
+                break;
             case "§3":
-                return "#00AAAA";
+                hex = "00AAAA";
+                break;
             case "§4":
-                return "#AA0000";
+                hex = "AA0000";
+                break;
             case "§5":
-                return "#AA00AA";
+                hex = "AA00AA";
+                break;
             case "§6":
-                return "#FFAA00";
+                hex = "FFAA00";
+                break;
             case "§7":
-                return "#AAAAAA";
+                hex = "AAAAAA";
+                break;
             case "§8":
-                return "#555555";
+                hex = "555555";
+                break;
             case "§9":
-                return "#5555FF";
+                hex = "5555FF";
+                break;
             case "§a":
-                return "#55FF55";
+                hex = "55FF55";
+                break;
             case "§b":
-                return "#55FFFF";
+                hex = "55FFFF";
+                break;
             case "§c":
-                return "#FF5555";
+                hex = "FF5555";
+                break;
             case "§d":
-                return "#FF55FF";
+                hex = "FF55FF";
+                break;
             case "§e":
-                return "#FFFF55";
+                hex = "FFFF55";
+                break;
             default:
-                return "#FFFFFF";
+                hex = "FFFFFF";
         }
+        return includeSymbol ? "#" + hex : hex;
+    }
+
+    public static String toHex(String color) {
+        return toHex(color, true);
     }
 
     public static String translate(String text) {

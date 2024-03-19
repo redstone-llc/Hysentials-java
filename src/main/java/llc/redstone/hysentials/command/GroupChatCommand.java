@@ -1,256 +1,312 @@
 package llc.redstone.hysentials.command;
 
+import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.utils.Multithreading;
+import llc.redstone.hysentials.schema.HysentialsSchema;
+import llc.redstone.hysentials.util.BUtils;
 import llc.redstone.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.commands.annotations.*;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.handlers.groupchats.GroupChat;
 import llc.redstone.hysentials.util.DuoVariable;
+import llc.redstone.hysentials.utils.GroupUtils;
 import llc.redstone.hysentials.websocket.Request;
 import llc.redstone.hysentials.websocket.Socket;
 import llc.redstone.hysentials.config.HysentialsConfig;
 import net.minecraft.client.Minecraft;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
 
-@Command(value = "groupchat", aliases = {"grc", "group"}, customHelpMessage = {
-    "§9§m                                                     ",
-    "§aGroup Commands:",
-    "§e/group join <name> §8- §bAccepts a group invitation",
-    "§e/group chat <group> <chat message> §8- §bSend a chat message to your group chat channel.",
-    "§e/group create <name> §8- §bCreates a group with the specified name.",
-    "§e/group settings <group> <allInvite/silence/filter/private> <value> §8- §bChange group settings.",
-    "§e/group demote <group> <player> §8- §bDemotes the player to the previous rank.",
-    "§e/group disband <group> §8- §bDisbands the group.",
-    "§e/group help §8- §bPrints this help message.",
-    "§e/group invite <group> <player> §8- §bInvites the player to your group.",
-    "§e/group kick <group> <player> <reason> §8- §bKicks the player from your group.",
-    "§e/group leave <group> §8- §bLeaves your current group.",
-    "§e/group promote <group> <player> §8- §bPromotes the player to the next rank.",
-    "§e/group online <group> §8- §bShow the current online members of your group.",
-    "§e/group rename <group> <name> §8- §bRenames the group.",
-    "§e/group transfer <group> <player> §8- §bTransfers ownership of the group to another player.",
-    "§e/group hide <group> §8- §bHide the group from displaying messages in chat.",
-    "§e/group unhide <group> §8- §bAllow the group to display messages in chat.",
-    "§e/group color <group> <color> §8- §bChange the prefix color of the group.",
-    "§9§m                                                     "
-})
-public class GroupChatCommand {
-    @SubCommand(description = "Join a group chat.", aliases = "join")
-    public void join(String name) {
-        Socket.CLIENT.sendText(new Request(
-            "method", "groupJoin",
-            "name", name,
-            "username", Minecraft.getMinecraft().thePlayer.getName(),
-            "serverId", Socket.serverId
-        ).toString());
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+public class GroupChatCommand extends CommandBase {
+    String selectedGroup = null;
+    boolean confirmedLeave = false;
+    boolean confirmedDelete = false;
+    @Override
+    public String getCommandName() {
+        return "groupchat";
     }
 
-    @SubCommand(description = "Chat in a group chat.", aliases = "chat")
-    public void chat(String group, @Greedy String message) {
-        Socket.CLIENT.sendText(new Request(
-            "method", "groupChat",
-            "name", group,
-            "username", Minecraft.getMinecraft().thePlayer.getName(),
-            "serverId", Socket.serverId,
-            "message", message
-        ).toString());
-        Socket.awaiting.add(new DuoVariable<>("groupChat", jsonObject -> {
-            if (jsonObject.has("displayName")) return;
-            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
-        }));
+    @Override
+    public int getRequiredPermissionLevel() {
+        return 0;
     }
 
-    @SubCommand(description = "Create a group chat.", aliases = "create")
-    public void create(String name) {
-        Socket.CLIENT.sendText(new Request(
-            "method", "groupCreate",
-            "name", name,
-            "owner", Minecraft.getMinecraft().thePlayer.getName(),
-            "serverId", Socket.serverId
-        ).toString());
-        Socket.awaiting.add(new DuoVariable<>("groupCreate", jsonObject -> {
-            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
-        }));
+    @Override
+    public String getCommandUsage(ICommandSender sender) {
+        return "/groupchat";
     }
 
-    @SubCommand(description = "Set the settings of the group.", aliases = {"settings", "s"})
-    public void settings( String name, @Description(autoCompletesTo = {"allInvite", "silence", "filter", "private"}) String setting, @Description(autoCompletesTo = {"true", "false"}) String value) {
-        Socket.CLIENT.sendText(new Request(
-            "method", "groupSettings",
-            "name", name,
-            "username", Minecraft.getMinecraft().thePlayer.getName(),
-            "setting", setting,
-            "valuez", value,
-            "serverId", Socket.serverId
-        ).toString());
-        Socket.awaiting.add(new DuoVariable<>("groupSettings", jsonObject -> {
-            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
-        }));
+    @Override
+    public List<String> getCommandAliases() {
+        return Collections.singletonList("group");
     }
 
-    @SubCommand(description = "Demote a player in the group.", aliases = {"demote", "d"})
-    public void demote(String name, String player) {
-        Socket.CLIENT.sendText(new Request(
-            "method", "groupDemote",
-            "name", name,
-            "username", Minecraft.getMinecraft().thePlayer.getName(),
-            "player", player,
-            "serverId", Socket.serverId
-        ).toString());
-        Socket.awaiting.add(new DuoVariable<>("groupDemote", jsonObject -> {
-            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
-        }));
-    }
-
-    @SubCommand(description = "Disband a group.", aliases = {"disband", "dis"})
-    public void disband(String name) {
-        Socket.CLIENT.sendText(new Request(
-            "method", "groupDisband",
-            "name", name,
-            "username", Minecraft.getMinecraft().thePlayer.getName(),
-            "serverId", Socket.serverId
-        ).toString());
-        Socket.awaiting.add(new DuoVariable<>("groupDisband", jsonObject -> {
-            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
-        }));
-    }
-
-    @SubCommand(description = "Invite a player to a group chat.", aliases = {"invite", "i"})
-    public void invite(String name, String player) {
-        Socket.CLIENT.sendText(new Request(
-            "method", "groupInvite",
-            "name", name,
-            "username", Minecraft.getMinecraft().thePlayer.getName(),
-            "player", player,
-            "serverId", Socket.serverId
-        ).toString());
-        Socket.awaiting.add(new DuoVariable<>("groupInvite", jsonObject -> {
-            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
-        }));
-    }
-
-    @SubCommand(description = "Kick a player from a group chat.", aliases = {"kick", "k"})
-    public void kick(String name, String player, String reason) {
-        Socket.CLIENT.sendText(new Request(
-            "method", "groupKick",
-            "name", name,
-            "username", Minecraft.getMinecraft().thePlayer.getName(),
-            "player", player,
-            "reason", reason,
-            "serverId", Socket.serverId
-        ).toString());
-        Socket.awaiting.add(new DuoVariable<>("groupKick", jsonObject -> {
-            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
-        }));
-    }
-
-    @SubCommand(description = "Leave a group chat.", aliases = {"leave", "l"})
-    public void leave(String name) {
-        Socket.CLIENT.sendText(new Request(
-            "method", "groupLeave",
-            "name", name,
-            "username", Minecraft.getMinecraft().thePlayer.getName(),
-            "serverId", Socket.serverId
-        ).toString());
-        Socket.awaiting.add(new DuoVariable<>("groupLeave", jsonObject -> {
-            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
-        }));
-    }
-
-    @SubCommand(description = "Promote a player in the group.", aliases = {"promote", "p"})
-    public void promote(String name, String player) {
-        Socket.CLIENT.sendText(new Request(
-            "method", "groupPromote",
-            "name", name,
-            "username", Minecraft.getMinecraft().thePlayer.getName(),
-            "player", player,
-            "serverId", Socket.serverId
-        ).toString());
-        Socket.awaiting.add(new DuoVariable<>("groupPromote", jsonObject -> {
-            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
-        }));
-    }
-
-    @SubCommand(description = "Display online players in a group.", aliases = {"online", "o"})
-    public void online(String name) {
-        Socket.CLIENT.sendText(new Request(
-            "method", "groupOnline",
-            "name", name,
-            "username", Minecraft.getMinecraft().thePlayer.getName(),
-            "serverId", Socket.serverId
-        ).toString());
-        Socket.awaiting.add(new DuoVariable<>("groupOnline", jsonObject -> {
-            MUtils.chat(jsonObject.getString("message"));
-        }));
-    }
-
-    @SubCommand(description = "Renames a group.", aliases = {"rename", "r"})
-    public void rename(String name, String newName) {
-        Socket.CLIENT.sendText(new Request(
-            "method", "groupRename",
-            "name", name,
-            "username", Minecraft.getMinecraft().thePlayer.getName(),
-            "newName", newName,
-            "serverId", Socket.serverId
-        ).toString());
-        Socket.awaiting.add(new DuoVariable<>("groupRename", jsonObject -> {
-            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
-        }));
-    }
-
-    @SubCommand(aliases = {"transfer", "t"})
-    public void transfer(String name, String player) {
-        Socket.CLIENT.sendText(new Request(
-            "method", "groupTransfer",
-            "name", name,
-            "username", Minecraft.getMinecraft().thePlayer.getName(),
-            "player", player,
-            "serverId", Socket.serverId
-        ).toString());
-        Socket.awaiting.add(new DuoVariable<>("groupTransfer", jsonObject -> {
-            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
-        }));
-    }
-
-    @SubCommand(aliases = {"hide", "h"})
-    public void hide(String name) {
-        Socket.CLIENT.sendText(new Request(
-            "method", "groupHide",
-            "name", name,
-            "username", Minecraft.getMinecraft().thePlayer.getName(),
-            "serverId", Socket.serverId
-        ).toString());
-        Socket.awaiting.add(new DuoVariable<>("groupHide", jsonObject -> {
-            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
-            if (Hysentials.INSTANCE.isChatting) {
-                GroupChat.hideTab(name);
+    @Override
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
+        if (args.length == 0) {
+            UChat.chat(getHelp());
+            return;
+        }
+        String command = args[0];
+        if (command.equalsIgnoreCase("help")) {
+            UChat.chat(getHelp());
+            return;
+        }
+        args = Arrays.copyOfRange(args, 1, args.length);
+        switch (command) {
+            case "create": {
+                if (args.length < 1) {
+                    UChat.chat("§cUsage: /groupchat create [name]");
+                    return;
+                }
+                String name = args[0];
+                sendAction("create",
+                    "name", name
+                );
+                break;
             }
-        }));
+            case "invite": {
+                if (args.length < 2) {
+                    if (selectedGroup == null) {
+                        UChat.chat("§cUsage: /groupchat invite [name] <player>");
+                        return;
+                    }
+                    String player = args[0];
+                    sendAction("invite",
+                        "groupId", selectedGroup,
+                        "player", player
+                    );
+                    return;
+                }
+                String name = args[0];
+                HysentialsSchema.Group group = GroupUtils.getGroupByName(name);
+                if (group == null) {
+                    Hysentials.INSTANCE.sendMessage("§cGroup not found");
+                    return;
+                }
+                String player = args[1];
+                sendAction("invite",
+                    "groupId", group.getId(),
+                    "player", player
+                );
+                break;
+            }
+            case "join": {
+                if (args.length < 1) {
+                    UChat.chat("§cUsage: /groupchat join <groupid>");
+                    return;
+                }
+                String id = args[0];
+                sendAction("join",
+                    "groupId", id,
+                    "inviter", "todo",
+                    "inviterName", "todo"
+                );
+                break;
+            }
+            case "leave": {
+                if (args.length < 21) {
+                    if (selectedGroup == null) {
+                        UChat.chat("§cUsage: /groupchat leave [name]");
+                        return;
+                    }
+                    if (confirmedLeave) {
+                        confirmedLeave = false;
+                        sendAction("leave",
+                            "groupId", selectedGroup
+                        );
+                        selectedGroup = null;
+                        return;
+                    }
+                    confirmedLeave = true;
+                    UChat.chat("§cAre you sure you want to leave " + selectedGroup + "? Type §e/groupchat §cleave again to confirm.");
+                    Multithreading.runAsync(() -> {
+                        try {
+                            Thread.sleep(10000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        confirmedLeave = false;
+                    });
+                    return;
+                }
+                String name = args[0];
+                HysentialsSchema.Group group = GroupUtils.getGroupByName(name);
+                if (group == null) {
+                    Hysentials.INSTANCE.sendMessage("§cGroup not found");
+                    return;
+                }
+                sendAction("leave",
+                    "groupId", group.getId()
+                );
+                break;
+            }
+            case "delete": {
+                if (args.length < 1) {
+                    if (selectedGroup == null) {
+                        UChat.chat("§cUsage: /groupchat delete [name]");
+                        return;
+                    }
+                    if (confirmedDelete) {
+                        confirmedDelete = false;
+                        sendAction("delete",
+                            "groupId", selectedGroup
+                        );
+                        selectedGroup = null;
+                        return;
+                    }
+                    confirmedDelete = true;
+                    UChat.chat("§cAre you sure you want to delete " + selectedGroup + "? Type §e/groupchat delete §cagain to confirm.");
+                    Multithreading.runAsync(() -> {
+                        try {
+                            Thread.sleep(10000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        confirmedDelete = false;
+                    });
+                    return;
+                }
+                String name = args[0];
+                HysentialsSchema.Group group = GroupUtils.getGroupByName(name);
+                if (group == null) {
+                    Hysentials.INSTANCE.sendMessage("§cGroup not found");
+                    return;
+                }
+                if (confirmedDelete) {
+                    confirmedDelete = false;
+                    sendAction("delete",
+                        "groupId", group.getId()
+                    );
+                    selectedGroup = null;
+                    return;
+                }
+                confirmedDelete = true;
+                UChat.chat("§cAre you sure you want to delete " + name + "? Type §e/groupchat delete <name> §cagain to confirm.");
+                Multithreading.runAsync(() -> {
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    confirmedDelete = false;
+                });
+                break;
+            }
+            case "list": {
+                if (Socket.cachedGroups.isEmpty()) {
+                    Hysentials.INSTANCE.sendMessage("§cYou are not in any group chats or the cache is empty");
+                    return;
+                }
+                Hysentials.INSTANCE.sendMessage("&aYou are in the following group chats:");
+                for (HysentialsSchema.Group group : Socket.cachedGroups) {
+                    if (group.getOwner().equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString()))
+                        UChat.chat("   - &6" + group.getName() + " &7(" + group.getMembers().size() + " members)");
+                    else
+                        UChat.chat("   - &a" + group.getName() + " &7(" + group.getMembers().size() + " members)");
+                }
+                break;
+            }
+//            case "members": {
+//                HysentialsSchema.Group group = GroupUtils.getGroupById(selectedGroup);
+//                if (args.length > 0) {
+//                    group = GroupUtils.getGroupByName(args[0]);
+//                    if (group == null) {
+//                        Hysentials.INSTANCE.sendMessage("§cGroup not found");
+//                        return;
+//                    }
+//                }
+//                Hysentials.INSTANCE.sendMessage("&aMembers of " + group.getName() + ":");
+//                for (String member : group.getMembers()) {
+//
+//                }
+//
+//            }
+            case "message":
+            case "chat": {
+                if (args.length < 1) {
+                    UChat.chat("§cUsage: /groupchat chat <message>");
+                    return;
+                }
+                if (selectedGroup == null) {
+                    Hysentials.INSTANCE.sendMessage("§cYou do not have a group chat selected. Use §e/groupchat <name> §cto select a group chat.");
+                    return;
+                }
+                String message = String.join(" ", Arrays.copyOfRange(args, 0, args.length));
+                sendAction("message",
+                    "groupId", selectedGroup,
+                    "message", message
+                );
+                break;
+            }
+            case "settings": {
+                HysentialsSchema.Group group = GroupUtils.getGroupById(selectedGroup);
+                if (args.length > 0) {
+                    group = GroupUtils.getGroupByName(args[0]);
+                    if (group == null) {
+                        Hysentials.INSTANCE.sendMessage("§cGroup not found");
+                        return;
+                    }
+                    args = Arrays.copyOfRange(args, 1, args.length);
+                }
+                if (args.length < 2) {
+                    Hysentials.INSTANCE.sendMessage("§cUsage: /groupchat settings [name] <setting> <value>");
+                    return;
+                }
+                String setting = args[0];
+                if (Arrays.asList("allInvite", "saveLast").contains(setting)) {
+                    Hysentials.INSTANCE.sendMessage("§cYou cannot change this setting");
+                    return;
+                }
+                String value = args[1];
+                sendAction("settings",
+                    "groupId", group.getId(),
+                    "setting", setting,
+                    "value", value
+                );
+            }
+            default: {
+                HysentialsSchema.Group group = GroupUtils.getGroupByName(command);
+                if (group == null) {
+                    Hysentials.INSTANCE.sendMessage("§cGroup not found");
+                    return;
+                }
+                selectedGroup = group.getId();
+                Hysentials.INSTANCE.sendMessage("§aSelected group chat: " + group.getName());
+                break;
+            }
+        }
     }
 
-    @SubCommand(aliases = {"unhide", "uh"})
-    public void unhide(String name) {
+    public static void sendAction(String action, Object... args) {
         Socket.CLIENT.sendText(new Request(
-            "method", "groupUnhide",
-            "name", name,
-            "username", Minecraft.getMinecraft().thePlayer.getName(),
-            "serverId", Socket.serverId
+            "method", "group",
+            "action", action,
+            "uuid", Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString(),
+            "serverId", Socket.serverId,
+            args
         ).toString());
-        Socket.awaiting.add(new DuoVariable<>("groupUnhide", jsonObject -> {
-            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
-        }));
     }
 
-    @SubCommand(description = "Set the color of the groups prefix.", aliases = "color")
-    public void color( String name, String color) {
-        Socket.CLIENT.sendText(new Request(
-            "method", "groupColor",
-            "name", name,
-            "username", Minecraft.getMinecraft().thePlayer.getName(),
-            "color", color,
-            "serverId", Socket.serverId
-        ).toString());
-        Socket.awaiting.add(new DuoVariable<>("groupColor", jsonObject -> {
-            MUtils.chat(HysentialsConfig.chatPrefix + " " + jsonObject.getString("message"));
-        }));
+    private String getHelp() {
+         return "§9&m                                                               \n" +
+                "&aGroup Commands &c[BETA]\n" +
+                "§6/group <name> §7- Select a group chat\n" +
+                "§6/group help §7- Show this help message\n" +
+                "§6/group create <name> §7- Create a new group chat\n" +
+                "§6/group invite [name] <player> §7- Invite player to group\n" +
+                "§6/group join <name> §7- Join a group chat\n" +
+                "§6/group leave [name] §7- Leave a group chat\n" + //Require confirmation if name is not provided aka they have selected a group
+                "§6/group delete [name] §7- Delete a group chat\n" + //Require confirmation
+                "§6/group list §7- List all group chats that you are in\n" +
+                "§6/group chat <message> §7- Send a message to a group\n" +
+                "§9&m                                                               ";
+
     }
 }

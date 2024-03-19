@@ -60,9 +60,8 @@ public class ReplaceConfig extends Config {
     )
     public List<ReplaceStuff> clubReplacements = new ArrayList<>();
 
-    //, "/assets/hysentials/mods/cosmetics.png", 244, 80
     public ReplaceConfig() {
-        super(new Mod("Replace", ModType.UTIL_QOL), "hysentials-replace.json", true, false);
+        super(new Mod("Replace", ModType.UTIL_QOL, "/assets/hysentials/mods/replace.png", 244, 80), "hysentials-replace.json", true, false);
         initialize();
     }
 

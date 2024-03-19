@@ -6,6 +6,7 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.Greedy;
 import llc.redstone.hysentials.HysentialsUtilsKt;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.util.BlockWAPIUtils;
+import llc.redstone.hysentials.util.DuoVariable;
 import llc.redstone.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
@@ -55,10 +56,10 @@ import static llc.redstone.hysentials.handlers.redworks.BwRanks.randomString;
         "&e/club list &7- &bList all players in your club.",
         "&e/club house <index> help &7- &bManage your club houses.",
         "§9&m                                                        "
-    })
+    }, aliases = {"clubs"})
 public class ClubCommand {
     @SubCommand(aliases = {"create"}, description = "Create a club")
-    public void create(String name) {
+    public void create(@Greedy String name) {
         if (!Socket.linked) {
             UChat.chat("&cYou must be linked to a discord account to use this feature.");
             return;
@@ -99,6 +100,16 @@ public class ClubCommand {
             "uuid", Minecraft.getMinecraft().getSession().getProfile().getId(),
             "serverId", Socket.serverId
         ).toString());
+        Socket.awaiting.add(
+            new DuoVariable<>("clubAccept", (json) -> {
+                if (json.getBoolean("success")) {
+                    MUtils.chat(HysentialsConfig.chatPrefix + " &aSuccessfully joined " + name + "!");
+                } else {
+                    MUtils.chat(HysentialsConfig.chatPrefix + " &cFailed to join " + name + "!");
+                    MUtils.chat("   - &c" + json.getString("message"));
+                }
+            })
+        );
     }
 
     @SubCommand(aliases = {"house"})

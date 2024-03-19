@@ -2,12 +2,14 @@ package llc.redstone.hysentials.guis.club;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.HysentialsUtilsKt;
+import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.schema.HysentialsSchema.Club;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.guis.container.Container;
 import llc.redstone.hysentials.guis.container.GuiItem;
+import llc.redstone.hysentials.util.MUtils;
 import llc.redstone.hysentials.util.Material;
 import llc.redstone.hysentials.websocket.Socket;
 import com.google.gson.JsonObject;
@@ -263,9 +265,11 @@ public class ClubDashboard extends Container {
             String s = IOUtils.toString(input);
             JSONObject object = new JSONObject(s);
             System.out.println(object.toString());
-            if (!object.getBoolean("success")) {
-                UChat.chat("&c" + object.getString("message"));
-                return;
+            if (json.getBoolean("success")) {
+                MUtils.chat(HysentialsConfig.chatPrefix + " " + (json.has("message") ? json.getString("message") : "Successfully updated club!"));
+            } else {
+                MUtils.chat(HysentialsConfig.chatPrefix + " &cFailed to update club!");
+                MUtils.chat("   - &c" + json.getString("message"));
             }
         } catch (Exception e) {
             e.printStackTrace();

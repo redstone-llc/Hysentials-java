@@ -159,6 +159,61 @@ public class Renderer {
         finishDraw();
     }
 
+    public static void drawRect(float x, float y, float width, float height) {
+        float[] pos = {x, y, x + width, y + height};
+        if (pos[0] > pos[2])
+            Collections.swap(Arrays.asList(pos), 0, 2);
+        if (pos[1] > pos[3])
+            Collections.swap(Arrays.asList(pos), 1, 3);
+
+        GlStateManager.enableBlend();
+        GlStateManager.disableTexture2D();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+
+        worldRenderer.begin(drawMode != null ? Math.toIntExact(drawMode) : 7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos((double) pos[0], (double) pos[3], 0.0).endVertex();
+        worldRenderer.pos((double) pos[2], (double) pos[3], 0.0).endVertex();
+        worldRenderer.pos((double) pos[2], (double) pos[1], 0.0).endVertex();
+        worldRenderer.pos((double) pos[0], (double) pos[1], 0.0).endVertex();
+
+        tessellator.draw();
+
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+    }
+
+    public static void drawGradientRect(int zLevel, int left, int top, int right, int bottom, int startColor, int endColor)
+    {
+        float startAlpha = (float)(startColor >> 24 & 255) / 255.0F;
+        float startRed = (float)(startColor >> 16 & 255) / 255.0F;
+        float startGreen = (float)(startColor >> 8 & 255) / 255.0F;
+        float startBlue = (float)(startColor & 255) / 255.0F;
+        float endAlpha = (float)(endColor >> 24 & 255) / 255.0F;
+        float endRed = (float)(endColor >> 16 & 255) / 255.0F;
+        float endGreen = (float)(endColor >> 8 & 255) / 255.0F;
+        float endBlue = (float)(endColor & 255) / 255.0F;
+
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableBlend();
+        GlStateManager.disableAlpha();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.shadeModel(7425);
+
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        worldrenderer.pos(right, top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        worldrenderer.pos(left, top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        worldrenderer.pos(left, bottom, zLevel).color(endRed, endGreen, endBlue, endAlpha).endVertex();
+        worldrenderer.pos(right, bottom, zLevel).color(endRed, endGreen, endBlue, endAlpha).endVertex();
+        tessellator.draw();
+
+        GlStateManager.shadeModel(7424);
+        GlStateManager.disableBlend();
+        GlStateManager.enableAlpha();
+        GlStateManager.enableTexture2D();
+    }
+
     public static void drawImage(ITextureObject image, double x, double y, double width, double height) {
         if (colorized == null)
             GlStateManager.color(1f, 1f, 1f, 1f);

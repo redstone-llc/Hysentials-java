@@ -35,15 +35,7 @@ public class BwRanksUtils {
         }
 
         try {
-            BlockWAPIUtils.Rank rank = null;
-            if (Socket.cachedUsers.stream().anyMatch(u -> u.getString("uuid").equals(uuid.toString()))) {
-                String r = Socket.cachedUsers.stream().filter(u -> u.getString("uuid").equals(uuid.toString())).findFirst().get().getString("rank");
-                if (r != null) {
-                    rank = BlockWAPIUtils.Rank.valueOf(r.toUpperCase());
-                }
-            } else {
-                rank = BlockWAPIUtils.getRank(uuid);
-            }
+            BlockWAPIUtils.Rank rank = BlockWAPIUtils.getRank(uuid);
             String regex1 = "\\[[A-Za-z§0-9+]+] " + name;
             String regex2 = "(§r§7|§7)" + name;
 

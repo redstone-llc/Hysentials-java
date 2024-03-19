@@ -199,9 +199,13 @@ public class HysentialsConfig extends Config {
                     file.getString("url")
                 );
                 UpdateNotes notes = new UpdateNotes(
-                    file.getString("filename"),
+                    "Install Hytils Reborn",
+                    json2.getString("name").replace("Hytils Reborn-1.8.9-", ""),
                     "https://cdn.modrinth.com/data/nF6YaBfO/5de4ce522bbc4af9229018cbaeefb117ec458648.png",
-                    json2.getString("changelog")
+                    json2.getString("changelog") + "\n\n" +
+                        "Hytils Reborn is not affiliated with Hysentials, and is a separate mod. \n" +
+                        "However we do recommend using it for the best experience. \n" +
+                        "Created by Polyfrost and their team."
                 );
 
                 UpdateChecker.Companion.installFromUrl(repo, notes);

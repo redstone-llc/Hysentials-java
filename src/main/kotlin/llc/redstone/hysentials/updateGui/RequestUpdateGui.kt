@@ -1,25 +1,18 @@
 package llc.redstone.hysentials.updateGui
 
-import cc.polyfrost.oneconfig.libs.universal.ChatColor
+import cc.polyfrost.oneconfig.gui.elements.BasicElement
+import cc.polyfrost.oneconfig.libs.universal.UResolution.scaleFactor
+import cc.polyfrost.oneconfig.renderer.NanoVGHelper
+import cc.polyfrost.oneconfig.renderer.asset.Image
+import cc.polyfrost.oneconfig.renderer.asset.SVG
+import cc.polyfrost.oneconfig.renderer.font.Fonts
+import cc.polyfrost.oneconfig.utils.InputHandler
 import llc.redstone.hysentials.Hysentials
-import llc.redstone.hysentials.guis.container.GuiItem
-import llc.redstone.hysentials.util.ImageIconRenderer
 import llc.redstone.hysentials.util.Renderer
-import llc.redstone.hysentials.util.Renderer.Frame
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.*
-import net.minecraft.client.renderer.GlStateManager
-import net.minecraft.client.renderer.OpenGlHelper
-import net.minecraft.client.renderer.texture.TextureUtil
-import net.minecraft.client.shader.Framebuffer
-import net.minecraft.util.ResourceLocation
-import org.lwjgl.BufferUtils
-import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL12
-import java.awt.image.BufferedImage
-import java.io.IOException
-import java.net.URL
-import javax.imageio.ImageIO
+import net.minecraft.client.gui.GuiMainMenu
+import net.minecraft.client.gui.GuiScreen
+import java.awt.Color
 
 
 class RequestUpdateGui(private var inGame: Boolean, private var deleteOld: Boolean = false) : GuiScreen() {
@@ -29,19 +22,10 @@ class RequestUpdateGui(private var inGame: Boolean, private var deleteOld: Boole
 
     private var xSize = 367
     private var ySize = 460
-    var scale = 1.0f
     private var guiLeft = 0
     private var guiTop = 0
-    var textureManager = Minecraft.getMinecraft().textureManager
-    var titleImage: Frame? = null
-    var updateImage: Frame? = null
-    var updateNote: Frame? = null
-    var background = ResourceLocation("hysentials:gui/updateBackground.png")
-    var button1 = ResourceLocation("hysentials:gui/updateButton.png")
-    var button2 = ResourceLocation("hysentials:gui/UpdateLaterButton.png")
 
-    var fontRenderer: ImageIconRenderer? = Hysentials.INSTANCE.imageIconRenderer
-    var fontRendererObj: FontRenderer = Minecraft.getMinecraft().fontRendererObj
+
     val updateObj = UpdateChecker.updateGetter.updateObj ?: error("Update object is null")
     val updateNotes = UpdateChecker.updateGetter.updateNotes
 
@@ -51,134 +35,150 @@ class RequestUpdateGui(private var inGame: Boolean, private var deleteOld: Boole
     }
 
     fun drawScreenExternal(mouseX: Int, mouseY: Int, partialTicks: Float) {
-        GlStateManager.pushMatrix()
+        NanoVGHelper.INSTANCE.setupAndDraw(true) {
+            val nano = NanoVGHelper.INSTANCE
+            val inputHandler = InputHandler()
+            inputHandler.scale(scaleFactor, scaleFactor)
 
-        drawGradientRect(0, 0, width, height, -1072689136, -804253680)
-        try {
-            Renderer.translate(guiLeft.toDouble(), guiTop.toDouble(), 0.0)
+            val x = guiLeft
+            val y = guiTop
+            val width = xSize
+            val height = ySize
 
-            Renderer.drawImage(
-                background,
-                0.0,
-                0.0,
-                xSize.toDouble(),
-                ySize.toDouble()
+
+            nano.drawImage(
+                it,
+                Image("/assets/hysentials/gui/updater/background.png"),
+                x.toFloat(),
+                y.toFloat(),
+                width.toFloat(),
+                height.toFloat()
             )
 
-            Renderer.drawTextCenteredScaled(
-                "§f" + updateObj.name.replace(".jar", "").replace("Hysentials-", "Hysentials ") + " Update",
-                0f,
-                4f,
-                xSize.toFloat(),
-                33f,
-                1.5f
+            //Title: 35, 31 to 331, 60
+            var title = "Hysentials Update Available"
+            if (updateNotes?.name != null) {
+                title = updateNotes.name
+            }
+            nano.drawText(
+                it,
+                title,
+                x + 35f + (294f - nano.getTextWidth(it, title, 16f, Fonts.MINECRAFT_REGULAR)) / 2,
+                y + 31f + 15f,
+                Color(255, 255, 255, 255).rgb,
+                16f,
+                Fonts.MINECRAFT_REGULAR
+            )
+            //Version: 15, 76 to 94, 95
+            val version = updateObj.name.substringAfter("Hysentials-").substringBefore(".jar")
+            if (version.length > 15) {
+                nano.drawText(
+                    it,
+                    version,
+                    x + 15f + (80f - nano.getTextWidth(it, version, 8F, Fonts.MINECRAFT_REGULAR)) / 2,
+                    y + 76f + 10f,
+                    Color(255, 255, 255, 255).rgb,
+                    8F,
+                    Fonts.MINECRAFT_REGULAR
+                )
+            } else {
+                nano.drawText(
+                    it,
+                    version,
+                    x + 15f + (80f - nano.getTextWidth(it, version, 12F, Fonts.MINECRAFT_REGULAR)) / 2,
+                    y + 76f + 10f,
+                    Color(255, 255, 255, 255).rgb,
+                    12F,
+                    Fonts.MINECRAFT_REGULAR
+                )
+            }
+
+            if (inputHandler.isAreaHovered(x + 334f, y + 34f, 23f, 23f) && inputHandler.isMouseDown(0)) {
+                UpdateChecker.updateGetter.updateObj = null
+                if (!inGame) {
+                    Minecraft.getMinecraft().displayGuiScreen(GuiMainMenu())
+                } else {
+                    Minecraft.getMinecraft().thePlayer.closeScreen()
+                }
+            }
+
+            val notes = updateNotes?.notes ?: ("• Fixed me being dumb.\n" +
+                    "• Added Cosmetic gui. (default keybind K)\n" +
+                    "• Fixed auto updater not working.\n" +
+                    "• Fixed jar becoming way too large because of a library I added, but didn't really need.\n" +
+                    "• Started preparations for something big.\n" +
+                    "• Hysentials Level system using /hs level (we will go more in depth as to how this works soon)\n" +
+                    "• And more!")
+            nano.drawWrappedString(
+                it,
+                notes,
+                x + 20f,
+                y + 220f,
+                330f,
+                Color(255, 255, 255, 255).rgb,
+                12f,
+                Fonts.MINECRAFT_REGULAR
             )
 
-            if (updateImage != null) {
-                Renderer.drawFrameCentered(
-                    updateImage,
-                    xSize.toDouble(),
-                    123.0,
-                    219.0,
-                    123.0,
-                    0.0,
-                    49.0
-                )
+            //Update/Install Button
+            val textUpdate = if (deleteOld) "Update" else "Install"
+            val widthUpdates = 354f / 2 - 5
+            var hover = inputHandler.isAreaHovered(x + 6f, y + 382f, widthUpdates, 46f)
+            nano.drawSvg(
+                it,
+                if (!hover) SVG("/assets/hysentials/gui/updater/button.svg") else SVG("/assets/hysentials/gui/updater/buttonPressed.svg"),
+                x + 6f,
+                y + 382f,
+                widthUpdates, // there are supposed to be 2 buttons within this width but I'm not sure how to do that
+                46f
+            )
+            nano.drawText(
+                it,
+                textUpdate,
+                x + 6f + (widthUpdates - nano.getTextWidth(it, textUpdate, 16f, Fonts.MINECRAFT_REGULAR)) / 2,
+                y + 382f + 23f,
+                Color(41, 44, 45, 255).rgb,
+                16f,
+                Fonts.MINECRAFT_REGULAR
+            )
+
+            if (inputHandler.isAreaHovered(x + 6f, y + 382f, widthUpdates, 46f) && inputHandler.isMouseDown(0)) {
+                Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(UpdateGui(true, deleteOld))
             }
 
-            var notes = updateNotes?.notes ?: "No update notes"
-            notes = notes.replace("\n", " /newline ")
-            notes = notes.replace("\\n", " /newline ")
-            GuiItem.stringToLore(notes, 60, ChatColor.WHITE).forEachIndexed { index, s ->
-                if (s == "/newline") {
-                    return@forEachIndexed
-                }
-                if (index > 16) {
-                    return@forEachIndexed
-                }
-                Renderer.drawText(
-                    s,
-                    12f,
-                    192f + (index * 10)
-                )
-            }
+            //Update Later/Install Later Button
+            val textLater = if (deleteOld) "Update Later" else "Install Later"
+            hover = inputHandler.isAreaHovered(x + 6f + 354f / 2 + 5, y + 382f, widthUpdates, 46f)
+            nano.drawSvg(
+                it,
+                if (!hover) SVG("/assets/hysentials/gui/updater/button.svg") else SVG("/assets/hysentials/gui/updater/buttonPressed.svg"),
+                x + 6f + 354f / 2 + 5,
+                y + 382f,
+                widthUpdates, // there are supposed to be 2 buttons within this width but I'm not sure how to do that
+                46f
+            )
+            nano.drawText(
+                it,
+                textLater,
+                x + 6f + 354f / 2 + 5 + (widthUpdates - nano.getTextWidth(it, textLater, 16f, Fonts.MINECRAFT_REGULAR)) / 2,
+                y + 382f + 23f,
+                Color(41, 44, 45, 255).rgb,
+                16f,
+                Fonts.MINECRAFT_REGULAR
+            )
 
-            var relativeX = ((mouseX - guiLeft))
-            var relativeY = ((mouseY - guiTop))
-
-            if (relativeX in 12..176 && relativeY in 408..443) {
-                Renderer.drawImage(
-                    button1,
-                    (12).toDouble(),
-                    (408).toDouble(),
-                    165.0,
-                    40.0
-                )
+            if (inputHandler.isAreaHovered(x + 6f + 354f / 2 + 5, y + 382f, widthUpdates, 46f) && inputHandler.isMouseDown(0)) {
+                Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(UpdateGui(false, deleteOld))
             }
-
-            if (relativeX in 190..354 && relativeY in 408..443) {
-                Renderer.drawImage(
-                    button2,
-                    (190).toDouble(),
-                    (408).toDouble(),
-                    165.0,
-                    40.0
-                )
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
-        Renderer.untranslate(0.0, 0.0, 0.0)
-        GlStateManager.popMatrix()
     }
 
     override fun initGui() {
         super.initGui()
 
-        try {
-            updateImage = if (updateNotes?.image != null) {
-                Frame(ImageIO.read(URL(updateNotes.image)))
-            } else if (updateNotes != null) {
-                Frame(ResourceLocation("hysentials:gui/updater_background.png"))
-            } else {
-                Frame(ResourceLocation("hysentials:gui/updater_background.png"))
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
+        instance = this
 
-        scale = (Renderer.screen.getHeight() / 500f)
         guiLeft = (Renderer.screen.getWidth() - xSize) / 2
         guiTop = (Renderer.screen.getHeight() - ySize) / 2
-
-        if (guiTop < 0) {
-            guiTop = 20
-        }
-        instance = this
-    }
-
-    override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
-        mouseClickExternal(mouseX, mouseY, mouseButton)
-    }
-
-    fun mouseClickExternal(mouseX: Int, mouseY: Int, mouseButton: Int) {
-        var relativeX = ((mouseX - guiLeft))
-        var relativeY = ((mouseY - guiTop))
-        if (relativeX in 340..353 && relativeY in 13..26) {
-            UpdateChecker.updateGetter.updateObj = null
-            if (!inGame) {
-                Minecraft.getMinecraft().displayGuiScreen(GuiMainMenu())
-            } else {
-                Minecraft.getMinecraft().thePlayer.closeScreen()
-            }
-        }
-
-        if (relativeX in 12..176 && relativeY in 408..443) {
-            Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(UpdateGui(true, deleteOld))
-        }
-
-        if (relativeX in 190..354 && relativeY in 408..443) {
-            Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(UpdateGui(false, deleteOld))
-        }
     }
 }

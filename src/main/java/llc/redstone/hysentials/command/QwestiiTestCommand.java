@@ -22,7 +22,7 @@ public class QwestiiTestCommand extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/qwestiitest";
+        return "/ignite";
     }
 
     @Override
@@ -44,5 +44,5 @@ public class QwestiiTestCommand extends CommandBase {
             } catch (InterruptedException ignored) {
             }
         });
-    } //
-} //
+    }
+}

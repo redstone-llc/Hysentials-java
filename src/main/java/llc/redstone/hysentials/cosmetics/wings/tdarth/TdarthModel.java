@@ -103,15 +103,15 @@ public class TdarthModel extends ModelBase {
         rightAnimation = new Animation(
             right,
             Arrays.asList(
-                Keyframe.create(0.0, 0.0, 0.0, 0.0, -45.0, 0.0, -35.0),
-                Keyframe.create(1.0, 0.0, 0.0, 0.0, -45.0, 0.0, 35.0),
-                Keyframe.create(2.0, 0.0, 0.0, 0.0, -45.0, 0.0, -35.0)
+                Keyframe.create(0.0, 0.0, 0.0, 0.0, -73.8265F, 21.6937F, -28.8809F),
+                Keyframe.create(1.0, 0.0, 0.0, 0.0, -69.2464F, 43.0795F, 49.5108F),
+                Keyframe.create(2.0, 0.0, 0.0, 0.0, -73.8265F, 21.6937F, -28.8809F)
             ),
             Arrays.asList(
                 new Animation(rr, Arrays.asList(
-                    Keyframe.create(0.1667, 0.0, 0.0, 0.0, 0.0, 0.0, -30.0),
-                    Keyframe.create(1.1667, 0.0, 0.0, 0.0, 0.0, 0.0, 30.0),
-                    Keyframe.create(2.1667, 0.0, 0.0, 0.0, 0.0, 0.0, -30.0)
+                    Keyframe.create(0.1667, 0.0, 0.0, 0.0, 0.0F, 0.0F, -60.0F),
+                    Keyframe.create(1.1667, 0.0, 0.0, 0.0, 0.0F, 0.0F, 30.0F),
+                    Keyframe.create(2.1667, 0.0, 0.0, 0.0, 0.0F, 0.0F, -60.0F)
                 ), null)
             )
         );
@@ -119,15 +119,15 @@ public class TdarthModel extends ModelBase {
         leftAnimation = new Animation(
             left,
             Arrays.asList(
-                Keyframe.create(0.0, 0.0, 0.0, 0.0, -45.0, 0.0, 35.0),
-                Keyframe.create(1.0, 0.0, 0.0, 0.0, -45.0, 0.0, -35.0),
-                Keyframe.create(2.0, 0.0, 0.0, 0.0, -45.0, 0.0, 35.0)
+                Keyframe.create(0.0, 0.0, 0.0, 0.0, -73.8265F, -21.6937F, 28.8809F),
+                Keyframe.create(1.0, 0.0, 0.0, 0.0, -69.2464F, -43.0795F, -49.5108F),
+                Keyframe.create(2.0, 0.0, 0.0, 0.0, -73.8265F, -21.6937F, 28.8809F)
             ),
             Arrays.asList(
                 new Animation(ll, Arrays.asList(
-                    Keyframe.create(0.1667, 0.0, 0.0, 0.0, 0.0, 0.0, 30.0),
+                    Keyframe.create(0.1667, 0.0, 0.0, 0.0, 0.0F, 0.0F, 60.0F),
                     Keyframe.create(1.1667, 0.0, 0.0, 0.0, 0.0, 0.0, -30.0),
-                    Keyframe.create(2.1667, 0.0, 0.0, 0.0, 0.0, 0.0, 30.0)
+                    Keyframe.create(2.1667, 0.0, 0.0, 0.0, 0.0F, 0.0F, 60.0F)
                 ), null)
             )
         );

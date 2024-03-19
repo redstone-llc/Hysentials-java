@@ -2,6 +2,7 @@ package llc.redstone.hysentials.handlers.chat.modules.bwranks;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import llc.redstone.hysentials.config.hysentialMods.ChatConfig;
 import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
 import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
@@ -60,6 +61,10 @@ public class BWSReplace implements ChatReceiveModule {
             event.setCanceled(true);
             return;
         }
+        if (GuildFormatter.checkMessage(event)) {
+            event.setCanceled(true);
+            return;
+        }
         if (checkRegexes(event)) {
             event.setCanceled(true);
             return;
@@ -107,6 +112,26 @@ public class BWSReplace implements ChatReceiveModule {
                 if ((s.startsWith("§7") || s.startsWith("§f")) && blockwRank != null && uuidBold != null) {
                     s = s.replaceFirst("(§7|§f)", blockwRank.getChat() + italic(uuidBold) + bold(uuidBold));
                 }
+                Pattern p = Pattern.compile("(§[0-9a-fk-or])\\[(\\d+)(.)] ");
+                Pattern p2 = Pattern.compile("(§[0-9a-fk-or])\\[(.+)(.)§[0-9a-fk-or]] ");
+                //We don't care about multicolored ones just yet
+                Matcher m1 = p.matcher(s);
+                Matcher m2 = p2.matcher(s);
+                boolean found = m1.find();
+                if (found || m2.find()){
+                    Matcher m = found ? m1 : m2;
+                    String color = C.toHex(m.group(1)).replace("#", "");
+                    String num = C.removeColor(m.group(2));
+                    String symbol = m.group(3);
+                    if (ChatConfig.levelPrefixColors) {
+                        s = s.replaceFirst("(§[0-9a-fk-or])\\[(\\d+)(.)] ", "<" + color + ":" + num + ">");
+                    } else {
+                        //Else then §8
+                        String hex = ChatConfig.defaultLevelColor.getHex();
+                        hex = hex.replace("#", "");
+                        s = s.replaceFirst("(§[0-9a-fk-or])\\[(\\d+)(.)] ", "<" + hex + ":" + num + ">");
+                    }
+                }
             }
             diagnostics.add("Starting loop for players...");
             long start2 = System.currentTimeMillis();
@@ -115,15 +140,7 @@ public class BWSReplace implements ChatReceiveModule {
                 UUID uuid = user.getValue();
                 if (uuid.equals(UUID.fromString("00000000-0000-0000-0000-000000000000"))) continue;
                 try {
-                    BlockWAPIUtils.Rank rank = null;
-                    if (Socket.cachedUsers.stream().anyMatch(u -> u.getString("uuid").equals(uuid.toString()))) {
-                        String r = Socket.cachedUsers.stream().filter(u -> u.getString("uuid").equals(uuid.toString())).findFirst().get().getString("rank");
-                        if (r != null) {
-                            rank = BlockWAPIUtils.Rank.valueOf(r.toUpperCase());
-                        }
-                    } else {
-                        rank = BlockWAPIUtils.getRank(uuid);
-                    }
+                    BlockWAPIUtils.Rank rank = BlockWAPIUtils.getRank(uuid);
                     String regex1 = "\\[[A-Za-z§0-9+]+] " + name;
                     String regex2 = "(§r§7|§7)" + name;
                     if (rank != null && rank != BlockWAPIUtils.Rank.DEFAULT) {
@@ -157,6 +174,7 @@ public class BWSReplace implements ChatReceiveModule {
                         if (futuristic) {
                             Matcher m1 = Pattern.compile(regex1).matcher(s);
                             Matcher m2 = Pattern.compile(regex2).matcher(s);
+
                             if (m1.find(0)) {
                                 Object[] replacement = getReplacement(m1.group(0).split(" ")[0], name, uuid, false, false);
                                 HypixelRanks r = (HypixelRanks) replacement[1];
@@ -238,42 +256,10 @@ public class BWSReplace implements ChatReceiveModule {
         return italic ? "§o" : "";
     }
 
-    public static String capitalizeFirst(String string) {
-        return string.substring(0, 1).toUpperCase() + string.substring(1);
-    }
-
-    boolean lineSeperator = false;
-    List<String> middle = new ArrayList<>();
-    List<UTextComponent> components = new ArrayList<>();
-
     public boolean checkRegexes(ClientChatReceivedEvent event) {
         boolean futuristic = Hysentials.INSTANCE.getConfig().formattingConfig.enabled && FormattingConfig.fancyRankInChat && FormattingConfig.futuristicRanks;
         if (!futuristic) return false;
         String msg = event.message.getFormattedText().replaceAll("§r", "");
-
-        Pattern guildPattern = Pattern.compile("§2Guild > (§[0-9a-fk-or].+ |§[0-9a-fk-or])(.+)()§[f7]: (.+)");
-        Pattern guildPattern2 = Pattern.compile("§2Guild > (§[0-9a-fk-or].+ |§[0-9a-fk-or])(.+)( §[0-9a-fk-or].+)§[f7]: (.+)");
-        Matcher guildMatcher = guildPattern.matcher(event.message.getFormattedText().replaceAll("§r", ""));
-        Matcher guildMatcher2 = guildPattern2.matcher(event.message.getFormattedText().replaceAll("§r", ""));
-        boolean guildMatch = guildMatcher.find();
-        boolean guildMatch2 = guildMatcher2.find();
-        if (guildMatch2 || guildMatch) {
-            Matcher m = guildMatch2 ? guildMatcher2 : guildMatcher;
-            Multithreading.runAsync(() -> {
-                try {
-                    String name = m.group(2);
-                    String prefix = m.group(1);
-                    String tag = m.group(3);
-                    String message = m.group(4);
-//                    MUtils.chat(":guild: " + replacement[0].toString() + chat + ": " + message);
-                    MUtils.chat(":guild: &2" + name + tag + "<#c6f5c0>" + ": " + message);
-                } catch (Exception e) {
-                    System.out.println("Error in guild chat\n" + e.getMessage());
-                    e.printStackTrace();
-                }
-            });
-            return true;
-        }
 
         Pattern messageRegex = Pattern.compile("§d(To|From) (§[0-9a-fk-or].+ |§[0-9a-fk-or])(.+)§7: (.+)");
         Matcher messageMatcher = messageRegex.matcher(event.message.getFormattedText().replaceAll("§r", ""));
@@ -315,9 +301,9 @@ public class BWSReplace implements ChatReceiveModule {
             if (type.equals("§aFriend")) {
                 type = ":friend:<#79d930>";
             } else {
-                type = ":guild:&2";
+                type = GuildFormatter.prefix() + "&2";
             }
-            MUtils.chat(type + " " + name.substring(2) + " §e" + action + ".");
+            UChat.chat(type + " " + name.substring(2) + " §e" + action + ".");
             event.setCanceled(true);
             return true;
         }

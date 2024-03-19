@@ -39,9 +39,8 @@ public class IconsConfig extends Config {
     )
     public List<IconStuff> icons = getIcons();
 
-    //, "/assets/hysentials/mods/cosmetics.png", 244, 80
     public IconsConfig() {
-        super(new Mod("Icons", ModType.UTIL_QOL), "hysentials-icons.json", true, false);
+        super(new Mod("Icons", ModType.UTIL_QOL, "/assets/hysentials/mods/icons.png", 244, 80), "hysentials-icons.json", true, false);
         initialize();
 
         for (IconStuff icon : getIcons()) {

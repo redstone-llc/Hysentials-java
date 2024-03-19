@@ -23,6 +23,7 @@ import llc.redstone.hysentials.guis.misc.HysentialsLevel;
 import llc.redstone.hysentials.handlers.chat.modules.bwranks.BWSReplace;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.util.*;
+import llc.redstone.hysentials.websocket.methods.Group;
 import net.minecraft.client.Minecraft;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
@@ -49,9 +50,9 @@ public class Socket {
     public static HysentialsSchema.AuthUser user;
     //Client's player data (levels, ranks, etc)
     public static HysentialsSchema.User cachedUser = null;
-    public static List<JSONObject> cachedUsers = new ArrayList<>(); //TODO: Remove all of the old standards
     //All online hysentials users
     public static HashMap<String, HysentialsSchema.User> cachedUsersNew = new HashMap<>();
+    public static List<HysentialsSchema.Group> cachedGroups = new ArrayList<>();
     public static JSONObject cachedRewards = new JSONObject();
     public static JSONObject cachedServerData = new JSONObject();
     public static String serverId;
@@ -70,6 +71,7 @@ public class Socket {
     public static void init() {
         //TODO: Move all of the websocket parts to separate classes
         new DoorbellAuthenticate();
+        new Group();
     }
 
     public static void createSocket() {
@@ -227,8 +229,8 @@ public class Socket {
                                 }
 
                                 Socket.cachedUsersNew.clear();
-                                Socket.cachedUsers.clear();
                                 Socket.cachedUser = null;
+                                Socket.cachedGroups.clear();
                                 break;
                             }
                             case "data": {
@@ -243,10 +245,11 @@ public class Socket {
                                     cachedUsersNew.put(((JSONObject) o).getString("uuid"), HysentialsSchema.User.Companion.deserialize(jsonParser.parse(o.toString()).getAsJsonObject()));
                                 }
 
-                                cachedUsers = new ArrayList<>();
-                                for (Object o : toList(json.getJSONArray("users"))) {
-                                    cachedUsers.add((JSONObject) o);
+                                cachedGroups.clear();
+                                for (Object o : toList(json.getJSONArray("groups"))) {
+                                    cachedGroups.add(HysentialsSchema.Group.Companion.deserialize(jsonParser.parse(o.toString()).getAsJsonObject()));
                                 }
+
                                 break;
                             }
                             case "chat": {
@@ -351,6 +354,7 @@ public class Socket {
 
                     for (Channel channel : Channel.Companion.getChannels().values()) {
                         if (channel.getName().equals(json.getString("method"))) {
+                            System.out.println("Received message from channel: " + channel.getName());
                             channel.onReceive(new JsonParser().parse(json.toString()).getAsJsonObject());
                         }
                     }

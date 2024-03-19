@@ -23,6 +23,7 @@ import llc.redstone.hysentials.cosmetics.wings.tdarth.TdarthCosmetic;
 import llc.redstone.hysentials.guis.club.ClubDashboardHandler;
 import llc.redstone.hysentials.guis.container.ContainerHandler;
 import llc.redstone.hysentials.handlers.chat.modules.misc.Limit256;
+import llc.redstone.hysentials.handlers.groupchats.GlobalChat;
 import llc.redstone.hysentials.handlers.groupchats.GroupChat;
 import llc.redstone.hysentials.handlers.guis.GuiScreenPost;
 import llc.redstone.hysentials.handlers.htsl.*;
@@ -187,7 +188,6 @@ public class Hysentials {
         Socket.init();
         Socket.createSocket();
 
-        CommandManager.INSTANCE.registerCommand(new GroupChatCommand());
         commands = new ArrayList<>();
         commands.add(new HysentialsCommand());
         commands.add(new GlobalChatCommand());
@@ -206,6 +206,8 @@ public class Hysentials {
         commands.add(new SetTextureCommand());
         commands.add(new HymojiCommand());
         commands.add(new ClaimCommand());
+        commands.add(new GroupChatCommand());
+
         for (ICommand command : commands) {
             ClientCommandHandler.instance.registerCommand(command);
         }
@@ -304,6 +306,7 @@ public class Hysentials {
         new ImageIcon("from", new ResourceLocation("textures/icons/from.png"));
         new ImageIcon("team", new ResourceLocation("textures/icons/team.png"));
         new ImageIcon("friend", new ResourceLocation("textures/icons/friend.png"));
+        new ImageIcon("sys_error", new ResourceLocation("textures/icons/sys_error.png"));
 
         new ImageIcon("common", new ResourceLocation("textures/icons/common.png"));
         new ImageIcon("rare", new ResourceLocation("textures/icons/rare.png"));
@@ -402,6 +405,7 @@ public class Hysentials {
             try {
                 if (isChatting) {
                     eventBus.register(new GroupChat());
+                    eventBus.register(new GlobalChat());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -456,7 +460,7 @@ public class Hysentials {
 
             EventManager.INSTANCE.register(new BwRanks());
 
-            HysentialsUtilsKt.init();
+            HysentialsUtilsKt.init(VERSION);
 
 //        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 //            JSONArray array = new JSONArray();

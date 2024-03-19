@@ -89,6 +89,7 @@ data class RedstoneRepo(
 @Serializable
 data class UpdateNotes(
     val name: String,
+    val version: String,
     val image: String? = null,
     var notes: String,
 )

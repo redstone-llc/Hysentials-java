@@ -9,6 +9,7 @@ var HYSENTIALS_API = if (isLocalOn()) "http://localhost:8080/api" else "https://
 var WEBSOCKET = if (isLocalOn()) "ws://localhost:8080/ws" else "ws://backend.redstone.llc/ws"
 
 var local = false
+lateinit var VERSION: String
 fun isLocalOn(): Boolean {
     if (local) return true
     try {
@@ -28,8 +29,9 @@ val IO = object : CoroutineScope {
     override val coroutineContext = Dispatchers.IO + SupervisorJob() + CoroutineName("Hysentials IO")
 }
 
-fun init() {
+fun init(version: String) {
     MinecraftForge.EVENT_BUS.register(UpdateChecker())
+    VERSION = version
 }
 
 fun postInit() {

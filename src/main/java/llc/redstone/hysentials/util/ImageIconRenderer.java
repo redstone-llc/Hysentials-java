@@ -16,6 +16,9 @@ import llc.redstone.hysentials.hook.FontRendererAcessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityArmorStand;
@@ -27,18 +30,22 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.Sys;
 
+import java.awt.*;
 import java.util.*;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static llc.redstone.hysentials.handlers.imageicons.ImageIcon.stringPattern;
 import static llc.redstone.hysentials.util.C.toHex;
 
 public class ImageIconRenderer extends FontRenderer {
     FontRendererAcessor accessor = (FontRendererAcessor) this;
+    HysentialsFontRenderer mcFive;
 
     public ImageIconRenderer() {
         super(Minecraft.getMinecraft().gameSettings, new ResourceLocation("textures/font/ascii.png"), Minecraft.getMinecraft().getTextureManager(), false);
         super.onResourceManagerReload(null);
+        mcFive = new HysentialsFontRenderer("Minecraft Five", 12f);
     }
 
     @Override
@@ -95,10 +102,11 @@ public class ImageIconRenderer extends FontRenderer {
             int textColor = accessor.getTextColor();
 
             String sub = text.substring(i + 1);
+            //Image Icons
             if (c0 == ':' && sub.contains(":") && !sub.substring(0, sub.indexOf(":")).isEmpty()) {
                 String str = sub.substring(0, sub.indexOf(":"));
                 if (!str.isEmpty()) {
-                    if (str.endsWith("?")) {
+                    if (str.endsWith("?")) { //If the icon ends with a question mark then we don't render it
                         lookingForQuestionMark = true;
                     } else {
                         ImageIcon icon = ImageIcon.getIcon(str);
@@ -132,6 +140,21 @@ public class ImageIconRenderer extends FontRenderer {
                     continue;
                 }
             }
+
+            //Numbered strings
+            // <{HexColor}:{Number}>
+            if (c0 == 60 && sub.contains(":") && sub.contains(">")) {
+                String hex = sub.substring(0, sub.indexOf(":"));
+                if (checkIfHexadecimal(hex)) {
+                    String num = sub.substring(sub.indexOf(":") + 1, sub.indexOf(">"));
+                    if (num.matches("\\d+") && !num.isEmpty()) {
+                        this.posX += renderNumberedString(num, hex, (int) this.posX, (int) this.posY, textColor, shadow);
+                        i += hex.length() + num.length() + 2;
+                        continue;
+                    }
+                }
+            }
+
             if (c0 == 167 && i + 1 < text.length()) {
                 i1 = "0123456789abcdefklmnor".indexOf(text.toLowerCase(Locale.ENGLISH).charAt(i + 1));
                 if (i1 < 16) {
@@ -224,8 +247,64 @@ public class ImageIconRenderer extends FontRenderer {
                 this.doDraw(f);
             }
         }
-
     }
+
+    private int renderNumberedString(String num, String hex, int x, int y, int oldColor, boolean dropShadow) {
+        int bgColor = Integer.parseInt(hex, 16);
+        if (dropShadow) {
+            bgColor = (bgColor & 16579836) >> 2 | bgColor & -16777216;
+        }
+        Color c;
+        if (bgColor < 0x7F7F7F) {
+            c = Color.WHITE;
+        } else {
+            c = Color.DARK_GRAY;
+        }
+        int textColor = (int) (accessor.alpha() * 255f)  << 24 | c.getRed() << 16 | c.getGreen() << 8 | c.getBlue();
+        this.setColor((float) (bgColor >> 16) / 255.0F, (float) (bgColor >> 8 & 255) / 255.0F, (float) (bgColor & 255) / 255.0F, accessor.alpha());
+        float width = mcFive.getWidth(num) + 2;
+        Renderer.drawRect(x, y, width, 7);
+        this.setColor((float) (oldColor >> 16) / 255.0F, (float) (oldColor >> 8 & 255) / 255.0F, (float) (oldColor & 255) / 255.0F, accessor.alpha());
+        mcFive.drawString(num, x + 1, y, textColor);
+        this.setColor((float) (oldColor >> 16) / 255.0F, (float) (oldColor >> 8 & 255) / 255.0F, (float) (oldColor & 255) / 255.0F, accessor.alpha());
+        return (int) width;
+    }
+
+//    private float renderNumberedColorString(String fromFormat, float x, int y, int oldColor, boolean dropShadow) {
+//        // <{bgColors}:{textColors}:{Number}>
+//        float originalX = x;
+//        String[] split = fromFormat.split(":");
+//        if (split.length != 3) {
+//            return 0;
+//        }
+//        String bgColors = split[0];
+//        String textColors = split[1];
+//        String num = split[2].replace(">", "");
+//        if (bgColors.length() != textColors.length()) {
+//            return 0;
+//        }
+//        for (int i = 0; i < bgColors.length(); i++) {
+//            int adjustedI = i - 1;
+//            int bgColor = Integer.parseInt(C.toHex("§" + bgColors.charAt(i), false), 16);
+//            if (dropShadow) {
+//                bgColor = (bgColor & 16579836) >> 2 | bgColor & -16777216;
+//            }
+//            String numChar = null;
+//            if (i != 0 && i != bgColors.length() - 1) {
+//                numChar = String.valueOf(num.charAt(adjustedI));
+//            }
+//            float width = (numChar == null) ? 1 : mcFive.getWidth(numChar) + 1;
+//            this.setColor((float) (bgColor >> 16) / 255.0F, (float) (bgColor >> 8 & 255) / 255.0F, (float) (bgColor & 255) / 255.0F, accessor.alpha());
+//            Renderer.drawRect(x, y, width, 7);
+//            if (i != 0 && i != bgColors.length() - 1) {
+//                int textColor = Integer.parseInt(C.toHex("§" + textColors.charAt(i), false), 16);
+//                mcFive.drawString(numChar, x + 0.5f, y, textColor);
+//            }
+//            x += width;
+//        }
+//        this.setColor((float) (oldColor >> 16) / 255.0F, (float) (oldColor >> 8 & 255) / 255.0F, (float) (oldColor & 255) / 255.0F, accessor.alpha());
+//        return x - originalX;
+//    }
 
     private String trimStringNewline(String text) {
         while (text != null && text.endsWith("\n")) {
@@ -310,7 +389,7 @@ public class ImageIconRenderer extends FontRenderer {
                             if (str.endsWith("?")) {
                                 str = str.substring(0, str.length() - 1);
                                 j += str.length() + 2;
-                                i += getStringWidth(str) + getStringWidth(":") * 2;
+                                i += super.getStringWidth(str) + super.getStringWidth(":") * 2;
                                 continue;
                             } else {
                                 ImageIcon icon = ImageIcon.getIcon(str);
@@ -339,6 +418,20 @@ public class ImageIconRenderer extends FontRenderer {
                             if (checkIfHexadecimal(potentialHex)) {
                                 j += 7;
                                 i -= 5;
+                                continue;
+                            }
+                        }
+                    }
+                    //Numbered strings
+                    // <{HexColor}:{Number}>
+                    sub = text.substring(j + 1);
+                    if (c0 == 60 && sub.contains(":") && sub.contains(">")) {
+                        String hex = sub.substring(0, sub.indexOf(":"));
+                        if (checkIfHexadecimal(hex)) {
+                            String num = sub.substring(sub.indexOf(":") + 1, sub.indexOf(">"));
+                            if (num.matches("\\d+") && !num.isEmpty()) {
+                                i += ((int) mcFive.getWidth(num)) + 2;
+                                j += hex.length() + num.length() + 2;
                                 continue;
                             }
                         }

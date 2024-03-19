@@ -31,7 +31,7 @@ class Chat : Channel("chat") {
         val rank = Socket.cachedUsersNew[uuid]?.rank ?: "DEFAULT"
         val cachedUsername = Socket.cachedUsersNew[uuid]?.username ?: username
         val rankObj = Rank.valueOf(rank.uppercase())
-        //TODO: Do things here?
+
 
     }
 }

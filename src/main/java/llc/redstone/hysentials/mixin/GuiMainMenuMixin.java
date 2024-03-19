@@ -41,7 +41,6 @@ public class GuiMainMenuMixin implements MainMenuHook {
             return;
         }
         ci.cancel();
-        RequestUpdateGui.Companion.getInstance().mouseClickExternal(mouseX, mouseY, mouseButton);
     }
 
     @Shadow

@@ -63,15 +63,7 @@ public class ScoreboardWrapper {
         List<ScoreWrapper> scores = scoreboard.getSortedScores(sidebarObjective).stream().map(ScoreWrapper::new).collect(Collectors.toCollection(ArrayList::new));
         for (ScoreWrapper score : scores) {
             if (score.getName().startsWith("Rank: ") && FormattingConfig.fancyRendering()) {
-                BlockWAPIUtils.Rank rank = null;
-                if (Socket.cachedUsers.stream().anyMatch(u -> u.getString("uuid").equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString()))) {
-                    String r = Socket.cachedUsers.stream().filter(u -> u.getString("uuid").equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString())).findFirst().get().getString("rank");
-                    if (r != null) {
-                        rank = BlockWAPIUtils.Rank.valueOf(r.toUpperCase());
-                    }
-                } else {
-                    rank = BlockWAPIUtils.getRank(Minecraft.getMinecraft().thePlayer.getGameProfile().getId());
-                }
+                BlockWAPIUtils.Rank rank = BlockWAPIUtils.getRank(Minecraft.getMinecraft().thePlayer.getGameProfile().getId());
                 if (rank != null && !rank.equals(BlockWAPIUtils.Rank.DEFAULT)) {
                     Score score1 = new Score(scoreboard, sidebarObjective, "Rank: " + rank.getColor() + rank.name());
                     score1.setScorePoints(score.getPoints());

@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import llc.redstone.hysentials.VERSION
 import net.minecraft.client.Minecraft
 import net.minecraft.util.Util
 import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion
@@ -206,7 +207,7 @@ class UpdateChecker {
                 else -> return println("Update Channel set as none")
             } ?: return println("Failed to get update")
             val latestTag = latestRelease.name.substringAfter("Hysentials-").substringBefore(".jar")
-            val currentTag = Hysentials.VERSION
+            val currentTag = VERSION
             println("Current version: $currentTag Latest version: $latestTag")
 
             val currentVersion = SkytilsVersion(currentTag)

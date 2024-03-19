@@ -338,7 +338,7 @@ public class HysentialsCommand extends CommandBase {
                 case "switch": {
                     boolean isCurrentlyLocal = HysentialsUtilsKt.getHYSENTIALS_API().equals("http://localhost:8080/api");
                     if (HysentialsUtilsKt.isLocalOn()) {
-                        HysentialsUtilsKt.setHYSENTIALS_API(!isCurrentlyLocal ? "ws://localhost:8080/ws" : "ws://backend.redstone.llc/ws");
+                        HysentialsUtilsKt.setHYSENTIALS_API(!isCurrentlyLocal ? "http://localhost:8080/api" : "http://backend.redstone.llc/api");
                         HysentialsUtilsKt.setWEBSOCKET(!isCurrentlyLocal ? "ws://localhost:8080/ws" : "ws://backend.redstone.llc/ws");
                         Socket.CLIENT.sendClose();
                         Socket.createSocket();

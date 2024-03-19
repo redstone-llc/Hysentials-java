@@ -28,11 +28,11 @@ public final class ChatTab {
         throw new RuntimeException();
     }
 
-    public void setMessages(List<String> message) {
+    public void setMessages(List<Object> message) {
         throw new RuntimeException();
     }
 
-    public List<String> getMessages() {
+    public List<Object> getMessages() {
         throw new RuntimeException();
     }
 

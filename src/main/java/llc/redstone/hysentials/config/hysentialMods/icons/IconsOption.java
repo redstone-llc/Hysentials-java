@@ -39,12 +39,14 @@ import cc.polyfrost.oneconfig.gui.elements.config.ConfigColorElement;
 import cc.polyfrost.oneconfig.gui.elements.text.TextInputField;
 import cc.polyfrost.oneconfig.platform.Platform;
 import cc.polyfrost.oneconfig.renderer.NanoVGHelper;
+import cc.polyfrost.oneconfig.renderer.TinyFD;
 import cc.polyfrost.oneconfig.renderer.asset.Icon;
 import cc.polyfrost.oneconfig.renderer.asset.Image;
 import cc.polyfrost.oneconfig.renderer.asset.SVG;
 import cc.polyfrost.oneconfig.renderer.font.Fonts;
 import cc.polyfrost.oneconfig.utils.InputHandler;
 import cc.polyfrost.oneconfig.utils.Multithreading;
+import cc.polyfrost.oneconfig.utils.Notifications;
 import cc.polyfrost.oneconfig.utils.color.ColorPalette;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.hysentialMods.rank.RankAnnotation;
@@ -59,6 +61,8 @@ import java.awt.*;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -190,20 +194,18 @@ public class IconsOption extends BasicOption implements IFocusable {
 
     public void openFileAndSave(int index) {
         Multithreading.runAsync(() -> {
-            File base = new File("./config/hysentials/imageicons/");
-            FileDialog fileDialog = new FileDialog((Frame) null, "Select an image", FileDialog.LOAD);
-            fileDialog.setDirectory(base.getAbsolutePath());
-            fileDialog.setFile("*.png");
-            fileDialog.setVisible(true);
-            String file = fileDialog.getFile();
-            if (file != null) {
-                String path = "./config/hysentials/imageicons/" + file;
-                images.set(index, new Image(path));
-                icons.get(index).localPath = path;
-                File file1 = new File(path);
-                if (file1.exists()) {
+            File result = TinyFD.INSTANCE.openFileSelector(
+                "Select an image",
+                "./config/hysentials/imageicons/",
+                new String[]{"*.png"},
+                "Image Files"
+            );
+            if (result != null) {
+                images.set(index, new Image(result.getAbsolutePath()));
+                icons.get(index).localPath = result.getAbsolutePath();
+                if (result.exists()) {
                     try {
-                        java.awt.Image image = ImageIO.read(file1);
+                        java.awt.Image image = ImageIO.read(result);
                         int scale = (32 / image.getHeight(null));
                         icons.get(index).width = image.getWidth(null) * scale;
                         icons.get(index).height = image.getHeight(null) * scale;

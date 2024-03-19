@@ -13,6 +13,7 @@ import llc.redstone.hysentials.util.Material
 import llc.redstone.hysentials.utils.formatCapitalize
 import llc.redstone.hysentials.websocket.Socket
 import net.minecraft.item.ItemStack
+import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
 
@@ -415,6 +416,33 @@ class HysentialsSchema {
                     obj["functions"].asInt,
                     obj["conditions"].asInt,
                     obj["actions"].asInt,
+                )
+            }
+        }
+    }
+
+    data class Group(
+        var id: String,
+        var name: String,
+        var members: ArrayList<String>,
+        var owner: String,
+        var invites: ArrayList<String>,
+        var messages: ArrayList<String>,
+        var saveLast: Int, //count of messages to save
+        var allInvite: Boolean = false,
+        //TODO: probably add more things
+    ) {
+        companion object {
+            fun deserialize(obj: JsonObject): Group {
+                return Group(
+                    obj["id"].asString,
+                    obj["name"].asString,
+                    obj["members"].asJsonArray.map { it.asString }.toCollection(ArrayList()),
+                    obj["owner"].asString,
+                    obj["invites"].asJsonArray.map { it.asString }.toCollection(ArrayList()),
+                    obj["messages"].asJsonArray.map { it.asString }.toCollection(ArrayList()),
+                    obj["saveLast"].asInt,
+                    obj["allInvite"].asBoolean,
                 )
             }
         }

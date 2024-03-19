@@ -1,5 +1,7 @@
 package llc.redstone.hysentials.handlers.groupchats;
 
+import llc.redstone.hysentials.Hysentials;
+import llc.redstone.hysentials.schema.HysentialsSchema;
 import org.json.JSONObject;
 import org.polyfrost.chatting.chat.ChatTab;
 import org.polyfrost.chatting.chat.ChatTabs;
@@ -9,6 +11,8 @@ import llc.redstone.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import static llc.redstone.hysentials.command.GroupChatCommand.sendAction;
 
 public class GroupChatMessage implements ChatSendModule {
     @Override
@@ -30,20 +34,15 @@ public class GroupChatMessage implements ChatSendModule {
                 Socket.CLIENT.sendText(json.toString());
                 return null;
             }
-//            for (BlockWAPIUtils.Group group : Hysentials.INSTANCE.getOnlineCache().groups) {
-//                if (group.getName().equalsIgnoreCase(tab.getName())) {
-//                    Socket.CLIENT.sendText(
-//                        new Request(
-//                            "method", "groupChat",
-//                            "name", group.getName(),
-//                            "username", Minecraft.getMinecraft().thePlayer.getName(),
-//                            "serverId", Socket.serverId,
-//                            "message", message
-//                        ).toString()
-//                    );
-//                    return null;
-//                }
-//            }
+            for (HysentialsSchema.Group group : Socket.cachedGroups) {
+                if (group.getName().equalsIgnoreCase(tab.getName())) {
+                    sendAction("message",
+                        "groupId", group.getId(),
+                        "message", message
+                    );
+                    return null;
+                }
+            }
             return message;
         } catch (Exception e) {
             e.printStackTrace();

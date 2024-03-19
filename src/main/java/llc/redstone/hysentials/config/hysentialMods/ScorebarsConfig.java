@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.config.hysentialMods;
 
 import cc.polyfrost.oneconfig.config.Config;
+import cc.polyfrost.oneconfig.config.annotations.Button;
 import cc.polyfrost.oneconfig.config.annotations.Checkbox;
 import cc.polyfrost.oneconfig.config.annotations.Color;
 import cc.polyfrost.oneconfig.config.annotations.Dropdown;
@@ -8,10 +9,24 @@ import cc.polyfrost.oneconfig.config.core.ConfigUtils;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
+import llc.redstone.hysentials.guis.sbBoxes.SBBoxesEditor;
+import net.minecraft.client.Minecraft;
 
 import java.io.File;
 
 public class ScorebarsConfig extends Config {
+    @Button(
+        name = "Open Editor",
+        text = "Open Editor",
+        description = "Open the editor.",
+        category = "SBBoxes",
+        subcategory = "General"
+    )
+    public void openEditor() {
+        Minecraft.getMinecraft().thePlayer.closeScreen();
+        new SBBoxesEditor().show();
+    }
+
     @Color(
         name = "Color Picker",
         description = "Color for the boxes",
