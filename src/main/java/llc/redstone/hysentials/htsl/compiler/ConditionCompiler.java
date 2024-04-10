@@ -190,40 +190,40 @@ public class ConditionCompiler {
         return new ConditionResult(conditionList, compileErrors.size() > 0 ? compileErrors.get(0) : null);
     }
 
-    public static String export(String name, List<String> args)  {
+    public static String export(String name, List<String> args, boolean whole)  {
         switch (name) {
             case "Player Stat Requirement": {
-                return "stat \"" + args.get(0) + "\" " + args.get(1) + " " + args.get(2);
+                return "stat" + (whole ? " \"" + args.get(0) + "\" " + args.get(1) + " " + args.get(2) : "");
             }
             case "Global Stat Requirement": {
-                return "globalstat \"" + args.get(0) + "\" " + args.get(1) + " " + args.get(2);
+                return "globalstat" + (whole ? " \"" + args.get(0) + "\" " + args.get(1) + " " + args.get(2) : "");
             }
             case "Team Stat Requirement": {
-                return "teamstat \"" + args.get(0) + "\" \"" + args.get(1) + "\" " + args.get(2) + " " + args.get(3);
+                return "teamstat" + (whole ? " \"" + args.get(0) + "\" \"" + args.get(1) + "\" " + args.get(2) + " " + args.get(3) : "");
             }
             case "Has Potion Effect": {
-                return "hasPotion \"" + args.get(0) + "\"";
+                return "hasPotion" + (whole ? " \"" + args.get(0) + "\"" : "");
             }
             case "Doing Parkour": {
                 return "doingParkour";
             }
             case "Within Region": {
-                return "inRegion \"" + args.get(0) + "\"";
+                return "inRegion" + (whole ? " \"" + args.get(0) + "\"" : "");
             }
             case "Required Permission": {
-                return "hasPermission \"" + args.get(0) + "\"";
+                return "hasPermission" + (whole ? " \"" + args.get(0) + "\"" : "");
             }
             case "Required Group": {
-                return "hasGroup \"" + args.get(0) + "\" " + args.get(1);
+                return "hasGroup" + (whole ? " \"" + args.get(0) + "\" " + args.get(1) : "");
             }
             case "Required Team": {
-                return "hasTeam \"" + args.get(0) + "\"";
+                return "hasTeam" + (whole ? " \"" + args.get(0) + "\"" : "");
             }
             case "Damage Cause": {
-                return "damageCause \"" + args.get(0) + "\"";
+                return "damageCause" + (whole ? " \"" + args.get(0) + "\"" : "");
             }
             case "Block Type": {
-                return "blockType \"" + args.get(0) + "\" " + args.get(1);
+                return "blockType" + (whole ? " \"" + args.get(0) + "\" " + args.get(1) : "");
             }
             case "Player Sneaking": {
                 return "isSneaking";
@@ -232,19 +232,19 @@ public class ConditionCompiler {
                 return "isFlying";
             }
             case "Required Gamemode": {
-                return "gamemode \"" + args.get(0) + "\"";
+                return "gamemode" + (whole ? " \"" + args.get(0) + "\"" : "");
             }
             case "Placeholder Number Requirement": {
-                return "placeholder \"" + args.get(0) + "\" " + args.get(1) + " " + args.get(2);
+                return "placeholder" + (whole ? " \"" + args.get(0) + "\" " + args.get(1) + " " + args.get(2) : "");
             }
             case "Player Hunger": {
-                return "hunger " + args.get(1) + " " + args.get(2);
+                return "hunger" + (whole ? " " + args.get(1) + " " + args.get(2) : "");
             }
             case "Player Health": {
-                return "health " + args.get(1) + " " + args.get(2);
+                return "health" + (whole ? " " + args.get(1) + " " + args.get(2) : "");
             }
             case "Player Max Health": {
-                return "maxHealth " + args.get(1) + " " + args.get(2);
+                return "maxHealth" + (whole ? " " + args.get(1) + " " + args.get(2) : "");
             }
             default: {
                 return "";

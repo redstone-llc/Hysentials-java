@@ -1,11 +1,6 @@
 package llc.redstone.hysentials.capes;
 
-import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.cosmetic.CosmeticGui;
 import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
-import llc.redstone.hysentials.schema.HysentialsSchema;
-import llc.redstone.hysentials.websocket.Socket;
-import llc.redstone.hysentials.cosmetic.CosmeticGui;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
@@ -13,7 +8,6 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.json.JSONObject;
 
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
@@ -28,7 +22,7 @@ public class CapeHandler {
     public void onTickEvent(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         try {
-            for (String id : Socket.cachedUsersNew.keySet()) {
+            for (String id : Socket.cachedUsers.keySet()) {
                 UUID uuid = UUID.fromString(id);
                 boolean wearingCape = false;
                 for (HysentialsSchema.Cosmetic cosmetic : CosmeticUtilsKt.getEquippedCosmetics(uuid)) {

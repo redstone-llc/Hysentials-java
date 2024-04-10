@@ -68,6 +68,18 @@ class HysentialsSchema {
         }
     }
 
+    data class ServerData(
+        var rpc: Boolean?
+    ) {
+        companion object {
+            fun deserialize(obj: JsonObject): ServerData {
+                return ServerData(
+                    obj["rpc"]?.asBoolean,
+                )
+            }
+        }
+    }
+
     @Serializable
     data class Rank(
         var name: String,

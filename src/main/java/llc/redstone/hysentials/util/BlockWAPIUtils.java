@@ -1,9 +1,7 @@
 package llc.redstone.hysentials.util;
 
-import cc.polyfrost.oneconfig.libs.checker.units.qual.N;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.HysentialsUtilsKt;
-import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
 import llc.redstone.hysentials.config.hysentialMods.rank.RankStuff;
 import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
@@ -11,25 +9,11 @@ import llc.redstone.hysentials.handlers.redworks.BwRanksUtils;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.websocket.Socket;
 import com.google.gson.*;
-import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
-import llc.redstone.hysentials.schema.HysentialsSchema;
-import llc.redstone.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
-import org.jetbrains.annotations.Async;
-import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONPointer;
 
-import java.text.Format;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-
-import static llc.redstone.hysentials.guis.actionLibrary.ActionViewer.toList;
-import static llc.redstone.hysentials.handlers.chat.modules.bwranks.BWSReplace.diagnostics;
 
 public class BlockWAPIUtils {
     public static List<HysentialsSchema.Action> actions = new ArrayList<>();
@@ -71,7 +55,7 @@ public class BlockWAPIUtils {
     }
 
     public static boolean isOnline(UUID uuid) {
-        return Socket.cachedUsersNew.containsKey(uuid.toString());
+        return Socket.cachedUsers.containsKey(uuid.toString());
     }
 
     public static boolean hasCosmetic(UUID uuid, String cosmetic) {
@@ -105,7 +89,7 @@ public class BlockWAPIUtils {
     public static Rank getRank(UUID uuid) {
         BlockWAPIUtils.Rank rank;
         try {
-            rank = BlockWAPIUtils.Rank.valueOf(Socket.cachedUsersNew.get(uuid.toString()).getRank().toUpperCase());
+            rank = BlockWAPIUtils.Rank.valueOf(Socket.cachedUsers.get(uuid.toString()).getRank().toUpperCase());
         } catch (Exception e) {
             rank = BlockWAPIUtils.Rank.DEFAULT;
         }
@@ -113,7 +97,7 @@ public class BlockWAPIUtils {
     }
 
     public static String getUsername(UUID uuid) {
-        return Socket.cachedUsersNew.get(uuid.toString()).getUsername();
+        return Socket.cachedUsers.get(uuid.toString()).getUsername();
     }
 
     public static boolean isWearingType(UUID uuid, String type) {
@@ -183,21 +167,16 @@ public class BlockWAPIUtils {
             return id;
         }
 
-        public String getPrefix(String name) {
+        /*
+        * Get the non-futuristic prefix of the rank, if simplistic ranks are enabled, return the simple prefix, else return the normal prefix.
+         */
+        public String getPrefix() {
             return (FormattingConfig.simplisticRankInChat ? simplePrefix : prefix);
         }
 
-        public String getPrefix() {
-            return prefix;
-        }
-
-        public String getColor() {
-            if (BwRanksUtils.futuristicRanks(null)) {
-                return getNametag();
-            }
-            return color;
-        }
-
+        /*
+        * Checks if futuristic ranks are enabled, if so, return the placeholder, else return the prefix.
+         */
         public String getPrefixCheck() {
             if (BwRanksUtils.futuristicRanks(null)) {
                 return getPlaceholder();
@@ -205,7 +184,20 @@ public class BlockWAPIUtils {
             return getPrefix();
         }
 
-        public String getNametag() {
+        /*
+        * Get the color of the rank, if futuristic ranks are enabled, return the nametag, else return the color.
+         */
+        public String getColor() {
+            if (BwRanksUtils.futuristicRanks(null)) {
+                return getNametagColor();
+            }
+            return color;
+        }
+
+        /*
+        * Get the nametag color of the rank, if futuristic ranks are enabled, return the nametag color, else return the color.
+         */
+        public String getNametagColor() {
             if (Hysentials.INSTANCE.getConfig().formattingConfig.enabled && FormattingConfig.hexColors) {
                 RankStuff rank = FormattingConfig.getRank(hex);
                 return "<#" + rank.nametagColor.getHex() + ">";
@@ -214,7 +206,10 @@ public class BlockWAPIUtils {
             }
         }
 
-        public String getChat() {
+        /*
+        * Get the chat color of the rank, if futuristic ranks are enabled, return the chat message color else return white.
+         */
+        public String getChatColor() {
             if (Hysentials.INSTANCE.getConfig().formattingConfig.enabled && FormattingConfig.hexColors) {
                 RankStuff rank = FormattingConfig.getRank(hex);
                 return "<#" + rank.chatMessageColor.getHex() + ">";
@@ -223,18 +218,19 @@ public class BlockWAPIUtils {
             }
         }
 
-        public String getHex() {
-            return getNametag();
-        }
-
+        /*
+        * Get the placeholder of the rank, if it's null, return the nametag color and the color of the rank.
+         */
         public String getPlaceholder() {
             if (placeholder == null && ImageIcon.getIcon(name().toLowerCase()) != null) {
-                return "§f:" + ImageIcon.getIcon(name().toLowerCase()).getName() + ": " + (hex.isEmpty() ? color : getNametag());
+                return "§f:" + ImageIcon.getIcon(name().toLowerCase()).getName() + ": " + (hex.isEmpty() ? color : getNametagColor());
             }
             return placeholder;
         }
 
-
+        /*
+        * Get the rank by the name of the rank.
+         */
         public static Rank valueOF(String s) {
             if (s == null) return null;
             for (Rank rank : values()) {

@@ -1,8 +1,12 @@
 package llc.redstone.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
+import llc.redstone.hysentials.event.events.GuiLoadedEvent;
+import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
 import llc.redstone.hysentials.handlers.chat.modules.misc.GuiChat256;
+import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
 import llc.redstone.hysentials.htsl.Loader;
 import llc.redstone.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
@@ -26,11 +30,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.minecraftforge.fml.common.registry.GameData;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -114,7 +121,9 @@ public class Navigator {
                 throw new RuntimeException(e);
             }
         } else {
-            Minecraft.getMinecraft().playerController.windowClick(Minecraft.getMinecraft().thePlayer.openContainer.windowId, slotId, 2, 3, Minecraft.getMinecraft().thePlayer);
+            GuiMouseClickEvent event = new GuiMouseClickEvent(slotId, new CallbackInfo("test", true));
+            MinecraftForge.EVENT_BUS.post(event);
+            if (!event.getCi().isCancelled()) Minecraft.getMinecraft().playerController.windowClick(Minecraft.getMinecraft().thePlayer.openContainer.windowId, slotId, 2, 3, Minecraft.getMinecraft().thePlayer);
             setNotReady();
         }
     }
@@ -340,7 +349,7 @@ public class Navigator {
     public static String guiToOpen = null;
     public static void manualOpen(String msg, String s) {
         guiToOpen = s;
-        MUtils.chat(msg);
+        UChat.chat(msg);
         setNotReady();
     }
 
@@ -383,6 +392,7 @@ public class Navigator {
         }
     }
 
+
     @SubscribeEvent
     public void onGuiRender(GuiScreenEvent.BackgroundDrawnEvent event) {
         if (isReady) return;
@@ -408,6 +418,8 @@ public class Navigator {
         }
         isReady = true;
         guiIsLoading = false;
+        GuiLoadedEvent guiLoadedEvent = new GuiLoadedEvent(event.gui, containerName);
+        MinecraftForge.EVENT_BUS.post(guiLoadedEvent);
         if (guiToOpen != null) {
             GuiScreen screen = Minecraft.getMinecraft().currentScreen;
             if (screen == null) return;

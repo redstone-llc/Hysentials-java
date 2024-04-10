@@ -11,6 +11,9 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Random;
 
+/*
+Font Renderer Accessor Mixin
+ */
 @Mixin(value = FontRenderer.class, priority = Integer.MIN_VALUE)
 public abstract class FontRendererMixin implements FontRendererAcessor {
 
@@ -70,49 +73,6 @@ public abstract class FontRendererMixin implements FontRendererAcessor {
 
     @Shadow
     protected abstract void doDraw(float f);
-
-    /**
-     * @author
-     * @reason
-     */
-//    @Overwrite
-//    public int getStringWidth(String text) {
-//        if (Hysentials.INSTANCE != null && Hysentials.INSTANCE.imageIconRenderer != null && HysentialsConfig.fancyFormatting) {
-//            return Hysentials.INSTANCE.imageIconRenderer.getStringWidth(text);
-//        } else {
-//            if (text == null) {
-//                return 0;
-//            } else {
-//                int i = 0;
-//                boolean flag = false;
-//
-//                for(int j = 0; j < text.length(); ++j) {
-//                    char c0 = text.charAt(j);
-//                    int k = this.getCharWidth(c0);
-//                    if (k < 0 && j < text.length() - 1) {
-//                        ++j;
-//                        c0 = text.charAt(j);
-//                        if (c0 != 'l' && c0 != 'L') {
-//                            if (c0 == 'r' || c0 == 'R') {
-//                                flag = false;
-//                            }
-//                        } else {
-//                            flag = true;
-//                        }
-//
-//                        k = 0;
-//                    }
-//
-//                    i += k;
-//                    if (flag && k > 0) {
-//                        ++i;
-//                    }
-//                }
-//
-//                return i;
-//            }
-//        }
-//    }
 
     @Override
     public int getTextColor() {

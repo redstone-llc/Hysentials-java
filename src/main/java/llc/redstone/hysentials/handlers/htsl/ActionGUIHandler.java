@@ -372,5 +372,56 @@ public class ActionGUIHandler {
         return false;
     }
 
+    public static boolean isActionSettings() {
+        if (Minecraft.getMinecraft().currentScreen instanceof GuiChest) {
+            GuiChest chest = (GuiChest) Minecraft.getMinecraft().currentScreen;
+            try {
+                if (field_lowerChestInventory.get(chest) instanceof IInventory) {
+                    IInventory inventory = (IInventory) field_lowerChestInventory.get(chest);
+                    if (inventory.getName().equals("Action Settings") && inventory.getSizeInventory() == 36) {
+                        return true;
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return false;
+    }
+
+    public static boolean isEditConditions() {
+        if (Minecraft.getMinecraft().currentScreen instanceof GuiChest) {
+            GuiChest chest = (GuiChest) Minecraft.getMinecraft().currentScreen;
+            try {
+                if (field_lowerChestInventory.get(chest) instanceof IInventory) {
+                    IInventory inventory = (IInventory) field_lowerChestInventory.get(chest);
+                    if (inventory.getName().equals("Edit Conditions") && inventory.getSizeInventory() == 54) {
+                        return true;
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return false;
+    }
+
+    public static boolean isSettingsConditions() {
+        if (Minecraft.getMinecraft().currentScreen instanceof GuiChest) {
+            GuiChest chest = (GuiChest) Minecraft.getMinecraft().currentScreen;
+            try {
+                if (field_lowerChestInventory.get(chest) instanceof IInventory) {
+                    IInventory inventory = (IInventory) field_lowerChestInventory.get(chest);
+                    if (inventory.getName().equals("Settings") && inventory.getSizeInventory() == 36) {
+                        return true;
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return false;
+    }
+
 
 }

@@ -1,52 +1,32 @@
 package llc.redstone.hysentials.handlers.chat.modules.bwranks;
 
-import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.config.hysentialMods.ChatConfig;
 import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
 import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
-import llc.redstone.hysentials.cosmetic.CosmeticGui;
-import llc.redstone.hysentials.cosmetic.CosmeticManager;
 import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.util.*;
-import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UMessage;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
-import cc.polyfrost.oneconfig.utils.NetworkUtils;
-import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.command.HysentialsCommand;
-import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.handlers.chat.ChatReceiveModule;
 import llc.redstone.hysentials.handlers.redworks.BwRanks;
-import llc.redstone.hysentials.util.*;
-import llc.redstone.hysentials.websocket.Socket;
-import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.command.HysentialsCommand;
-import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.handlers.redworks.BwRanks;
-import llc.redstone.hysentials.schema.HysentialsSchema;
 import net.minecraft.client.Minecraft;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.lwjgl.Sys;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static llc.redstone.hysentials.guis.actionLibrary.ActionViewer.toList;
 import static llc.redstone.hysentials.handlers.redworks.BwRanksUtils.*;
 
 public class BWSReplace implements ChatReceiveModule {
@@ -105,12 +85,12 @@ public class BWSReplace implements ChatReceiveModule {
                     diagnostics.add("Added chat formatting to sibling. (Hypixel)");
                 }
                 if (blockwRank != null && (s.startsWith("§7: ") || s.startsWith("§f: "))) {
-                    s = s.replaceFirst("§[7f]: ", blockwRank.getChat() + ": " + italic(uuidBold) + bold(uuidBold));
+                    s = s.replaceFirst("§[7f]: ", blockwRank.getChatColor() + ": " + italic(uuidBold) + bold(uuidBold));
 //                    blockwRank = null;
                     diagnostics.add("Added chat formatting to sibling. (BlockW)");
                 }
                 if ((s.startsWith("§7") || s.startsWith("§f")) && blockwRank != null && uuidBold != null) {
-                    s = s.replaceFirst("(§7|§f)", blockwRank.getChat() + italic(uuidBold) + bold(uuidBold));
+                    s = s.replaceFirst("(§7|§f)", blockwRank.getChatColor() + italic(uuidBold) + bold(uuidBold));
                 }
                 Pattern p = Pattern.compile("(§[0-9a-fk-or])\\[(\\d+)(.)] ");
                 Pattern p2 = Pattern.compile("(§[0-9a-fk-or])\\[(.+)(.)§[0-9a-fk-or]] ");
@@ -144,7 +124,7 @@ public class BWSReplace implements ChatReceiveModule {
                     String regex1 = "\\[[A-Za-z§0-9+]+] " + name;
                     String regex2 = "(§r§7|§7)" + name;
                     if (rank != null && rank != BlockWAPIUtils.Rank.DEFAULT) {
-                        String replacement = (rank.getPrefix(name) + name);
+                        String replacement = (rank.getPrefix() + name);
                         if (futuristic) {
                             replacement = (rank.getPlaceholder() + name);
                             if (!BwRanks.hasRank) {
@@ -158,12 +138,12 @@ public class BWSReplace implements ChatReceiveModule {
                         if (m1.find(0)) {
                             blockwRank = rank;
                             if (uuidBold == null) uuidBold = user.getValue();
-                            s = s.replaceAll("\\[[A-Za-z§0-9+]+] " + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": " + italic(uuidBold) + bold(uuidBold));
+                            s = s.replaceAll("\\[[A-Za-z§0-9+]+] " + name, replacement).replaceAll("§[7f]: ", rank.getChatColor() + ": " + italic(uuidBold) + bold(uuidBold));
                             diagnostics.add("Used regex1 to replace " + name + " with " + replacement + " (BlockW)");
                         } else if (Pattern.compile(regex2).matcher(s).find(0)) {
                             blockwRank = rank;
                             if (uuidBold == null) uuidBold = user.getValue();
-                            s = s.replaceAll("(§r§7|§7)" + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": " + italic(uuidBold) + bold(uuidBold));
+                            s = s.replaceAll("(§r§7|§7)" + name, replacement).replaceAll("§[7f]: ", rank.getChatColor() + ": " + italic(uuidBold) + bold(uuidBold));
                             diagnostics.add("Used regex2 to replace " + name + " with " + replacement + " (BlockW)");
                         }
 //                  else if (Pattern.compile(regex3).matcher(s).find(0)) {

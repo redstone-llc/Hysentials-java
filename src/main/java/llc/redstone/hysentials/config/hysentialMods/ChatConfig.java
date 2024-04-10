@@ -129,7 +129,7 @@ public class ChatConfig extends Config {
         description = "The prefix for all global chat messages.",
         category = "Global Chat",
         subcategory = "General",
-        placeholder = ":global: "
+        placeholder = ":globalchat: "
     )
     public static String globalPrefix = ":globalchat: ";
 

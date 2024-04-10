@@ -66,10 +66,9 @@ public class ImageIcon {
     }
 
     public void handleImageIcon() throws IOException {
-        File file = new File("./config/hysentials/" + (emoji ? "emojis" : "imageicons") + "/" + name + ".png");
-        if (path != null) {
-            file = new File(path);
-        }
+        File file = new File( (path != null) ? path :
+            "./config/hysentials/" + (emoji ? "emojis" : "imageicons") + "/" + name + ".png"
+        );
         if ((!file.exists() && resourceLocation != null) || (name.equals("party") && javax.imageio.ImageIO.read(file).getWidth() != 48)) {
             if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();

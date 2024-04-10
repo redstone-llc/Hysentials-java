@@ -1,11 +1,10 @@
 package llc.redstone.hysentials.command;
 
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.util.BUtils;
-import llc.redstone.hysentials.util.MUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.item.ItemStack;
-import scala.tools.nsc.ScalaDoc;
 
 import static llc.redstone.hysentials.command.RenameCommand.setCreativeAction;
 
@@ -33,12 +32,12 @@ public class RemoveNameCommand extends CommandBase {
         }
         ItemStack item = Minecraft.getMinecraft().thePlayer.getHeldItem();
         if (item == null || item.getItem() == null) {
-            MUtils.chat("§cYou must be holding an item!");
+            UChat.chat("§cYou must be holding an item!");
             return;
         }
         item = item.copy();
         item.clearCustomName();
         setCreativeAction(item, Minecraft.getMinecraft().thePlayer.inventory.currentItem);
-        MUtils.chat("§aRemoved name from item successfully!");
+        UChat.chat("§aRemoved name from item successfully!");
     }
 }

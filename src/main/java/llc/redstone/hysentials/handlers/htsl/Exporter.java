@@ -92,9 +92,6 @@ public class Exporter {
     public static List<String> randomActionsExported = new ArrayList<>();
 
     public static List<String> conditionsExportedTotal = new ArrayList<>();
-    public static List<String> ifExportedTotal = new ArrayList<>();
-    public static List<String> elseExportedTotal = new ArrayList<>();
-    public static List<String> randomActionsExportedTotal = new ArrayList<>();
     public static List<String> actionsExportedTotal = new ArrayList<>();
     public static int stage = -1;
     public static TriVariable<String, Integer, Integer> currentAction = null;
@@ -146,7 +143,7 @@ public class Exporter {
         if (event.phase != TickEvent.Phase.START) return;
         if (event.type != TickEvent.Type.CLIENT) return;
         if (export == null) return;
-        if (Queue.queue.size() != 0) return;
+        if (!Queue.queue.isEmpty()) return;
         timeWithoutOperation++;
         if ((Queue.greaterThan(timeWithoutOperation, HousingConfig.guiTimeout)) && !HousingConfig.htslSafeMode && !manualItemClick) {
             fails.add("&cOperation timed out. &f(too long without GUI click)");
@@ -338,7 +335,7 @@ public class Exporter {
                 }
                 condition = conditions.get(0);
                 try {
-                    String s = ConditionCompiler.export(condition.getFirst(), new ArrayList<>());
+                    String s = ConditionCompiler.export(condition.getFirst(), new ArrayList<>(), false);
                     conditionsExported.add(s);
                     condition = null;
                 } catch (Exception e) {
@@ -354,7 +351,7 @@ public class Exporter {
                         List<String> args = getSlots(true, 2).stream()
                             .map(TriVariable::getFirst).collect(Collectors.toList());
                         if (args.size() == 0) return;
-                        conditionsExported.add(ConditionCompiler.export(condition.getFirst(), args));
+                        conditionsExported.add(ConditionCompiler.export(condition.getFirst(), args, false));
                         condition = null;
                         Navigator.goBack();
                         stage = 4;
@@ -580,7 +577,7 @@ public class Exporter {
                     StringSelection selection = new StringSelection(code);
                     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                     clipboard.setContents(selection, selection);
-                    MUtils.chat("&3[HTSL] &fCopied to clipboard!");
+                    UChat.chat("&3[HTSL] &fCopied to clipboard!");
                 } else if (export.equals("file")) {
                     try {
                         File file = new File(Minecraft.getMinecraft().mcDataDir, "config/hysentials");
@@ -590,7 +587,7 @@ public class Exporter {
                         file = new File(file, name + ".htsl");
                         if (!file.exists()) file.createNewFile();
                         FileUtils.writeStringToFile(file, code, StandardCharsets.UTF_8);
-                        MUtils.chat("&3[HTSL] &fExported to file &b" + file.getAbsolutePath() + "&f!");
+                        UChat.chat("&3[HTSL] &fExported to file &b" + file.getAbsolutePath() + "&f!");
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -600,7 +597,7 @@ public class Exporter {
                     Multithreading.runAsync(() -> {
                         ClubDashboard.getClub();
                         ClubDashboard.update(object);
-                        MUtils.chat("&3[HTSL] &fExported to &bClub Dashboard&f!");
+                        UChat.chat("&3[HTSL] &fExported to &bClub Dashboard&f!");
                     });
                 }
             }
@@ -666,7 +663,7 @@ public class Exporter {
         Minecraft.getMinecraft().fontRendererObj.drawString("Names: " + names.toString(), 50, y + 60, 0xFFFFFF);
     }
 
-    public String undoValidOperator(String operator) {
+    public static String undoValidOperator(String operator) {
         switch (operator.toLowerCase()) {
             case "enabled":
                 operator = "true";
@@ -695,7 +692,7 @@ public class Exporter {
         return operator;
     }
 
-    public List<TriVariable<String, Integer, Integer>> getSlots(boolean getLore, int loreLine) {
+    public static List<TriVariable<String, Integer, Integer>> getSlots(boolean getLore, int loreLine) {
         Container container = Minecraft.getMinecraft().thePlayer.openContainer;
         List<TriVariable<String, Integer, Integer>> slots = new ArrayList<>();
         int page = 1;
@@ -713,7 +710,10 @@ public class Exporter {
                     continue;
                 }
                 if (getLore) {
-                    if (lore.size() <= loreLine) continue;
+                    if (lore.size() <= loreLine) {
+                        slots.add(new TriVariable<>(name, i, page));
+                        continue;
+                    };
                     String line = ChatColor.Companion.stripControlCodes(lore.get(loreLine));
                     line = undoValidOperator(undoValidComparator(line));
                     slots.add(new TriVariable<>(line, i, page));

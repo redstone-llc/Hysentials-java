@@ -3,6 +3,8 @@ package llc.redstone.hysentials.guis.misc;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import llc.redstone.hysentials.HysentialsUtilsKt;
 import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.guis.container.Container;
@@ -192,12 +194,12 @@ public class HysentialsLevel extends Container {
             event.getEvent().cancel();
             Multithreading.runAsync(() -> {
                 String s = NetworkUtils.getString(HysentialsUtilsKt.getHYSENTIALS_API() + "/exp?username=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getName());
-                JSONObject json = new JSONObject(s);
-                if (json.has("message") && json.getString("message").equals("You are being ratelimited")) {
+                JsonObject json = new JsonParser().parse(s).getAsJsonObject();
+                if (json.has("message") && json.get("message").getAsString().equals("You are being ratelimited")) {
                     UChat.chat(HysentialsConfig.chatPrefix + " &cDue to Hypixel API restrictions we are unable to update your level at this time. Please try again in a moment.");
                     return;
                 }
-                if (json.has("exp") && getExp() != json.getInt("exp")) {
+                if (json.has("exp") && getExp() != json.get("exp").getAsInt()) {
                     checkLevel(json);
 
                     Minecraft.getMinecraft().thePlayer.closeScreen();
@@ -227,19 +229,19 @@ public class HysentialsLevel extends Container {
     }
 
 
-    public static void checkLevel(JSONObject json) {
+    public static void checkLevel(JsonObject json) {
         int previousExp = getExp();
-        int currentExp = json.getInt("exp");
+        int currentExp = json.get("exp").getAsInt();
         int differenceExp = currentExp - previousExp;
 
         int previousEmeralds = (Socket.cachedUser != null ? Socket.cachedUser.getEmeralds() : 0);
-        int currentEmeralds = json.getInt("emeralds");
+        int currentEmeralds = json.get("emeralds").getAsInt();
         int differenceEmeralds = currentEmeralds - previousEmeralds;
 
         int previousLevel = (int) getLevel();
         if (Socket.cachedUser != null) {
-            Socket.cachedUser.setExp(json.getInt("exp"));
-            Socket.cachedUser.setEmeralds(json.getInt("emeralds"));
+            Socket.cachedUser.setExp(json.get("exp").getAsInt());
+            Socket.cachedUser.setEmeralds(json.get("emeralds").getAsInt());
         }
         int currentLevel = (int) getLevel();
         int differenceLevel = currentLevel - previousLevel;

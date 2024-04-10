@@ -4,87 +4,43 @@ import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
-import cc.polyfrost.oneconfig.utils.commands.annotations.Greedy;
-import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.HysentialsUtilsKt;
 import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.cosmetic.CosmeticGui;
-import llc.redstone.hysentials.guis.actionLibrary.ActionLibrary;
 import llc.redstone.hysentials.guis.club.ClubDashboard;
 import llc.redstone.hysentials.guis.misc.HysentialsLevel;
 import llc.redstone.hysentials.guis.quest.QuestMainGui;
 import llc.redstone.hysentials.handlers.htsl.CodeEditor;
 import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
-import llc.redstone.hysentials.handlers.misc.QuestHandler;
 import llc.redstone.hysentials.handlers.npc.NPC;
-import llc.redstone.hysentials.handlers.npc.lost.LostAdventure;
 import llc.redstone.hysentials.htsl.compiler.Compiler;
-import llc.redstone.hysentials.hyphone.HyPhoneGUI;
 import llc.redstone.hysentials.macrowheel.MacroWheelSelector;
 import llc.redstone.hysentials.profileViewer.DefaultProfileGui;
-import llc.redstone.hysentials.quest.Quest;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.util.*;
-import llc.redstone.hysentials.util.Renderer;
 import llc.redstone.hysentials.utils.ChatLib;
-import llc.redstone.hysentials.utils.ScreenshotUtilsKt;
 import llc.redstone.hysentials.websocket.Request;
 import llc.redstone.hysentials.websocket.Socket;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
-import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.guis.misc.HysentialsLevel;
-import llc.redstone.hysentials.schema.HysentialsSchema;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.AbstractClientPlayer;
-import net.minecraft.client.entity.EntityOtherPlayerMP;
-import net.minecraft.client.gui.GuiDisconnected;
-import net.minecraft.client.gui.GuiMainMenu;
-import net.minecraft.client.gui.GuiMultiplayer;
-import net.minecraft.client.multiplayer.GuiConnecting;
-import net.minecraft.client.network.NetHandlerPlayClient;
-import net.minecraft.client.network.NetworkPlayerInfo;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
-import net.minecraft.network.EnumConnectionState;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.handshake.client.C00Handshake;
-import net.minecraft.network.login.client.C00PacketLoginStart;
-import net.minecraft.network.login.server.S02PacketLoginSuccess;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -154,16 +110,16 @@ public class HysentialsCommand extends CommandBase {
             case "link": {
                 if (Socket.linking) {
                     Multithreading.runAsync(() -> {
-                        JSONObject response = Socket.data;
-                        response.put("server", false);
+                        JsonObject response = Socket.linkingData;
+                        response.addProperty("server", false);
                         Socket.CLIENT.sendText(response.toString());
                         Socket.linking = false;
-                        Socket.data = null;
+                        Socket.linkingData = null;
                         Socket.linked = true;
-                        MUtils.chat(HysentialsConfig.chatPrefix + " §aSuccessfully linked your Discord account!");
+                        UChat.chat(HysentialsConfig.chatPrefix + " §aSuccessfully linked your Discord account!");
                     });
                 } else {
-                    MUtils.chat(HysentialsConfig.chatPrefix + " §cYou are not currently linked to your Discord account! You must run /link in the Discord to link it.");
+                    UChat.chat(HysentialsConfig.chatPrefix + " §cYou are not currently linked to your Discord account! You must run /link in the Discord to link it.");
                 }
                 break;
             }
@@ -174,19 +130,19 @@ public class HysentialsCommand extends CommandBase {
             }
 
             case "online": {
-                Hysentials.INSTANCE.sendMessage("§aOnline Players (" + Socket.cachedUsersNew.size() + "):");
-                for (Map.Entry<String, HysentialsSchema.User> player : Socket.cachedUsersNew.entrySet().stream().limit(25).collect(Collectors.toList())) {
+                Hysentials.INSTANCE.sendMessage("§aOnline Players (" + Socket.cachedUsers.size() + "):");
+                for (Map.Entry<String, HysentialsSchema.User> player : Socket.cachedUsers.entrySet().stream().limit(25).collect(Collectors.toList())) {
                     UChat.chat("&8 - &a" + player.getValue().getUsername());
                 }
-                if (Socket.cachedUsersNew.size() > 25) {
-                    UChat.chat("&8 - &aAnd " + ( Socket.cachedUsersNew.size() - 25) + " more...");
+                if (Socket.cachedUsers.size() > 25) {
+                    UChat.chat("&8 - &aAnd " + ( Socket.cachedUsers.size() - 25) + " more...");
                 }
                 break;
             }
 
             case "phone":
             case "menu": {
-                Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(new HyPhoneGUI());
+                UChat.chat(HysentialsConfig.chatPrefix + " §cComing soon!");
                 break;
             }
 
@@ -283,7 +239,7 @@ public class HysentialsCommand extends CommandBase {
                 text.appendText(pageS);
                 text.appendText("&e/hysentials help <page> &b- &bShows this help page.\n");
                 text.appendText("&e/hysentials config &b- &bOpens the Hysentials config.\n");
-                text.appendText("&e/hysentials commandwheel &7- &bOpens the Command Wheel Editor.\n"); //here too
+                text.appendText("&e/hysentials commandwheel &7- &bOpens the Command Wheel Editor.\n");
                 text.appendText("&e/hysentials reload &7- &bReloads the configs.\n");
                 text.appendText("&e/hysentials reconnect &7- &bReconnects to the websocket.\n");
                 text.appendText("&e/hysentials link &7- &bAccept a link request from discord.\n");
@@ -349,19 +305,6 @@ public class HysentialsCommand extends CommandBase {
                         Socket.createSocket();
                     } else {
                         Hysentials.INSTANCE.sendMessage("&cLocal is not on and you are already on the main server!");
-                    }
-                    break;
-                }
-
-                case "file": {
-                    File base = new File("./config/hysentials/imageicons/");
-                    JFileChooser chooser = new JFileChooser(base);
-                    FileNameExtensionFilter filter = new FileNameExtensionFilter(
-                        "PNG", "png");
-                    chooser.setFileFilter(filter);
-                    int returnVal = chooser.showOpenDialog(null);
-                    if(returnVal == JFileChooser.APPROVE_OPTION) {
-                        Hysentials.INSTANCE.sendMessage("&aSelected file: " + chooser.getSelectedFile().getPath());
                     }
                     break;
                 }

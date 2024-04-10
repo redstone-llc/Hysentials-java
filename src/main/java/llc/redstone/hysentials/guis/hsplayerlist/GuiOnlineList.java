@@ -14,8 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import llc.redstone.hysentials.schema.HysentialsSchema;
-import llc.redstone.hysentials.util.BlockWAPIUtils;
-import llc.redstone.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiIngame;
@@ -24,7 +22,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
-import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria.EnumRenderType;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
@@ -33,9 +30,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.imageio.ImageIO;
-
-import static llc.redstone.hysentials.schema.HysentialsSchema.*;
-import static llc.redstone.hysentials.util.BlockWAPIUtils.getDisplayName;
 
 @SideOnly(Side.CLIENT)
 public class GuiOnlineList extends Gui {
@@ -66,7 +60,7 @@ public class GuiOnlineList extends Gui {
 
     public void renderPlayerlist(int width) {
         GlStateManager.pushMatrix();
-        List<HysentialsSchema.User> list = field_175252_a.sortedCopy(Socket.cachedUsersNew.values());
+        List<HysentialsSchema.User> list = field_175252_a.sortedCopy(Socket.cachedUsers.values());
         int i = 0;
         int j = 0;
         Iterator<HysentialsSchema.User> iterator = list.iterator();

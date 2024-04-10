@@ -1,8 +1,8 @@
 package llc.redstone.hysentials.command;
 
 
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.util.BUtils;
-import llc.redstone.hysentials.util.MUtils;
 import llc.redstone.hysentials.util.C;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
@@ -35,7 +35,7 @@ public class RenameCommand extends CommandBase {
         }
         ItemStack item = Minecraft.getMinecraft().thePlayer.getHeldItem();
         if (item == null || item.getItem() == null) {
-            MUtils.chat("§cYou must be holding an item!");
+            UChat.chat("§cYou must be holding an item!");
             return;
         }
         item = item.copy();
@@ -50,7 +50,7 @@ public class RenameCommand extends CommandBase {
 
         item.setStackDisplayName(C.translate(completeArgs));
         setCreativeAction(item, Minecraft.getMinecraft().thePlayer.inventory.currentItem);
-        MUtils.chat("§aRenamed item to: §r" + C.translate(completeArgs));
+        UChat.chat("§aRenamed item to: §r" + C.translate(completeArgs));
     }
 
     public static void setCreativeAction(ItemStack item, int slot){

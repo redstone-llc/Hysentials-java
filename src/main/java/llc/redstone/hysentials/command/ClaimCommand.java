@@ -1,9 +1,8 @@
 package llc.redstone.hysentials.command;
 
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.util.BUtils;
 import llc.redstone.hysentials.util.DuoVariable;
-import llc.redstone.hysentials.util.MUtils;
 import llc.redstone.hysentials.websocket.Request;
 import llc.redstone.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
@@ -42,9 +41,9 @@ public class ClaimCommand extends CommandBase {
             ).toString()
         );
         Socket.awaiting.add(new DuoVariable<>("claim", (data) -> {
-            if (data.has("success") && !(boolean) data.get("success")) {
+            if (data.has("success") && !data.get("success").getAsBoolean()) {
                 if (data.has("message")) {
-                    MUtils.chat(HysentialsConfig.chatPrefix + " " + data.get("message").toString());
+                    UChat.chat(HysentialsConfig.chatPrefix + " " + data.get("message").getAsString());
                 }
 //                Minecraft.getMinecraft().thePlayer.sendChatMessage("/claim");
             }

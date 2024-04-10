@@ -5,6 +5,7 @@ import com.neovisionaries.ws.client.WebSocket
 
 
 abstract class Channel (val name: String) {
+    var socket: WebSocket? = null
     init {
         channels[name] = this
     }

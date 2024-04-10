@@ -11,6 +11,7 @@ import llc.redstone.hysentials.handlers.redworks.HousingScoreboard
 import llc.redstone.hysentials.handlers.sbb.Actionbar
 import llc.redstone.hysentials.handlers.sbb.SbbRenderer
 import llc.redstone.hysentials.handlers.sbb.Scoreboard
+import llc.redstone.hysentials.util.C
 import llc.redstone.hysentials.util.Renderer
 import llc.redstone.hysentials.util.ScoreboardWrapper
 import llc.redstone.hysentials.util.ScoreboardWrapper.ScoreWrapper
@@ -45,8 +46,7 @@ class SbbRenderer {
                     Collectors.toCollection { ArrayList() }
                 )
             for (line in lines) {
-                val s = SBBoxesEditor.removeHiddenCharacters(line.toString())
-                val box = SBBoxes.getFromMatch(s) ?: continue
+                val box = SBBoxes.getFromMatch(line.toString()) ?: continue
 
                 box.apply {
                     if (!isEnabled) return@apply

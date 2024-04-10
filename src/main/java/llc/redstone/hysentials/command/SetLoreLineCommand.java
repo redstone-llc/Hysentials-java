@@ -92,6 +92,6 @@ public class SetLoreLineCommand extends CommandBase {
 
         setLore(item, newLore);
         RenameCommand.setCreativeAction(item, Minecraft.getMinecraft().thePlayer.inventory.currentItem);
-        MUtils.chat("§aLore line " + (line + 1) + " set to: " + loreToBeSet);
+        UChat.chat("§aLore line " + (line + 1) + " set to: " + loreToBeSet);
     }
 }

@@ -64,11 +64,15 @@ public class FunctionsGUIHandler {
         }
     }
 
+    public static boolean isInFunctionsGui() {
+        return Minecraft.getMinecraft().currentScreen instanceof GuiChest && Navigator.getContainerName() != null && Navigator.getContainerName().equals("Functions");
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onGuiRender(GuiScreenEvent.BackgroundDrawnEvent event) {
         if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
             return;
-        if (Navigator.getContainerName() == null || !Navigator.getContainerName().equals("Functions")) return;
+        if (!isInFunctionsGui()) return;
         if (Navigator.getContainerSize() != 54) return;
         GlStateManager.pushMatrix();
         Slot slot = Minecraft.getMinecraft().thePlayer.openContainer.getSlot(48);

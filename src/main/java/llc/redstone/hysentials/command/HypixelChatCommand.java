@@ -1,14 +1,10 @@
 package llc.redstone.hysentials.command;
 
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.config.hysentialMods.ChatConfig;
 import llc.redstone.hysentials.handlers.chat.modules.bwranks.BWSReplace;
 import llc.redstone.hysentials.util.BUtils;
-import llc.redstone.hysentials.util.MUtils;
-import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.handlers.chat.modules.bwranks.BWSReplace;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -44,8 +40,8 @@ public class HypixelChatCommand extends CommandBase {
             return;
         }
         if (args.length == 0) {
-            MUtils.chat("&cInvalid usage! /chat <channel>");
-            MUtils.chat("&cValid channels: " + String.join(", ", chats));
+            UChat.chat("&cInvalid usage! /chat <channel>");
+            UChat.chat("&cValid channels: " + String.join(", ", chats));
             return;
         }
         boolean enabled = ChatConfig.globalChat && Hysentials.INSTANCE.getConfig().chatConfig.enabled;
@@ -57,16 +53,16 @@ public class HypixelChatCommand extends CommandBase {
         if ((command.equals("global") || command.equals("gl")) && enabled) {
             if (isInGlobalChat) {
                 BWSReplace.diagnostics.add("Already in Global Chat");
-                MUtils.chat("&cYou're already in this channel!");
+                UChat.chat("&cYou're already in this channel!");
             } else {
                 isInGlobalChat = true;
                 BWSReplace.diagnostics.add("Global Chat set to true");
-                MUtils.chat("&aYou are now in the &6GLOBAL &achannel!");
+                UChat.chat("&aYou are now in the &6GLOBAL &achannel!");
             }
         } else {
             String finalCommand = command;
             if (chats.stream().noneMatch(c -> c.toLowerCase().equals(finalCommand)) && !chatAliases.contains(command)) {
-                MUtils.chat("&cInvalid Channel! Valid channels: " + String.join(", ", chats));
+                UChat.chat("&cInvalid Channel! Valid channels: " + String.join(", ", chats));
             } else {
                 if (isInGlobalChat) {
                     if (chatAliases.contains(command)) {

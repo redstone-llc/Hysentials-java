@@ -1,24 +1,15 @@
 package llc.redstone.hysentials.handlers.redworks;
 
-import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
-import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.util.BlockWAPIUtils;
 import llc.redstone.hysentials.util.C;
 import llc.redstone.hysentials.util.HypixelRanks;
-import llc.redstone.hysentials.util.ScoreboardWrapper;
-import llc.redstone.hysentials.websocket.Socket;
-import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.schema.HysentialsSchema;
-import llc.redstone.hysentials.util.BlockWAPIUtils;
 import llc.redstone.hysentials.websocket.Socket;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -40,10 +31,10 @@ public class BwRanksUtils {
             String regex2 = "(§r§7|§7)" + name;
 
             if (rank != null && rank != BlockWAPIUtils.Rank.DEFAULT) {
-                String replacement = (rank.getPrefix(name) + name + (plus ? getPlus(uuid) : ""));
+                String replacement = (rank.getPrefix() + name + (plus ? getPlus(uuid) : ""));
                 if (futuristicRanks(true)) {
                     if (!checksColor) {
-                        return rank.getHex() + name;
+                        return rank.getNametagColor() + name;
                     }
                     replacement = (rank.getPlaceholder() + name + (plus ? getPlus(uuid) : ""));
                 }
@@ -161,7 +152,7 @@ public class BwRanksUtils {
         }
 
         if (rank != null && rank != BlockWAPIUtils.Rank.DEFAULT) {
-            String replacement = (rank.getPrefix(name));
+            String replacement = (rank.getPrefix());
             if (futuristicRanks(null)) {
                 replacement = (rank.getPlaceholder());
             }
@@ -194,7 +185,7 @@ public class BwRanksUtils {
     }
 
     public static String getPlus(UUID id) {
-        HysentialsSchema.User user = Socket.cachedUsersNew.get(id.toString());
+        HysentialsSchema.User user = Socket.cachedUsers.get(id.toString());
         if (user == null) return "";
         return user.getHasPlus() ? " §6[+]§r" : "";
     }

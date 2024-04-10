@@ -1,12 +1,11 @@
 package llc.redstone.hysentials.command;
 
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.hysentialMods.ChatConfig;
 import llc.redstone.hysentials.util.BUtils;
-import llc.redstone.hysentials.util.MUtils;
 import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.websocket.Socket;
-import llc.redstone.hysentials.config.HysentialsConfig;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -40,15 +39,15 @@ public class GlobalChatCommand extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
         if (!BUtils.isHypixelOrSBX()) {
-            MUtils.chat(HysentialsConfig.chatPrefix + "&cYou are not on a Hypixel server!");
+            UChat.chat(HysentialsConfig.chatPrefix + "&cYou are not on a Hypixel server!");
             return;
         }
         if (!ChatConfig.globalChat || !Hysentials.INSTANCE.getConfig().chatConfig.enabled) {
-            MUtils.chat(HysentialsConfig.chatPrefix + "&cGlobal chat is disabled!");
+            UChat.chat(HysentialsConfig.chatPrefix + "&cGlobal chat is disabled!");
             return;
         }
         if (args.length == 0) {
-            MUtils.chat(HysentialsConfig.chatPrefix + "&cInvalid usage! /globalchat <message>");
+            UChat.chat(HysentialsConfig.chatPrefix + "&cInvalid usage! /globalchat <message>");
             return;
         }
 

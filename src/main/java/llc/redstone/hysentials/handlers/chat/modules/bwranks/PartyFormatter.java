@@ -157,7 +157,7 @@ public class PartyFormatter {
                 prefix = BwRanksUtils.getReplace(partyMatcher.group(1), name, null);
             }
             String mes = partyMatcher.group(3);
-            MUtils.chat(prefix() + "&9" + prefix + name + (FormattingConfig.hexRendering() ? "<#c0def5>" : "&f") + ": " + mes);
+            UChat.chat(prefix() + "&9" + prefix + name + (FormattingConfig.hexRendering() ? "<#c0def5>" : "&f") + ": " + mes);
 
             return true;
         }

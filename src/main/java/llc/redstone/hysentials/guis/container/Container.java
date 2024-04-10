@@ -207,10 +207,6 @@ public abstract class Container extends InventoryBasic {
     }
 
     public void open(@NotNull EntityPlayer owner) {
-        if (!Socket.linked) {
-            UChat.chat("&cYou must be linked to a discord account to use this feature.");
-            return;
-        }
         setItems();
         for (Map.Entry<Integer, GuiItem> entry : guiItems.entrySet()) {
             Integer slot = entry.getKey();

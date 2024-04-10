@@ -1,15 +1,11 @@
 package llc.redstone.hysentials.command;
 
-import llc.redstone.hysentials.util.MUtils;
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.guis.container.GuiItem;
-import llc.redstone.hysentials.util.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class GlowCommand extends CommandBase {
@@ -32,11 +28,11 @@ public class GlowCommand extends CommandBase {
     public void processCommand(ICommandSender sender, String[] args) {
         ItemStack item = Minecraft.getMinecraft().thePlayer.getHeldItem();
         if (item == null || item.getItem() == null) {
-            MUtils.chat("§cYou must be holding an item!");
+            UChat.chat("§cYou must be holding an item!");
             return;
         }
         if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative()) {
-            MUtils.chat("§cYou must be in creative mode!");
+            UChat.chat("§cYou must be in creative mode!");
             return;
         }
         item = item.copy();
@@ -44,6 +40,6 @@ public class GlowCommand extends CommandBase {
         GuiItem.hideFlag(item, 1);
         GuiItem.setEnchanted(item, true);
         RenameCommand.setCreativeAction(item, Minecraft.getMinecraft().thePlayer.inventory.currentItem);
-        MUtils.chat("§aAdded glow to the item successfully!");
+        UChat.chat("§aAdded glow to the item successfully!");
     }
 }

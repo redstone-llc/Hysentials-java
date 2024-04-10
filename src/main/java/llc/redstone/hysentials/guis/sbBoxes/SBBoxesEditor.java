@@ -15,6 +15,7 @@ import llc.redstone.hysentials.guis.utils.GrabOffset;
 import llc.redstone.hysentials.guis.utils.Position;
 import llc.redstone.hysentials.guis.utils.SBBoxes;
 import llc.redstone.hysentials.guis.utils.SnappingLine;
+import llc.redstone.hysentials.util.C;
 import llc.redstone.hysentials.util.Renderer;
 import llc.redstone.hysentials.util.ScoreboardWrapper;
 import com.google.common.collect.Iterables;
@@ -107,7 +108,7 @@ public class SBBoxesEditor extends HysentialsGui {
                     drawRect(0, 15 + 30 * i + 3 * i + this.scrollAmount, 200, 30, (int) Renderer.color(0, 0, 0, 175));
                     fontRendererObj.drawString("§eClick to edit", mouseX + 5, mouseY - 10, (int) Renderer.color(255, 255, 255, 255));
                 }
-                fontRendererObj.drawString("§eText: §r" + sbBox.getText(), 100 - fontRendererObj.getStringWidth("§eText: §r" + sbBox.getText()) / 2, 20 + 30 * i + 3 * i + this.scrollAmount, (int) Renderer.color(255, 255, 255, 255));
+                fontRendererObj.drawString("§eText: §r" + C.translate(sbBox.getText()), 100 - fontRendererObj.getStringWidth("§eText: §r" + C.translate(sbBox.getText())) / 2, 20 + 30 * i + 3 * i + this.scrollAmount, (int) Renderer.color(255, 255, 255, 255));
                 fontRendererObj.drawString("§ePosition: §r(" + sbBox.getX() + ", " + sbBox.getY() + ")", 100 - fontRendererObj.getStringWidth("§ePosition: §r(" + sbBox.getX() + ", " + sbBox.getY() + ")") / 2, 30 + 30 * i + 3 * i + this.scrollAmount, (int) Renderer.color(255, 255, 255, 255));
             }
         } else {

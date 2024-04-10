@@ -1,21 +1,16 @@
 package llc.redstone.hysentials.cosmetics.wings.tdarth;
 
 import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
-import llc.redstone.hysentials.cosmetics.backpack.BackpackModel;
-import llc.redstone.hysentials.cosmetics.backpack.CatPackModel;
 import llc.redstone.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 public class TdarthCosmetic {
@@ -31,7 +26,7 @@ public class TdarthCosmetic {
     public void onTickEvent(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         try {
-            for (String id : Socket.cachedUsersNew.keySet()) {
+            for (String id : Socket.cachedUsers.keySet()) {
                 UUID uuid = UUID.fromString(id);
                 if (!canUse(uuid)) continue;
                 try {

@@ -1,20 +1,12 @@
 package llc.redstone.hysentials.guis.utils;
 
-import cc.polyfrost.oneconfig.config.core.OneColor;
-import cc.polyfrost.oneconfig.hud.Hud;
-import cc.polyfrost.oneconfig.libs.universal.ChatColor;
-import cc.polyfrost.oneconfig.libs.universal.UMatrixStack;
 import cc.polyfrost.oneconfig.renderer.TextRenderer;
-import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.config.hysentialMods.ScorebarsConfig;
+import llc.redstone.hysentials.guis.sbBoxes.SBBoxesEditor;
 import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
-import llc.redstone.hysentials.util.Renderer;
-import llc.redstone.hysentials.util.ScoreboardWrapper;
+import llc.redstone.hysentials.util.C;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
-import kotlin.jvm.JvmName;
-import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -23,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class SBBoxes {
     public static List<SBBoxes> boxes = new ArrayList<>();
@@ -56,6 +49,10 @@ public class SBBoxes {
     }
 
     public void draw() {
+        if (display.startsWith(" ") && !display.endsWith(" ")) {
+            display = display.trim();
+        }
+        display = C.translate(display);
         SbbRenderer.drawBox(position.getX(), position.getY(), getWidth(display), getHeight(display),
             ScorebarsConfig.boxColor, ScorebarsConfig.boxShadows,
             new Integer[]{0, 2, 4}[ScorebarsConfig.scoreboardBoxesBorderRadius]
@@ -169,11 +166,17 @@ public class SBBoxes {
     }
 
     public static SBBoxes getFromMatch(String s) {
+        s = C.removeRepeatColor(s);
+        s = s.replace("§", "&");
+        s = SBBoxesEditor.removeHiddenCharacters(s);
         for (SBBoxes box : boxes) {
-            Matcher matcher = Pattern.compile(box.regex).matcher(s);
-            if (matcher.find()) {
-                box.setDisplay(s, matcher);
-                return box;
+            try {
+                Matcher matcher = Pattern.compile(box.regex).matcher(s);
+                if (matcher.find()) {
+                    box.setDisplay(s, matcher);
+                    return box;
+                }
+            } catch (PatternSyntaxException ignored) { // Bad regex pattern
             }
         }
         return null;

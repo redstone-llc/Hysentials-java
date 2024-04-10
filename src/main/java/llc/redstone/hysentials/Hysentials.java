@@ -206,7 +206,7 @@ public class Hysentials {
         commands.add(new SetTextureCommand());
         commands.add(new HymojiCommand());
         commands.add(new ClaimCommand());
-        commands.add(new GroupChatCommand());
+//        commands.add(new GroupChatCommand());
 
         for (ICommand command : commands) {
             ClientCommandHandler.instance.registerCommand(command);
@@ -216,12 +216,12 @@ public class Hysentials {
         CommandManager.INSTANCE.registerCommand(new ClubCommand());
 
 
-        if (Socket.cachedServerData.has("rpc") && Socket.cachedServerData.getBoolean("rpc")) {
-            //                DiscordCore.init();
+        if (Socket.cachedServerData != null && Socket.cachedServerData.getRpc() != null && Socket.cachedServerData.getRpc()) {
             discordRPC = new DiscordRPC();
         }
 
         Quest.registerQuests();
+        HysentialsUtilsKt.init(VERSION);
         System.out.println("Hysentials has been initialized!");
     }
 
@@ -402,16 +402,16 @@ public class Hysentials {
             SBBoxesEditor.initGUI();
             // general stuff
             eventBus.register(languageHandler);
-            try {
-                if (isChatting) {
-                    eventBus.register(new GroupChat());
-                    eventBus.register(new GlobalChat());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                isChatting = false;
-                System.out.println("Failed to register GroupChat due to old version of Chatting mod. Please update Chatting to the latest version.");
-            }
+//            try {
+//                if (isChatting) {
+//                    eventBus.register(new GroupChat());
+//                    eventBus.register(new GlobalChat());
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                isChatting = false;
+//                System.out.println("Failed to register GroupChat due to old version of Chatting mod. Please update Chatting to the latest version.");
+//            }
             // chat
             eventBus.register(chatHandler);
 
@@ -432,6 +432,7 @@ public class Hysentials {
             eventBus.register(new Queue());
             eventBus.register(new Navigator());
             eventBus.register(new ActionGUIHandler());
+            eventBus.register(new CommitListener());
             eventBus.register(new FunctionsGUIHandler());
             eventBus.register(new Exporter());
             eventBus.register(new HousingMenuHandler());
@@ -460,7 +461,6 @@ public class Hysentials {
 
             EventManager.INSTANCE.register(new BwRanks());
 
-            HysentialsUtilsKt.init(VERSION);
 
 //        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 //            JSONArray array = new JSONArray();

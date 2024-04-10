@@ -216,4 +216,15 @@ public class Compiler {
         }
         return result;
     }
+
+    public static List<String> getArgs(String input, boolean iQ) {
+        List<String> result = new ArrayList<>();
+        Matcher matcher = Pattern.compile("\"((?:\\\\\"|[^\"])*)\"|'((?:\\\\'|[^'])*)'|(\\S+)").matcher(input);
+        while (matcher.find()) {
+            String quote = matcher.group(1) != null ? "\"" : matcher.group(2) != null ? "'" : "";
+            if (!iQ) quote = "";
+            result.add(matcher.group(1) != null ? (quote + matcher.group(1) + quote) : matcher.group(2) != null ? (quote + matcher.group(2) + quote) : matcher.group(3));
+        }
+        return result;
+    }
 }

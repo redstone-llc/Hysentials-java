@@ -93,11 +93,32 @@ public class C {
         return text.replace("&", "§");
     }
 
+    public static String removeRepeatColor(String text) {
+        String lastColor = null;
+        StringBuilder newText = new StringBuilder();
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == '§' && i + 1 < text.length()) {
+                char next = text.charAt(i + 1);
+                if (next >= '0' && next <= '9' || next >= 'a' && next <= 'f' || next >= 'k' && next <= 'o' || next >= 'r' && next <= 'r') {
+                    if (lastColor == null || lastColor.charAt(1) != next) {
+                        lastColor = "§" + next;
+                        newText.append(lastColor);
+                    }
+                    i++;
+                }
+            } else {
+                newText.append(c);
+            }
+        }
+        return newText.toString();
+    }
+
     public static String removeColor(String text) {
-        return text.replaceAll("§[0-9a-fA-Fk-oK-ORr]", "");
+        return text.replaceAll("§[0-9a-fA-Fk-oK-ORr]|&[0-9a-fA-Fk-oK-ORr]", "");
     }
 
     public static String removeControlCodes(String text) {
-        return text.replaceAll("§[k-oK-ORr]", "");
+        return text.replaceAll("§[k-oK-ORr]|&[k-oK-ORr]", "");
     }
 }

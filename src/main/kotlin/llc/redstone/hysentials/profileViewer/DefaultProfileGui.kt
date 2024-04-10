@@ -6,18 +6,13 @@ import cc.polyfrost.oneconfig.libs.universal.UScreen
 import cc.polyfrost.oneconfig.utils.Multithreading
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil
 import llc.redstone.hysentials.Hysentials
-import llc.redstone.hysentials.cosmetic.CosmeticGui
-import llc.redstone.hysentials.guis.actionLibrary.ActionViewer.toList
-import llc.redstone.hysentials.guis.container.GuiItem
 import llc.redstone.hysentials.guis.misc.HysentialsLevel
 import llc.redstone.hysentials.handlers.redworks.BwRanksUtils
 import llc.redstone.hysentials.util.*
 import llc.redstone.hysentials.util.BlockWAPIUtils.getRequest
 import llc.redstone.hysentials.util.Renderer.drawImage
-import llc.redstone.hysentials.utils.formatCapitalize
 import llc.redstone.hysentials.websocket.Socket
 import com.google.common.collect.Lists
-import llc.redstone.hysentials.cosmetic.colorFromRarity
 import llc.redstone.hysentials.cosmetic.getEquippedCosmetics
 import llc.redstone.hysentials.schema.HysentialsSchema
 import net.minecraft.client.Minecraft
@@ -27,7 +22,6 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.Slot
 import net.minecraft.item.ItemStack
 import net.minecraft.util.ResourceLocation
-import org.json.JSONArray
 import org.json.JSONObject
 import java.math.BigDecimal
 import java.text.DecimalFormat
@@ -403,7 +397,7 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
             }
             guildData = JSONObject(guild)
 
-            hysentialData = Socket.cachedUsersNew.values.firstOrNull { it.uuid == player.uniqueID.toString() }
+            hysentialData = Socket.cachedUsers.values.firstOrNull { it.uuid == player.uniqueID.toString() }
 
             badges = ArrayList()
 

@@ -1,12 +1,9 @@
 package llc.redstone.hysentials.command;
 
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.util.MUtils;
-import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
-import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
 import llc.redstone.hysentials.guis.misc.PlayerInventory;
-import llc.redstone.hysentials.handlers.redworks.HousingScoreboard;
 import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
-import llc.redstone.hysentials.guis.misc.PlayerInventory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -48,7 +45,7 @@ public class OpenInvCommand extends CommandBase {
             return;
         }
         if (args.length == 0) {
-            MUtils.chat("&cUsage: /openinv <player>");
+            UChat.chat("&cUsage: /openinv <player>");
             return;
         }
         for (EntityPlayer player : Minecraft.getMinecraft().theWorld.playerEntities) {
@@ -57,6 +54,6 @@ public class OpenInvCommand extends CommandBase {
                 return;
             }
         }
-        MUtils.chat("&cCouldn't find a player by " + args[0] + ", make sure they are within your render distance to view their inventory!");
+        UChat.chat("&cCouldn't find a player by " + args[0] + ", make sure they are within your render distance to view their inventory!");
     }
 }

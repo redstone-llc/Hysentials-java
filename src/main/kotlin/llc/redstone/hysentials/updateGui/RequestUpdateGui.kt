@@ -1,12 +1,16 @@
 package llc.redstone.hysentials.updateGui
 
 import cc.polyfrost.oneconfig.gui.elements.BasicElement
+import cc.polyfrost.oneconfig.libs.universal.UKeyboard
+import cc.polyfrost.oneconfig.libs.universal.UResolution
 import cc.polyfrost.oneconfig.libs.universal.UResolution.scaleFactor
+import cc.polyfrost.oneconfig.libs.universal.UScreen
 import cc.polyfrost.oneconfig.renderer.NanoVGHelper
 import cc.polyfrost.oneconfig.renderer.asset.Image
 import cc.polyfrost.oneconfig.renderer.asset.SVG
 import cc.polyfrost.oneconfig.renderer.font.Fonts
 import cc.polyfrost.oneconfig.utils.InputHandler
+import cc.polyfrost.oneconfig.utils.dsl.nanoVGHelper
 import llc.redstone.hysentials.Hysentials
 import llc.redstone.hysentials.util.Renderer
 import net.minecraft.client.Minecraft
@@ -22,8 +26,9 @@ class RequestUpdateGui(private var inGame: Boolean, private var deleteOld: Boole
 
     private var xSize = 367
     private var ySize = 460
-    private var guiLeft = 0
-    private var guiTop = 0
+    private var scale = 0f
+    private var guiLeft = 0f
+    private var guiTop = 0f
 
 
     val updateObj = UpdateChecker.updateGetter.updateObj ?: error("Update object is null")
@@ -35,13 +40,14 @@ class RequestUpdateGui(private var inGame: Boolean, private var deleteOld: Boole
     }
 
     fun drawScreenExternal(mouseX: Int, mouseY: Int, partialTicks: Float) {
-        NanoVGHelper.INSTANCE.setupAndDraw(true) {
+        NanoVGHelper.INSTANCE.setupAndDraw(false) {
             val nano = NanoVGHelper.INSTANCE
             val inputHandler = InputHandler()
-            inputHandler.scale(scaleFactor, scaleFactor)
+            inputHandler.scale(scale.toDouble(), scale.toDouble())
+            nano.scale(it, scale, scale)
 
-            val x = guiLeft
-            val y = guiTop
+            val x = guiLeft / scale
+            val y = guiTop / scale
             val width = xSize
             val height = ySize
 
@@ -49,8 +55,8 @@ class RequestUpdateGui(private var inGame: Boolean, private var deleteOld: Boole
             nano.drawImage(
                 it,
                 Image("/assets/hysentials/gui/updater/background.png"),
-                x.toFloat(),
-                y.toFloat(),
+                x,
+                y,
                 width.toFloat(),
                 height.toFloat()
             )
@@ -102,13 +108,16 @@ class RequestUpdateGui(private var inGame: Boolean, private var deleteOld: Boole
                 }
             }
 
-            val notes = updateNotes?.notes ?: ("• Fixed me being dumb.\n" +
-                    "• Added Cosmetic gui. (default keybind K)\n" +
-                    "• Fixed auto updater not working.\n" +
-                    "• Fixed jar becoming way too large because of a library I added, but didn't really need.\n" +
-                    "• Started preparations for something big.\n" +
-                    "• Hysentials Level system using /hs level (we will go more in depth as to how this works soon)\n" +
-                    "• And more!")
+            if (UKeyboard.isKeyDown(UKeyboard.KEY_ESCAPE)) {
+                UpdateChecker.updateGetter.updateObj = null
+                if (!inGame) {
+                    Minecraft.getMinecraft().displayGuiScreen(GuiMainMenu())
+                } else {
+                    Minecraft.getMinecraft().thePlayer.closeScreen()
+                }
+            }
+
+            val notes = updateNotes?.notes ?: "No notes available"
             nano.drawWrappedString(
                 it,
                 notes,
@@ -178,7 +187,11 @@ class RequestUpdateGui(private var inGame: Boolean, private var deleteOld: Boole
 
         instance = this
 
-        guiLeft = (Renderer.screen.getWidth() - xSize) / 2
-        guiTop = (Renderer.screen.getHeight() - ySize) / 2
+        scale = UResolution.windowHeight / 480f
+        guiLeft = (UResolution.windowWidth - (xSize * scale)) / 2
+        guiTop = (UResolution.windowHeight - (ySize * scale)) / 2
+        if (guiLeft < 0) {
+            guiLeft = 0f
+        }
     }
 }

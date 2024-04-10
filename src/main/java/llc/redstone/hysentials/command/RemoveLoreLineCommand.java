@@ -63,18 +63,18 @@ public class RemoveLoreLineCommand extends CommandBase {
 
         ItemStack item = Minecraft.getMinecraft().thePlayer.getHeldItem();
         if (item == null || item.getItem() == null) {
-            MUtils.chat("&cYou must be holding an item!");
+            UChat.chat("&cYou must be holding an item!");
             return;
         }
         item = item.copy();
         if (line > getLore(item).size()) {
-            MUtils.chat("&cLine number is too high!");
+            UChat.chat("&cLine number is too high!");
             return;
         }
         List<String> lore = getLore(item);
         lore.remove(line - 1);
         setLore(item, lore);
         RenameCommand.setCreativeAction(item, Minecraft.getMinecraft().thePlayer.inventory.currentItem);
-        MUtils.chat("&aSuccessfully removed line &e" + line + "&a!");
+        UChat.chat("&aSuccessfully removed line &e" + line + "&a!");
     }
 }

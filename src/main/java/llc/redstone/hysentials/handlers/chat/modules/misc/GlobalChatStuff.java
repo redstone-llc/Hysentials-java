@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.handlers.chat.modules.misc;
 
 import cc.polyfrost.oneconfig.events.event.ChatSendEvent;
+import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.command.HypixelChatCommand;
 import llc.redstone.hysentials.handlers.chat.ChatReceiveModule;
 import llc.redstone.hysentials.handlers.chat.ChatSendModule;
@@ -26,12 +27,12 @@ public class GlobalChatStuff {
                 if (getStrippedMessage(event.message).equals("\nPlease enter the text you wish to set in chat!\n [PREVIOUS] [CANCEL]")) {
                     BWSReplace.diagnostics.add("Setting isInGlobalChat to false (0)");
                     HypixelChatCommand.isInGlobalChat = false;
-                    MUtils.chat("&aYou are now in the &6" + HypixelChatCommand.gotoChannel.toUpperCase() + " &achannel!");
+                    UChat.chat("&aYou are now in the &6" + HypixelChatCommand.gotoChannel.toUpperCase() + " &achannel!");
                 }
                 if (getStrippedMessage(event.message).equals("You're already in this channel!")) {
                     BWSReplace.diagnostics.add("Setting isInGlobalChat to false (1)");
                     event.setCanceled(true);
-                    MUtils.chat("&aYou are now in the &6" + HypixelChatCommand.gotoChannel.toUpperCase() + " &achannel!");
+                    UChat.chat("&aYou are now in the &6" + HypixelChatCommand.gotoChannel.toUpperCase() + " &achannel!");
                     HypixelChatCommand.isInGlobalChat = false;
                 }else if (getStrippedMessage(event.message).startsWith("You are now in the ") && !getStrippedMessage(event.message).startsWith("You are now in the GLOBAL")) {
                     BWSReplace.diagnostics.add("Setting isInGlobalChat to false (2)");

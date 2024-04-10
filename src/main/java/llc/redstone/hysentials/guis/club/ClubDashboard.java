@@ -75,7 +75,7 @@ public class ClubDashboard extends Container {
                     "",
                     "&eClick to set!"
                 )));
-            setItem(13, GuiItem.fromStack(
+            setItem(12, GuiItem.fromStack(
                 GuiItem.makeColorfulItem(Material.PAPER, "&aInvite Players", 1, 0,
                     "&8Option",
                     "",
@@ -85,6 +85,18 @@ public class ClubDashboard extends Container {
                     "&eClick to invite!"
                 )));
 
+
+            setItem(14, GuiItem.fromStack(
+                GuiItem.makeColorfulItem(Material.DOUBLE_PLANT, "&aClub Icons", 1, 0,
+                    "&8Option",
+                    "",
+                    "&7View and delete the icons you",
+                    "&7want shown in any of your houses",
+                    "&7Current Icons: &a" + clubData.getIcons().size() + "&7/&e100",
+                    "",
+                    "&eClick to edit!"
+                )
+            ));
             setItem(15, GuiItem.fromStack(
                 GuiItem.makeColorfulItem(Material.EMPTY_MAP, "&aText Replace", 1, 0,
                     "&8Option",
@@ -167,7 +179,7 @@ public class ClubDashboard extends Container {
             }, 5, TimeUnit.MINUTES);
         });
 
-        setAction(13, (event) -> {
+        setAction(12, (event) -> {
             event.getEvent().cancel();
             if (clubData.isOwner()) {
                 Minecraft.getMinecraft().thePlayer.closeScreen();
@@ -182,6 +194,12 @@ public class ClubDashboard extends Container {
                     UChat.chat("&cInvite request has expired!");
                 }, 5, TimeUnit.MINUTES);
             }
+        });
+
+        setAction(14, (event) -> {
+            event.getEvent().cancel();
+            Minecraft.getMinecraft().thePlayer.closeScreen();
+            new ClubIcons(null).open();
         });
 
         setAction(15, (event) -> {
@@ -266,10 +284,10 @@ public class ClubDashboard extends Container {
             JSONObject object = new JSONObject(s);
             System.out.println(object.toString());
             if (json.getBoolean("success")) {
-                MUtils.chat(HysentialsConfig.chatPrefix + " " + (json.has("message") ? json.getString("message") : "Successfully updated club!"));
+                UChat.chat(HysentialsConfig.chatPrefix + " " + (json.has("message") ? json.getString("message") : "Successfully updated club!"));
             } else {
-                MUtils.chat(HysentialsConfig.chatPrefix + " &cFailed to update club!");
-                MUtils.chat("   - &c" + json.getString("message"));
+                UChat.chat(HysentialsConfig.chatPrefix + " &cFailed to update club!");
+                UChat.chat("   - &c" + json.getString("message"));
             }
         } catch (Exception e) {
             e.printStackTrace();
