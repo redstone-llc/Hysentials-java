@@ -25,13 +25,14 @@ class HysentialsListener : WebSocketAdapter() {
     override fun onConnected(websocket: WebSocket, headers: Map<String, List<String>>) {
         println("Connected to websocket server")
         relogAttempts = 0
-        future?.cancel(true)
+        future?.cancel(false)
         val obj = JSONObject()
         obj.put("method", "login")
         obj.put("username", Minecraft.getMinecraft().session.username)
         obj.put("version", VERSION)
         obj.put("key", serverId)
         websocket.send(obj.toString())
+        println("Sent login packet")
     }
 
     @Throws(Exception::class)

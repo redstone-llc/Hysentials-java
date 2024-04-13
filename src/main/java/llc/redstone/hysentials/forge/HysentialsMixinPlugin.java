@@ -55,22 +55,12 @@ public class HysentialsMixinPlugin implements IMixinConfigPlugin {
     }
 
     @Override
-    public void preApply(String targetClassName, org.spongepowered.asm.lib.tree.ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
 
     }
 
     @Override
-    public void postApply(String targetClassName, org.spongepowered.asm.lib.tree.ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-//        if (!hasApplied && targetClass != null && Objects.equals(targetClassName, "net.minecraft.client.gui.GuiPlayerTabOverlay")) {
-//            for (MethodNode method : targetClass.methods) {
-//                final String methodName = FMLDeobfuscatingRemapper.INSTANCE.mapMethodName(targetClass.name, method.name, method.desc);
-//                final ListIterator<AbstractInsnNode> iterator = method.instructions.iterator();
-//            }
-//        }
-    }
+    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
 
-    private String mapMethodNameFromNode(AbstractInsnNode node) {
-        MethodInsnNode methodInsnNode = (MethodInsnNode) node;
-        return FMLDeobfuscatingRemapper.INSTANCE.mapMethodName(methodInsnNode.owner, methodInsnNode.name, methodInsnNode.desc);
     }
 }

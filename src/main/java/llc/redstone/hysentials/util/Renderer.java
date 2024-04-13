@@ -23,6 +23,7 @@ import org.lwjgl.opengl.GL11;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -366,19 +367,9 @@ public class Renderer {
         return Math.max(0, Math.min(255, value));
     }
 
-    public static URLConnection makeWebRequest(String url) throws IOException {
-        URLConnection connection = new URL(url).openConnection();
-        connection.setRequestProperty("User-Agent", "Mozilla/5.0 (ChatTriggers)");
-        connection.setConnectTimeout(3000);
-        connection.setReadTimeout(3000);
-        return connection;
-    }
-
     public static BufferedImage getImageFromUrl(String url) throws IOException {
-        HttpURLConnection conn = (HttpURLConnection) makeWebRequest(url);
-        conn.setRequestMethod("GET");
-        conn.setDoOutput(true);
-        return ImageIO.read(conn.getInputStream());
+        InputStream conn = NetworkUtils.setupConnection(url, "OneConfig/1.0.0", 5000, false);
+        return ImageIO.read(conn);
     }
 
     private static void translate(int x, int y, float z) {

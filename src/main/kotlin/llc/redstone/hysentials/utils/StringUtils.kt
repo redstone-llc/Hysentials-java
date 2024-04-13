@@ -14,6 +14,14 @@ fun CharSequence?.containsAny(vararg sequences: CharSequence?): Boolean {
     return sequences.any { it != null && this.contains(it) }
 }
 
+//shift a list of strings to the right and return the String
+fun List<String>.shiftRight(): String {
+    val last = this.last()
+    val list = this.dropLast(1)
+    return last + list.joinToString("")
+}
+
+
 fun String.toDashedUUID(): String {
     if (this.length != 32) return this
     return buildString {

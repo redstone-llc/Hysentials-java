@@ -60,9 +60,11 @@ configurations {
 
 repositories {
     mavenCentral()
+    mavenLocal()
     maven { url 'https://repo.polyfrost.cc/releases' }
     maven { url 'https://jitpack.io' }
     maven { url 'https://repo.essential.gg/repository/maven-public' }
+    maven { url 'https://repo.hypixel.net/repository/Hypixel/' }
 }
 
 dependencies {
@@ -74,15 +76,16 @@ dependencies {
     include('cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta+')
     include("org.java-websocket:Java-WebSocket:1.5.3")
     include('org.reflections:reflections:0.10.2')
-    include("org.json:json:20220924")
+    include('org.json:json:20231013')
     include('org.slick2d:slick2d-core:1.0.2') {
         exclude module: 'lwjgl'
     }
     include('com.github.JnCrMx:discord-game-sdk4j:v0.5.5')
     include('com.neovisionaries:nv-websocket-client:2.14')
     include('com.github.MinnDevelopment:java-discord-rpc:v2.0.2')
+    include('net.hypixel:mod-api:0.3.1')
 
-    compileOnly('org.spongepowered:mixin:0.7.11-SNAPSHOT')
+    compileOnly('org.spongepowered:mixin:0.7.+')
 
     compileOnly("me.djtheredstoner:DevAuth-forge-legacy:1.1.0")
 }

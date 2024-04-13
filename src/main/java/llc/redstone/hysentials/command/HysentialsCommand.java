@@ -4,6 +4,10 @@ import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
+import io.netty.buffer.AbstractByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.EmptyByteBuf;
+import io.netty.buffer.Unpooled;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.HysentialsUtilsKt;
 import llc.redstone.hysentials.config.HysentialsConfig;
@@ -25,6 +29,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
+import net.hypixel.modapi.HypixelModAPI;
+import net.hypixel.modapi.packet.PacketRegistry;
+import net.hypixel.modapi.packet.impl.clientbound.ClientboundPingPacket;
+import net.hypixel.modapi.packet.impl.serverbound.ServerboundLocationPacket;
+import net.hypixel.modapi.packet.impl.serverbound.ServerboundPingPacket;
+import net.hypixel.modapi.serializer.PacketSerializer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -32,6 +42,8 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.util.MovingObjectPosition;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
@@ -41,6 +53,7 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -135,7 +148,7 @@ public class HysentialsCommand extends CommandBase {
                     UChat.chat("&8 - &a" + player.getValue().getUsername());
                 }
                 if (Socket.cachedUsers.size() > 25) {
-                    UChat.chat("&8 - &aAnd " + ( Socket.cachedUsers.size() - 25) + " more...");
+                    UChat.chat("&8 - &aAnd " + (Socket.cachedUsers.size() - 25) + " more...");
                 }
                 break;
             }
@@ -305,6 +318,16 @@ public class HysentialsCommand extends CommandBase {
                         Socket.createSocket();
                     } else {
                         Hysentials.INSTANCE.sendMessage("&cLocal is not on and you are already on the main server!");
+                    }
+                    break;
+                }
+
+                case "hypixel": {
+                    UChat.chat("Sending Hypixel mod API requests...");
+                    for (PacketRegistry.RegisteredType type : HypixelModAPI.getInstance().getRegistry().getRegisteredTypes()) {
+                        Hysentials.getModAPI().sendPacket(type.getServerPacketFactory(), (packet) -> {
+                            UChat.chat("§aReceived packet: " + packet.toString());
+                        });
                     }
                     break;
                 }

@@ -28,6 +28,7 @@ import llc.redstone.hysentials.handlers.groupchats.GroupChat;
 import llc.redstone.hysentials.handlers.guis.GuiScreenPost;
 import llc.redstone.hysentials.handlers.htsl.*;
 import llc.redstone.hysentials.handlers.misc.HousingJoinHandler;
+import llc.redstone.hysentials.handlers.misc.PacketRecievedHandler;
 import llc.redstone.hysentials.handlers.misc.QuestHandler;
 import llc.redstone.hysentials.handlers.redworks.FormatPlayerName;
 import llc.redstone.hysentials.macrowheel.MacroWheelData;
@@ -55,6 +56,7 @@ import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
 import llc.redstone.hysentials.htsl.Cluster;
 import llc.redstone.hysentials.cosmetics.cubit.CubitCompanion;
 import llc.redstone.hysentials.websocket.Socket;
+import net.hypixel.modapi.HypixelModAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiMainMenu;
@@ -119,6 +121,7 @@ public class Hysentials {
     public final CosmeticManager cosmeticManager = new CosmeticManager();
     public static List<ICommand> commands;
 
+    public ModAPIHandler hypixelModAPI;
     public ImageIconRenderer imageIconRenderer;
     public JsonData sbBoxes;
     public JsonData rankColors;
@@ -184,6 +187,7 @@ public class Hysentials {
             throw new RuntimeException(e);
         }
 
+        HysentialsUtilsKt.init(VERSION);
 
         Socket.init();
         Socket.createSocket();
@@ -221,7 +225,6 @@ public class Hysentials {
         }
 
         Quest.registerQuests();
-        HysentialsUtilsKt.init(VERSION);
         System.out.println("Hysentials has been initialized!");
     }
 
@@ -443,6 +446,7 @@ public class Hysentials {
             eventBus.register(new Limit256());
             eventBus.register(new QuestHandler());
             eventBus.register(new CapeHandler());
+            eventBus.register(new PacketRecievedHandler());
             eventBus.register(cubitCompanion = new CubitCompanion());
             eventBus.register(pepperCompanion = new PepperCompanion());
             eventBus.register(miyaCompanion = new MiyaCompanion());
@@ -461,6 +465,7 @@ public class Hysentials {
 
             EventManager.INSTANCE.register(new BwRanks());
 
+            HypixelModAPI.getInstance().registerHandler(hypixelModAPI = new ModAPIHandler());
 
 //        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 //            JSONArray array = new JSONArray();
@@ -506,6 +511,10 @@ public class Hysentials {
 
     public Logger getLogger() {
         return logger;
+    }
+
+    public static ModAPIHandler getModAPI() {
+        return INSTANCE.hypixelModAPI;
     }
 
 

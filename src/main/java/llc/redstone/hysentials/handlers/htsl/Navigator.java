@@ -2,6 +2,7 @@ package llc.redstone.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import llc.redstone.hysentials.HysentialsUtilsKt;
 import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
 import llc.redstone.hysentials.event.events.GuiLoadedEvent;
 import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
@@ -84,7 +85,7 @@ public class Navigator {
 
     public Navigator() {
         try {
-            ARROW_TEXTURE_LOCATION = new DynamicTexture(getImageFromUrl("https://raw.githubusercontent.com/BusterBrown1218/HTSL/main/assets/red-arrow.png"));
+            ARROW_TEXTURE_LOCATION = new DynamicTexture(getImageFromUrl(HysentialsUtilsKt.getHYSENTIALS_API() + "/resource?file=red-arrow.png"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
