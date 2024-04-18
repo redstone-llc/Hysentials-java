@@ -30,11 +30,11 @@ val IO = object : CoroutineScope {
 }
 
 fun init(version: String) {
-    MinecraftForge.EVENT_BUS.register(UpdateChecker())
     VERSION = version
 }
 
 fun postInit() {
+    MinecraftForge.EVENT_BUS.register(UpdateChecker())
     UpdateChecker.instance.downloadDeleteTask()
 }
 

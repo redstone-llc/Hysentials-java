@@ -8,6 +8,8 @@ import llc.redstone.hysentials.cosmetics.miya.EntityMiya;
 import llc.redstone.hysentials.cosmetics.miya.RenderMiya;
 import llc.redstone.hysentials.cosmetics.pepper.EntityPepper;
 import llc.redstone.hysentials.cosmetics.pepper.RenderPepper;
+import llc.redstone.hysentials.renderer.plusStand.PlusStandEntity;
+import llc.redstone.hysentials.renderer.plusStand.RenderPlusStand;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.entity.Render;
@@ -34,6 +36,7 @@ public class MixinRenderManager {
         entityRenderMap.put(EntityPepper.class, new RenderPepper((RenderManager) (Object) this));
         entityRenderMap.put(EntityHamster.class, new RenderHamster((RenderManager) (Object) this));
         entityRenderMap.put(EntityMiya.class, new RenderMiya((RenderManager) (Object) this));
+        entityRenderMap.put(PlusStandEntity.class, new RenderPlusStand((RenderManager) (Object) this));
     }
 
     @Inject(method = "getFontRenderer", at = @At("HEAD"), cancellable = true)

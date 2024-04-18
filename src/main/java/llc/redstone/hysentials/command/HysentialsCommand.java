@@ -20,6 +20,7 @@ import llc.redstone.hysentials.handlers.npc.NPC;
 import llc.redstone.hysentials.htsl.compiler.Compiler;
 import llc.redstone.hysentials.macrowheel.MacroWheelSelector;
 import llc.redstone.hysentials.profileViewer.DefaultProfileGui;
+import llc.redstone.hysentials.renderer.plusStand.PlusStandEntity;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.util.*;
 import llc.redstone.hysentials.utils.ChatLib;
@@ -29,8 +30,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
+import net.hypixel.data.type.GameType;
+import net.hypixel.data.type.ServerType;
 import net.hypixel.modapi.HypixelModAPI;
 import net.hypixel.modapi.packet.PacketRegistry;
+import net.hypixel.modapi.packet.impl.clientbound.ClientboundLocationPacket;
 import net.hypixel.modapi.packet.impl.clientbound.ClientboundPingPacket;
 import net.hypixel.modapi.packet.impl.serverbound.ServerboundLocationPacket;
 import net.hypixel.modapi.packet.impl.serverbound.ServerboundPingPacket;
@@ -324,11 +328,40 @@ public class HysentialsCommand extends CommandBase {
 
                 case "hypixel": {
                     UChat.chat("Sending Hypixel mod API requests...");
-                    for (PacketRegistry.RegisteredType type : HypixelModAPI.getInstance().getRegistry().getRegisteredTypes()) {
-                        Hysentials.getModAPI().sendPacket(type.getServerPacketFactory(), (packet) -> {
+                    for (HypixelPacketType type : HypixelPacketType.values()) {
+                        Hysentials.getModAPI().sendPacket(type, (packet) -> {
                             UChat.chat("§aReceived packet: " + packet.toString());
                         });
                     }
+                    break;
+                }
+
+                case "plus": {
+                    UChat.chat("Sending Location Request...");
+                    Hysentials.getModAPI().sendPacket(HypixelPacketType.LOCATION, (p) -> {
+                        double x = 0;
+                        double y = 0;
+                        double z = 0;
+                        float yaw = 0;
+                        ClientboundLocationPacket packet = (ClientboundLocationPacket) p;
+                        if (!packet.getServerType().isPresent()) return;
+                        ServerType serverType = packet.getServerType().get();
+                        if (!(serverType instanceof GameType)) return;
+                        GameType gameType = (GameType) serverType;
+                        switch (gameType) {
+                            case HOUSING: {
+                                x = -16;
+                                y = 65;
+                                z = 30;
+                                yaw = 320f;
+                                break;
+                            }
+                        }
+
+                        PlusStandEntity entity = new PlusStandEntity(Minecraft.getMinecraft().theWorld);
+                        entity.setPositionAndRotation(x, y, z, yaw, 0);
+                        Minecraft.getMinecraft().theWorld.spawnEntityInWorld(entity);
+                    });
                     break;
                 }
 

@@ -87,9 +87,9 @@ public class ChatConfig extends Config {
         description = "The prefix for all guild related chat messages.",
         category = "Guild",
         subcategory = "General",
-        placeholder = ":guildprefix: "
+        placeholder = ":guild: "
     )
-    public static String guildPrefix = ":guildprefix: ";
+    public static String guildPrefix = ":guild: ";
 
     @Switch(
         name = "Player Guild Chat Prefix",

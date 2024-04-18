@@ -37,7 +37,6 @@ class HysentialsSchema {
         var quests: MutableSet<Quest>?,
         var amountSpent: Int?,
         var hypixel: JsonObject,
-        var hypixel2: JsonObject,
         var skin: String,
     ) {
         companion object {
@@ -61,7 +60,6 @@ class HysentialsSchema {
                     obj["quests"]?.asJsonArray?.map { it1 -> Quest.deserialize(it1.asJsonObject) }?.toMutableSet(),
                     obj["amountSpent"]?.asInt,
                     obj["hypixel"].asJsonObject,
-                    obj["hypixel2"].asJsonObject,
                     obj["skin"].asString,
                 )
             }

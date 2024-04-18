@@ -15,7 +15,7 @@ public class PacketRecievedHandler {
     @SubscribeEvent
     public void onNetworkEvent(FMLNetworkEvent.ClientConnectedToServerEvent event) {
         event.manager.channel().pipeline()
-            .addAfter("fml:packet_handler", "CT_packet_handler", new ChannelDuplexHandler() {
+            .addAfter("fml:packet_handler", "HS_packet_handler", new ChannelDuplexHandler() {
                 @Override
                 public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                     CancellableEvent packetReceivedEvent = new CancellableEvent();
