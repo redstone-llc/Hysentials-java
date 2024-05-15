@@ -39,6 +39,7 @@ import static llc.redstone.hysentials.util.NetworkUtils.setupConnection;
 public class HousingJoinHandler {
     boolean isHousing = false;
 
+
     @SubscribeEvent
     public void onWorldJoin(WorldEvent.Load event) {
         if (isHousing) {

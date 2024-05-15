@@ -2,22 +2,15 @@ package llc.redstone.hysentials.command;
 
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
-import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
-import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 import llc.redstone.hysentials.HysentialsUtilsKt;
-import llc.redstone.hysentials.guis.club.HousingViewer;
+import llc.redstone.hysentials.guis.container.containers.club.HousingViewer;
 import llc.redstone.hysentials.schema.HysentialsSchema;
-import llc.redstone.hysentials.websocket.Socket;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import llc.redstone.hysentials.schema.HysentialsSchema;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import org.json.JSONObject;
 
 public class VisitCommand extends CommandBase {
 

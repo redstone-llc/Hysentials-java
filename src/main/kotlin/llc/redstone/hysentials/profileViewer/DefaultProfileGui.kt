@@ -5,16 +5,17 @@ import cc.polyfrost.oneconfig.libs.universal.UMatrixStack
 import cc.polyfrost.oneconfig.libs.universal.UScreen
 import cc.polyfrost.oneconfig.utils.Multithreading
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil
+import com.google.common.collect.Lists
 import llc.redstone.hysentials.Hysentials
+import llc.redstone.hysentials.cosmetic.getEquippedCosmetics
 import llc.redstone.hysentials.guis.misc.HysentialsLevel
+import llc.redstone.hysentials.handlers.lobby.TabChanger
 import llc.redstone.hysentials.handlers.redworks.BwRanksUtils
+import llc.redstone.hysentials.schema.HysentialsSchema
 import llc.redstone.hysentials.util.*
 import llc.redstone.hysentials.util.BlockWAPIUtils.getRequest
 import llc.redstone.hysentials.util.Renderer.drawImage
 import llc.redstone.hysentials.websocket.Socket
-import com.google.common.collect.Lists
-import llc.redstone.hysentials.cosmetic.getEquippedCosmetics
-import llc.redstone.hysentials.schema.HysentialsSchema
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
@@ -68,7 +69,6 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
     var inventorySlots: ArrayList<Slot> = Lists.newArrayList()
     var hypixelData: JSONObject? = null
     var hysentialData: HysentialsSchema.User? = null
-    var guildData: JSONObject? = null
     val fontRenderer: ImageIconRenderer = Hysentials.INSTANCE.imageIconRenderer
 
 
@@ -141,26 +141,13 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
             }
 
             if (hypixelData != null) {
-                val rankUser = BwRanksUtils.getReplace(
-                    (hypixelData!!["rank_formatted"] as String).addFormatting(),
-                    player.name,
-                    player.uniqueID
-                )
-
-                var guildTag: String = try {
-                    if (guildData!!["guild"] == true && guildData!!["tag"] != null) {
-                        var returnString = "${guildData!!["tag_color"]}${guildData!!["tag"]}"
-                        returnString
-                    } else {
-                        ""
-                    }
-                } catch (e: Exception) {
-                    ""
-                }
-
-
                 var largeFormat = DecimalFormat("#,###")
-                var lore = "§f${rankUser}${player.name} ${if (guildTag != "null") guildTag else ""}\n" +
+
+                val playerInfo = Minecraft.getMinecraft().netHandler.getPlayerInfo(player.uniqueID)
+                var displayName = BwRanksUtils.getPlayerName(playerInfo, false)
+                displayName = TabChanger.modifyName(displayName, playerInfo)
+
+                var lore = "§f$displayName\n" +
                         "&7Hypixel Level: &e${(hypixelData!!["level"] as BigDecimal).toDouble().roundToInt()}\n"
                 if (hysentialData != null) {
                     lore += "&7Hysentials Level: &e${getLevel(hysentialData!!.exp).roundToInt()}\n" +
@@ -395,7 +382,6 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                 UChat.chat("&cFailed to get data from Hypixel API.")
                 return@runAsync
             }
-            guildData = JSONObject(guild)
 
             hysentialData = Socket.cachedUsers.values.firstOrNull { it.uuid == player.uniqueID.toString() }
 

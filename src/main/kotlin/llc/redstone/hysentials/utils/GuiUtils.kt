@@ -1,10 +1,12 @@
 package llc.redstone.hysentials.utils
 
+import llc.redstone.hysentials.guis.container.GuiItem
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.entity.EntityLivingBase
+import net.minecraft.item.ItemStack
 
 fun drawEntityOnScreen(posX: Int, posY: Int, scale: Int, xAngle: Float, yAngle: Float, ent: EntityLivingBase) {
     GlStateManager.enableColorMaterial()
@@ -47,4 +49,8 @@ fun drawEntityOnScreen(posX: Int, posY: Int, scale: Int, xAngle: Float, yAngle: 
     GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit)
     GlStateManager.disableTexture2D()
     GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit)
+}
+
+fun ItemStack.getLore(): List<String> {
+    return GuiItem.getLore(this)
 }

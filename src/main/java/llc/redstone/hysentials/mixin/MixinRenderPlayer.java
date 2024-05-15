@@ -1,7 +1,6 @@
 package llc.redstone.hysentials.mixin;
 
 import llc.redstone.hysentials.event.EventBus;
-import llc.redstone.hysentials.event.render.RenderPlayerEvent;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelPlayer;
@@ -23,11 +22,5 @@ public abstract class MixinRenderPlayer extends RendererLivingEntity<AbstractCli
 
     @Shadow
     public abstract ModelPlayer getMainModel();
-    @Inject(method = "doRender", at = @At("HEAD"), cancellable = true)
-    private void doRender(AbstractClientPlayer entity, double x, double y, double z, float entityYaw, float partialTicks, CallbackInfo ci) {
-        GlStateManager.resetColor();
-
-        EventBus.INSTANCE.post(new RenderPlayerEvent(entity, renderManager, x, y, z, partialTicks));
-    }
 }
 

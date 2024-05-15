@@ -120,10 +120,10 @@ public class BlockWAPIUtils {
 
     public enum Rank {
         ADMIN(6, "1", "§c[ADMIN] ", "§c", "admin"),
+        TEAM(5, "5", "§6[TEAM] ", "§6", "team"),
         MOD(4, "2", "§2[MOD] ", "§2", "mod"),
         HELPER(3, "3", "§9[HELPER] ", "§9", "helper"),
         CREATOR("§3[§fC§3] ", 2, "4", "§3[§fCREATOR§3] ", "§3", "creator"),
-        TEAM(5, "5", "§6[TEAM] ", "§6", "team"),
         DEFAULT(1, "replace", "§7", "§7", null, "default");
 
         public final int index;

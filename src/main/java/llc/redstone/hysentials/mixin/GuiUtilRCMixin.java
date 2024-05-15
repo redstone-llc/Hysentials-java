@@ -8,6 +8,7 @@ import llc.redstone.hysentials.Hysentials;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiUtilRenderComponents;
+import org.lwjgl.Sys;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -27,6 +28,7 @@ public class GuiUtilRCMixin {
         if (!FormattingConfig.fancyRendering()) {
             return fr.trimStringToWidth(c0, c1, c2);
         }
+        System.out.println("Trimming: " + Hysentials.INSTANCE.imageIconRenderer.trimStringToWidth(c0, c1, c2));
         return Hysentials.INSTANCE.imageIconRenderer.trimStringToWidth(c0, c1, c2);
     }
 }

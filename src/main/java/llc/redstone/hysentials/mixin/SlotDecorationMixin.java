@@ -22,7 +22,7 @@ import java.awt.*;
 
 import static net.minecraftforge.fml.client.config.GuiUtils.drawGradientRect;
 
-@Mixin(value = GuiContainer.class)
+@Mixin(value = GuiContainer.class, priority = 9001)
 public abstract class SlotDecorationMixin {
     @Inject(method = "drawSlot", at = @At(value = "HEAD"))
     public void drawSlot(Slot slotIn, CallbackInfo ci) {

@@ -48,6 +48,14 @@ public class HousingConfig extends Config {
     )
     public static int guiTimeout = 60;
 
+    @Switch(
+        name = "Export Color Codes",
+        category = "Housing",
+        subcategory = "HTSL",
+        description = "Export color codes in the HTSL language."
+    )
+    public static boolean exportColorCodes = true;
+
     // Housing
     @Switch(
         name = "Remove Asterisk",

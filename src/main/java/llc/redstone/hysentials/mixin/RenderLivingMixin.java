@@ -1,5 +1,7 @@
 package llc.redstone.hysentials.mixin;
 
+import llc.redstone.hysentials.handlers.lobby.TabChanger;
+import llc.redstone.hysentials.handlers.redworks.BwRanks;
 import llc.redstone.hysentials.handlers.redworks.BwRanksUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -24,7 +26,11 @@ public abstract class RenderLivingMixin<T extends EntityLivingBase> extends Rend
     public String renderName(IChatComponent instance, T entity, double x, double y, double z) {
         if (entity instanceof EntityPlayer) {
             NetworkPlayerInfo playerInfo = Minecraft.getMinecraft().getNetHandler().getPlayerInfo((entity.getUniqueID()));
-            return BwRanksUtils.getPlayerName(playerInfo, false);
+            if (playerInfo == null) {
+                return entity.getDisplayName().getFormattedText();
+            }
+            String displayName = BwRanksUtils.getPlayerName(playerInfo, false);
+            return TabChanger.modifyName(displayName, playerInfo);
         }
         return entity.getDisplayName().getFormattedText();
     }

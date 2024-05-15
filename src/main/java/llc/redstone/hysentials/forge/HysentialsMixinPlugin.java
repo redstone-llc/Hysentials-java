@@ -1,7 +1,9 @@
 package llc.redstone.hysentials.forge;
 
 
+import llc.redstone.hysentials.Hysentials;
 import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
+import org.lwjgl.Sys;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.lib.tree.*;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -16,6 +18,8 @@ public class HysentialsMixinPlugin implements IMixinConfigPlugin {
 
     private boolean isOptiFine = false;
     private boolean hasApplied = false;
+    private boolean hasAppliedModifyName = false;
+
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -46,7 +50,6 @@ public class HysentialsMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
-
     }
 
     @Override
@@ -60,7 +63,49 @@ public class HysentialsMixinPlugin implements IMixinConfigPlugin {
     }
 
     @Override
-    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+    public void postApply(String targetClassName, org.spongepowered.asm.lib.tree.ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+        if (!hasAppliedModifyName && targetClass != null && Objects.equals(targetClassName, "net.minecraft.client.gui.GuiPlayerTabOverlay")) {
+            if (Hysentials.INSTANCE.isFeather && true) {
+                System.out.println("Hysentials is running in Feather mode, skipping TabChanger mixin.");
+                return;
+            }
+            for (MethodNode method : targetClass.methods) {
+                final String methodName = FMLDeobfuscatingRemapper.INSTANCE.mapMethodName(targetClass.name, method.name, method.desc);
+                final ListIterator<AbstractInsnNode> iterator = method.instructions.iterator();
+                switch (methodName) {
+                    case "getPlayerName":
+                    case "func_175243_a":
+                        while (iterator.hasNext()) {
+                            final AbstractInsnNode next = iterator.next();
 
+                            if (next.getOpcode() == Opcodes.INVOKESTATIC) {
+                                final String methodInsnName = mapMethodNameFromNode(next);
+                                if (methodInsnName.equals("formatPlayerName") || methodInsnName.equals("func_96667_a")) {
+                                    method.instructions.insert(next, modifyName());
+                                    hasAppliedModifyName = true;
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+    }
+
+    private String mapMethodNameFromNode(AbstractInsnNode node) {
+        MethodInsnNode methodInsnNode = (MethodInsnNode) node;
+        return FMLDeobfuscatingRemapper.INSTANCE.mapMethodName(methodInsnNode.owner, methodInsnNode.name, methodInsnNode.desc);
+    }
+
+    private InsnList modifyName() {
+        InsnList list = new InsnList();
+        list.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            "llc/redstone/hysentials/handlers/lobby/TabChanger",
+            "modifyName",
+            "(Ljava/lang/String;Lnet/minecraft/client/network/NetworkPlayerInfo;)Ljava/lang/String;",
+            false));
+        return list;
     }
 }

@@ -143,7 +143,7 @@ public class ImageIcon {
         }
         int width = this.getWidth();
         int height = this.getHeight();
-        float scaledHeight = (float) 9 / height;
+        float scaledHeight = 9.0f / height;
 
         GlStateManager.pushMatrix();
 

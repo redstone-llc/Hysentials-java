@@ -18,6 +18,5 @@ public class PlayerModelMixin {
     @Inject(method = "renderCape", at = @At("HEAD"), cancellable = true)
     public void renderCloak(float p_renderCape_1_, CallbackInfo info) {
         if (!CosmeticConfig.disableCustomCapes) info.cancel();
-
     }
 }

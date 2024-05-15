@@ -43,7 +43,7 @@ public class GuildFormatter {
                 if (ChatConfig.guildChatPrefix) {
                     UChat.chat(prefix() + "&2" + BwRanksUtils.getReplace(prefix, name, null) + tag + hex + ": " + message);
                 } else {
-                    UChat.chat(":guild: &2" + name + tag + "<#c6f5c0>" + ": " + message);
+                    UChat.chat(prefix() + "&2" + name + tag + hex + ": " + message);
                 }
             } catch (Exception e) {
                 System.out.println("Error in guild chat\n" + e.getMessage());

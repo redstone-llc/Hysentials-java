@@ -1,6 +1,8 @@
 package llc.redstone.hysentials.handlers.chat.modules.bwranks;
 
+import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.platform.Platform;
 import llc.redstone.hysentials.config.hysentialMods.ChatConfig;
 import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
 import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
@@ -16,6 +18,7 @@ import llc.redstone.hysentials.command.HysentialsCommand;
 import llc.redstone.hysentials.handlers.chat.ChatReceiveModule;
 import llc.redstone.hysentials.handlers.redworks.BwRanks;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.util.IChatComponent;
@@ -23,20 +26,22 @@ import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static llc.redstone.hysentials.handlers.redworks.BwRanksUtils.*;
 
 public class BWSReplace implements ChatReceiveModule {
-    public static List<String> diagnostics = new ArrayList<>();
     public Pattern pattern = Pattern.compile("<(.+):(.+)>");
 
     @SubscribeEvent()
     public void onMessageReceived(@NotNull ClientChatReceivedEvent event) {
         if (!BUtils.isHypixelOrSBX()) return;
         if (event.type != 0 && event.type != 1) return;
+        //These can probably moved around, but I cannot be bothered.
         if (PartyFormatter.checkMessage(event)) {
             event.setCanceled(true);
             return;
@@ -49,72 +54,57 @@ public class BWSReplace implements ChatReceiveModule {
             event.setCanceled(true);
             return;
         }
+
         boolean futuristic = Hysentials.INSTANCE.getConfig().formattingConfig.enabled && FormattingConfig.fancyRankInChat && FormattingConfig.futuristicRanks;
-        long start0 = System.currentTimeMillis();
-        String message = event.message.getFormattedText();
-        diagnostics.add("New message received: " + message);
+
         IChatComponent chatComponent = event.message;
         List<IChatComponent> siblings = event.message.getSiblings();
-        HysentialsCommand.messages.add(chatComponent.toString());
 
-        diagnostics.add("Looking for players in the map...");
-        long start1 = System.currentTimeMillis();
         HashMap<String, UUID> users = new HashMap<>();
 
         Minecraft.getMinecraft().getNetHandler().getPlayerInfoMap().forEach(playerInfo -> {
             users.put(playerInfo.getGameProfile().getName(), playerInfo.getGameProfile().getId());
         });
-        diagnostics.add("Took " + (System.currentTimeMillis() - start1) + "ms to find players in the map.");
 
 
         HypixelRanks hRank = null;
         BlockWAPIUtils.Rank blockwRank = null;
+        String previousRankColor = null;
         UUID uuidBold = null;
+        GlStateManager.disableAlpha();
         for (IChatComponent sibling : siblings) {
             String s = sibling.getFormattedText();
-            diagnostics.add("Checking sibling: " + s);
-
-            if (HousingConfig.removeAsterisk && (s.startsWith("§r§7* ") || s.startsWith("§7* "))) {
-                s = s.replaceFirst("(§7|§r§7)\\* ", "");
-            }
-
             if (futuristic) {
-                if (hRank != null && (s.startsWith("§7: ") || s.startsWith("§f: "))) {
-                    s = s.replaceFirst("§[7f]: ", hRank.getChat() + ": " + italic(uuidBold) + bold(uuidBold));
-//                    hRank = null;
-                    diagnostics.add("Added chat formatting to sibling. (Hypixel)");
-                }
-                if (blockwRank != null && (s.startsWith("§7: ") || s.startsWith("§f: "))) {
-                    s = s.replaceFirst("§[7f]: ", blockwRank.getChatColor() + ": " + italic(uuidBold) + bold(uuidBold));
-//                    blockwRank = null;
-                    diagnostics.add("Added chat formatting to sibling. (BlockW)");
-                }
-                if ((s.startsWith("§7") || s.startsWith("§f")) && blockwRank != null && uuidBold != null) {
-                    s = s.replaceFirst("(§7|§f)", blockwRank.getChatColor() + italic(uuidBold) + bold(uuidBold));
-                }
-                Pattern p = Pattern.compile("(§[0-9a-fk-or])\\[(\\d+)(.)] ");
-                Pattern p2 = Pattern.compile("(§[0-9a-fk-or])\\[(.+)(.)§[0-9a-fk-or]] ");
-                //We don't care about multicolored ones just yet
-                Matcher m1 = p.matcher(s);
-                Matcher m2 = p2.matcher(s);
-                boolean found = m1.find();
-                if (found || m2.find()){
-                    Matcher m = found ? m1 : m2;
-                    String color = C.toHex(m.group(1)).replace("#", "");
-                    String num = C.removeColor(m.group(2));
-                    String symbol = m.group(3);
-                    if (ChatConfig.levelPrefixColors) {
-                        s = s.replaceFirst("(§[0-9a-fk-or])\\[(\\d+)(.)] ", "<" + color + ":" + num + ">");
-                    } else {
-                        //Else then §8
-                        String hex = ChatConfig.defaultLevelColor.getHex();
-                        hex = hex.replace("#", "");
-                        s = s.replaceFirst("(§[0-9a-fk-or])\\[(\\d+)(.)] ", "<" + hex + ":" + num + ">");
+                //This is for the level prefix colors
+                if (LocrawUtil.INSTANCE.getLocrawInfo() != null && !LocrawUtil.INSTANCE.getLocrawInfo().getGameType().equals(LocrawInfo.GameType.SKYBLOCK)) {
+                    Pattern p = Pattern.compile("(§[0-9a-fk-or])\\[(\\d+)(.)] ");
+                    Pattern p2 = Pattern.compile("(§[0-9a-fk-or])\\[(.+)(.)§[0-9a-fk-or]] ");
+                    //We don't care about multicolored ones just yet
+                    Matcher m1 = p.matcher(s);
+                    Matcher m2 = p2.matcher(s);
+                    boolean found = m1.find();
+                    if (found || m2.find()) {
+                        Matcher m = found ? m1 : m2;
+                        String color = C.toHex(m.group(1)).replace("#", "");
+                        String num = C.removeColor(m.group(2));
+                        String symbol = m.group(3);
+                        if (ChatConfig.levelPrefixColors) {
+                            s = s.replaceFirst("(§[0-9a-fk-or])\\[(\\d+)(.)] ", "<" + color + ":" + num + ">");
+                        } else {
+                            //Else then §8
+                            OneColor oneColor = ChatConfig.defaultLevelColor;
+                            Color color1 = new Color(oneColor.getRed(), oneColor.getGreen(), oneColor.getBlue());
+
+                            String buf = Integer.toHexString(color1.getRGB());
+                            String hex = buf.substring(buf.length() - 6);
+
+                            s = s.replaceFirst("(§[0-9a-fk-or])\\[(\\d+)(.)] ", "<" + hex + ":" + num + ">");
+                        }
                     }
                 }
             }
-            diagnostics.add("Starting loop for players...");
-            long start2 = System.currentTimeMillis();
+
+
             for (Map.Entry<String, UUID> user : users.entrySet()) {
                 String name = user.getKey();
                 UUID uuid = user.getValue();
@@ -139,17 +129,11 @@ public class BWSReplace implements ChatReceiveModule {
                             blockwRank = rank;
                             if (uuidBold == null) uuidBold = user.getValue();
                             s = s.replaceAll("\\[[A-Za-z§0-9+]+] " + name, replacement).replaceAll("§[7f]: ", rank.getChatColor() + ": " + italic(uuidBold) + bold(uuidBold));
-                            diagnostics.add("Used regex1 to replace " + name + " with " + replacement + " (BlockW)");
                         } else if (Pattern.compile(regex2).matcher(s).find(0)) {
                             blockwRank = rank;
                             if (uuidBold == null) uuidBold = user.getValue();
                             s = s.replaceAll("(§r§7|§7)" + name, replacement).replaceAll("§[7f]: ", rank.getChatColor() + ": " + italic(uuidBold) + bold(uuidBold));
-                            diagnostics.add("Used regex2 to replace " + name + " with " + replacement + " (BlockW)");
                         }
-//                  else if (Pattern.compile(regex3).matcher(s).find(0)) {
-//                        didSomething = true;
-//                        s = s.replaceAll("[a-f0-9§]{2}" + name, replacement).replaceAll("§[7f]: ", rank.getChat() + ": ");
-//                    }
                     } else {
                         if (futuristic) {
                             Matcher m1 = Pattern.compile(regex1).matcher(s);
@@ -161,8 +145,6 @@ public class BWSReplace implements ChatReceiveModule {
                                 hRank = r;
                                 if (uuidBold == null) uuidBold = user.getValue();
                                 s = s.replace(m1.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":" + italic(uuidBold) + bold(uuidBold));
-                                HysentialsCommand.messages.add(sibling.getFormattedText() + " -> " + s);
-                                diagnostics.add("Used regex1 to replace " + name + " with " + replacement[0].toString() + " (Hypixel)");
                             }
                             if (m2.find(0)) {
                                 Object[] replacement = getReplacement("§7", name, uuid, LocrawUtil.INSTANCE.getLocrawInfo().getGameType().equals(LocrawInfo.GameType.SKYBLOCK), false);
@@ -170,45 +152,51 @@ public class BWSReplace implements ChatReceiveModule {
                                 hRank = r;
                                 if (uuidBold == null) uuidBold = user.getValue();
                                 s = s.replace(m2.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":" + italic(uuidBold) + bold(uuidBold));
-                                HysentialsCommand.messages.add(sibling.getFormattedText() + " -> " + s);
-                                diagnostics.add("Used regex2 to replace " + name + " with " + replacement[0].toString() + " (Hypixel)");
                             }
                         }
-//                    if (m3.find(0) && (!BwRanks.hasRank)) {
-//                        didSomething = true;
-//                        Object[] replacement = getReplacement(m3.group(0).substring(0, 2), name, uuid, true);
-//                        HypixelRanks r = (HypixelRanks) replacement[1];
-//                        s = s.replaceAll("[a-f0-9§]{2}" + name, replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":");
-//                    }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-            diagnostics.add("Looped through players in " + (System.currentTimeMillis() - start2) + "ms");
+
+            if (futuristic) {
+                String rankColor = (hRank != null ? hRank.getChat() : blockwRank != null ? blockwRank.getChatColor() : "§7");
+                if (rankColor.equals("§7") && previousRankColor != null) {
+                    rankColor = previousRankColor;
+                }
+                previousRankColor = rankColor;
+                s = rankColor + s;
+                s = s.replaceFirst("§[7f]: ", rankColor + ": " + italic(uuidBold) + bold(uuidBold));
+                if ((s.startsWith("§7") || s.startsWith("§f")) && !rankColor.equals("§7") && uuidBold != null) {
+                    s = s.replaceFirst("(§7|§f)", rankColor + italic(uuidBold) + bold(uuidBold));
+                }
+                s = MessageFormatter.fixEmojiBug(s, rankColor);
+                s = s.replaceAll("§r", "");
+            }
+
+
             UTextComponent textComponent = new UTextComponent(sibling);
             textComponent.setText(s);
             if (siblings.indexOf(sibling) != -1) {
                 siblings.set(siblings.indexOf(sibling), textComponent);
             }
+
+            //I'm not too sure if this actually works or not
             Pattern actionRegex = pattern;
             Matcher actionMatcher = actionRegex.matcher(s.replaceAll("§r", ""));
-            diagnostics.add("Looking for actions...");
             if (actionMatcher.find()) {
-                diagnostics.add("Found action!");
                 String finalS = s;
                 String name = actionMatcher.group(1);
                 int i = name.lastIndexOf("<");
                 name = name.substring(i + 1);
                 int startM = finalS.indexOf("<" + name + ":" + actionMatcher.group(2) + ">");
-                diagnostics.add("Action: " + name + ":" + actionMatcher.group(2));
 
                 HysentialsSchema.Action action = BlockWAPIUtils.getAction(name, actionMatcher.group(2));
 
                 if (action != null) {
                     String mes = finalS.substring(0, startM);
                     String mes2 = finalS.substring(startM + ("<" + name + ":" + actionMatcher.group(2) + ">").length());
-                    boolean isFunction = action.getAction().getType().equals("function");
                     UTextComponent messageComponent = new UTextComponent("&b" + action.getAction().getCreator() + "'s " + action.getAction().getName() + " &7(Copy)");
                     messageComponent.setHover(HoverEvent.Action.SHOW_TEXT, "§eClick to copy the action");
                     messageComponent.setClick(ClickEvent.Action.SUGGEST_COMMAND, action.getId());
@@ -218,12 +206,8 @@ public class BWSReplace implements ChatReceiveModule {
                 }
             }
         }
-        if (uuidBold != null) {
-            BwRanks.replacementMap.put(chatComponent.getFormattedText().replaceAll("§r", ""), new DuoVariable<>(uuidBold, chatComponent.getFormattedText().replaceAll("§r", "")));
-        }
         Minecraft.getMinecraft().thePlayer.addChatMessage(chatComponent);
         event.setCanceled(true);
-        diagnostics.add("Finished in " + (System.currentTimeMillis() - start0) + "ms");
     }
 
     private static String bold(UUID id) {
@@ -237,10 +221,16 @@ public class BWSReplace implements ChatReceiveModule {
     }
 
     public boolean checkRegexes(ClientChatReceivedEvent event) {
+        String msg = event.message.getFormattedText();
+        if (HousingConfig.removeAsterisk && (msg.startsWith("§r§7* ") || msg.startsWith("§7* "))) {
+            event.message = new UTextComponent(msg.replaceFirst("§r§7\\* ", "§7"));
+            onMessageReceived(event);
+            return true;
+        }
+
         boolean futuristic = Hysentials.INSTANCE.getConfig().formattingConfig.enabled && FormattingConfig.fancyRankInChat && FormattingConfig.futuristicRanks;
         if (!futuristic) return false;
-        String msg = event.message.getFormattedText().replaceAll("§r", "");
-
+        msg = msg.replaceAll("§r", "");
         Pattern messageRegex = Pattern.compile("§d(To|From) (§[0-9a-fk-or].+ |§[0-9a-fk-or])(.+)§7: (.+)");
         Matcher messageMatcher = messageRegex.matcher(event.message.getFormattedText().replaceAll("§r", ""));
 

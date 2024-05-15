@@ -11,6 +11,7 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.BlockPos;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,8 +34,8 @@ public class HypixelChatCommand extends CommandBase {
     public static String gotoChannel = "All";
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
-        List<String> chats = Arrays.asList("All", "Global", "Party", "Guild", "Officer", "Skyblock-Coop");
-        List<String> chatAliases = Arrays.asList("a", "gl", "p", "g", "o", "coop");
+        ArrayList<String> chats = new ArrayList<>(Arrays.asList("All", "Global", "Party", "Guild", "Officer", "Skyblock-Coop"));
+        ArrayList<String> chatAliases = new ArrayList<>(Arrays.asList("a", "gl", "p", "g", "o", "coop"));
         if (!BUtils.isHypixelOrSBX()) {
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/chat " + String.join(" ", args));
             return;
@@ -52,11 +53,9 @@ public class HypixelChatCommand extends CommandBase {
         String command = args[0].toLowerCase();
         if ((command.equals("global") || command.equals("gl")) && enabled) {
             if (isInGlobalChat) {
-                BWSReplace.diagnostics.add("Already in Global Chat");
                 UChat.chat("&cYou're already in this channel!");
             } else {
                 isInGlobalChat = true;
-                BWSReplace.diagnostics.add("Global Chat set to true");
                 UChat.chat("&aYou are now in the &6GLOBAL &achannel!");
             }
         } else {
@@ -70,7 +69,6 @@ public class HypixelChatCommand extends CommandBase {
                     }
                     gotoChannel = command;
                 }
-                BWSReplace.diagnostics.add("Sending /chat " + command);
                 Minecraft.getMinecraft().thePlayer.sendChatMessage("/chat " + command);
             }
         }

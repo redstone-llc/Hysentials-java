@@ -38,14 +38,13 @@ public class RenderItemUtils {
         c = new Color(red, green, blue, FormattingConfig.slotDecorationAlpha);
         int c1 = c.getRGB();
         int c2 = (c1 & 0xFEFEFE) >> 1 | c1 & 0xFF000000;
+        GlStateManager.pushMatrix();
         if (FormattingConfig.slotDecorationStyle == 0) { //Circle
-            GlStateManager.pushMatrix();
             GlStateManager.disableLighting();
             GlStateManager.disableDepth();
             Renderer.drawCircle(c1, i + 8, j + 8, 8, 100, 5);
             GlStateManager.enableLighting();
             GlStateManager.enableDepth();
-            GlStateManager.popMatrix();
         } else if (FormattingConfig.slotDecorationStyle == 1) { //Square
             drawGradientRect(0, i, j, i + 16, j + 16, c1, c1);
         } else if (FormattingConfig.slotDecorationStyle == 2){ //Partial Outline
@@ -58,5 +57,6 @@ public class RenderItemUtils {
             drawGradientRect(0, i + 15, j, i + 16, j + 16, c2, c1);
             drawGradientRect(0, i, j + 15, i + 16, j + 16, c1, c1);
         }
+        GlStateManager.popMatrix();
     }
 }

@@ -6,6 +6,7 @@ import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.hysentialMods.ChatConfig;
 import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
 import llc.redstone.hysentials.handlers.redworks.BwRanksUtils;
+import llc.redstone.hysentials.util.C;
 import llc.redstone.hysentials.util.MUtils;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
@@ -157,7 +158,7 @@ public class PartyFormatter {
                 prefix = BwRanksUtils.getReplace(partyMatcher.group(1), name, null);
             }
             String mes = partyMatcher.group(3);
-            UChat.chat(prefix() + "&9" + prefix + name + (FormattingConfig.hexRendering() ? "<#c0def5>" : "&f") + ": " + mes);
+            UChat.chat(prefix() + "&9" + prefix + name + (FormattingConfig.hexRendering() ? "<#c0def5>" : "&f") + ": " + MessageFormatter.replaceWhite(mes, "<#c0def5>"));
 
             return true;
         }

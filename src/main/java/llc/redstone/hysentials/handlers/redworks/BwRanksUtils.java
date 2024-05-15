@@ -1,5 +1,7 @@
 package llc.redstone.hysentials.handlers.redworks;
 
+import cc.polyfrost.oneconfig.libs.caffeine.cache.Cache;
+import cc.polyfrost.oneconfig.libs.caffeine.cache.Caffeine;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
 import llc.redstone.hysentials.schema.HysentialsSchema;
@@ -12,17 +14,40 @@ import net.minecraft.scoreboard.ScorePlayerTeam;
 
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BwRanksUtils {
+    private static final AtomicInteger counter = new AtomicInteger(0);
+    private static final ThreadPoolExecutor POOL = new ThreadPoolExecutor(
+        50, 50,
+        0L, TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(), (r) -> new Thread(
+        r,
+        String.format("%s Cache Thread %s", Hysentials.MOD_NAME, counter.incrementAndGet())
+    )
+    );
 
-    static HashMap<UUID, String> previousNames = new HashMap<>();
+    //thread to clear cache every 5 seconds
+    static {
+        POOL.prestartAllCoreThreads();
+        POOL.setKeepAliveTime(5, TimeUnit.SECONDS);
+        POOL.allowCoreThreadTimeOut(true);
+    }
 
+    public static final Cache<UUID, String> cache = Caffeine.newBuilder().executor(POOL).maximumSize(40).build();
     public static String getMessage(String message, String name, UUID uuid, boolean plus, boolean checksColor) {
         String s = checkRegexes(message, name, uuid);
         if (s != null) {
             return s;
+        }
+
+        if (cache.getIfPresent(uuid) != null) {
+            return cache.getIfPresent(uuid);
         }
 
         try {
@@ -64,11 +89,16 @@ public class BwRanksUtils {
             }
         } catch (Exception e) {
         }
+
+        if (message.equals(name)) return message;
+
+        cache.put(uuid, message);
+
         return message;
     }
 
+    static Pattern teamsP = Pattern.compile("(§[8efacd9b]§l[SYWGRPBA]) §[8efacd9b](.+)");
     public static String checkRegexes(String message, String name, UUID uuid) {
-        Pattern teamsP = Pattern.compile("(§[8efacd9b]§l[SYWGRPBA]) §[8efacd9b](.+)");
         Matcher teamsM = teamsP.matcher(message.replaceAll("§r", ""));
 
         if (teamsM.find()) {

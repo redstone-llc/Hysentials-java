@@ -44,25 +44,14 @@ import static llc.redstone.hysentials.handlers.guis.GameMenuOpen.field_prevPage;
 
 public class BwRanks {
     private int tick;
-    public static HashMap<NetworkPlayerInfo, DuoVariable<String, String>> playerTeamMap = new HashMap<>();
-
-    public static HashMap<String, DuoVariable<UUID, String>> replacementMap = new HashMap<>();
-    public static HashMap<UUID, ScorePlayerTeam> customTeamMap = new HashMap<>();
     public static boolean hasRank = true;
 
 
     @SubscribeEvent
     public void onWorldLoad(WorldEvent.Load event) {
         this.tick = 79;
-        playerTeamMap.clear();
-        replacementMap.clear();
-        customTeamMap.clear();
+        BwRanksUtils.cache.invalidateAll();
     }
-
-
-    int tick2 = 0;
-    public static boolean shouldClose = false;
-    public static boolean shouldOpen = true;
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
@@ -72,10 +61,6 @@ public class BwRanks {
         if (++this.tick == 80) {
             // Update online cache every 4 seconds
             Multithreading.runAsync(BlockWAPIUtils::getOnline);
-            if (++tick2 == 30) { // Basically every 2 minutes
-                replacementMap.clear();
-                tick2 = 0;
-            }
             this.tick = 0;
         }
     }

@@ -1,7 +1,5 @@
 package llc.redstone.hysentials.utils.animation
 
-import llc.redstone.hysentials.capes.Mth.lerp
-
 enum class KeyframeType {
     LINEAR, // For now we only support linear
     SMOOTH,

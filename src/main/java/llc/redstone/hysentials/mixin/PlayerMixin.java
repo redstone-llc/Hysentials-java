@@ -1,7 +1,7 @@
 package llc.redstone.hysentials.mixin;
 
-import llc.redstone.hysentials.capes.CapeHolder;
-import llc.redstone.hysentials.capes.StickSimulation;
+import llc.redstone.hysentials.cosmetics.capes.CapeHolder;
+import llc.redstone.hysentials.cosmetics.capes.StickSimulation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

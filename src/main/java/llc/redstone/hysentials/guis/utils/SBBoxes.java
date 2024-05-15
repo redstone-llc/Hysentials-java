@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.guis.utils;
 
+import cc.polyfrost.oneconfig.internal.hud.HudCore;
 import cc.polyfrost.oneconfig.renderer.TextRenderer;
 import llc.redstone.hysentials.config.hysentialMods.ScorebarsConfig;
 import llc.redstone.hysentials.guis.sbBoxes.SBBoxesEditor;
@@ -7,19 +8,23 @@ import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
 import llc.redstone.hysentials.util.C;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
+import llc.redstone.hysentials.util.ScoreboardWrapper;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
 
 public class SBBoxes {
     public static List<SBBoxes> boxes = new ArrayList<>();
-    private final transient JSONObject line;
+    public static List<SBBoxesHud> huds = new ArrayList<>();
     public transient Position position;
     private transient String display = "";
     @SerializedName("display")
@@ -34,7 +39,6 @@ public class SBBoxes {
     private boolean enabled = false;
 
     public SBBoxes(@NotNull JSONObject line) {
-        this.line = line;
         this.display = line.getString("display");
         this.regexDisplay = line.getString("display");
         this.regex = line.getString("regex");
@@ -46,6 +50,24 @@ public class SBBoxes {
         this.text = line.getString("text");
 
         position = new Position(x, y, getWidth(text), getHeight(text));
+
+        HudCore.huds.put(new Map.Entry<Field, Object>() {
+            @Override
+            public Field getKey() {
+                return null;
+            }
+
+            @Override
+            public Object getValue() {
+                return null;
+            }
+
+            @Override
+            public Object setValue(Object o) {
+                return null;
+            }
+        }, new SBBoxesHud(this));
+
     }
 
     public void draw() {
@@ -140,6 +162,22 @@ public class SBBoxes {
         return 15 * scale;
     }
 
+    @Override
+    public String toString() {
+        return "SBBoxes{" +
+            "position=" + position +
+            ", display='" + display + '\'' +
+            ", regexDisplay='" + regexDisplay + '\'' +
+            ", text='" + text + '\'' +
+            ", regex='" + regex + '\'' +
+            ", x=" + x +
+            ", y=" + y +
+            ", scale=" + scale +
+            ", title='" + title + '\'' +
+            ", enabled=" + enabled +
+            '}';
+    }
+
     public void setDisplay(String score, Matcher matcher) {
         if (regexDisplay == null) {
             regexDisplay = display;
@@ -152,10 +190,13 @@ public class SBBoxes {
         }
     }
 
-    @NotNull
-    public JSONObject getData() {
-        return line;
+    public void setDisplay(String text) {
+        Matcher matcher = Pattern.compile(regex).matcher(text);
+        if (matcher.find()) {
+            setDisplay(text, matcher);
+        }
     }
+
 
     public JSONObject save() {
         String json = new GsonBuilder().create().toJson(this, SBBoxes.class);
@@ -163,6 +204,30 @@ public class SBBoxes {
         obj.put("x", position.getX());
         obj.put("y", position.getY());
         return obj;
+    }
+
+    public boolean canRender() {
+        ArrayList<ScoreboardWrapper.ScoreWrapper> ls = ScoreboardWrapper.getScoreboard().getSortedScores(ScoreboardWrapper.getSidebar()).stream().map(ScoreboardWrapper.ScoreWrapper::new).collect(Collectors.toCollection(ArrayList::new));
+
+        for (ScoreboardWrapper.ScoreWrapper l : ls) {
+            if (doesMatch(l.getName())) {
+                setDisplay(l.getName());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean doesMatch(String s) {
+        s = C.removeRepeatColor(s);
+        s = s.replace("§", "&");
+        s = SBBoxesEditor.removeHiddenCharacters(s);
+        Matcher matcher = Pattern.compile(regex).matcher(s);
+        if (matcher.find()) {
+            setDisplay(s, matcher);
+            return true;
+        }
+        return false;
     }
 
     public static SBBoxes getFromMatch(String s) {

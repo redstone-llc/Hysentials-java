@@ -30,7 +30,7 @@ public class ChatConfig extends Config {
         category = "General",
         subcategory = "General"
     )
-    public static boolean levelPrefixColors = true;
+    public static boolean levelPrefixColors = false;
 
     @Color(
         name = "Default Level Color",
@@ -39,7 +39,7 @@ public class ChatConfig extends Config {
         subcategory = "General",
         allowAlpha = false
     )
-    public static OneColor defaultLevelColor = new OneColor("#FFFFFF");
+    public static OneColor defaultLevelColor = new OneColor("#26292b");
 
     @Switch(
             name = "Party Formatting",
@@ -132,6 +132,14 @@ public class ChatConfig extends Config {
         placeholder = ":globalchat: "
     )
     public static String globalPrefix = ":globalchat: ";
+
+    @Switch(
+        name = "Player Direct Message Prefix",
+        description = "Enable/Disable player prefixes in direct messages.",
+        category = "Direct Messages",
+        subcategory = "General"
+    )
+    public static boolean directMessagePrefix = true;
 
     public ChatConfig() {
         super(new Mod("Chat", ModType.UTIL_QOL, "/assets/hysentials/mods/chat.png", 244, 80), "hysentials-chat.json");

@@ -1,11 +1,8 @@
 package llc.redstone.hysentials.handlers.htsl;
 
-import cc.polyfrost.oneconfig.libs.universal.UChat;
-import llc.redstone.hysentials.util.*;
+import llc.redstone.hysentials.handlers.redworks.BwRanks;
+import llc.redstone.hysentials.htsl.compiler.ExportAction;
 import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
-import llc.redstone.hysentials.guis.club.ClubDashboard;
-import llc.redstone.hysentials.guis.container.GuiItem;
-import llc.redstone.hysentials.guis.club.ClubDashboard;
 import llc.redstone.hysentials.guis.container.GuiItem;
 import llc.redstone.hysentials.util.C;
 import llc.redstone.hysentials.util.Input;
@@ -13,24 +10,20 @@ import llc.redstone.hysentials.util.Material;
 import llc.redstone.hysentials.util.Renderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.lwjgl.opengl.GL11;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static llc.redstone.hysentials.guis.sbBoxes.SBBoxesEditor.drawRect;
 
@@ -42,7 +35,6 @@ public class FunctionsGUIHandler {
     boolean showChoose = false;
     Input.Button clipboard;
     Input.Button file;
-    Input.Button club;
     Input.Button library;
     boolean isSelecting = false;
 
@@ -50,7 +42,6 @@ public class FunctionsGUIHandler {
         try {
             clipboard = new Input.Button(0, 0, 0, 20, "Clipboard");
             file = new Input.Button(0, 0, 0, 20, "File");
-            club = new Input.Button(0, 0, 0, 20, "Club");
             library = new Input.Button(0, 0, 0, 20, "Action Library");
 
             guiTopField = GuiContainer.class.getDeclaredField("field_147009_r");
@@ -105,8 +96,6 @@ public class FunctionsGUIHandler {
                 int x = rightMost + 10;
                 int y = chestGuiTop + 1 + 25 * slotIndex - 5;
                 drawRect(x, y, 50, 20, (int) Renderer.color(0, 0, 0, 150));
-
-
             }
         }
 
@@ -120,17 +109,12 @@ public class FunctionsGUIHandler {
             file.xPosition = rightMost + 10;
             file.yPosition = chestGuiTop + 1 + 50 - 5;
 
-            club.setWidth(chestWidth / 2 - 10);
-            club.xPosition = rightMost + 10;
-            club.yPosition = chestGuiTop + 1 + 75 - 5;
-
             library.setWidth(chestWidth / 2 - 10);
             library.xPosition = rightMost + 10;
             library.yPosition = chestGuiTop + 1 + 100 - 5;
 
             clipboard.drawButton(Minecraft.getMinecraft(), event.getMouseX(), event.getMouseY());
             file.drawButton(Minecraft.getMinecraft(), event.getMouseX(), event.getMouseY());
-            club.drawButton(Minecraft.getMinecraft(), event.getMouseX(), event.getMouseY());
             library.drawButton(Minecraft.getMinecraft(), event.getMouseX(), event.getMouseY());
         }
         GlStateManager.popMatrix();
@@ -142,33 +126,35 @@ public class FunctionsGUIHandler {
             return;
         if (Navigator.getContainerName() == null || !Navigator.getContainerName().equals("Functions")) return;
         if (!showChoose) return;
-        if (event.getX() > clipboard.xPosition && event.getX() < clipboard.xPosition + clipboard.width && event.getY() > clipboard.yPosition && event.getY() < clipboard.yPosition + clipboard.height) {
-            EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
-            Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
-            Exporter.export = "clipboard";
-            showChoose = false;
+
+        if (isClickOnButton(clipboard, event)) {
+            performClickAction("clipboard");
         }
-        if (event.getX() > file.xPosition && event.getX() < file.xPosition + file.width && event.getY() > file.yPosition && event.getY() < file.yPosition + file.height) {
-            EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
-            Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
-            Exporter.export = "file";
-            showChoose = false;
+        if (isClickOnButton(file, event)) {
+            performClickAction("file");
         }
-        if (event.getX() > club.xPosition && event.getX() < club.xPosition + club.width && event.getY() > club.yPosition && event.getY() < club.yPosition + club.height) {
-            EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
-            Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
-            if (ClubDashboard.getClub() == null) {
-                UChat.chat("&cYou are not in a club!");
-                return;
-            }
-            Exporter.export = "club";
-            showChoose = false;
+        if (isClickOnButton(library, event)) {
+            performClickAction("library");
         }
-        if (event.getX() > library.xPosition && event.getX() < library.xPosition + library.width && event.getY() > library.yPosition && event.getY() < library.yPosition + library.height) {
-            EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
-            Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
-            Exporter.export = "library";
-            showChoose = false;
+    }
+
+    private boolean isClickOnButton(GuiButton button, GuiMouseClickEvent event) {
+        return event.getX() > button.xPosition && event.getX() < button.xPosition + button.width &&
+            event.getY() > button.yPosition && event.getY() < button.yPosition + button.height;
+    }
+
+    String exportName = null;
+
+    private void performClickAction(String exportMethod) {
+        EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+        Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
+        ExportAction.setExportMethod(exportMethod);
+        showChoose = false;
+        if (exportName != null) {
+            ExportAction.Companion.exportAction(exportName);
+            exportName = null;
+        } else {
+            ExportAction.Companion.exportAction(BwRanks.randomString(5));
         }
     }
 

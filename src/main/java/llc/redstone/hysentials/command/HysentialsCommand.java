@@ -4,20 +4,15 @@ import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
-import io.netty.buffer.AbstractByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.EmptyByteBuf;
-import io.netty.buffer.Unpooled;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.HysentialsUtilsKt;
 import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.guis.club.ClubDashboard;
 import llc.redstone.hysentials.guis.misc.HysentialsLevel;
 import llc.redstone.hysentials.guis.quest.QuestMainGui;
-import llc.redstone.hysentials.handlers.htsl.CodeEditor;
 import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
+import llc.redstone.hysentials.util.LocrawUtil;
 import llc.redstone.hysentials.handlers.npc.NPC;
-import llc.redstone.hysentials.htsl.compiler.Compiler;
+import llc.redstone.hysentials.htsl.compiler.CompileKt;
 import llc.redstone.hysentials.macrowheel.MacroWheelSelector;
 import llc.redstone.hysentials.profileViewer.DefaultProfileGui;
 import llc.redstone.hysentials.renderer.plusStand.PlusStandEntity;
@@ -32,23 +27,20 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 import net.hypixel.data.type.GameType;
 import net.hypixel.data.type.ServerType;
-import net.hypixel.modapi.HypixelModAPI;
-import net.hypixel.modapi.packet.PacketRegistry;
 import net.hypixel.modapi.packet.impl.clientbound.ClientboundLocationPacket;
-import net.hypixel.modapi.packet.impl.clientbound.ClientboundPingPacket;
-import net.hypixel.modapi.packet.impl.serverbound.ServerboundLocationPacket;
-import net.hypixel.modapi.packet.impl.serverbound.ServerboundPingPacket;
-import net.hypixel.modapi.serializer.PacketSerializer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.client.C17PacketCustomPayload;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -57,15 +49,15 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
 
 public class HysentialsCommand extends CommandBase {
-    public static List<String> messages = new ArrayList<>();
     public static boolean collecting = false;
+    public static double time = 0;
+    public static int count = 0;
 
     @Override
     public String getCommandName() {
@@ -174,11 +166,6 @@ public class HysentialsCommand extends CommandBase {
                 break;
             }
 
-            case "editor": {
-                new CodeEditor().openGui(args.length > 1 ? args[1] : "default");
-                break;
-            }
-
             case "import": {
                 if (args.length > 1) {
                     handleImport(args[1]);
@@ -213,33 +200,21 @@ public class HysentialsCommand extends CommandBase {
             String codeToBeCompiled = null;
             File file = new File("./config/hysentials/htsl/" + id + ".htsl");
             if (!file.exists()) {
-                File defaultFile = new File("./config/hysentials/htsl/" + id + ".txt");
-                if (defaultFile.exists()) {
-                    file = defaultFile;
-                    codeToBeCompiled = FileUtils.readFileToString(file);
-                } else {
-                    try {
-                        JsonObject club = ClubDashboard.getClub();
-                        String otherCode = NetworkUtils.getString(HysentialsUtilsKt.getHYSENTIALS_API() + "/club/action?clubID=" + (club != null ? club.get("id").getAsString() : null) + "&id=" + id);
-                        JSONObject otherJson = new JSONObject(otherCode);
-                        if (otherJson.has("action")) {
-                            codeToBeCompiled = otherJson.getJSONObject("action").getJSONObject("action").getString("code");
-                        } else {
-                            String code = NetworkUtils.getString(HysentialsUtilsKt.getHYSENTIALS_API() + "/action?id=" + id);
-                            JSONObject json = new JSONObject(code);
-                            if (json.has("action")) {
-                                codeToBeCompiled = json.getJSONObject("action").getJSONObject("action").getString("code");
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                try {
+                    String code = NetworkUtils.getString(HysentialsUtilsKt.getHYSENTIALS_API() + "/action?id=" + id);
+                    JSONObject json = new JSONObject(code);
+                    if (json.has("action")) {
+                        codeToBeCompiled = json.getJSONObject("action").getJSONObject("action").getString("code");
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             } else {
                 codeToBeCompiled = FileUtils.readFileToString(file);
             }
+
             if (codeToBeCompiled != null) {
-                new Compiler(codeToBeCompiled);
+                CompileKt.compileFile(codeToBeCompiled, true);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -335,6 +310,47 @@ public class HysentialsCommand extends CommandBase {
                     }
                     break;
                 }
+                case "locraw": {
+                    LocrawInfo info = LocrawUtil.INSTANCE.getLocrawInfo();
+                    if (info != null) {
+                        UChat.chat("§aLocraw Info:");
+                        UChat.chat("&7Environment: &a" + info.getEnvironment());
+                        UChat.chat("&7ProxyName: &a" + info.getProxyName());
+                        UChat.chat("&7ServerName: &a" + info.getServerName());
+                        UChat.chat("&7GameType: &a" + info.getGameType());
+                        UChat.chat("&7LobbyName: &a" + info.getLobbyName());
+                        UChat.chat("&7ModeName: &a" + info.getGameMode());
+                        UChat.chat("&7MapName: &a" + info.getMapName());
+                    } else {
+                        UChat.chat("§cLocraw Info is null!");
+                        LocrawUtil.INSTANCE.sendLocraw();
+                    }
+                    break;
+                }
+
+
+                case "render": {
+
+
+                    //average fps
+                    Multithreading.runAsync(() -> {
+                        int total = 0;
+                        for (int i = 0; i < 100; i++) {
+                            total += Minecraft.getDebugFPS();
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        Hysentials.INSTANCE.sendMessage("&aAverage FPS: " + total / 100);
+                        Hysentials.INSTANCE.sendMessage("&aAverage time per render: " + time / count);
+
+                    });
+
+
+                    break;
+                }
 
                 case "plus": {
                     UChat.chat("Sending Location Request...");
@@ -401,6 +417,26 @@ public class HysentialsCommand extends CommandBase {
                     break;
                 }
 
+                case "copyholo": {
+                    List<MovingObjectPosition> objs = getMouseOverExtended(4);
+                    List<String> holo = new ArrayList<>();
+                    for (MovingObjectPosition obj : objs) {
+                        if (obj.entityHit != null && obj.entityHit instanceof EntityArmorStand) {
+                            EntityArmorStand stand = (EntityArmorStand) obj.entityHit;
+                            String name = stand.getCustomNameTag();
+                            if (name != null && !name.isEmpty()) {
+                                holo.add(name);
+                            }
+                        }
+                    }
+                    String holoString = String.join("\n", holo);
+                    StringSelection stringSelection = new StringSelection(holoString);
+                    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                    clipboard.setContents(stringSelection, null);
+                    Hysentials.INSTANCE.sendMessage("&aCopied hologram text to clipboard!");
+                    break;
+                }
+
                 case "averagefps": {
                     Hysentials.INSTANCE.sendMessage("&aGetting average FPS...");
                     Multithreading.runAsync(() -> {
@@ -419,5 +455,84 @@ public class HysentialsCommand extends CommandBase {
                 }
             }
         }
+    }
+
+    public static List<MovingObjectPosition> getMouseOverExtended(float dist)
+    {
+        List<MovingObjectPosition> mopReturn = new ArrayList<>();
+        Minecraft mc = FMLClientHandler.instance().getClient();
+        Entity theRenderViewEntity = mc.getRenderViewEntity();
+        AxisAlignedBB theViewBoundingBox = new AxisAlignedBB(
+            theRenderViewEntity.posX-0.5D,
+            theRenderViewEntity.posY-0.0D,
+            theRenderViewEntity.posZ-0.5D,
+            theRenderViewEntity.posX+0.5D,
+            theRenderViewEntity.posY+1.5D,
+            theRenderViewEntity.posZ+0.5D
+        );
+        MovingObjectPosition returnMOP = null;
+        if (mc.theWorld != null)
+        {
+            double var2 = dist;
+            returnMOP = theRenderViewEntity.rayTrace(var2, 0);
+            double calcdist = var2;
+            Vec3 pos = theRenderViewEntity.getPositionEyes(0);
+            var2 = calcdist;
+            if (returnMOP != null)
+            {
+                calcdist = returnMOP.hitVec.distanceTo(pos);
+            }
+
+            Vec3 lookvec = theRenderViewEntity.getLook(0);
+            Vec3 var8 = pos.addVector(lookvec.xCoord * var2,
+                lookvec.yCoord * var2,
+                lookvec.zCoord * var2);
+            Entity pointedEntity = null;
+            float var9 = 1.0F;
+            @SuppressWarnings("unchecked")
+            List<Entity> list = mc.theWorld.getEntitiesWithinAABBExcludingEntity(
+                theRenderViewEntity,
+                theViewBoundingBox.addCoord(
+                    lookvec.xCoord * var2,
+                    lookvec.yCoord * var2,
+                    lookvec.zCoord * var2).expand(var9, var9, var9));
+            double d = calcdist;
+
+            for (Entity entity : list)
+            {
+                if (entity.canBeCollidedWith())
+                {
+                    float bordersize = entity.getCollisionBorderSize();
+                    AxisAlignedBB aabb = new AxisAlignedBB(
+                        entity.posX-entity.width/2,
+                        entity.posY,
+                        entity.posZ-entity.width/2,
+                        entity.posX+entity.width/2,
+                        entity.posY+entity.height,
+                        entity.posZ+entity.width/2);
+                    aabb.expand(bordersize, bordersize, bordersize);
+                    MovingObjectPosition mop0 = aabb.calculateIntercept(pos, var8);
+
+                    if (aabb.isVecInside(pos))
+                    {
+                        if (0.0D < d || d == 0.0D)
+                        {
+                            mopReturn.add(new MovingObjectPosition(entity));
+                            d = 0.0D;
+                        }
+                    } else if (mop0 != null)
+                    {
+                        double d1 = pos.distanceTo(mop0.hitVec);
+
+                        if (d1 < d || d == 0.0D)
+                        {
+                            mopReturn.add(new MovingObjectPosition(entity));
+                            d = d1;
+                        }
+                    }
+                }
+            }
+        }
+        return mopReturn;
     }
 }

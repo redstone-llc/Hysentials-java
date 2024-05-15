@@ -2,28 +2,21 @@ package llc.redstone.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
-import llc.redstone.hysentials.HysentialsUtilsKt;
-import llc.redstone.hysentials.util.MUtils;
-import cc.polyfrost.oneconfig.libs.universal.UGraphics;
-import cc.polyfrost.oneconfig.utils.NetworkUtils;
+import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
+import llc.redstone.hysentials.htsl.compiler.CommitSystemKt;
+import llc.redstone.hysentials.htsl.compiler.CompileKt;
 import llc.redstone.hysentials.event.events.GuiKeyboardEvent;
 import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
 import llc.redstone.hysentials.guis.ResolutionUtil;
-import llc.redstone.hysentials.guis.actionLibrary.ActionLibrary;
-import llc.redstone.hysentials.guis.club.ClubDashboard;
 import llc.redstone.hysentials.guis.container.GuiItem;
 import llc.redstone.hysentials.handlers.redworks.BwRanks;
-import llc.redstone.hysentials.htsl.compiler.Compiler;
+import llc.redstone.hysentials.htsl.compiler.ExportAction;
+import llc.redstone.hysentials.util.BUtils;
 import llc.redstone.hysentials.util.Input;
 import llc.redstone.hysentials.util.Material;
-import llc.redstone.hysentials.util.Renderer;
-import com.google.gson.JsonObject;
-import llc.redstone.hysentials.guis.ResolutionUtil;
-import llc.redstone.hysentials.guis.club.ClubDashboard;
-import llc.redstone.hysentials.guis.container.GuiItem;
-import llc.redstone.hysentials.handlers.redworks.BwRanks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -36,10 +29,7 @@ import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.commons.io.FileUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -52,23 +42,23 @@ public class ActionGUIHandler {
     public static Field xSizeField;
 
     Input.Button button;
+    Input.Button patch;
     Input input;
     boolean showChoose;
     Input.Button clipboard;
     Input.Button file;
-    Input.Button club;
     Input.Button library;
 
     public ActionGUIHandler() {
         try {
             button = new Input.Button(0, 0, 0, 20, "Import HTSL");
+            patch = new Input.Button(0, 0, 0, 20, "Patch");
             input = new Input(0, 0, 0, 18);
             input.setEnabled(false);
             input.setText("Enter File Name");
             input.setMaxStringLength(24);
             clipboard = new Input.Button(0, 0, 0, 20, "Clipboard");
             file = new Input.Button(0, 0, 0, 20, "File");
-            club = new Input.Button(0, 0, 0, 20, "Club");
             library = new Input.Button(0, 0, 0, 20, "Action Library");
 
             guiTopField = GuiContainer.class.getDeclaredField("field_147009_r");
@@ -114,17 +104,12 @@ public class ActionGUIHandler {
             file.xPosition = rightMost + 10;
             file.yPosition = chestGuiTop + 1 + 50 - 5;
 
-            club.setWidth(chestWidth / 2 - 10);
-            club.xPosition = rightMost + 10;
-            club.yPosition = chestGuiTop + 1 + 75 - 5;
-
             library.setWidth(chestWidth / 2 - 10);
             library.xPosition = rightMost + 10;
             library.yPosition = chestGuiTop + 1 + 100 - 5;
 
             clipboard.drawButton(Minecraft.getMinecraft(), event.getMouseX(), event.getMouseY());
             file.drawButton(Minecraft.getMinecraft(), event.getMouseX(), event.getMouseY());
-            club.drawButton(Minecraft.getMinecraft(), event.getMouseX(), event.getMouseY());
             library.drawButton(Minecraft.getMinecraft(), event.getMouseX(), event.getMouseY());
         }
 
@@ -144,11 +129,18 @@ public class ActionGUIHandler {
         button.xPosition = ResolutionUtil.current().getScaledWidth() / 2 + sizeDifference;
         button.yPosition = chestGuiTop - button.height - margin + 1;
 
+        patch.setWidth(chestWidth / 2 - sizeDifference);
+        patch.xPosition = ResolutionUtil.current().getScaledWidth() / 2 + sizeDifference + button.width + sizeDifference;
+        patch.yPosition = chestGuiTop - patch.height - margin + 1;
+
         input.width = chestWidth / 2 + sizeDifference - margin;
         input.xPosition = ResolutionUtil.current().getScaledWidth() / 2 - input.width + sizeDifference - margin;
         input.yPosition = chestGuiTop - input.height - margin;
 
         button.drawButton(Minecraft.getMinecraft(), event.getMouseX(), event.getMouseY());
+        if (getFunctionName() != null) {
+            patch.drawButton(Minecraft.getMinecraft(), event.getMouseX(), event.getMouseY());
+        }
         input.drawTextBox();
         GlStateManager.popMatrix();
     }
@@ -189,6 +181,46 @@ public class ActionGUIHandler {
             input.setEnabled(false);
         }
 
+        if (getFunctionName() != null) {
+            if (event.getX() > patch.xPosition && event.getX() < patch.xPosition + patch.width && event.getY() > patch.yPosition && event.getY() < patch.yPosition + patch.height) {
+                EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+                Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
+                patch.displayString = "Patching...";
+                patch.enabled = true;
+
+                if (input.getText().equals("Enter File Name") || input.getText().equals("")) {
+                    input.setText(getFunctionName());
+                }
+
+                try {
+                    String houseFile = SbbRenderer.housingScoreboard.getHousingName() + "-" + SbbRenderer.housingScoreboard.getHousingCreator();
+                    File file = new File("./config/hysentials/htsl/house/" + houseFile + "/" + input.getText() + ".htsl"); // Recently imported one
+                    File file2 = new File("./config/hysentials/htsl/" + input.getText() + ".htsl"); // New file
+                    if (!file.exists()) {
+                        UChat.chat("&3[HTSL] &cFile not found in house folder, please export the file first.");
+                        return;
+                    }
+                    if (!file2.exists()) {
+                        UChat.chat("&3[HTSL] &cFile not found in htsl folder, please create the file you want to patch first.");
+                        return;
+                    }
+
+                    String response = CommitSystemKt.patch(file, file2).toString();
+                    if (response.equals("success")) {
+                        UChat.chat("&3[HTSL] &aSuccessfully patched " + input.getText() + ".htsl");
+                    } else {
+                        UChat.chat("&3[HTSL] &cFailed to patch " + input.getText() + ".htsl");
+                        UChat.chat("&c- " + response);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                patch.displayString = "Patch";
+                patch.enabled = true;
+            }
+        }
+
         if (event.getX() > button.xPosition && event.getX() < button.xPosition + button.width && event.getY() > button.yPosition && event.getY() < button.yPosition + button.height) {
             EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
             Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
@@ -201,35 +233,14 @@ public class ActionGUIHandler {
             try {
                 String codeToBeCompiled = null;
                 File file = new File("./config/hysentials/htsl/" + input.getText() + ".htsl");
-                if (!file.exists()) {
-                    File defaultFile = new File("./config/hysentials/htsl/" + input.getText() + ".txt");
-                    if (defaultFile.exists()) {
-                        file = defaultFile;
-                        codeToBeCompiled = FileUtils.readFileToString(file);
-                    } else {
-                        try {
-                            JsonObject club = ClubDashboard.getClub();
-                            String otherCode = NetworkUtils.getString(HysentialsUtilsKt.getHYSENTIALS_API() + "/club/action?clubID=" + (club != null ? club.get("id").getAsString() : null) + "&id=" + input.getText());
-                            JSONObject otherJson = new JSONObject(otherCode);
-                            if (otherJson.has("action")) {
-                                codeToBeCompiled = otherJson.getJSONObject("action").getJSONObject("action").getString("code");
-                            } else {
-                                String code = NetworkUtils.getString(HysentialsUtilsKt.getHYSENTIALS_API() + "/action?id=" + input.getText());
-                                JSONObject json = new JSONObject(code);
-                                if (json.has("action")) {
-                                    codeToBeCompiled = json.getJSONObject("action").getJSONObject("action").getString("code");
-                                }
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } else {
+                if (file.exists()) {
                     codeToBeCompiled = FileUtils.readFileToString(file);
                 }
+
                 if (codeToBeCompiled != null) {
-                    new Compiler(codeToBeCompiled);
+                    CompileKt.compileFile(codeToBeCompiled, true);
                 }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -246,33 +257,34 @@ public class ActionGUIHandler {
         //over clipboard
         if (!showChoose) return;
 
-        if (event.getX() > clipboard.xPosition && event.getX() < clipboard.xPosition + clipboard.width && event.getY() > clipboard.yPosition && event.getY() < clipboard.yPosition + clipboard.height) {
-            EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
-            Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
-            Exporter.export = "clipboard";
-            showChoose = false;
+        if (isClickOnButton(clipboard, event)) {
+            performClickAction("clipboard");
         }
-        if (event.getX() > file.xPosition && event.getX() < file.xPosition + file.width && event.getY() > file.yPosition && event.getY() < file.yPosition + file.height) {
-            EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
-            Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
-            Exporter.export = "file";
-            showChoose = false;
+        if (isClickOnButton(file, event)) {
+            performClickAction("file");
         }
-        if (event.getX() > club.xPosition && event.getX() < club.xPosition + club.width && event.getY() > club.yPosition && event.getY() < club.yPosition + club.height) {
-            EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
-            Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
-            if (ClubDashboard.getClub() == null) {
-                UChat.chat("&cYou are not in a club!");
-                return;
-            }
-            Exporter.export = "club";
-            showChoose = false;
+        if (isClickOnButton(library, event)) {
+            performClickAction("library");
         }
-        if (event.getX() > library.xPosition && event.getX() < library.xPosition + library.width && event.getY() > library.yPosition && event.getY() < library.yPosition + library.height) {
-            EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
-            Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
-            Exporter.export = "library";
-            showChoose = false;
+    }
+
+    private boolean isClickOnButton(GuiButton button, GuiMouseClickEvent event) {
+        return event.getX() > button.xPosition && event.getX() < button.xPosition + button.width &&
+            event.getY() > button.yPosition && event.getY() < button.yPosition + button.height;
+    }
+
+    String exportName = null;
+
+    private void performClickAction(String exportMethod) {
+        EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+        Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
+        ExportAction.setExportMethod(exportMethod);
+        showChoose = false;
+        if (exportName != null) {
+            ExportAction.Companion.exportAction(exportName);
+            exportName = null;
+        } else {
+            ExportAction.Companion.exportAction(BwRanks.randomString(5));
         }
     }
 
@@ -302,12 +314,10 @@ public class ActionGUIHandler {
                 event.getCi().cancel();
 
                 if (Navigator.getContainerName() != null && Navigator.getContainerName().startsWith("Actions: ")) {
-                    Exporter.names.add(Navigator.getContainerName().split("Actions: ")[1]);
-                    Exporter.type = "function";
+                    exportName = Navigator.getContainerName().split("Actions: ")[1];
                     showChoose = true;
                 } else {
-                    Exporter.names.add(BwRanks.randomString(5));
-                    Exporter.type = getType((GuiChest) screen);
+                    exportName = BwRanks.randomString(5);
                     showChoose = true;
                 }
             }
@@ -370,6 +380,23 @@ public class ActionGUIHandler {
             }
         }
         return false;
+    }
+
+    public static String getFunctionName() {
+        if (Minecraft.getMinecraft().currentScreen instanceof GuiChest) {
+            GuiChest chest = (GuiChest) Minecraft.getMinecraft().currentScreen;
+            try {
+                if (field_lowerChestInventory.get(chest) instanceof IInventory) {
+                    IInventory inventory = (IInventory) field_lowerChestInventory.get(chest);
+                    if (inventory.getName().startsWith("Actions: ")) {
+                        return inventory.getName().split("Actions: ")[1];
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                return null;
+            }
+        }
+        return null;
     }
 
     public static boolean isActionSettings() {

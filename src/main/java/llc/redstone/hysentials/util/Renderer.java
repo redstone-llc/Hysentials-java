@@ -34,6 +34,7 @@ import java.util.function.Consumer;
 import static cc.polyfrost.oneconfig.renderer.TextRenderer.drawBorderedText;
 import static java.lang.Math.*;
 
+// From ChatTriggers
 public class Renderer {
     public Renderer() {
     }

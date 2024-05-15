@@ -1,8 +1,6 @@
 package llc.redstone.hysentials.cosmetics.wings.tdarth;
 
 import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.capes.CapeHandler;
-import llc.redstone.hysentials.cosmetics.backpack.BackpackCosmetic;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderPlayer;

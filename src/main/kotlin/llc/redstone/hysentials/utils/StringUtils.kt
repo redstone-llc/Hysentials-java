@@ -1,6 +1,9 @@
 package llc.redstone.hysentials.utils
 
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent
+import org.bitbucket.cowwoc.diffmatchpatch.DiffMatchPatch
+import java.io.UnsupportedEncodingException
+import java.net.URLEncoder
 import org.apache.commons.lang3.StringUtils as ApacheStringUtils
 
 fun CharSequence?.countMatches(subString: CharSequence): Int = ApacheStringUtils.countMatches(this, subString)
@@ -46,3 +49,22 @@ fun String.toTitleCase(): String = this.lowercase().replaceFirstChar { c -> c.ti
 fun String.splitToWords(): String = this.split('_', ' ').joinToString(" ") { it.toTitleCase() }
 fun String.isInteger(): Boolean = this.toIntOrNull() != null
 fun String.formatCapitalize(): String = this.replace("_", " ").split(" ").joinToString(" ") { it.toTitleCase() }
+
+fun DiffMatchPatch.Patch.getText(): String {
+    val var4 = this.diffs.iterator()
+    val text = StringBuilder()
+    while (var4.hasNext()) {
+        val aDiff = var4.next()
+        when (aDiff.operation) {
+            DiffMatchPatch.Operation.INSERT -> text.append('+')
+            DiffMatchPatch.Operation.DELETE -> text.append('-')
+            DiffMatchPatch.Operation.EQUAL -> text.append(' ')
+        }
+        try {
+            text.append(aDiff.text.replace('+', ' ')).append("\n")
+        } catch (var7: UnsupportedEncodingException) {
+            throw Error("This system does not support UTF-8.", var7)
+        }
+    }
+    return text.toString()
+}

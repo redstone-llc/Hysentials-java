@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.mixin;
 
+import llc.redstone.hysentials.event.events.GuiCloseEvent;
 import llc.redstone.hysentials.event.events.GuiKeyboardEvent;
 import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
 import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
@@ -20,6 +21,11 @@ public class GuiScreenMixin {
     @Inject(method = "handleMouseInput", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiScreen;mouseClicked(III)V"), cancellable = true)
     public void handleMouseInput(CallbackInfo ci) {
         MinecraftForge.EVENT_BUS.post(new GuiMouseClickEvent((int) SbbRenderer.getMouseX(), (int) SbbRenderer.getMouseY(), Mouse.getEventButton(), ci));
+    }
+
+    @Inject(method = "onGuiClosed", at = @At("HEAD"))
+    public void onGuiClosed(CallbackInfo ci) {
+        MinecraftForge.EVENT_BUS.post(new GuiCloseEvent((GuiScreen) (Object) this));
     }
 
     @Inject(method = "handleKeyboardInput", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiScreen;keyTyped(CI)V"), cancellable = true)

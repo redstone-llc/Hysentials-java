@@ -1,9 +1,7 @@
 package llc.redstone.hysentials.handlers.chat.modules.misc;
 
 import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.guis.club.ClubDashboard;
-import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.guis.club.ClubDashboard;
+import llc.redstone.hysentials.guis.container.containers.club.ClubDashboard;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.network.play.client.C01PacketChatMessage;

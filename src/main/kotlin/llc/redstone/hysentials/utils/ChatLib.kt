@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.ChatLine
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.client.event.ClientChatReceivedEvent
+import java.io.File
 import java.util.regex.Pattern
 import kotlin.math.roundToInt
 
@@ -19,11 +20,15 @@ object ChatLib {
      */
     @JvmStatic
     fun chat(text: Any) {
-        when (text) {
-            is String -> UMessage(text).chat()
-            is UMessage -> text.chat()
-            is UTextComponent -> text.chat()
-            else -> UMessage(text.toString()).chat()
+        if (File("./config").exists()) {
+            when (text) {
+                is String -> UMessage(text).chat()
+                is UMessage -> text.chat()
+                is UTextComponent -> text.chat()
+                else -> UMessage(text.toString()).chat()
+            }
+        } else {
+            println(text)
         }
     }
 

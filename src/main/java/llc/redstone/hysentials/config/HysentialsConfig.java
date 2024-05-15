@@ -30,6 +30,9 @@ import llc.redstone.hysentials.config.hysentialMods.page.PageOption;
 import llc.redstone.hysentials.config.hysentialMods.rank.RankAnnotation;
 import llc.redstone.hysentials.config.hysentialMods.rank.RankOption;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
+import llc.redstone.hysentials.guis.sbBoxes.huds.ActionBarHUD;
+import llc.redstone.hysentials.guis.sbBoxes.huds.BossbarSbBoxHud;
+import llc.redstone.hysentials.guis.sbBoxes.huds.HeldItemTooltipHUD;
 import llc.redstone.hysentials.macrowheel.overlay.MacroWheelHudConfigThing;
 import llc.redstone.hysentials.macrowheel.overlay.MacroWheelOverlay;
 import llc.redstone.hysentials.updateGui.UpdateChecker;
@@ -112,6 +115,27 @@ public class HysentialsConfig extends Config {
     )
     public MacroWheelHudConfigThing macroWheelHud = new MacroWheelHudConfigThing(true, 0, 0,
         5f, true, new OneColor(119, 119, 119, 150));
+
+    @HUD(
+        name = "Actionbar HUD",
+        category = "HUD",
+        subcategory = "Actionbar"
+    )
+    public static ActionBarHUD actionBarHUD = new ActionBarHUD();
+
+    @HUD(
+        name = "Boss Bar HUD",
+        category = "HUD",
+        subcategory = "Boss Bar"
+    )
+    public static BossbarSbBoxHud bossBarHUD = new BossbarSbBoxHud();
+
+    @HUD(
+        name = "Held Item Tooltip HUD",
+        category = "HUD",
+        subcategory = "Held Item Tooltip"
+    )
+    public static HeldItemTooltipHUD heldItemTooltipHUD = new HeldItemTooltipHUD();
 
     @Text(
         name = "Chat Prefix",

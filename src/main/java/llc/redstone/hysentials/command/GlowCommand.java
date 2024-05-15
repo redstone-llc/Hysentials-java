@@ -36,9 +36,9 @@ public class GlowCommand extends CommandBase {
             return;
         }
         item = item.copy();
-        item.addEnchantment(Enchantment.lure, 10);
-        GuiItem.hideFlag(item, 1);
         GuiItem.setEnchanted(item, true);
+        GuiItem.hideFlag(item, 1);
+        item.addEnchantment(Enchantment.lure, 10);
         RenameCommand.setCreativeAction(item, Minecraft.getMinecraft().thePlayer.inventory.currentItem);
         UChat.chat("§aAdded glow to the item successfully!");
     }

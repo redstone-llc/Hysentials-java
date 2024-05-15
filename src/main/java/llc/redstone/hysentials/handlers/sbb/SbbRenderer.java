@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.handlers.sbb;
 
 import cc.polyfrost.oneconfig.config.core.OneColor;
+import cc.polyfrost.oneconfig.renderer.NanoVGHelper;
 import llc.redstone.hysentials.guis.utils.SBBoxes;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import llc.redstone.hysentials.Hysentials;
@@ -8,6 +9,7 @@ import llc.redstone.hysentials.guis.sbBoxes.SBBoxesEditor;
 import llc.redstone.hysentials.handlers.redworks.HousingScoreboard;
 import llc.redstone.hysentials.util.Renderer;
 import llc.redstone.hysentials.util.ScoreboardWrapper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.MouseEvent;
@@ -52,7 +54,8 @@ public class SbbRenderer {
         if (SBBoxesEditor.configGui != null && SBBoxesEditor.configGui.isClosed && SBBoxesEditor.isConfigOpen) {
             SBBoxesEditor.configGui = null;
             SBBoxesEditor.isConfigOpen = false;
-            Multithreading.schedule(() -> new SBBoxesEditor().show(), 100, TimeUnit.MILLISECONDS);
+            getMinecraft().thePlayer.closeScreen();
+            new SBBoxesEditor().show();
         }
     }
 
@@ -77,6 +80,11 @@ public class SbbRenderer {
     }
 
     public static void drawBox(float x, float y, float width, float height, OneColor color, boolean boxShadows, int radius) {
+        int shadowColor = (int) Renderer.color(color.getRed(), color.getGreen(), color.getBlue(), (long) (color.getAlpha() * 0.42F));
+        drawBox(x, y, width, height, color, boxShadows ? new OneColor(shadowColor) : null, radius);
+    }
+
+    public static void drawBox(float x, float y, float width, float height, OneColor color, OneColor boxShadows, int radius) {
         x = (float) Math.round(x);
         y = (float) Math.round(y);
         width = (float) Math.round(width);
@@ -86,13 +94,30 @@ public class SbbRenderer {
         Renderer.drawRect(boxColor, x, y + radius, radius, height - (2 * radius));
         Renderer.drawRect(boxColor, x + width - radius, y + radius, radius, height - (2 * radius));
 
-        if (boxShadows) {
-            long shadowColor = Renderer.color(color.getRed(), color.getGreen(), color.getBlue(), (long) (color.getAlpha() * 0.42F));
+        if (boxShadows != null) {
+            long shadowColor = Renderer.color(boxShadows.getRed(), boxShadows.getGreen(), boxShadows.getBlue(), boxShadows.getAlpha());
             Renderer.drawRect(shadowColor, x + width, y + (2 * radius), radius, height - (2 * radius));
             if (radius != 0) {
                 Renderer.drawRect(shadowColor, x + width - radius, y + height - radius, radius, radius);
             }
             Renderer.drawRect(shadowColor, x + (2 * radius), y + height, width - (2 * radius), radius);
+        }
+    }
+
+    static NanoVGHelper nvg = NanoVGHelper.INSTANCE;
+    public static void drawBox(long vg, float x, float y, float width, float height, OneColor oneColor, boolean boxShadows, int radius) {
+        int color = Renderer.color(oneColor.getRed(), oneColor.getGreen(), oneColor.getBlue(), oneColor.getAlpha());
+        nvg.drawRect(vg, x + radius, y, width - (radius * 2), height, color);
+        nvg.drawRect(vg, x, y + radius, radius, height - (2 * radius), color);
+        nvg.drawRect(vg, x + width - radius, y + radius, radius, height - (2 * radius), color);
+
+        if (boxShadows) {
+            int shadowColor = Renderer.color(oneColor.getRed(), oneColor.getGreen(), oneColor.getBlue(), (int) (oneColor.getAlpha() * 0.42F));
+            nvg.drawRect(vg, x + width, y + (2 * radius), radius, height - (2 * radius), shadowColor);
+            if (radius != 0) {
+                nvg.drawRect(vg, x + width - radius, y + height - radius, radius, radius, shadowColor);
+            }
+            nvg.drawRect(vg, x + (2 * radius), y + height, width - (2 * radius), radius, shadowColor);
         }
     }
 

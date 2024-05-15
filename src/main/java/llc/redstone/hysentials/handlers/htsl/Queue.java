@@ -1,36 +1,33 @@
 package llc.redstone.hysentials.handlers.htsl;
 
-import cc.polyfrost.oneconfig.libs.checker.units.qual.N;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
 import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
-import llc.redstone.hysentials.util.MUtils;
-import cc.polyfrost.oneconfig.utils.Multithreading;
-import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.guis.ResolutionUtil;
-import llc.redstone.hysentials.htsl.Loader;
+import llc.redstone.hysentials.htsl.LoaderObject;
+import llc.redstone.hysentials.htsl.LoaderObjectKt;
 import llc.redstone.hysentials.util.Input;
-import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.guis.ResolutionUtil;
-import llc.redstone.hysentials.htsl.Loader;
+import llc.redstone.hysentials.utils.ChatLib;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.lwjgl.Sys;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static llc.redstone.hysentials.handlers.htsl.ActionGUIHandler.*;
 
 public class Queue {
-    public static List<Loader.LoaderObject> queue = new ArrayList<>();
+    public static List<LoaderObject> queue = new ArrayList<>();
     List<String> fails = new ArrayList<>();
     public static int timeWithoutOperation = 0;
     long startedTime = 0;
@@ -39,7 +36,7 @@ public class Queue {
 
     Input.Button timeRemainingButton;
     Input.Button cancel;
-    Loader.LoaderObject current;
+    LoaderObject current;
 
     public Queue() {
         timeRemainingButton = new Input.Button(0, 0, 0, 20, "Time Remaining: ");
@@ -139,21 +136,21 @@ public class Queue {
         if (current == null) return;
         queue.remove(0);
 
-        if (current.type.equals("setGuiContext")) {
-            currentGuiContext = String.valueOf(current.value);
+        if (current.getType().equals("setGuiContext")) {
+            currentGuiContext = String.valueOf(current.getValue());
             if (queue.size() == 0) return;
             current = queue.get(0);
             queue.remove(0);
         }
-        System.out.println("current: " + current.type + " " + current.value);
-        switch (current.type) {
+        System.out.println("current: " + current.getType() + " " + current.getValue());
+        switch (current.getType()) {
             case "click":
-                System.out.println("clicking " + current.value);
-                Navigator.click((Integer) current.value);
+                System.out.println("clicking " + current.getValue());
+                Navigator.click((Integer) current.getValue());
                 break;
             case "anvil":
                 System.out.println("inputting anvil");
-                Navigator.inputAnvil(String.valueOf(current.value));
+                Navigator.inputAnvil(String.valueOf(current.getValue()));
                 break;
             case "returnToEditActions":
                 Navigator.returnToEditActions();
@@ -162,23 +159,53 @@ public class Queue {
                 Navigator.goBack();
                 break;
             case "option":
-                Navigator.setSelecting(String.valueOf(current.value));
+                Navigator.setSelecting(String.valueOf(current.getValue()));
                 break;
             case "chat":
-                Navigator.inputChat(String.valueOf(current.value));
+                Navigator.inputChat(String.valueOf(current.getValue()), current.getFunc(), current.getCommand() != null ? (Boolean) current.getCommand() : false);
                 break;
             case "item":
-                Navigator.selectItem(String.valueOf(current.value));
+                Navigator.selectItem(String.valueOf(current.getValue()));
                 break;
             case "command":
-                System.out.println("commanding " + current.value);
-                Navigator.command(String.valueOf(current.value));
+                System.out.println("commanding " + current.getValue());
+                Navigator.command(String.valueOf(current.getValue()));
+                break;
+            case "export":
+                List<ItemStack> items = Minecraft.getMinecraft().thePlayer.openContainer.inventorySlots.stream().map(Slot::getStack).collect(Collectors.toList());
+                items = items.subList(0, items.size() - 36 - 9);
+                current.func(items);
                 break;
             case "done":
                 doneLoading();
+                current.func();
                 break;
+            case "doneExport": {
+                timeWithoutOperation = 0;
+                Navigator.isWorking = false;
+                queue = new ArrayList<>();
+                startedTime = 0;
+                totalTime = 0;
+                current.func();
+                break;
+            }
+            case "actionOrder":
+            case "doneSub":
+            case "donePage":
+                current.func();
+                break;
+            case "chat_input": {
+                if (Navigator.getChatInput() == null) {
+                    fails.add("&cNo chat input found.");
+                    doneLoading();
+                    return;
+                }
+                current.func(Navigator.getChatInput());
+                ChatLib.command("chatinput cancel");
+                break;
+            }
             case "manualOpen": {
-                Navigator.manualOpen(String.valueOf(current.value), String.valueOf(current.key));
+                Navigator.manualOpen(String.valueOf(current.getValue()), String.valueOf(current.getKey()));
                 break;
             }
             case "close": {
@@ -187,7 +214,7 @@ public class Queue {
                 break;
             }
             case "selectOrClick": {
-                Navigator.setSelectingOrSlot(String.valueOf(current.key), Integer.parseInt(current.value.toString()));
+                Navigator.setSelectingOrSlot(String.valueOf(current.getKey()), Integer.parseInt(current.getValue().toString()));
                 break;
             }
         }
@@ -204,6 +231,7 @@ public class Queue {
         } else {
             UChat.chat("&3[HTSL] &fImported successfully!");
         }
+        Navigator.isWorking = false;
 
         timeWithoutOperation = 0;
         queue = new ArrayList<>();
@@ -222,18 +250,40 @@ public class Queue {
         int y = 50;
         Minecraft.getMinecraft().fontRendererObj.drawString("Tick: " + timeWithoutOperation, 50, y + 20, 0xFFFFFF);
         Minecraft.getMinecraft().fontRendererObj.drawString("Queue Size: " + queue.size(), 50, y + 30, 0xFFFFFF);
-        Minecraft.getMinecraft().fontRendererObj.drawString("Current: " + (current == null ? "null" : current.type + " " + current.value), 50, y + 40, 0xFFFFFF);
+        Minecraft.getMinecraft().fontRendererObj.drawString("Current: " + (current == null ? "null" : current.getType() + " " + current.getValue()), 50, y + 40, 0xFFFFFF);
         Minecraft.getMinecraft().fontRendererObj.drawString("Context: " + currentGuiContext, 50, y + 50, 0xFFFFFF);
         Minecraft.getMinecraft().fontRendererObj.drawString("Ready: " + Navigator.isReady, 50, y + 60, 0xFFFFFF);
         y += 80;
         List<String> lines = new ArrayList<>();
-        for (Loader.LoaderObject object : queue) {
-            lines.add(object.type + " - " + object.key + ":" + object.value);
+        for (LoaderObject object : queue) {
+            lines.add(object.getType() + " - " + object.getKey() + ":" + object.getValue());
         }
         for (String line : lines) {
             Minecraft.getMinecraft().fontRendererObj.drawString(line, 50, y, 0xFFFFFF);
             y += 10;
         }
 
+    }
+
+    public static void add(LoaderObject object) {
+        if (!Navigator.isWorking) {
+            if (object.getType().equals("returnToEditActions")) return;
+            Navigator.isReady = true;
+        }
+        Navigator.isWorking = true;
+        queue.add(object);
+    }
+
+    public static void forceOperation(LoaderObject object) {
+        if (!Navigator.isWorking) {
+            if (object.getType().equals("returnToEditActions")) return;
+            Navigator.isReady = true;
+        }
+        Navigator.isWorking = true;
+        queue.add(0, object); // add to front of queue
+    }
+
+    public static boolean isWorking() {
+        return Navigator.isWorking;
     }
 }

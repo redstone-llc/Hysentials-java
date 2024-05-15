@@ -30,31 +30,10 @@ class SbbRenderer {
         if (event.type != RenderGameOverlayEvent.ElementType.TEXT) return
         GL11.glPushMatrix()
         try {
-            Actionbar.actionBar()
             if (ScorebarsConfig.scoreboard && ScorebarsConfig.showScoreboard) {
                 Scoreboard.scoreboard()
             } else {
                 GuiIngameForge.renderObjective = ScorebarsConfig.showScoreboard
-            }
-            val lines = ScoreboardWrapper.getScoreboard().getSortedScores(
-                ScoreboardWrapper.getSidebar()).stream()
-                .map { score: Score? ->
-                    ScoreWrapper(
-                        score
-                    )
-                }.collect(
-                    Collectors.toCollection { ArrayList() }
-                )
-            for (line in lines) {
-                val box = SBBoxes.getFromMatch(line.toString()) ?: continue
-
-                box.apply {
-                    if (!isEnabled) return@apply
-                    if (title != "" && stripControlCodes(ScoreboardWrapper.getTitle()) != title) return@apply
-                    text = display
-                    if (text == "") return@apply
-                    draw()
-                }
             }
         } catch (e: Exception) {
             e.printStackTrace()

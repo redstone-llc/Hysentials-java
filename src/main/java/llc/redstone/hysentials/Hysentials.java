@@ -1,9 +1,10 @@
 package llc.redstone.hysentials;
 
+import Apec.Components.Gui.GuiIngame.ApecGuiIngameForge;
 import cc.polyfrost.oneconfig.events.EventManager;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
-import llc.redstone.hysentials.capes.CapeHandler;
+import llc.redstone.hysentials.cosmetics.capes.CapeHandler;
 import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
 import llc.redstone.hysentials.config.hysentialMods.icons.IconStuff;
 import llc.redstone.hysentials.cosmetic.CosmeticManager;
@@ -18,15 +19,17 @@ import llc.redstone.hysentials.cosmetics.pepper.PepperCompanion;
 import llc.redstone.hysentials.cosmetics.hats.technocrown.TechnoCrown;
 import llc.redstone.hysentials.cosmetics.wings.dragon.DragonCosmetic;
 import llc.redstone.hysentials.cosmetics.wings.tdarth.TdarthCosmetic;
-import llc.redstone.hysentials.guis.club.ClubDashboardHandler;
+import llc.redstone.hysentials.guis.container.containers.club.ClubDashboardHandler;
 import llc.redstone.hysentials.guis.container.ContainerHandler;
 import llc.redstone.hysentials.handlers.chat.modules.misc.Limit256;
 import llc.redstone.hysentials.handlers.guis.GuiScreenPost;
+import llc.redstone.hysentials.handlers.guis.OneConfigHudClickHandler;
 import llc.redstone.hysentials.handlers.htsl.*;
+import llc.redstone.hysentials.util.LocrawUtil;
 import llc.redstone.hysentials.handlers.misc.HousingJoinHandler;
 import llc.redstone.hysentials.handlers.misc.PacketRecievedHandler;
 import llc.redstone.hysentials.handlers.misc.QuestHandler;
-import llc.redstone.hysentials.handlers.redworks.FormatPlayerName;
+
 import llc.redstone.hysentials.macrowheel.MacroWheelData;
 import llc.redstone.hysentials.quest.Quest;
 import llc.redstone.hysentials.util.*;
@@ -46,9 +49,7 @@ import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
 import llc.redstone.hysentials.handlers.language.LanguageHandler;
 import llc.redstone.hysentials.handlers.lobby.HousingLagReducer;
 import llc.redstone.hysentials.handlers.redworks.BwRanks;
-import llc.redstone.hysentials.handlers.sbb.Actionbar;
 import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
-import llc.redstone.hysentials.htsl.Cluster;
 import llc.redstone.hysentials.cosmetics.cubit.CubitCompanion;
 import llc.redstone.hysentials.websocket.Socket;
 import net.hypixel.modapi.HypixelModAPI;
@@ -120,11 +121,11 @@ public class Hysentials {
     public MacroWheelData.MacroJson macroJson;
     public boolean isPatcher;
     public boolean isChatting;
+    public boolean isApec;
     public boolean isCVGT1_5_3;
     public boolean isHytils;
     private boolean loadedCall;
-
-    public DiscordRPC discordRPC;
+    public boolean isFeather;
 
     public String rank;
 
@@ -211,11 +212,6 @@ public class Hysentials {
         CommandManager.INSTANCE.registerCommand(new ActionLibraryCommand());
         CommandManager.INSTANCE.registerCommand(new ClubCommand());
 
-
-        if (Socket.cachedServerData != null && Socket.cachedServerData.getRpc() != null && Socket.cachedServerData.getRpc()) {
-            discordRPC = new DiscordRPC();
-        }
-
         Quest.registerQuests();
         System.out.println("Hysentials has been initialized!");
     }
@@ -224,6 +220,8 @@ public class Hysentials {
     public void postInit(FMLPostInitializationEvent event) {
         isPatcher = Loader.isModLoaded("patcher");
         isChatting = Loader.isModLoaded("chatting");
+        isApec = Loader.isModLoaded("apec");
+        isFeather = Loader.isModLoaded("feather");
         if (isChatting) {
             ModContainer container = Loader.instance().getActiveModList().stream().filter(modContainer -> modContainer.getModId().equals("chatting")).findFirst().orElse(null);
             if (container != null) {
@@ -240,7 +238,6 @@ public class Hysentials {
             }
         }
         isHytils = Loader.isModLoaded("hytils-reborn");
-        registerHandlers();
         chatHandler.init();
 
         imageIconRenderer = new ImageIconRenderer();
@@ -249,8 +246,7 @@ public class Hysentials {
             Minecraft.getMinecraft().fontRendererObj = imageIconRenderer;
         }
 
-        llc.redstone.hysentials.htsl.Loader.registerLoaders();
-        Cluster.registerClusters();
+        registerHandlers();
 
         MinecraftForge.EVENT_BUS.post(new HysentialsLoadedEvent());
         HysentialsUtilsKt.postInit();
@@ -395,6 +391,7 @@ public class Hysentials {
         final llc.redstone.hysentials.event.EventBus hyBus = llc.redstone.hysentials.event.EventBus.INSTANCE;
         try {
             SBBoxesEditor.initGUI();
+            LocrawUtil.INSTANCE.init();
             // general stuff
             eventBus.register(languageHandler);
 //            try {
@@ -422,14 +419,11 @@ public class Hysentials {
             eventBus.register(new HousingJoinHandler());
 
 
-            eventBus.register(new Actionbar());
             eventBus.register(new ActionLibrary());
             eventBus.register(new Queue());
             eventBus.register(new Navigator());
             eventBus.register(new ActionGUIHandler());
-            eventBus.register(new CommitListener());
             eventBus.register(new FunctionsGUIHandler());
-            eventBus.register(new Exporter());
             eventBus.register(new HousingMenuHandler());
             eventBus.register(new ClubDashboardHandler());
             eventBus.register(new PlayerInvHandler());
@@ -439,6 +433,7 @@ public class Hysentials {
             eventBus.register(new QuestHandler());
             eventBus.register(new CapeHandler());
             eventBus.register(new PacketRecievedHandler());
+            eventBus.register(new OneConfigHudClickHandler());
             eventBus.register(cubitCompanion = new CubitCompanion());
             eventBus.register(pepperCompanion = new PepperCompanion());
             eventBus.register(miyaCompanion = new MiyaCompanion());
@@ -451,7 +446,6 @@ public class Hysentials {
             CatHat.loadCatHats();
             BackpackCosmetic.loadBackpacks();
             eventBus.register(new ContainerHandler());
-            eventBus.register(new FormatPlayerName());
 
             new Renderer();
 
@@ -528,5 +522,9 @@ public class Hysentials {
         outStream.close();
 
         return connection.getInputStream();
+    }
+
+    public boolean isApec() {
+        return isApec && Minecraft.getMinecraft().ingameGUI instanceof ApecGuiIngameForge;
     }
 }

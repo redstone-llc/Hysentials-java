@@ -18,6 +18,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+/*
+Modified version of HyperiumFontRenderer from the Hyperium Client
+https://github.com/HyperiumClient/Hyperium/blob/master/src/main/java/cc/hyperium/utils/HyperiumFontRenderer.java
+ */
 public class HysentialsFontRenderer {
     private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("§[0123456789abcdefklmnor]");
     public final int FONT_HEIGHT = 9;

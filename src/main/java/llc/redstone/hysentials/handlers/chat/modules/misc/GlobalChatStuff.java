@@ -25,17 +25,14 @@ public class GlobalChatStuff {
             if (event.type != 0 && event.type != 1) return;
             if (HypixelChatCommand.isInGlobalChat) {
                 if (getStrippedMessage(event.message).equals("\nPlease enter the text you wish to set in chat!\n [PREVIOUS] [CANCEL]")) {
-                    BWSReplace.diagnostics.add("Setting isInGlobalChat to false (0)");
                     HypixelChatCommand.isInGlobalChat = false;
                     UChat.chat("&aYou are now in the &6" + HypixelChatCommand.gotoChannel.toUpperCase() + " &achannel!");
                 }
                 if (getStrippedMessage(event.message).equals("You're already in this channel!")) {
-                    BWSReplace.diagnostics.add("Setting isInGlobalChat to false (1)");
                     event.setCanceled(true);
                     UChat.chat("&aYou are now in the &6" + HypixelChatCommand.gotoChannel.toUpperCase() + " &achannel!");
                     HypixelChatCommand.isInGlobalChat = false;
                 }else if (getStrippedMessage(event.message).startsWith("You are now in the ") && !getStrippedMessage(event.message).startsWith("You are now in the GLOBAL")) {
-                    BWSReplace.diagnostics.add("Setting isInGlobalChat to false (2)");
                     HypixelChatCommand.isInGlobalChat = false;
                 }
             }
@@ -46,7 +43,6 @@ public class GlobalChatStuff {
         public static @Nullable String onMessageSend(String message) {
             if (message.startsWith("/")) return message;
             if (HypixelChatCommand.isInGlobalChat) {
-                BWSReplace.diagnostics.add("Heard a message in global chat, sending to server");
                 JSONObject json = new JSONObject();
                 json.put("method", "chat");
                 json.put("message", message);

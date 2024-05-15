@@ -2,23 +2,20 @@ package llc.redstone.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UMessage;
+import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import llc.redstone.hysentials.HysentialsUtilsKt;
 import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
 import llc.redstone.hysentials.event.events.GuiLoadedEvent;
 import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
 import llc.redstone.hysentials.handlers.chat.modules.misc.GuiChat256;
-import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
-import llc.redstone.hysentials.htsl.Loader;
-import llc.redstone.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.utils.Multithreading;
-import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.event.events.RenderItemInGuiEvent;
-import llc.redstone.hysentials.util.Renderer;
-import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.htsl.ModifyAnvilOutput;
+import llc.redstone.hysentials.util.Renderer;
+import llc.redstone.hysentials.utils.ChatLib;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
-import net.minecraft.client.gui.GuiNewChat;
 import net.minecraft.client.gui.GuiRepair;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
@@ -30,25 +27,24 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
+import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.minecraftforge.fml.common.registry.GameData;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import javax.swing.*;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static llc.redstone.hysentials.handlers.guis.GameMenuOpen.field_lowerChestInventory;
-import static llc.redstone.hysentials.htsl.ModifyAnvilOutput.modifyOutput;
 import static llc.redstone.hysentials.util.Renderer.getImageFromUrl;
 
 public class Navigator {
@@ -82,6 +78,9 @@ public class Navigator {
     private static Field guiLeft;
     private static Field guiTop;
     private static Field chatGuiInputField;
+
+    private static String func;
+    public static boolean isWorking = false;
 
     public Navigator() {
         try {
@@ -133,6 +132,11 @@ public class Navigator {
         isReturning = true;
         String containerName = getContainerName();
         if (containerName != null && (containerName.equals("Edit Actions") || containerName.startsWith("Actions: "))) {
+            isReturning = false;
+            return;
+        }
+
+        if (containerName != null && (containerName.equals("Functions") || containerName.equals("Edit NPC")) ) {
             isReturning = false;
             return;
         }
@@ -312,18 +316,24 @@ public class Navigator {
         setNotReady();
     }
 
-    public static void inputChat(String text) {
+    public static void inputChat(String text, String func, boolean command) {
+        if (text.startsWith("/") && !command) text = "&r" + text;
+        if (func != null) {
+            Navigator.func = func;
+        }
         if (HousingConfig.htslSafeMode) {
             String finalText = text;
             Multithreading.schedule(() -> {
-                Minecraft.getMinecraft().displayGuiScreen(new GuiChat(finalText));
+                try {
+                    Minecraft.getMinecraft().displayGuiScreen(new GuiChat256(finalText));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }, 100, TimeUnit.MILLISECONDS);
         } else {
-            if (text.startsWith("/")) {
-                text = "&r" + text;
-            }
-            GuiChat256.sendMessage(text);
-//            Minecraft.getMinecraft().thePlayer.sendChatMessage(text);
+            ChatLib.say(
+                (command ? "" : "/ac ") + text
+            );
         }
         setNotReady();
     }
@@ -358,14 +368,6 @@ public class Navigator {
         priority = EventPriority.HIGHEST
     )
     public void renderArrow(GuiScreenEvent.DrawScreenEvent.Post event) {
-        if (Exporter.manualItemClick) {
-            try {
-                int guiTop = Navigator.guiTop.getInt(Minecraft.getMinecraft().currentScreen);
-                int guiLeft = Navigator.guiLeft.getInt(Minecraft.getMinecraft().currentScreen);
-                Minecraft.getMinecraft().fontRendererObj.drawString("Click on the item you want to export", guiLeft + 176 / 2 - Minecraft.getMinecraft().fontRendererObj.getStringWidth("Click on the item you want to export") / 2, guiTop + 10, 0xFFFFFF);
-            } catch (IllegalAccessException e) {
-            }
-        }
         if (drawArrow) {
             GL11.glTranslated(0, 0, 400);
             Renderer.drawImage(ARROW_TEXTURE_LOCATION, drawArrowX, drawArrowY, ARROW_SIZE, ARROW_SIZE);
@@ -378,18 +380,29 @@ public class Navigator {
         guiIsLoading = true;
     }
 
+    public static String chatInput = "";
+
+    public static String getChatInput() {
+        return chatInput;
+    }
+
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onChat(ClientChatReceivedEvent event) {
+        if (!Navigator.isWorking) return;
         String message = event.message.getUnformattedText();
         if (message.split("\n").length < 3) return;
         String line = message.split("\n")[2];
         if (line.equals(" [PREVIOUS] [CANCEL]") || line.startsWith(" [CANCEL]")) {
             isReady = true;
+            chatInput = event.message.getSiblings().get(0).getChatStyle().getChatClickEvent().getValue();
             Multithreading.schedule(() -> {
                 if (!isReady) {
                     isReady = true;
                 }
             }, 100, TimeUnit.MILLISECONDS);
+        } else if (line.equals("Could not find a function with that name!")) {
+            ChatLib.command("function create " + Navigator.func);
         }
     }
 

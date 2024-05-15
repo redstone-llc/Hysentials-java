@@ -1,41 +1,21 @@
 package llc.redstone.hysentials.util;
 
 import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.cosmetic.CosmeticGui;
 import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
 import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
-import llc.redstone.hysentials.handlers.redworks.BwRanks;
 import llc.redstone.hysentials.hook.FontRendererAcessor;
 import com.ibm.icu.text.ArabicShaping;
 import com.ibm.icu.text.ArabicShapingException;
 import com.ibm.icu.text.Bidi;
-import llc.redstone.hysentials.cosmetic.CosmeticGui;
-import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
-import llc.redstone.hysentials.handlers.redworks.BwRanks;
-import llc.redstone.hysentials.hook.FontRendererAcessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiChat;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityArmorStand;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.S45PacketTitle;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.Sys;
 
 import java.awt.*;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import static llc.redstone.hysentials.handlers.imageicons.ImageIcon.stringPattern;
 import static llc.redstone.hysentials.util.C.toHex;
 
 public class ImageIconRenderer extends FontRenderer {
@@ -62,16 +42,17 @@ public class ImageIconRenderer extends FontRenderer {
         if (Minecraft.getMinecraft().currentScreen instanceof GuiChat) {
             uuid = (Minecraft.getMinecraft().thePlayer == null) ? null : Minecraft.getMinecraft().thePlayer.getUniqueID();
         }
+
         try {
-            if (BwRanks.replacementMap.size() > 0) {
-                String finalText = text.replace("§r", "");
-                for (Map.Entry<String, DuoVariable<UUID, String>> entry : BwRanks.replacementMap.entrySet()) {
-                    if (finalText.startsWith(entry.getKey())) {
-                        text = text.replace(entry.getKey(), entry.getValue().second);
-                        uuid = entry.getValue().first;
-                    }
-                }
-            }
+//            if (BwRanks.replacementMap.size() > 0) {
+//                String finalText = text.replace("§r", "");
+//                for (Map.Entry<String, DuoVariable<UUID, String>> entry : BwRanks.replacementMap.entrySet()) {
+//                    if (finalText.startsWith(entry.getKey())) {
+//                        text = text.replace(entry.getKey(), entry.getValue().second);
+//                        uuid = entry.getValue().first;
+//                    }
+//                }
+//            }
 
             HashMap<String, String> allActiveReplacements = Hysentials.INSTANCE.getConfig().replaceConfig.getAllActiveReplacements();
             for (String key : allActiveReplacements.keySet()) {
@@ -260,7 +241,7 @@ public class ImageIconRenderer extends FontRenderer {
         } else {
             c = Color.DARK_GRAY;
         }
-        int textColor = (int) (accessor.alpha() * 255f)  << 24 | c.getRed() << 16 | c.getGreen() << 8 | c.getBlue();
+        int textColor = (int) (accessor.alpha() * 255f) << 24 | c.getRed() << 16 | c.getGreen() << 8 | c.getBlue();
         this.setColor((float) (bgColor >> 16) / 255.0F, (float) (bgColor >> 8 & 255) / 255.0F, (float) (bgColor & 255) / 255.0F, accessor.alpha());
         float width = mcFive.getWidth(num) + 2;
         Renderer.drawRect(x, y, width, 7);
@@ -342,17 +323,6 @@ public class ImageIconRenderer extends FontRenderer {
             uuid = (Minecraft.getMinecraft().thePlayer == null) ? null : Minecraft.getMinecraft().thePlayer.getUniqueID();
         }
         try {
-            if (BwRanks.replacementMap.size() > 0) {
-                String finalText = text.replace("§r", "");
-
-                for (Map.Entry<String, DuoVariable<UUID, String>> entry : BwRanks.replacementMap.entrySet()) {
-                    if (finalText.startsWith(entry.getKey())) {
-                        text = text.replace(entry.getKey(), entry.getValue().second);
-                        uuid = entry.getValue().first;
-                    }
-                }
-            }
-
             HashMap<String, String> allActiveReplacements = Hysentials.INSTANCE.getConfig().replaceConfig.getAllActiveReplacements();
             for (String key : allActiveReplacements.keySet()) {
                 String finalText = text.replace("§r", "");
@@ -399,12 +369,12 @@ public class ImageIconRenderer extends FontRenderer {
                                     float scaledHeight = (float) 9 / height;
                                     int scaledWidth = (int) (width * scaledHeight);
                                     if (icon.emoji && uuid != null && CosmeticUtilsKt.hasCosmetic(uuid, "hymojis")) {
-                                        j += str.length() + 2;
-                                        i += scaledWidth + 4;
+                                        j += str.length() + 1;
+                                        i += scaledWidth;
                                         continue;
                                     } else if (!icon.emoji) {
-                                        j += str.length() + 2;
-                                        i += scaledWidth + 4;
+                                        j += str.length() + 1;
+                                        i += scaledWidth;
                                         continue;
                                     }
                                 }
@@ -416,8 +386,7 @@ public class ImageIconRenderer extends FontRenderer {
                         if (s.charAt(0) == '<' && s.charAt(1) == '#' && s.charAt(8) == '>') {
                             String potentialHex = s.substring(2, 8);
                             if (checkIfHexadecimal(potentialHex)) {
-                                j += 7;
-                                i -= 5;
+                                j += 8;
                                 continue;
                             }
                         }
@@ -674,32 +643,6 @@ public class ImageIconRenderer extends FontRenderer {
         return color;
     }
 
-    //        String s = "";
-    //        int j = text.length();
-    //
-    //        for (int i = 0; i < text.length(); ++i) {
-    //            char c0 = text.charAt(i);
-    //            int i1;
-    //            int j1;
-    //            if (c0 == 60 && i + 8 < text.length()) {
-    //                String hex = text.substring(i + 2, i + 8);
-    //                if (text.charAt(i + 1) == '#' && hex.matches("[0-9a-fA-F]+")) {
-    //                    s = "<#" + hex + ">";
-    //                }
-    //                i += 8;
-    //                continue;
-    //            }
-    //            if (c0 == 167 && i + 1 < text.length()) {
-    //                char c1 = text.charAt(i + 1);
-    //                i1 = "0123456789abcdefklmnor".indexOf(text.toLowerCase(Locale.ENGLISH).charAt(i + 1));
-    //                if (isFormatColor(c1)) {
-    //                    s = "§" + c1;
-    //                } else if (isFormatSpecial(c1)) {
-    //                    s = s + "§" + c1;
-    //                }
-    //            }
-    //        }
-
     public String trimStringToWidth(String text, int width, boolean reverse) {
         StringBuilder stringbuilder = new StringBuilder();
         int i = 0;
@@ -712,44 +655,34 @@ public class ImageIconRenderer extends FontRenderer {
             char c0 = text.charAt(l);
             try {
                 String sub = text.substring(l + 1);
-                if (c0 == ':' && sub.contains(":") && sub.substring(0, sub.indexOf(":")).matches("[a-z_\\-0-9]+")) {
-                    Matcher matcher = ImageIcon.stringPattern.matcher(text);
-                    if (matcher.find(l)) {
-                        String str = matcher.group(1);
-                        if (str != null) {
-                            ImageIcon icon = ImageIcon.getIcon(str);
-                            if (icon != null) {
-                                int w = icon.getWidth();
-                                int height = icon.getHeight();
-                                float scaledHeight = (float) 9 / height;
-                                int scaledWidth = (int) (w * scaledHeight);
-                                l += (str.length() + 2) * k;
-                                i += scaledWidth + 4;
-                                if (i > width) {
-                                    break;
-                                }
+                if (c0 == ':' && sub.contains(":") && !sub.substring(0, sub.indexOf(":")).isEmpty()) {
+                    String str = sub.substring(0, sub.indexOf(":"));
+                    if (!str.isEmpty()) {
+                        ImageIcon icon = ImageIcon.getIcon(str);
+                        if (icon != null) {
+                            int w = icon.getWidth();
+                            int height = icon.getHeight();
+                            float scaledHeight = (float) 9 / height;
+                            int scaledWidth = (int) (w * scaledHeight);
 
-                                if (reverse) {
-                                    stringbuilder.insert(0, ":" + str + ":");
-                                } else {
-                                    stringbuilder.append(":" + str + ":");
-                                }
-                                continue;
+                            l += (str.length() + 1) * k;
+                            i += scaledWidth;
+                            if (i > width) {
+                                break;
                             }
+                            if (reverse) {
+                                stringbuilder.insert(0, ":" + str + ":");
+                            } else {
+                                stringbuilder.append(":" + str + ":");
+                            }
+                            continue;
                         }
                     }
                 }
                 if (c0 == 60 && l + 7 < text.length()) {
                     String s = text.substring(l, l + 9);
-//                    System.out.println(s);
-//                    System.out.println(text);
                     if (s.matches("<#([0-9a-fA-F]){6}>")) {
                         l += 8 * k;
-//                        i += 5;
-                        if (i > width) {
-                            break;
-                        }
-
                         if (reverse) {
                             stringbuilder.insert(0, s);
                         } else {
@@ -758,7 +691,31 @@ public class ImageIconRenderer extends FontRenderer {
                         continue;
                     }
                 }
+
+                //Numbered strings
+                // <{HexColor}:{Number}>
+                if (c0 == 60 && sub.contains(":") && sub.contains(">")) {
+                    String hex = sub.substring(0, sub.indexOf(":"));
+                    if (checkIfHexadecimal(hex)) {
+                        String num = sub.substring(sub.indexOf(":") + 1, sub.indexOf(">"));
+                        if (num.matches("\\d+") && !num.isEmpty()) {
+                            int i1 = ((int) mcFive.getWidth(num)) + 2;
+                            l += hex.length() + num.length() + 2;
+                            i += i1;
+                            if (i > width) {
+                                break;
+                            }
+                            if (reverse) {
+                                stringbuilder.insert(0, "<" + hex + ":" + num + ">");
+                            } else {
+                                stringbuilder.append("<" + hex + ":" + num + ">");
+                            }
+                            continue;
+                        }
+                    }
+                }
             } catch (Exception ignored) {
+                ignored.printStackTrace();
             }
             int i1 = getCharWidth(c0);
             if (flag) {
@@ -789,7 +746,6 @@ public class ImageIconRenderer extends FontRenderer {
                 stringbuilder.append(c0);
             }
         }
-//        System.out.println("Result: " + stringbuilder.toString());
         return stringbuilder.toString();
     }
 }

@@ -1,28 +1,17 @@
 package llc.redstone.hysentials.websocket;
 
 import com.google.gson.JsonObject;
-import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.HysentialsUtilsKt;
-import llc.redstone.hysentials.config.hysentialMods.ChatConfig;
-import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
-import llc.redstone.hysentials.guis.misc.HysentialsLevel;
-import llc.redstone.hysentials.handlers.chat.modules.bwranks.BWSReplace;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.util.*;
-import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.websocket.methods.*;
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
 import com.neovisionaries.ws.client.*;
 import kotlin.random.Random;
 import llc.redstone.hysentials.websocket.methods.club.ClubAccept;
 import llc.redstone.hysentials.websocket.methods.club.ClubInvite;
 import net.minecraft.client.Minecraft;
-import net.minecraft.event.ClickEvent;
-import net.minecraft.event.HoverEvent;
-import net.minecraft.util.IChatComponent;
 import org.json.JSONObject;
 
 import javax.net.ssl.SSLContext;
