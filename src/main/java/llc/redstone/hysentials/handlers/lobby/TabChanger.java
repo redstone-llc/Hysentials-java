@@ -19,15 +19,14 @@
 package llc.redstone.hysentials.handlers.lobby;
 
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
+import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
+import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 import llc.redstone.hysentials.forge.HysentialsMixinPlugin;
 import llc.redstone.hysentials.handlers.redworks.BwRanksUtils;
 import llc.redstone.hysentials.util.BlockWAPIUtils;
-import llc.redstone.hysentials.util.LocrawInfo;
-import llc.redstone.hysentials.util.LocrawUtil;
 import llc.redstone.hysentials.utils.StringUtilsKt;
-import net.hypixel.data.type.GameType;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.world.WorldSettings;
@@ -50,7 +49,7 @@ public class TabChanger {
             final String username = playerInfo.getGameProfile().getName();
             final LocrawInfo locraw = LocrawUtil.INSTANCE.getLocrawInfo();
 
-            if (locraw != null && LocrawUtil.INSTANCE.isInGame() && locraw.getGameType().equals(GameType.SKYBLOCK)) {
+            if (locraw != null && LocrawUtil.INSTANCE.isInGame() && locraw.getGameType().equals(LocrawInfo.GameType.SKYBLOCK)) {
                 return displayName;
             }
 
@@ -84,7 +83,7 @@ public class TabChanger {
             BlockWAPIUtils.Rank rank = BlockWAPIUtils.getRank(networkPlayerInfo.getGameProfile().getId());
             BlockWAPIUtils.Rank rank2 = BlockWAPIUtils.getRank(networkPlayerInfo2.getGameProfile().getId());
 
-            if (locrawInfo != null && Objects.equals(locrawInfo.getGameType(), GameType.HOUSING) && locrawInfo.getLobbyName() == null) {
+            if (locrawInfo != null && Objects.equals(locrawInfo.getGameType(), LocrawInfo.GameType.HOUSING) && LocrawUtil.INSTANCE.isInGame()) {
                 //In a house, sort by housing team name before hysentials rank
                 return ComparisonChain.start().compareTrueFirst(networkPlayerInfo.getGameType() != WorldSettings.GameType.SPECTATOR, networkPlayerInfo2.getGameType() != WorldSettings.GameType.SPECTATOR).compare(scorePlayerTeam != null ? scorePlayerTeam.getRegisteredName() : "", scorePlayerTeam2 != null ? scorePlayerTeam2.getRegisteredName() : "").compare(
                     rank2 != null ? rank2.index : -1, rank != null ? rank.index : -1

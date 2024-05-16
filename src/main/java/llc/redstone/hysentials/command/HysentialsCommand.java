@@ -30,8 +30,10 @@ import net.hypixel.data.type.GameType;
 import net.hypixel.data.type.ServerType;
 import net.hypixel.modapi.HypixelModAPI;
 import net.hypixel.modapi.handler.ClientboundPacketHandler;
-import net.hypixel.modapi.packet.impl.clientbound.ClientboundLocationPacket;
+import net.hypixel.modapi.packet.impl.clientbound.ClientboundPingPacket;
 import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacket;
+import net.hypixel.modapi.packet.impl.serverbound.ServerboundPingPacket;
+import net.hypixel.modapi.packet.impl.serverbound.ServerboundPlayerInfoPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -344,34 +346,16 @@ public class HysentialsCommand extends CommandBase {
                     break;
                 }
 
-                case "plus": {
-                    UChat.chat("Sending Location Request...");
-                    HypixelModAPI.getInstance().registerHandler(new ClientboundPacketHandler() {
-                        @Override
-                        public void onLocationEvent(ClientboundLocationPacket packet) {
-                            double x = 0;
-                            double y = 0;
-                            double z = 0;
-                            float yaw  = 0;
-                            if (!packet.getServerType().isPresent()) return;
-                            ServerType serverType = packet.getServerType().get();
-                            if (!(serverType instanceof GameType)) return;
-                            GameType gameType = (GameType) serverType;
-                            switch (gameType) {
-                                case HOUSING: {
-                                    x = -16;
-                                    y = 65;
-                                    z = 30;
-                                    yaw = 320f;
-                                    break;
-                                }
-                            }
-
-                            PlusStandEntity entity = new PlusStandEntity(Minecraft.getMinecraft().theWorld);
-                            entity.setPositionAndRotation(x, y, z, yaw, 0);
-                            Minecraft.getMinecraft().theWorld.spawnEntityInWorld(entity);
-                        }
+                case "hypixel": {
+                    UChat.chat("Sending hypixel packet...");
+                    ModAPIHandler.sendPacket(new ServerboundPingPacket(), (packet) -> {
+                        ClientboundPingPacket pingPacket = (ClientboundPingPacket) packet;
+                        UChat.chat("§aReceived ping packet: " + pingPacket.getResponse());
                     });
+                    break;
+                }
+
+                case "plus": {
                     break;
                 }
 

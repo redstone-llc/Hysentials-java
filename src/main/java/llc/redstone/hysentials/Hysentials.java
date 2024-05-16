@@ -403,7 +403,6 @@ public class Hysentials {
         final llc.redstone.hysentials.event.EventBus hyBus = llc.redstone.hysentials.event.EventBus.INSTANCE;
         try {
             SBBoxesEditor.initGUI();
-            LocrawUtil.INSTANCE.init();
             // general stuff
             eventBus.register(languageHandler);
 //            try {
@@ -463,8 +462,11 @@ public class Hysentials {
 
             EventManager.INSTANCE.register(new BwRanks());
 
+            System.out.println("Handlers registered!");
+            HypixelModAPI.getInstance().setPacketSender(ModAPIHandler::sendPacket);
             HypixelModAPI.getInstance().subscribeToEventPacket(ClientboundLocationPacket.class);
-            HypixelModAPI.getInstance().registerHandler(hypixelModAPI = new ModAPIHandler());
+            HypixelModAPI.getInstance().registerHandler(new ModAPIHandler());
+            System.out.println("HypixelModAPI initialized!");
 
 //        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 //            JSONArray array = new JSONArray();

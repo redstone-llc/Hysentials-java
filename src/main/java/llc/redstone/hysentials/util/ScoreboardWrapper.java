@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.util;
 
+import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;

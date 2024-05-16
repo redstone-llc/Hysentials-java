@@ -61,19 +61,6 @@ public class LocrawUtil {
 
     public void init() {
         MinecraftForge.EVENT_BUS.register(this);
-        HypixelModAPI.getInstance().registerHandler(new ClientboundPacketHandler() {
-            @Override
-            public void onLocationEvent(ClientboundLocationPacket packet) {
-                try {
-                    locrawInfo = new LocrawInfo(packet);
-                } catch (Exception ignored) {
-                    ignored.printStackTrace();
-                }
-                if (locrawInfo != null) {
-                    inGame = locrawInfo.getLobbyName() == null;
-                }
-            }
-        });
     }
 
     @SubscribeEvent
@@ -114,5 +101,16 @@ public class LocrawUtil {
     @Nullable
     public LocrawInfo getLastLocrawInfo() {
         return lastLocrawInfo;
+    }
+
+    public void update (ClientboundLocationPacket packet) {
+        try {
+            locrawInfo = new LocrawInfo(packet);
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
+        if (locrawInfo != null) {
+            inGame = locrawInfo.getLobbyName() == null;
+        }
     }
 }
