@@ -1,6 +1,6 @@
 package cc.polyfrost.oneconfig.internal.gui;
 
-import cc.polyfrost.oneconfig.libs.universal.UScreen;
+import net.minecraft.client.gui.GuiScreen;
 
-public class HudGui extends UScreen {
+public class HudGui extends GuiScreen {
 }

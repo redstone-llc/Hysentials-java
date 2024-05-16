@@ -35,7 +35,9 @@ package llc.redstone.hysentials.util;
 
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import llc.redstone.hysentials.Hysentials;
-import net.hypixel.modapi.packet.impl.clientbound.ClientboundLocationPacket;
+import net.hypixel.modapi.HypixelModAPI;
+import net.hypixel.modapi.handler.ClientboundPacketHandler;
+import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacket;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -59,6 +61,19 @@ public class LocrawUtil {
 
     public void init() {
         MinecraftForge.EVENT_BUS.register(this);
+        HypixelModAPI.getInstance().registerHandler(new ClientboundPacketHandler() {
+            @Override
+            public void onLocationEvent(ClientboundLocationPacket packet) {
+                try {
+                    locrawInfo = new LocrawInfo(packet);
+                } catch (Exception ignored) {
+                    ignored.printStackTrace();
+                }
+                if (locrawInfo != null) {
+                    inGame = locrawInfo.getLobbyName() == null;
+                }
+            }
+        });
     }
 
     @SubscribeEvent
@@ -68,34 +83,6 @@ public class LocrawUtil {
         }
         locrawInfo = null;
         tick = 0;
-    }
-
-    public void sendLocraw() {
-        Hysentials.INSTANCE.hypixelModAPI.sendPacket(HypixelPacketType.LOCATION,
-            packet -> {
-                ClientboundLocationPacket locationPacket = (ClientboundLocationPacket) packet;
-                try {
-                    locrawInfo = new LocrawInfo(locationPacket);
-                } catch (Exception ignored) {
-                    ignored.printStackTrace();
-                }
-                if (locrawInfo != null) {
-                    inGame = locrawInfo.getLobbyName() == null;
-                }
-            }
-        );
-    }
-
-    @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.START || !HypixelUtils.INSTANCE.isHypixel()) {
-            return;
-        }
-
-        this.tick++;
-        if (this.tick == 40 || this.tick % 520 == 0) {
-            sendLocraw();
-        }
     }
 
     /**

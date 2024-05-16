@@ -74,14 +74,19 @@ dependencies {
 
     compileOnly('cc.polyfrost:oneconfig-1.8.9-forge:0.2.1-alpha184')
     include('cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta+')
+    include('org.polyfrost:polyui:1.1.+')
     include('org.reflections:reflections:0.10.2')
     include('org.json:json:20231013')
     include('org.slick2d:slick2d-core:1.0.2') {
         exclude module: 'lwjgl'
     }
     include('com.neovisionaries:nv-websocket-client:2.14')
-    include('net.hypixel:mod-api:0.3.1')
+    include('net.hypixel:mod-api:0.4.0')
     include("org.bitbucket.cowwoc:diff-match-patch:1.2")
+
+    compileOnly("cc.polyfrost:lwjgl-legacy:1.0.0-alpha26") {
+        transitive = false
+    }
 
     compileOnly('org.spongepowered:mixin:0.7.+')
 }

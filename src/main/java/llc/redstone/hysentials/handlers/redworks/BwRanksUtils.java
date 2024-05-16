@@ -208,10 +208,14 @@ public class BwRanksUtils {
     }
 
     public static boolean futuristicRanks(Boolean tab) {
-        if (tab == null) {
-            return Hysentials.INSTANCE.getConfig().formattingConfig.enabled && FormattingConfig.futuristicRanks;
+        try {
+            if (tab == null) {
+                return Hysentials.INSTANCE.getConfig().formattingConfig.enabled && FormattingConfig.futuristicRanks;
+            }
+            return Hysentials.INSTANCE.getConfig().formattingConfig.enabled && FormattingConfig.futuristicRanks && (tab ? FormattingConfig.fancyRankInTab : FormattingConfig.fancyRankInChat);
+        } catch (Exception e) {
+            return false;
         }
-        return Hysentials.INSTANCE.getConfig().formattingConfig.enabled && FormattingConfig.futuristicRanks && (tab ? FormattingConfig.fancyRankInTab : FormattingConfig.fancyRankInChat);
     }
 
     public static String getPlus(UUID id) {

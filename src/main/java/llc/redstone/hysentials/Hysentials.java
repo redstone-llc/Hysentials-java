@@ -21,10 +21,12 @@ import llc.redstone.hysentials.cosmetics.wings.dragon.DragonCosmetic;
 import llc.redstone.hysentials.cosmetics.wings.tdarth.TdarthCosmetic;
 import llc.redstone.hysentials.guis.container.containers.club.ClubDashboardHandler;
 import llc.redstone.hysentials.guis.container.ContainerHandler;
+import llc.redstone.hysentials.guis.polyui.LwjglManagerImpl;
 import llc.redstone.hysentials.handlers.chat.modules.misc.Limit256;
 import llc.redstone.hysentials.handlers.guis.GuiScreenPost;
 import llc.redstone.hysentials.handlers.guis.OneConfigHudClickHandler;
 import llc.redstone.hysentials.handlers.htsl.*;
+import llc.redstone.hysentials.polyui.ui.VisitHouseScreen;
 import llc.redstone.hysentials.util.LocrawUtil;
 import llc.redstone.hysentials.handlers.misc.HousingJoinHandler;
 import llc.redstone.hysentials.handlers.misc.PacketRecievedHandler;
@@ -53,6 +55,7 @@ import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
 import llc.redstone.hysentials.cosmetics.cubit.CubitCompanion;
 import llc.redstone.hysentials.websocket.Socket;
 import net.hypixel.modapi.HypixelModAPI;
+import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiMainMenu;
@@ -74,14 +77,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.polyfrost.polyui.PolyUI;
+import org.polyfrost.polyui.component.Drawable;
+import org.polyfrost.polyui.input.Translator;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import java.io.*;
-import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -154,6 +158,7 @@ public class Hysentials {
         registerImages();
         config = new HysentialsConfig();
         updateAndAdd();
+
         File file = new File(modDir, "./config/hysentials");
         if (!file.exists() && !file.mkdirs()) {
             throw new RuntimeException("Failed to create config directory! Please report this to sinender on Discord");
@@ -161,15 +166,15 @@ public class Hysentials {
         sbBoxes = new SBBJsonData("./config/hysentials/lines.json", new JSONObject().put("lines", new JSONArray()));
         macroJson = new MacroWheelData.MacroJson();
 
-        try {
-            System.setProperty("file.encoding", "UTF-8");
-            Field charset = Charset.class.getDeclaredField("defaultCharset");
-            charset.setAccessible(true);
-            charset.set(null, null);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+//        try {
+//            System.setProperty("file.encoding", "UTF-8");
+//            Field charset = Charset.class.getDeclaredField("defaultCharset");
+//            charset.setAccessible(true);
+//            charset.set(null, null);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
         try {
             SSLStore store = new SSLStore();
             store.load("/ssl/hysentials.der");
@@ -246,6 +251,9 @@ public class Hysentials {
             Minecraft.getMinecraft().fontRendererObj = imageIconRenderer;
         }
 
+        preload();
+        preloadScreens();
+
         registerHandlers();
 
         MinecraftForge.EVENT_BUS.post(new HysentialsLoadedEvent());
@@ -257,6 +265,10 @@ public class Hysentials {
         if (config.macroWheelHud.position.getX() == 0 && config.macroWheelHud.position.getY() == 0) {
             config.macroWheelHud.position.setPosition((Renderer.screen.getWidth() / 2f) - (34*5f) / 2, (Renderer.screen.getHeight() / 2f) - (34*5f) / 2);
         }
+    }
+
+    private void preloadScreens() {
+        new VisitHouseScreen().create("Sin_ender");
     }
 
     @Mod.EventHandler
@@ -451,6 +463,7 @@ public class Hysentials {
 
             EventManager.INSTANCE.register(new BwRanks());
 
+            HypixelModAPI.getInstance().subscribeToEventPacket(ClientboundLocationPacket.class);
             HypixelModAPI.getInstance().registerHandler(hypixelModAPI = new ModAPIHandler());
 
 //        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -522,6 +535,26 @@ public class Hysentials {
         outStream.close();
 
         return connection.getInputStream();
+    }
+
+    /**
+     * Ensure that key PolyUI classes are loaded to prevent lag-spikes when loading PolyUI for the first time.
+     */
+    private static void preload() {
+        long t1 = System.nanoTime();
+        try {
+            Class.forName(PolyUI.class.getName());
+            Class.forName(Drawable.class.getName());
+            Class.forName(Translator.class.getName());
+
+            LwjglManagerImpl.INSTANCE = new LwjglManagerImpl();
+            LwjglManagerImpl.INSTANCE.getRenderer();
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to preload necessary PolyUI classes", e);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+        System.out.printf("PolyUI preload took %sms", (System.nanoTime() - t1) / 1_000_000.0);
     }
 
     public boolean isApec() {

@@ -11,16 +11,6 @@ import java.util.HashMap;
 import java.util.function.Consumer;
 
 public class ModAPIHandler implements ClientboundPacketHandler {
-    HashMap<String, Consumer<HypixelPacket>> packetAwaiters = new HashMap<>();
-    @Override
-    public void handle(HypixelPacket packet) {
-        packetAwaiters.forEach((identifier, consumer) -> {
-            if (packet.getIdentifier().equals(identifier)) {
-                consumer.accept(packet);
-            }
-        });
-    }
-
     public void sendPacket(HypixelPacketType packet, PacketBuffer buffer) {
         Minecraft.getMinecraft().getNetHandler().addToSendQueue(
             new C17PacketCustomPayload(
@@ -30,14 +20,5 @@ public class ModAPIHandler implements ClientboundPacketHandler {
                 ) : buffer)
             )
         );
-    }
-
-    public void sendPacket(HypixelPacketType packet) {
-        sendPacket(packet, (PacketBuffer) null);
-    }
-
-    public void sendPacket(HypixelPacketType packet, Consumer<HypixelPacket> awaiter) {
-        packetAwaiters.put(packet.getIdentifier(), awaiter);
-        sendPacket(packet);
     }
 }

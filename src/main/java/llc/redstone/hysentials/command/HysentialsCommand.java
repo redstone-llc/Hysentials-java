@@ -10,6 +10,7 @@ import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.guis.misc.HysentialsLevel;
 import llc.redstone.hysentials.guis.quest.QuestMainGui;
 import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
+import llc.redstone.hysentials.polyui.ui.VisitHouseScreen;
 import llc.redstone.hysentials.util.LocrawUtil;
 import llc.redstone.hysentials.handlers.npc.NPC;
 import llc.redstone.hysentials.htsl.compiler.CompileKt;
@@ -27,7 +28,10 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 import net.hypixel.data.type.GameType;
 import net.hypixel.data.type.ServerType;
+import net.hypixel.modapi.HypixelModAPI;
+import net.hypixel.modapi.handler.ClientboundPacketHandler;
 import net.hypixel.modapi.packet.impl.clientbound.ClientboundLocationPacket;
+import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -301,21 +305,10 @@ public class HysentialsCommand extends CommandBase {
                     break;
                 }
 
-                case "hypixel": {
-                    UChat.chat("Sending Hypixel mod API requests...");
-                    for (HypixelPacketType type : HypixelPacketType.values()) {
-                        Hysentials.getModAPI().sendPacket(type, (packet) -> {
-                            UChat.chat("§aReceived packet: " + packet.toString());
-                        });
-                    }
-                    break;
-                }
                 case "locraw": {
                     LocrawInfo info = LocrawUtil.INSTANCE.getLocrawInfo();
                     if (info != null) {
                         UChat.chat("§aLocraw Info:");
-                        UChat.chat("&7Environment: &a" + info.getEnvironment());
-                        UChat.chat("&7ProxyName: &a" + info.getProxyName());
                         UChat.chat("&7ServerName: &a" + info.getServerName());
                         UChat.chat("&7GameType: &a" + info.getGameType());
                         UChat.chat("&7LobbyName: &a" + info.getLobbyName());
@@ -323,7 +316,6 @@ public class HysentialsCommand extends CommandBase {
                         UChat.chat("&7MapName: &a" + info.getMapName());
                     } else {
                         UChat.chat("§cLocraw Info is null!");
-                        LocrawUtil.INSTANCE.sendLocraw();
                     }
                     break;
                 }
@@ -354,30 +346,37 @@ public class HysentialsCommand extends CommandBase {
 
                 case "plus": {
                     UChat.chat("Sending Location Request...");
-                    Hysentials.getModAPI().sendPacket(HypixelPacketType.LOCATION, (p) -> {
-                        double x = 0;
-                        double y = 0;
-                        double z = 0;
-                        float yaw = 0;
-                        ClientboundLocationPacket packet = (ClientboundLocationPacket) p;
-                        if (!packet.getServerType().isPresent()) return;
-                        ServerType serverType = packet.getServerType().get();
-                        if (!(serverType instanceof GameType)) return;
-                        GameType gameType = (GameType) serverType;
-                        switch (gameType) {
-                            case HOUSING: {
-                                x = -16;
-                                y = 65;
-                                z = 30;
-                                yaw = 320f;
-                                break;
+                    HypixelModAPI.getInstance().registerHandler(new ClientboundPacketHandler() {
+                        @Override
+                        public void onLocationEvent(ClientboundLocationPacket packet) {
+                            double x = 0;
+                            double y = 0;
+                            double z = 0;
+                            float yaw  = 0;
+                            if (!packet.getServerType().isPresent()) return;
+                            ServerType serverType = packet.getServerType().get();
+                            if (!(serverType instanceof GameType)) return;
+                            GameType gameType = (GameType) serverType;
+                            switch (gameType) {
+                                case HOUSING: {
+                                    x = -16;
+                                    y = 65;
+                                    z = 30;
+                                    yaw = 320f;
+                                    break;
+                                }
                             }
-                        }
 
-                        PlusStandEntity entity = new PlusStandEntity(Minecraft.getMinecraft().theWorld);
-                        entity.setPositionAndRotation(x, y, z, yaw, 0);
-                        Minecraft.getMinecraft().theWorld.spawnEntityInWorld(entity);
+                            PlusStandEntity entity = new PlusStandEntity(Minecraft.getMinecraft().theWorld);
+                            entity.setPositionAndRotation(x, y, z, yaw, 0);
+                            Minecraft.getMinecraft().theWorld.spawnEntityInWorld(entity);
+                        }
                     });
+                    break;
+                }
+
+                case "house": {
+                    VisitHouseScreen.INSTANCE.open();
                     break;
                 }
 

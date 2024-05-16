@@ -4,7 +4,7 @@ import net.hypixel.data.region.Environment;
 import net.hypixel.data.type.GameType;
 import net.hypixel.data.type.LobbyType;
 import net.hypixel.data.type.ServerType;
-import net.hypixel.modapi.packet.impl.clientbound.ClientboundLocationPacket;
+import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacket;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -14,17 +14,13 @@ import java.util.Objects;
  *, and lobby name.
  */
 public class LocrawInfo {
-    private final Environment environment;
-    private final String proxyName;
     private final String serverName;
     private @Nullable ServerType serverType;
     private final @Nullable String lobbyName;
     private final @Nullable String mode;
     private final @Nullable String map;
 
-    public LocrawInfo(Environment environment, String proxyName, String serverName, @Nullable ServerType serverType, @Nullable String lobbyName, @Nullable String mode, @Nullable String map) {
-        this.environment = environment;
-        this.proxyName = proxyName;
+    public LocrawInfo(String serverName, @Nullable ServerType serverType, @Nullable String lobbyName, @Nullable String mode, @Nullable String map) {
         this.serverName = serverName;
         this.serverType = serverType;
         this.lobbyName = lobbyName;
@@ -34,8 +30,6 @@ public class LocrawInfo {
 
     public LocrawInfo(ClientboundLocationPacket packet) {
         try {
-            this.environment = packet.getEnvironment();
-            this.proxyName = packet.getProxyName();
             this.serverName = packet.getServerName();
             this.serverType = packet.getServerType().orElse(null);
             this.lobbyName = packet.getLobbyName().orElse(null);
@@ -100,24 +94,6 @@ public class LocrawInfo {
         return map;
     }
 
-
-    /**
-     * Retrieves the name of the proxy from the LocrawInfo instance.
-     *
-     * @return The name of the proxy as a String.
-     */
-    public String getProxyName() {
-        return proxyName;
-    }
-
-    /**
-     * Gets the environment of the LocrawInfo object.
-     *
-     * @return The environment.
-     */
-    public Environment getEnvironment() {
-        return environment;
-    }
 
     /**
      * Retrieves the lobby name associated with this LocrawInfo object.
