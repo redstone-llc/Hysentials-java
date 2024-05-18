@@ -56,7 +56,7 @@ public class SetTextureGui extends Container {
         cataItems.put("Armor", new ArrayList<>());
         cataItems.put("Seasonal", new ArrayList<>());
         try {
-            guiTopField = ReflectionHelper.findField(GuiContainer.class, "guiTop", "field_147004_r");
+            guiTopField = ReflectionHelper.findField(GuiContainer.class, "guiTop", "field_147009_r");
             xSizeField = ReflectionHelper.findField(GuiContainer.class, "xSize", "field_146999_f");
             guiTopField.setAccessible(true);
             xSizeField.setAccessible(true);

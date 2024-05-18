@@ -97,7 +97,7 @@ public abstract class NPC {
         try {
             entity.setCustomNameTag(name);
             GameProfile profile = new GameProfile(UUID.randomUUID(), name);
-            Field gameProfile = ReflectionHelper.findField(Entity.class, "field_184245_j", "gameProfile");
+            Field gameProfile = ReflectionHelper.findField(EntityPlayer.class, "field_146106_i", "gameProfile");
             gameProfile.setAccessible(true);
             gameProfile.set(entity, profile);
             NetworkPlayerInfo info = new NetworkPlayerInfo(profile);

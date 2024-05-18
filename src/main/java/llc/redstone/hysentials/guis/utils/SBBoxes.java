@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
+import java.beans.Transient;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,8 @@ public class SBBoxes {
     private float scale = 0;
     private String title = "";
     private boolean enabled = false;
+    transient public SBBoxesHud hud;
+    transient public Map.Entry<Field, Object> entry;
 
     public SBBoxes(@NotNull JSONObject line) {
         this.display = line.getString("display");
@@ -50,7 +53,9 @@ public class SBBoxes {
 
         position = new Position(x, y, getWidth(text), getHeight(text));
 
-        HudCore.huds.put(new Map.Entry<Field, Object>() {
+        hud = new SBBoxesHud(this);
+
+        HudCore.huds.put(entry = new Map.Entry<Field, Object>() {
             @Override
             public Field getKey() {
                 return null;
@@ -65,7 +70,7 @@ public class SBBoxes {
             public Object setValue(Object o) {
                 return null;
             }
-        }, new SBBoxesHud(this));
+        }, hud);
 
     }
 

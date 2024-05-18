@@ -127,15 +127,15 @@ public class Hysentials {
 
     public String rank;
 
-    public CubitCompanion cubitCompanion;
-    public PepperCompanion pepperCompanion;
-    public MiyaCompanion miyaCompanion;
-    public HamsterCompanion hamsterCompanion;
-    public TechnoCrown technoCrown;
-    public BlackCat blackCat;
-    public KzeroBundle kzeroBundle;
-    public TdarthCosmetic tdarthCosmetic;
-    public DragonCosmetic dragonCosmetic;
+    public CubitCompanion cubitCompanion = new CubitCompanion();
+    public PepperCompanion pepperCompanion = new PepperCompanion();
+    public MiyaCompanion miyaCompanion = new MiyaCompanion();
+    public HamsterCompanion hamsterCompanion = new HamsterCompanion();
+    public TechnoCrown technoCrown = new TechnoCrown();
+    public BlackCat blackCat = new BlackCat();
+    public KzeroBundle kzeroBundle = new KzeroBundle();
+    public TdarthCosmetic tdarthCosmetic = new TdarthCosmetic();
+    public DragonCosmetic dragonCosmetic = new DragonCosmetic();
 
 
 
@@ -431,14 +431,14 @@ public class Hysentials {
             eventBus.register(new CapeHandler());
             eventBus.register(new PacketRecievedHandler());
             eventBus.register(new OneConfigHudClickHandler());
-            eventBus.register(cubitCompanion = new CubitCompanion());
-            eventBus.register(pepperCompanion = new PepperCompanion());
-            eventBus.register(miyaCompanion = new MiyaCompanion());
-            eventBus.register(hamsterCompanion = new HamsterCompanion());
-            eventBus.register(technoCrown = new TechnoCrown());
-            eventBus.register(kzeroBundle = new KzeroBundle());
-            eventBus.register(tdarthCosmetic = new TdarthCosmetic());
-            eventBus.register(dragonCosmetic = new DragonCosmetic());
+            eventBus.register(cubitCompanion);
+            eventBus.register(pepperCompanion);
+            eventBus.register(miyaCompanion);
+            eventBus.register(hamsterCompanion);
+            eventBus.register(technoCrown);
+            eventBus.register(kzeroBundle);
+            eventBus.register(tdarthCosmetic);
+            eventBus.register(dragonCosmetic);
             blackCat = LayerBlackCatHat.hat;
             CatHat.loadCatHats();
             BackpackCosmetic.loadBackpacks();

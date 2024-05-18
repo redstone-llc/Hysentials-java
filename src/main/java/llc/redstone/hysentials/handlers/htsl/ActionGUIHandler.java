@@ -62,7 +62,7 @@ public class ActionGUIHandler {
             file = new Input.Button(0, 0, 0, 20, "File");
             library = new Input.Button(0, 0, 0, 20, "Action Library");
 
-            guiTopField = ReflectionHelper.findField(GuiContainer.class, "guiTop", "field_147004_r");
+            guiTopField = ReflectionHelper.findField(GuiContainer.class, "guiTop", "field_147009_r");
             guiTopField.setAccessible(true);
             guiLeftField = ReflectionHelper.findField(GuiContainer.class, "guiLeft", "field_147003_i");
             guiLeftField.setAccessible(true);

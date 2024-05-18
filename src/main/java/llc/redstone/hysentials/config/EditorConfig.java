@@ -8,9 +8,12 @@ import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.gui.OneConfigGui;
 import cc.polyfrost.oneconfig.gui.pages.ModConfigPage;
+import cc.polyfrost.oneconfig.hud.Hud;
+import cc.polyfrost.oneconfig.internal.hud.HudCore;
 import cc.polyfrost.oneconfig.utils.gui.GuiUtils;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.guis.utils.SBBoxes;
+import llc.redstone.hysentials.guis.utils.SBBoxesHud;
 import net.minecraft.client.Minecraft;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -93,6 +96,7 @@ public class EditorConfig extends Config {
         text = "Delete"
     )
     public void delete() {
+        HudCore.huds.remove(line.entry, line.hud);
         SBBoxes.boxes.remove(line);
         Minecraft.getMinecraft().thePlayer.closeScreen();
     }

@@ -86,7 +86,7 @@ public class Navigator {
             throw new RuntimeException(e);
         }
         try {
-            guiTop = ReflectionHelper.findField(GuiContainer.class, "guiTop", "field_147004_r");
+            guiTop = ReflectionHelper.findField(GuiContainer.class, "guiTop", "field_147009_r");
             guiTop.setAccessible(true);
             guiLeft = ReflectionHelper.findField(GuiContainer.class, "guiLeft", "field_147003_i");
             guiLeft.setAccessible(true);
