@@ -149,7 +149,6 @@ jar {
 
 remapJar {
     archiveFileName.set("${mod_name}-${mod_version}.jar")
-    destinationDirectory = file("C:\\Users\\griff\\Desktop\\games\\MultiMC\\instances\\1.8.9\\.minecraft\\mods")
 }
 
 publishing {
