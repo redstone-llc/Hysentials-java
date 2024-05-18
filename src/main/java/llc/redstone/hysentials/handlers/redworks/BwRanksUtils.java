@@ -3,7 +3,7 @@ package llc.redstone.hysentials.handlers.redworks;
 import cc.polyfrost.oneconfig.libs.caffeine.cache.Cache;
 import cc.polyfrost.oneconfig.libs.caffeine.cache.Caffeine;
 import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
+import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.util.BlockWAPIUtils;
 import llc.redstone.hysentials.util.C;
@@ -12,7 +12,6 @@ import llc.redstone.hysentials.websocket.Socket;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 
-import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;

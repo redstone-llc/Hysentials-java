@@ -2,7 +2,7 @@ package llc.redstone.hysentials.guis.utils;
 
 import cc.polyfrost.oneconfig.internal.hud.HudCore;
 import cc.polyfrost.oneconfig.renderer.TextRenderer;
-import llc.redstone.hysentials.config.hysentialMods.ScorebarsConfig;
+import llc.redstone.hysentials.config.hysentialmods.ScorebarsConfig;
 import llc.redstone.hysentials.guis.sbBoxes.SBBoxesEditor;
 import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
 import llc.redstone.hysentials.util.C;

@@ -10,13 +10,11 @@ import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.guis.misc.HysentialsLevel;
 import llc.redstone.hysentials.guis.quest.QuestMainGui;
 import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
-import llc.redstone.hysentials.polyui.ui.VisitHouseScreen;
 import llc.redstone.hysentials.util.LocrawUtil;
 import llc.redstone.hysentials.handlers.npc.NPC;
 import llc.redstone.hysentials.htsl.compiler.CompileKt;
 import llc.redstone.hysentials.macrowheel.MacroWheelSelector;
-import llc.redstone.hysentials.profileViewer.DefaultProfileGui;
-import llc.redstone.hysentials.renderer.plusStand.PlusStandEntity;
+import llc.redstone.hysentials.profileviewer.DefaultProfileGui;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.util.*;
 import llc.redstone.hysentials.utils.ChatLib;
@@ -26,14 +24,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
-import net.hypixel.data.type.GameType;
-import net.hypixel.data.type.ServerType;
-import net.hypixel.modapi.HypixelModAPI;
-import net.hypixel.modapi.handler.ClientboundPacketHandler;
 import net.hypixel.modapi.packet.impl.clientbound.ClientboundPingPacket;
-import net.hypixel.modapi.packet.impl.clientbound.event.ClientboundLocationPacket;
 import net.hypixel.modapi.packet.impl.serverbound.ServerboundPingPacket;
-import net.hypixel.modapi.packet.impl.serverbound.ServerboundPlayerInfoPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -356,11 +348,6 @@ public class HysentialsCommand extends CommandBase {
                 }
 
                 case "plus": {
-                    break;
-                }
-
-                case "house": {
-                    VisitHouseScreen.INSTANCE.open();
                     break;
                 }
 

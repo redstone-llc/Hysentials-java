@@ -1,8 +1,7 @@
 package llc.redstone.hysentials.command;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
-import llc.redstone.hysentials.config.hysentialMods.ChatConfig;
-import llc.redstone.hysentials.handlers.chat.modules.bwranks.BWSReplace;
+import llc.redstone.hysentials.config.hysentialmods.ChatConfig;
 import llc.redstone.hysentials.util.BUtils;
 import llc.redstone.hysentials.Hysentials;
 import net.minecraft.client.Minecraft;

@@ -1,15 +1,13 @@
 package llc.redstone.hysentials.guis.sbBoxes;
 
 import cc.polyfrost.oneconfig.gui.OneConfigGui;
-import cc.polyfrost.oneconfig.hud.Hud;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UKeyboard;
 import cc.polyfrost.oneconfig.libs.universal.UResolution;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.EditorConfig;
-import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.config.hysentialMods.ScorebarsConfig;
+import llc.redstone.hysentials.config.hysentialmods.ScorebarsConfig;
 import llc.redstone.hysentials.guis.HysentialsGui;
 import llc.redstone.hysentials.guis.utils.GrabOffset;
 import llc.redstone.hysentials.guis.utils.Position;
@@ -20,10 +18,6 @@ import llc.redstone.hysentials.util.Renderer;
 import llc.redstone.hysentials.util.ScoreboardWrapper;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.config.EditorConfig;
-import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.guis.HysentialsGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
@@ -36,9 +30,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.GuiIngameForge;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 import java.util.*;

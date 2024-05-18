@@ -1,11 +1,7 @@
 package llc.redstone.hysentials.util;
 
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
-import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
-import llc.redstone.hysentials.websocket.Socket;
-import llc.redstone.hysentials.websocket.Socket;
+import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -13,7 +9,6 @@ import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;

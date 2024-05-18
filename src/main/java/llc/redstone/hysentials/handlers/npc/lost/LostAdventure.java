@@ -22,6 +22,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import java.lang.reflect.Field;
 import java.util.Iterator;
@@ -48,9 +49,9 @@ public class LostAdventure extends NPC {
             true
         );
         try {
-            field = ChatLine.class.getDeclaredField("field_74541_b");
+            field = ReflectionHelper.findField(ChatLine.class, "field_74541_b", "lineString");
             field.setAccessible(true);
-        } catch (NoSuchFieldException e) {
+        } catch (ReflectionHelper.UnableToFindFieldException e) {
         }
         hologram.add("§b??????");
     }

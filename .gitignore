@@ -22,3 +22,6 @@ build
 # other
 eclipse
 run
+
+# vscode
+.vscode

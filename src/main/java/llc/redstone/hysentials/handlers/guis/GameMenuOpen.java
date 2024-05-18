@@ -1,26 +1,20 @@
 package llc.redstone.hysentials.handlers.guis;
 
 import cc.polyfrost.oneconfig.gui.OneConfigGui;
-import cc.polyfrost.oneconfig.gui.pages.ModConfigPage;
-import cc.polyfrost.oneconfig.gui.pages.ModsPage;
-import cc.polyfrost.oneconfig.gui.pages.Page;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.profileViewer.DefaultProfileGui;
-import llc.redstone.hysentials.Hysentials;
+import llc.redstone.hysentials.profileviewer.DefaultProfileGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class GameMenuOpen {
@@ -32,11 +26,11 @@ public class GameMenuOpen {
 
     public GameMenuOpen () {
         try {
-            field_lowerChestInventory = GuiChest.class.getDeclaredField("field_147015_w");
+            field_lowerChestInventory = ReflectionHelper.findField(GuiChest.class, "lowerChestInventory", "field_147015_w");
             field_lowerChestInventory.setAccessible(true);
-            field_upperChestInventory = GuiChest.class.getDeclaredField("field_147016_v");
+            field_upperChestInventory = ReflectionHelper.findField(GuiChest.class, "upperChestInventory", "field_147016_v");
             field_upperChestInventory.setAccessible(true);
-            field_inventoryContents = InventoryBasic.class.getDeclaredField("field_70482_c");
+            field_inventoryContents = ReflectionHelper.findField(InventoryBasic.class, "inventoryContents", "field_70482_c");
             field_inventoryContents.setAccessible(true);
             field_currentPage = OneConfigGui.class.getDeclaredField("currentPage");
             field_currentPage.setAccessible(true);

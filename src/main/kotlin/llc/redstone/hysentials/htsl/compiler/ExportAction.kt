@@ -4,7 +4,7 @@ import cc.polyfrost.oneconfig.libs.universal.UChat
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent
 import llc.redstone.hysentials.HYSENTIALS_API
 import llc.redstone.hysentials.Hysentials
-import llc.redstone.hysentials.config.hysentialMods.HousingConfig
+import llc.redstone.hysentials.config.hysentialmods.HousingConfig
 import llc.redstone.hysentials.handlers.htsl.Queue.add
 import llc.redstone.hysentials.handlers.htsl.Queue.forceOperation
 import llc.redstone.hysentials.handlers.redworks.BwRanks

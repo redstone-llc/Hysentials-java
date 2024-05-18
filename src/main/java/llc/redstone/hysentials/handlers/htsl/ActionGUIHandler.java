@@ -28,6 +28,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.apache.commons.io.FileUtils;
 import org.lwjgl.input.Keyboard;
 
@@ -61,13 +62,13 @@ public class ActionGUIHandler {
             file = new Input.Button(0, 0, 0, 20, "File");
             library = new Input.Button(0, 0, 0, 20, "Action Library");
 
-            guiTopField = GuiContainer.class.getDeclaredField("field_147009_r");
+            guiTopField = ReflectionHelper.findField(GuiContainer.class, "guiTop", "field_147004_r");
             guiTopField.setAccessible(true);
-            guiLeftField = GuiContainer.class.getDeclaredField("field_147003_i");
+            guiLeftField = ReflectionHelper.findField(GuiContainer.class, "guiLeft", "field_147003_i");
             guiLeftField.setAccessible(true);
-            xSizeField = GuiContainer.class.getDeclaredField("field_146999_f");
+            xSizeField = ReflectionHelper.findField(GuiContainer.class, "xSize", "field_146999_f");
             xSizeField.setAccessible(true);
-        } catch (NoSuchFieldException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

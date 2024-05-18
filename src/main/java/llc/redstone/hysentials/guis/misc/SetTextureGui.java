@@ -10,11 +10,13 @@ import llc.redstone.hysentials.utils.StringUtilsKt;
 import com.google.common.collect.Lists;
 import llc.redstone.hysentials.util.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.MouseEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
@@ -54,8 +56,8 @@ public class SetTextureGui extends Container {
         cataItems.put("Armor", new ArrayList<>());
         cataItems.put("Seasonal", new ArrayList<>());
         try {
-            guiTopField = net.minecraft.client.gui.inventory.GuiContainer.class.getDeclaredField("field_147009_r");
-            xSizeField = net.minecraft.client.gui.inventory.GuiContainer.class.getDeclaredField("field_146999_f");
+            guiTopField = ReflectionHelper.findField(GuiContainer.class, "guiTop", "field_147004_r");
+            xSizeField = ReflectionHelper.findField(GuiContainer.class, "xSize", "field_146999_f");
             guiTopField.setAccessible(true);
             xSizeField.setAccessible(true);
 
@@ -80,7 +82,7 @@ public class SetTextureGui extends Container {
             }
 
             reader.close();
-        } catch (IOException | NoSuchFieldException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 

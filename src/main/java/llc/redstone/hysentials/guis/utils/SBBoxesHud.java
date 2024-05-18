@@ -1,18 +1,9 @@
 package llc.redstone.hysentials.guis.utils;
 
-import cc.polyfrost.oneconfig.config.core.OneColor;
-import cc.polyfrost.oneconfig.hud.BasicHud;
 import cc.polyfrost.oneconfig.hud.Hud;
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack;
-import cc.polyfrost.oneconfig.renderer.NanoVGHelper;
-import cc.polyfrost.oneconfig.renderer.font.Fonts;
 import llc.redstone.hysentials.config.EditorConfig;
-import llc.redstone.hysentials.config.hysentialMods.ScorebarsConfig;
 import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
-import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
-import llc.redstone.hysentials.util.C;
-import llc.redstone.hysentials.util.NVGUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 
 public class SBBoxesHud extends Hud {

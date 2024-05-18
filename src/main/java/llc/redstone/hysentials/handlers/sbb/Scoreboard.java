@@ -1,18 +1,14 @@
 package llc.redstone.hysentials.handlers.sbb;
 
-import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
-import llc.redstone.hysentials.config.hysentialMods.ScorebarsConfig;
-import llc.redstone.hysentials.handlers.redworks.HousingScoreboard;
+import llc.redstone.hysentials.config.hysentialmods.HousingConfig;
+import llc.redstone.hysentials.config.hysentialmods.ScorebarsConfig;
 import llc.redstone.hysentials.util.Renderer;
 import llc.redstone.hysentials.util.ScoreboardWrapper;
-import llc.redstone.hysentials.config.HysentialsConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraftforge.client.GuiIngameForge;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Scoreboard {

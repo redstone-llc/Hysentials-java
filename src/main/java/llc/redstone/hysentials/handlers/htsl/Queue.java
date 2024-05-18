@@ -1,22 +1,19 @@
 package llc.redstone.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
-import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
+import llc.redstone.hysentials.config.hysentialmods.HousingConfig;
 import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
 import llc.redstone.hysentials.guis.ResolutionUtil;
 import llc.redstone.hysentials.htsl.LoaderObject;
-import llc.redstone.hysentials.htsl.LoaderObjectKt;
 import llc.redstone.hysentials.util.Input;
 import llc.redstone.hysentials.utils.ChatLib;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 

@@ -11,6 +11,7 @@ import llc.redstone.hysentials.util.Renderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -20,6 +21,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -44,13 +46,13 @@ public class FunctionsGUIHandler {
             file = new Input.Button(0, 0, 0, 20, "File");
             library = new Input.Button(0, 0, 0, 20, "Action Library");
 
-            guiTopField = GuiContainer.class.getDeclaredField("field_147009_r");
+            guiTopField = ReflectionHelper.findField(GuiContainer.class, "guiTop", "field_147004_r");
             guiTopField.setAccessible(true);
-            guiLeftField = GuiContainer.class.getDeclaredField("field_147003_i");
+            guiLeftField = ReflectionHelper.findField(GuiContainer.class, "guiLeft", "field_147003_i");
             guiLeftField.setAccessible(true);
-            xSizeField = GuiContainer.class.getDeclaredField("field_146999_f");
+            xSizeField = ReflectionHelper.findField(GuiContainer.class, "xSize", "field_146999_f");
             xSizeField.setAccessible(true);
-        } catch (NoSuchFieldException e) {
+        } catch (ReflectionHelper.UnableToAccessFieldException e) {
             throw new RuntimeException(e);
         }
     }

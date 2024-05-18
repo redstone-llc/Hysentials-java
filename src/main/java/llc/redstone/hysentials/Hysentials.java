@@ -5,8 +5,8 @@ import cc.polyfrost.oneconfig.events.EventManager;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.cosmetics.capes.CapeHandler;
-import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
-import llc.redstone.hysentials.config.hysentialMods.icons.IconStuff;
+import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
+import llc.redstone.hysentials.config.hysentialmods.icons.IconStuff;
 import llc.redstone.hysentials.cosmetic.CosmeticManager;
 import llc.redstone.hysentials.cosmetics.backpack.BackpackCosmetic;
 import llc.redstone.hysentials.cosmetics.hamster.HamsterCompanion;
@@ -21,13 +21,10 @@ import llc.redstone.hysentials.cosmetics.wings.dragon.DragonCosmetic;
 import llc.redstone.hysentials.cosmetics.wings.tdarth.TdarthCosmetic;
 import llc.redstone.hysentials.guis.container.containers.club.ClubDashboardHandler;
 import llc.redstone.hysentials.guis.container.ContainerHandler;
-import llc.redstone.hysentials.guis.polyui.LwjglManagerImpl;
 import llc.redstone.hysentials.handlers.chat.modules.misc.Limit256;
 import llc.redstone.hysentials.handlers.guis.GuiScreenPost;
 import llc.redstone.hysentials.handlers.guis.OneConfigHudClickHandler;
 import llc.redstone.hysentials.handlers.htsl.*;
-import llc.redstone.hysentials.polyui.ui.VisitHouseScreen;
-import llc.redstone.hysentials.util.LocrawUtil;
 import llc.redstone.hysentials.handlers.misc.HousingJoinHandler;
 import llc.redstone.hysentials.handlers.misc.PacketRecievedHandler;
 import llc.redstone.hysentials.handlers.misc.QuestHandler;
@@ -77,9 +74,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.polyfrost.polyui.PolyUI;
-import org.polyfrost.polyui.component.Drawable;
-import org.polyfrost.polyui.input.Translator;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -251,9 +245,6 @@ public class Hysentials {
             Minecraft.getMinecraft().fontRendererObj = imageIconRenderer;
         }
 
-        preload();
-        preloadScreens();
-
         registerHandlers();
 
         MinecraftForge.EVENT_BUS.post(new HysentialsLoadedEvent());
@@ -266,11 +257,6 @@ public class Hysentials {
             config.macroWheelHud.position.setPosition((Renderer.screen.getWidth() / 2f) - (34*5f) / 2, (Renderer.screen.getHeight() / 2f) - (34*5f) / 2);
         }
     }
-
-    private void preloadScreens() {
-        new VisitHouseScreen().create("Sin_ender");
-    }
-
     @Mod.EventHandler
     public void finishedStarting(FMLLoadCompleteEvent event) {
         this.loadedCall = true;
@@ -537,26 +523,6 @@ public class Hysentials {
         outStream.close();
 
         return connection.getInputStream();
-    }
-
-    /**
-     * Ensure that key PolyUI classes are loaded to prevent lag-spikes when loading PolyUI for the first time.
-     */
-    private static void preload() {
-        long t1 = System.nanoTime();
-        try {
-            Class.forName(PolyUI.class.getName());
-            Class.forName(Drawable.class.getName());
-            Class.forName(Translator.class.getName());
-
-            LwjglManagerImpl.INSTANCE = new LwjglManagerImpl();
-            LwjglManagerImpl.INSTANCE.getRenderer();
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to preload necessary PolyUI classes", e);
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
-        System.out.printf("PolyUI preload took %sms", (System.nanoTime() - t1) / 1_000_000.0);
     }
 
     public boolean isApec() {

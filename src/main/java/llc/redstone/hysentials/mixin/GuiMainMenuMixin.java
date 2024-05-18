@@ -1,9 +1,8 @@
 package llc.redstone.hysentials.mixin;
 
-import llc.redstone.hysentials.updateGui.RequestUpdateGui;
-import llc.redstone.hysentials.updateGui.UpdateChecker;
-import llc.redstone.hysentials.updateGui.UpdateGui;
-import llc.redstone.hysentials.hook.MainMenuHook;
+import llc.redstone.hysentials.updategui.RequestUpdateGui;
+import llc.redstone.hysentials.updategui.UpdateChecker;
+import llc.redstone.hysentials.updategui.UpdateGui;
 import llc.redstone.hysentials.hook.MainMenuHook;
 import net.minecraft.client.gui.*;
 import org.spongepowered.asm.mixin.Mixin;

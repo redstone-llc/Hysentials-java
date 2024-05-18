@@ -2,10 +2,8 @@ package llc.redstone.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
-import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UMessage;
-import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import llc.redstone.hysentials.HysentialsUtilsKt;
-import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
+import llc.redstone.hysentials.config.hysentialmods.HousingConfig;
 import llc.redstone.hysentials.event.events.GuiLoadedEvent;
 import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
 import llc.redstone.hysentials.handlers.chat.modules.misc.GuiChat256;
@@ -27,13 +25,13 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
-import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.minecraftforge.fml.common.registry.GameData;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -42,7 +40,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static llc.redstone.hysentials.handlers.guis.GameMenuOpen.field_lowerChestInventory;
 import static llc.redstone.hysentials.util.Renderer.getImageFromUrl;
@@ -89,13 +86,13 @@ public class Navigator {
             throw new RuntimeException(e);
         }
         try {
-            guiTop = GuiContainer.class.getDeclaredField("field_147009_r");
+            guiTop = ReflectionHelper.findField(GuiContainer.class, "guiTop", "field_147004_r");
             guiTop.setAccessible(true);
-            guiLeft = GuiContainer.class.getDeclaredField("field_147003_i");
+            guiLeft = ReflectionHelper.findField(GuiContainer.class, "guiLeft", "field_147003_i");
             guiLeft.setAccessible(true);
-            chatGuiInputField = GuiChat.class.getDeclaredField("field_146415_a");
+            chatGuiInputField = ReflectionHelper.findField(GuiChat.class, "inputField", "field_146415_a");
             chatGuiInputField.setAccessible(true);
-        } catch (NoSuchFieldException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

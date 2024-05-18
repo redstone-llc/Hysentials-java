@@ -1,11 +1,6 @@
 package llc.redstone.hysentials.handlers.groupchats;
 
-import cc.polyfrost.oneconfig.config.core.ConfigUtils;
-import cc.polyfrost.oneconfig.libs.universal.UChat;
-import com.google.gson.*;
-import llc.redstone.hysentials.config.hysentialMods.ChatConfig;
 import llc.redstone.hysentials.schema.HysentialsSchema;
-import llc.redstone.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
@@ -16,21 +11,13 @@ import net.minecraft.client.gui.ChatLine;
 import org.polyfrost.chatting.chat.ChatTab;
 import org.polyfrost.chatting.chat.ChatTabs;
 import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.config.HysentialsConfig;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.event.ClickEvent;
-import net.minecraft.event.HoverEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.apache.commons.io.IOUtils;
-import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;

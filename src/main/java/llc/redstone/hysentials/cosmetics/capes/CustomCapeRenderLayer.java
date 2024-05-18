@@ -1,6 +1,6 @@
 package llc.redstone.hysentials.cosmetics.capes;
 
-import llc.redstone.hysentials.config.hysentialMods.CosmeticConfig;
+import llc.redstone.hysentials.config.hysentialmods.CosmeticConfig;
 import llc.redstone.hysentials.util.BlockWAPIUtils;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelBase;

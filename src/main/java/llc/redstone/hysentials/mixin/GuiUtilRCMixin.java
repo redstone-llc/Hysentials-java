@@ -1,14 +1,10 @@
 package llc.redstone.hysentials.mixin;
 
 import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
+import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
 import llc.redstone.hysentials.util.ImageIconRenderer;
-import llc.redstone.hysentials.Hysentials;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiUtilRenderComponents;
-import org.lwjgl.Sys;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;

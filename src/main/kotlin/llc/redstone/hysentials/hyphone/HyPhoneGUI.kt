@@ -5,8 +5,8 @@ import cc.polyfrost.oneconfig.libs.universal.UMatrixStack
 import cc.polyfrost.oneconfig.libs.universal.UScreen
 import llc.redstone.hysentials.Hysentials
 import llc.redstone.hysentials.cosmetic.CosmeticGui
-import llc.redstone.hysentials.updateGui.Button
-import llc.redstone.hysentials.updateGui.HysentialsGui
+import llc.redstone.hysentials.updategui.Button
+import llc.redstone.hysentials.updategui.HysentialsGui
 import llc.redstone.hysentials.guis.misc.HysentialsLevel
 import llc.redstone.hysentials.util.ImageIconRenderer
 import llc.redstone.hysentials.util.Renderer

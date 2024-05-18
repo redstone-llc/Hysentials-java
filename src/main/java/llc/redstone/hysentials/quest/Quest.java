@@ -1,14 +1,10 @@
 package llc.redstone.hysentials.quest;
 
-import llc.redstone.hysentials.quest.dailyQuests.*;
 import llc.redstone.hysentials.quest.quests.LobbyParkourist;
 import llc.redstone.hysentials.quest.quests.LostMage;
 import llc.redstone.hysentials.schema.HysentialsSchema;
-import llc.redstone.hysentials.quest.dailyQuests.BlitzDuelsRandom;
-import llc.redstone.hysentials.quest.dailyQuests.DuelsMaster;
-import llc.redstone.hysentials.quest.quests.LobbyParkourist;
-import llc.redstone.hysentials.quest.quests.LostMage;
-import llc.redstone.hysentials.schema.HysentialsSchema;
+import llc.redstone.hysentials.quest.dailyquests.BlitzDuelsRandom;
+import llc.redstone.hysentials.quest.dailyquests.DuelsMaster;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import org.json.JSONObject;
 

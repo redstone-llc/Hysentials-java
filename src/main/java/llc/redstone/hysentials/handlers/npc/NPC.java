@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.handlers.npc;
 
+import kotlin.jvm.internal.ReflectionFactory;
 import llc.redstone.hysentials.handlers.npc.lost.LostRidable;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
@@ -17,6 +18,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -69,10 +71,10 @@ public abstract class NPC {
             Minecraft.getMinecraft().theWorld.addEntityToWorld(entity.getEntityId(), entity);
             NetworkPlayerInfo info = new NetworkPlayerInfo(profile);
             ResourceLocation skin = new ResourceLocation(textureLocation);
-            Field locationSkin = NetworkPlayerInfo.class.getDeclaredField("field_178865_e");
+            Field locationSkin = ReflectionHelper.findField(NetworkPlayerInfo.class, "field_178865_e", "locationSkin");
             locationSkin.setAccessible(true);
             locationSkin.set(info, skin);
-            Field playerInfo = AbstractClientPlayer.class.getDeclaredField("field_175157_a");
+            Field playerInfo = ReflectionHelper.findField(AbstractClientPlayer.class, "field_175157_a", "playerInfo");
             playerInfo.setAccessible(true);
             playerInfo.set(entity, info);
 
@@ -95,15 +97,15 @@ public abstract class NPC {
         try {
             entity.setCustomNameTag(name);
             GameProfile profile = new GameProfile(UUID.randomUUID(), name);
-            Field gameProfile = EntityPlayer.class.getDeclaredField("field_146106_i");
+            Field gameProfile = ReflectionHelper.findField(Entity.class, "field_184245_j", "gameProfile");
             gameProfile.setAccessible(true);
             gameProfile.set(entity, profile);
             NetworkPlayerInfo info = new NetworkPlayerInfo(profile);
             ResourceLocation skin = new ResourceLocation(textureLocation);
-            Field locationSkin = NetworkPlayerInfo.class.getDeclaredField("field_178865_e");
+            Field locationSkin = ReflectionHelper.findField(NetworkPlayerInfo.class, "field_178865_e", "locationSkin");
             locationSkin.setAccessible(true);
             locationSkin.set(info, skin);
-            Field playerInfo = AbstractClientPlayer.class.getDeclaredField("field_175157_a");
+            Field playerInfo = ReflectionHelper.findField(AbstractClientPlayer.class, "field_175157_a", "playerInfo");
             playerInfo.setAccessible(true);
             playerInfo.set(entity, info);
             entity.refreshDisplayName();

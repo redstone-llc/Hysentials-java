@@ -1,17 +1,9 @@
 package llc.redstone.hysentials.util;
 
-import cc.polyfrost.oneconfig.libs.universal.ChatColor;
-import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
-import llc.redstone.hysentials.config.hysentialMods.rank.RankStuff;
-import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
-import com.google.gson.JsonObject;
+import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
+import llc.redstone.hysentials.config.hysentialmods.rank.RankStuff;
 import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
 import llc.redstone.hysentials.handlers.redworks.BwRanksUtils;
-import org.json.JSONObject;
-
-import static llc.redstone.hysentials.handlers.redworks.BwRanksUtils.futuristicRanks;
 
 public enum HypixelRanks {
     //normal ranks

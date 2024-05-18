@@ -1,24 +1,15 @@
 package llc.redstone.hysentials.mixin;
 
-import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
+import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
 import llc.redstone.hysentials.util.C;
 import llc.redstone.hysentials.util.ImageIconRenderer;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraftforge.fml.client.config.GuiUtils;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.awt.*;
-import java.text.Format;
-import java.util.ArrayList;
 import java.util.List;
 
 import static llc.redstone.hysentials.util.C.toHex;

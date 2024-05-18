@@ -1,6 +1,6 @@
 package llc.redstone.hysentials.handlers.chat.modules.bwranks;
 
-import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
+import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
 
 public class MessageFormatter {
     public static String replaceWhite(String message, String color) {

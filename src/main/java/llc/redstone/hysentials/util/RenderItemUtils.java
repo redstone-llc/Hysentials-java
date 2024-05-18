@@ -1,22 +1,11 @@
 package llc.redstone.hysentials.util;
 
-import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
-import net.minecraft.client.Minecraft;
+import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.ItemModelMesher;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.event.GuiScreenEvent;
 
 import java.awt.*;
-import java.util.HashMap;
-import java.util.UUID;
-import java.util.function.Consumer;
 
 import static net.minecraftforge.fml.client.config.GuiUtils.drawGradientRect;
 

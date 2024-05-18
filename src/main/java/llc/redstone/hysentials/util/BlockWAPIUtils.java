@@ -2,8 +2,8 @@ package llc.redstone.hysentials.util;
 
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.HysentialsUtilsKt;
-import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
-import llc.redstone.hysentials.config.hysentialMods.rank.RankStuff;
+import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
+import llc.redstone.hysentials.config.hysentialmods.rank.RankStuff;
 import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
 import llc.redstone.hysentials.handlers.redworks.BwRanksUtils;
 import llc.redstone.hysentials.schema.HysentialsSchema;

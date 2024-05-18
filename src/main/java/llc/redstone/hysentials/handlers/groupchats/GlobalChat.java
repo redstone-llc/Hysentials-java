@@ -5,9 +5,7 @@ import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
 import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.config.hysentialMods.ChatConfig;
-import llc.redstone.hysentials.schema.HysentialsSchema;
-import llc.redstone.hysentials.websocket.Socket;
+import llc.redstone.hysentials.config.hysentialmods.ChatConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -15,10 +13,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.polyfrost.chatting.chat.ChatTab;
 import org.polyfrost.chatting.chat.ChatTabs;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class GlobalChat {

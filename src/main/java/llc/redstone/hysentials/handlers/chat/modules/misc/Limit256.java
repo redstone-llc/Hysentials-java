@@ -1,9 +1,6 @@
 package llc.redstone.hysentials.handlers.chat.modules.misc;
 
-import cc.polyfrost.oneconfig.platform.Platform;
-import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
-import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.config.hysentialMods.ChatConfig;
+import llc.redstone.hysentials.config.hysentialmods.ChatConfig;
 import llc.redstone.hysentials.util.BUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;

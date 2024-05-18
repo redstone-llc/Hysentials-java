@@ -1,6 +1,6 @@
 package llc.redstone.hysentials
 
-import llc.redstone.hysentials.updateGui.UpdateChecker
+import llc.redstone.hysentials.updategui.UpdateChecker
 import llc.redstone.hysentials.util.NetworkUtils
 import kotlinx.coroutines.*
 import net.minecraftforge.common.MinecraftForge

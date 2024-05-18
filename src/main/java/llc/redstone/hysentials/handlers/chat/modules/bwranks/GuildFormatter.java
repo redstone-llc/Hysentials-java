@@ -1,12 +1,10 @@
 package llc.redstone.hysentials.handlers.chat.modules.bwranks;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
-import cc.polyfrost.oneconfig.utils.Multithreading;
 import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.config.hysentialMods.ChatConfig;
-import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
+import llc.redstone.hysentials.config.hysentialmods.ChatConfig;
+import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
 import llc.redstone.hysentials.handlers.redworks.BwRanksUtils;
-import llc.redstone.hysentials.util.MUtils;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 
 import java.util.regex.Matcher;

@@ -1,10 +1,8 @@
 package llc.redstone.hysentials.cosmetics;
 
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
-import llc.redstone.hysentials.config.HysentialsConfig;
-import llc.redstone.hysentials.config.hysentialMods.CosmeticConfig;
+import llc.redstone.hysentials.config.hysentialmods.CosmeticConfig;
 import llc.redstone.hysentials.util.BUtils;
-import llc.redstone.hysentials.config.HysentialsConfig;
 import llc.redstone.hysentials.handlers.npc.NPC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
@@ -18,9 +16,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
-import static llc.redstone.hysentials.handlers.npc.NPC.getMouseOverExtended;
 import static java.lang.Thread.sleep;
 
 public abstract class AbstractCosmetic <E extends Entity>{

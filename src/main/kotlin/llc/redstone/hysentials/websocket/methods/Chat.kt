@@ -4,8 +4,8 @@ import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent
 import com.google.gson.JsonObject
 import llc.redstone.hysentials.Hysentials
 import llc.redstone.hysentials.config.HysentialsConfig
-import llc.redstone.hysentials.config.hysentialMods.ChatConfig
-import llc.redstone.hysentials.config.hysentialMods.FormattingConfig
+import llc.redstone.hysentials.config.hysentialmods.ChatConfig
+import llc.redstone.hysentials.config.hysentialmods.FormattingConfig
 import llc.redstone.hysentials.util.BlockWAPIUtils
 import llc.redstone.hysentials.util.MUtils
 import llc.redstone.hysentials.websocket.Channel
