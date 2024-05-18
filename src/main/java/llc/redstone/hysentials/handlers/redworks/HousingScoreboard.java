@@ -29,13 +29,18 @@ public class HousingScoreboard {
     public HousingScoreboard() {
         {
             try {
-                footerField = GuiPlayerTabOverlay.class.getDeclaredField("field_175255_h");
+                try {
+                    footerField = GuiPlayerTabOverlay.class.getDeclaredField("field_175255_h");
+                } catch (NoSuchFieldException e) {
+                    footerField = GuiPlayerTabOverlay.class.getDeclaredField("footer");
+                }
                 footerField.setAccessible(true);
-            } catch (NoSuchFieldException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
     }
+
     public String getHousingName() {
         if (getMinecraft().ingameGUI == null || getMinecraft().ingameGUI.getTabList() == null) return null;
         if (!HypixelUtils.INSTANCE.isHypixel()) return null;

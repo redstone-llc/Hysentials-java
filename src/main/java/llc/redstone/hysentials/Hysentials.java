@@ -4,6 +4,7 @@ import Apec.Components.Gui.GuiIngame.ApecGuiIngameForge;
 import cc.polyfrost.oneconfig.events.EventManager;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import kotlin.Pair;
 import llc.redstone.hysentials.cosmetics.capes.CapeHandler;
 import llc.redstone.hysentials.config.hysentialMods.FormattingConfig;
 import llc.redstone.hysentials.config.hysentialMods.icons.IconStuff;
@@ -26,6 +27,7 @@ import llc.redstone.hysentials.handlers.chat.modules.misc.Limit256;
 import llc.redstone.hysentials.handlers.guis.GuiScreenPost;
 import llc.redstone.hysentials.handlers.guis.OneConfigHudClickHandler;
 import llc.redstone.hysentials.handlers.htsl.*;
+import llc.redstone.hysentials.handlers.misc.VisitMenuHandler;
 import llc.redstone.hysentials.polyui.ui.VisitHouseScreen;
 import llc.redstone.hysentials.util.LocrawUtil;
 import llc.redstone.hysentials.handlers.misc.HousingJoinHandler;
@@ -88,6 +90,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Mod(
@@ -133,15 +137,15 @@ public class Hysentials {
 
     public String rank;
 
-    public CubitCompanion cubitCompanion;
-    public PepperCompanion pepperCompanion;
-    public MiyaCompanion miyaCompanion;
-    public HamsterCompanion hamsterCompanion;
-    public TechnoCrown technoCrown;
-    public BlackCat blackCat;
-    public KzeroBundle kzeroBundle;
-    public TdarthCosmetic tdarthCosmetic;
-    public DragonCosmetic dragonCosmetic;
+    public CubitCompanion cubitCompanion = new CubitCompanion();
+    public PepperCompanion pepperCompanion = new PepperCompanion();
+    public MiyaCompanion miyaCompanion = new MiyaCompanion();
+    public HamsterCompanion hamsterCompanion = new HamsterCompanion();
+    public TechnoCrown technoCrown = new TechnoCrown();
+    public BlackCat blackCat = new BlackCat();
+    public KzeroBundle kzeroBundle = new KzeroBundle();
+    public TdarthCosmetic tdarthCosmetic = new TdarthCosmetic();
+    public DragonCosmetic dragonCosmetic = new DragonCosmetic();
 
 
 
@@ -268,7 +272,7 @@ public class Hysentials {
     }
 
     private void preloadScreens() {
-        new VisitHouseScreen().create("Sin_ender");
+        new VisitHouseScreen().create("Sin_ender", new ArrayList<>());
     }
 
     @Mod.EventHandler
@@ -445,14 +449,15 @@ public class Hysentials {
             eventBus.register(new CapeHandler());
             eventBus.register(new PacketRecievedHandler());
             eventBus.register(new OneConfigHudClickHandler());
-            eventBus.register(cubitCompanion = new CubitCompanion());
-            eventBus.register(pepperCompanion = new PepperCompanion());
-            eventBus.register(miyaCompanion = new MiyaCompanion());
-            eventBus.register(hamsterCompanion = new HamsterCompanion());
-            eventBus.register(technoCrown = new TechnoCrown());
-            eventBus.register(kzeroBundle = new KzeroBundle());
-            eventBus.register(tdarthCosmetic = new TdarthCosmetic());
-            eventBus.register(dragonCosmetic = new DragonCosmetic());
+            eventBus.register(new VisitMenuHandler());
+            eventBus.register(cubitCompanion);
+            eventBus.register(pepperCompanion);
+            eventBus.register(miyaCompanion);
+            eventBus.register(hamsterCompanion);
+            eventBus.register(technoCrown);
+            eventBus.register(kzeroBundle);
+            eventBus.register(tdarthCosmetic);
+            eventBus.register(dragonCosmetic);
             blackCat = LayerBlackCatHat.hat;
             CatHat.loadCatHats();
             BackpackCosmetic.loadBackpacks();

@@ -16,6 +16,7 @@ import llc.redstone.hysentials.util.Renderer
 import llc.redstone.hysentials.util.ScoreboardWrapper
 import llc.redstone.hysentials.util.ScoreboardWrapper.ScoreWrapper
 import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiChat
 import net.minecraft.scoreboard.Score
 import net.minecraftforge.client.GuiIngameForge
 import net.minecraftforge.client.event.RenderGameOverlayEvent

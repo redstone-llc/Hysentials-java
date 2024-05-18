@@ -4,6 +4,9 @@ import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UMessage;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import llc.redstone.hysentials.HysentialsUtilsKt;
 import llc.redstone.hysentials.config.hysentialMods.HousingConfig;
 import llc.redstone.hysentials.event.events.GuiLoadedEvent;
@@ -27,6 +30,8 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
+import net.minecraft.network.play.client.C0EPacketClickWindow;
+import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.MinecraftForge;
@@ -89,11 +94,23 @@ public class Navigator {
             throw new RuntimeException(e);
         }
         try {
-            guiTop = GuiContainer.class.getDeclaredField("field_147009_r");
+            try {
+                guiTop = GuiContainer.class.getDeclaredField("field_147009_r");
+            } catch (NoSuchFieldException e) {
+                guiTop = GuiContainer.class.getDeclaredField("guiTop");
+            }
             guiTop.setAccessible(true);
-            guiLeft = GuiContainer.class.getDeclaredField("field_147003_i");
+            try {
+                guiLeft = GuiContainer.class.getDeclaredField("field_147003_i");
+            } catch (NoSuchFieldException e) {
+                guiLeft = GuiContainer.class.getDeclaredField("guiLeft");
+            }
             guiLeft.setAccessible(true);
-            chatGuiInputField = GuiChat.class.getDeclaredField("field_146415_a");
+            try {
+                chatGuiInputField = GuiChat.class.getDeclaredField("field_146415_a");
+            } catch (NoSuchFieldException e) {
+                chatGuiInputField = GuiChat.class.getDeclaredField("inputField");
+            }
             chatGuiInputField.setAccessible(true);
         } catch (NoSuchFieldException e) {
             throw new RuntimeException(e);
@@ -462,8 +479,8 @@ public class Navigator {
         }
     }
 
-    @SubscribeEvent
-    public void packetReceived(FMLNetworkEvent.ClientConnectedToServerEvent event) {
+//    @SubscribeEvent
+//    public void packetReceived(FMLNetworkEvent.ClientConnectedToServerEvent event) {
 //        event.manager.channel().pipeline()
 //            .addAfter("fml:packet_handler", "hysentials:packet_handler", new ChannelDuplexHandler() {
 //                @Override
@@ -494,5 +511,5 @@ public class Navigator {
 //                    }
 //                }
 //            });
-    }
+//    }
 }

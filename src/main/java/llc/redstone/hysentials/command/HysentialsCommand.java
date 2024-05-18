@@ -4,6 +4,7 @@ import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
+import kotlin.Pair;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.HysentialsUtilsKt;
 import llc.redstone.hysentials.config.HysentialsConfig;
@@ -360,7 +361,19 @@ public class HysentialsCommand extends CommandBase {
                 }
 
                 case "house": {
-                    VisitHouseScreen.INSTANCE.open();
+                    VisitHouseScreen.INSTANCE.open("Sin_ender",
+                        Arrays.asList(
+                            new Pair<>("§bMining Simulator §7[TYCOON] 1", 101),
+                            new Pair<>("§bMining Simulator §7[TYCOON] 2", 101),
+                            new Pair<>("§bMining Simulator §7[TYCOON] 3", 101),
+                            new Pair<>("§bMining Simulator §7[TYCOON] 4", 101),
+                            new Pair<>("§bMining Simulator §7[TYCOON] 5", 101),
+                            new Pair<>("§bMining Simulator §7[TYCOON] 6", 101),
+                            new Pair<>("§bMining Simulator §7[TYCOON] 7", 101),
+                            new Pair<>("§bMining Simulator §7[TYCOON] 8", 101),
+                            new Pair<>("§bMining Simulator §7[TYCOON] 9", 101)
+                        )
+                    );
                     break;
                 }
 

@@ -32,12 +32,25 @@ public class GameMenuOpen {
 
     public GameMenuOpen () {
         try {
-            field_lowerChestInventory = GuiChest.class.getDeclaredField("field_147015_w");
+            try {
+                field_lowerChestInventory = GuiChest.class.getDeclaredField("field_147015_w");
+            } catch (NoSuchFieldException e) {
+                field_lowerChestInventory = GuiChest.class.getDeclaredField("lowerChestInventory");
+            }
             field_lowerChestInventory.setAccessible(true);
-            field_upperChestInventory = GuiChest.class.getDeclaredField("field_147016_v");
+            try {
+                field_upperChestInventory = GuiChest.class.getDeclaredField("field_147016_v");
+            } catch (NoSuchFieldException e) {
+                field_upperChestInventory = GuiChest.class.getDeclaredField("upperChestInventory");
+            }
             field_upperChestInventory.setAccessible(true);
-            field_inventoryContents = InventoryBasic.class.getDeclaredField("field_70482_c");
+            try {
+                field_inventoryContents = InventoryBasic.class.getDeclaredField("field_70482_c");
+            } catch (NoSuchFieldException e) {
+                field_inventoryContents = InventoryBasic.class.getDeclaredField("inventoryContents");
+            }
             field_inventoryContents.setAccessible(true);
+
             field_currentPage = OneConfigGui.class.getDeclaredField("currentPage");
             field_currentPage.setAccessible(true);
             field_prevPage = OneConfigGui.class.getDeclaredField("prevPage");

@@ -61,11 +61,23 @@ public class ActionGUIHandler {
             file = new Input.Button(0, 0, 0, 20, "File");
             library = new Input.Button(0, 0, 0, 20, "Action Library");
 
-            guiTopField = GuiContainer.class.getDeclaredField("field_147009_r");
+            try {
+                guiTopField = GuiContainer.class.getDeclaredField("field_147009_r");
+            } catch (NoSuchFieldException e) {
+                guiTopField = GuiContainer.class.getDeclaredField("guiTop");
+            }
             guiTopField.setAccessible(true);
-            guiLeftField = GuiContainer.class.getDeclaredField("field_147003_i");
+            try {
+                guiLeftField = GuiContainer.class.getDeclaredField("field_147003_i");
+            } catch (NoSuchFieldException e) {
+                guiLeftField = GuiContainer.class.getDeclaredField("guiLeft");
+            }
             guiLeftField.setAccessible(true);
-            xSizeField = GuiContainer.class.getDeclaredField("field_146999_f");
+            try {
+                xSizeField = GuiContainer.class.getDeclaredField("field_146999_f");
+            } catch (NoSuchFieldException e) {
+                xSizeField = GuiContainer.class.getDeclaredField("xSize");
+            }
             xSizeField.setAccessible(true);
         } catch (NoSuchFieldException e) {
             throw new RuntimeException(e);

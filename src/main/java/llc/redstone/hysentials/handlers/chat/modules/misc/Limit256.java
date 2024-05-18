@@ -37,6 +37,7 @@ public class Limit256 {
             return;
         }
 
+
         if (e.gui instanceof GuiChat && BUtils.isHypixelOrSBX()) {
             if (!ChatConfig.chatLimit256) return;
             e.setCanceled(true);

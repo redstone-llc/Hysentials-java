@@ -11,6 +11,14 @@ import cc.polyfrost.oneconfig.config.data.ModType;
 import java.io.File;
 
 public class HousingConfig extends Config {
+    // General
+    @Switch(
+        name = "Fancy visit menu",
+        category = "Housing",
+        subcategory = "General",
+        description = "Enables the fancy visit menu."
+    )
+    public static boolean fancyVisitMenu = true;
     // HTSL
     @Checkbox(
         name = "HTSL Enabled",
