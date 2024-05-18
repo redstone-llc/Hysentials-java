@@ -35,3 +35,8 @@ jobs:
     - run: chmod +x ./gradlew
     - name: Build with Gradle
       run: ./gradlew remapJar
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: hysentials-artifacts
+        path: build/libs/
