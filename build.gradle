@@ -144,11 +144,12 @@ jar {
             "TweakOrder": "0",
             'TweakClass': "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker"
     )
-    //set the destination directory to be the desktop for easy testing
 }
 
 remapJar {
-    archiveFileName.set("${mod_name}-${mod_version}.jar")
+    doLast {
+        delete jar.archiveFile
+    }
 }
 
 publishing {

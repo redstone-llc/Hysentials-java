@@ -3,6 +3,8 @@ package llc.redstone.hysentials.guis.utils;
 import cc.polyfrost.oneconfig.hud.Hud;
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack;
 import llc.redstone.hysentials.config.EditorConfig;
+import llc.redstone.hysentials.config.HysentialsConfig;
+import llc.redstone.hysentials.config.hysentialmods.ScorebarsConfig;
 import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
 import net.minecraft.client.renderer.GlStateManager;
 
@@ -17,6 +19,16 @@ public class SBBoxesHud extends Hud {
         box.setDisplay(box.getText());
     }
 
+    @Override
+    protected void preRender(boolean example) {
+        if (box == null) {
+            return;
+        }
+
+        if (!example) {
+            position.setPosition(box.getX(), box.getY());
+        }
+    }
 
     @Override
     public void draw(UMatrixStack matrices, float x, float y, float scale, boolean example) {
@@ -30,17 +42,18 @@ public class SBBoxesHud extends Hud {
 
     public void mouseClick(GuiMouseClickEvent event) {
         // This is a custom method that is called when the mouse is clicked on the HUD
+        // Only happens when the right mouse button is clicked
         new EditorConfig(box).openGuI();
     }
 
     @Override
     protected boolean shouldShow() {
-        return super.shouldShow() && box.canRender();
+        return super.shouldShow() && box.canRender() && ScorebarsConfig.scoreboardBoxes;
     }
 
     @Override
     public boolean isEnabled() {
-        return box.canRender();
+        return box.canRender() && ScorebarsConfig.scoreboardBoxes;
     }
 
     @Override

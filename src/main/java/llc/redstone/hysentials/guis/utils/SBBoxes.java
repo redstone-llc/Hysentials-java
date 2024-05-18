@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 public class SBBoxes {
     public static List<SBBoxes> boxes = new ArrayList<>();
-    public static List<SBBoxesHud> huds = new ArrayList<>();
     public transient Position position;
     private transient String display = "";
     @SerializedName("display")
