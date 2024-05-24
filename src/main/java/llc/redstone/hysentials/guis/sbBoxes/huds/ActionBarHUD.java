@@ -75,9 +75,9 @@ public class ActionBarHUD extends SBBoxesTextHud {
         int style = this.cornerType;
         switch (style) {
             case 0: {
-                GlStateManager.pushMatrix();
-                Renderer.drawRect(bgColor, x, y, width, height);
-                GlStateManager.popMatrix();
+                NanoVGHelper.INSTANCE.setupAndDraw(true, (vg) -> {
+                    NanoVGHelper.INSTANCE.drawRect(vg, x, y, width, height, bgColor);
+                });
                 break;
             }
             case 1: {
@@ -89,25 +89,11 @@ public class ActionBarHUD extends SBBoxesTextHud {
                 break;
             }
             case 2: {
-                GlStateManager.pushMatrix();
-                if (this.shadow) {
-                    SbbRenderer.drawBox(x, y, width, height, this.bgColor, this.shadowColor, (int) this.cornerRadius);
-                } else {
-                    SbbRenderer.drawBox(x, y, width, height, this.bgColor, false, (int) this.cornerRadius);
-                }
-                GlStateManager.popMatrix();
+                NanoVGHelper.INSTANCE.setupAndDraw(true, (vg) -> {
+                    SbbRenderer.drawBox(vg, x, y, width, height, this.bgColor, this.shadow, (int) this.cornerRadius);
+                });
             }
         }
-    }
-
-    @Override
-    protected float getHeight(float scale, boolean example) {
-        return super.getHeight(scale, example) + 5 * scale;
-    }
-
-    @Override
-    protected float getWidth(float scale, boolean example) {
-        return super.getWidth(scale, example) + 10 * scale;
     }
 
     @Override

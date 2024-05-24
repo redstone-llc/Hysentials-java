@@ -54,6 +54,14 @@ public class ChatConfig extends Config {
         placeholder = ":partyprefix: "
     )
     public static String partyPrefix = ":partyprefix: ";
+    @Text(
+        name = "Party Chat Color",
+        description = "The color for all party chat messages.",
+        category = "Party",
+        subcategory = "General",
+        placeholder = "<#c0def5>"
+    )
+    public static String partyChatColor = "<#c0def5>";
 
     @Switch(
         name = "Hide Lines",
@@ -87,6 +95,15 @@ public class ChatConfig extends Config {
         placeholder = ":guild: "
     )
     public static String guildPrefix = ":guild: ";
+
+    @Text(
+        name = "Guild Chat Color",
+        description = "The color for all guild chat messages.",
+        category = "Guild",
+        subcategory = "General",
+        placeholder = "<#c6f5c0>"
+    )
+    public static String guildChatColor = "<#c6f5c0>";
 
     @Switch(
         name = "Player Guild Chat Prefix",

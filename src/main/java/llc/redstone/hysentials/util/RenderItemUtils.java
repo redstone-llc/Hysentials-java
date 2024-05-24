@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.util;
 
 import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
@@ -15,6 +16,7 @@ public class RenderItemUtils {
         if (hotbar && !FormattingConfig.showInHotbar) return;
         if (item == null) return;
         String s = item.getDisplayName();
+        if (Minecraft.getMinecraft().fontRendererObj.getStringWidth(s) == 0) return; //Don't render if the string is empty or its supposed to be hidden
         String hex = ImageIconRenderer.getHexFromString(s, true);
         if (hex == null || hex.isEmpty()) {
             return;

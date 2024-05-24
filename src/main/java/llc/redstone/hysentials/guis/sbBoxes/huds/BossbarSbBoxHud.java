@@ -123,7 +123,7 @@ public class BossbarSbBoxHud extends SBBoxesTextHud {
     protected float getWidth(float scale, boolean example) {
         float textWidth = this.renderText ? UMinecraft.getFontRenderer().getStringWidth(getText(example)) : 0.0f;
         float healthWidth = this.renderHealth ? BAR_WIDTH : 0.0f;
-        return Math.max(textWidth, healthWidth) * scale + 10f * scale;
+        return Math.max(textWidth, healthWidth) * scale + paddingX * scale * 2;
     }
 
     @Override
@@ -142,6 +142,6 @@ public class BossbarSbBoxHud extends SBBoxesTextHud {
             height += 1.0F;
         }
 
-        return height * scale + 5.0F * scale;
+        return height * scale + paddingY * scale * 2;
     }
 }

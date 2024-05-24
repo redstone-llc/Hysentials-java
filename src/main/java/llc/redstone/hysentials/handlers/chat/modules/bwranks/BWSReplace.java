@@ -142,14 +142,14 @@ public class BWSReplace implements ChatReceiveModule {
                                 HypixelRanks r = (HypixelRanks) replacement[1];
                                 hRank = r;
                                 if (uuidBold == null) uuidBold = user.getValue();
-                                s = s.replace(m1.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":" + italic(uuidBold) + bold(uuidBold));
+                                s = s.replace(m1.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]: ", r.getChat() + ":" + italic(uuidBold) + bold(uuidBold));
                             }
                             if (m2.find(0)) {
                                 Object[] replacement = getReplacement("§7", name, uuid, LocrawUtil.INSTANCE.getLocrawInfo().getGameType().equals(LocrawInfo.GameType.SKYBLOCK), false);
                                 HypixelRanks r = (HypixelRanks) replacement[1];
                                 hRank = r;
                                 if (uuidBold == null) uuidBold = user.getValue();
-                                s = s.replace(m2.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]:", r.getChat() + ":" + italic(uuidBold) + bold(uuidBold));
+                                s = s.replace(m2.group(0), "§f" + replacement[0].toString()).replaceAll("§[7f]: ", r.getChat() + ":" + italic(uuidBold) + bold(uuidBold));
                             }
                         }
                     }

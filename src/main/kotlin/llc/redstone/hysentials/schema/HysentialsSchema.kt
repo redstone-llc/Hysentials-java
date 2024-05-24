@@ -284,11 +284,28 @@ class HysentialsSchema {
         @Transient var socket: WebSocket? = null,
         @Transient var cache: User? = null,
     ) {
-        fun sendWithAuth(method: String, data: JsonObject) {
-            data.add("method", JsonPrimitive(method))
-            data.add("serverId", JsonPrimitive(serverId))
-            data.add("uuid", JsonPrimitive(uuid))
+        companion object {
+            fun deserialize(obj: JsonObject): AuthUser {
+                return AuthUser(
+                    obj["username"].asString,
+                    obj["authenticated"].asBoolean,
+                    obj["uuid"].asString,
+                    obj["id"].asString,
+                    obj["serverId"].asString,
+                )
+            }
+        }
+        fun sendWithAuth(method: String, data: JSONObject) {
+            data.put("method", method)
+            data.put("serverId", serverId)
+            data.put("uuid", uuid)
             socket?.sendText(data.toString())
+        }
+
+        fun sendWithAuth(method: String, key: String, value: Any) {
+            val data = JSONObject()
+            data.put(key, value)
+            sendWithAuth(method, data)
         }
     }
 

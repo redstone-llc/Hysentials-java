@@ -1,9 +1,6 @@
 package llc.redstone.hysentials.handlers.misc;
 
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import llc.redstone.hysentials.event.CancellableEvent;
 import net.hypixel.modapi.HypixelModAPI;
 import net.hypixel.modapi.serializer.PacketSerializer;
@@ -18,6 +15,7 @@ public class PacketRecievedHandler {
         event.manager.channel().pipeline().addBefore("packet_handler", "hysentials_mod_api_packet_handler", HypixelPacketHandler.INSTANCE);
     }
 
+    @ChannelHandler.Sharable
     public static class HypixelPacketHandler extends SimpleChannelInboundHandler<Packet<?>>{
         private static final HypixelPacketHandler INSTANCE = new HypixelPacketHandler();
 

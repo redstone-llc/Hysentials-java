@@ -156,7 +156,11 @@ public class PartyFormatter {
                 prefix = BwRanksUtils.getReplace(partyMatcher.group(1), name, null);
             }
             String mes = partyMatcher.group(3);
-            UChat.chat(prefix() + "&9" + prefix + name + (FormattingConfig.hexRendering() ? "<#c0def5>" : "&f") + ": " + MessageFormatter.replaceWhite(mes, "<#c0def5>"));
+            String color = ChatConfig.partyChatColor;
+            if (color.equals("<#c0def5>") && !FormattingConfig.hexRendering()) {
+                color = "&f";
+            }
+            UChat.chat(prefix() + "&9" + prefix + name + color + ": " + MessageFormatter.replaceWhite(mes, color));
 
             return true;
         }

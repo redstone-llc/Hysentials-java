@@ -109,12 +109,12 @@ public abstract class SBBoxesTextHud extends Hud{
         for (String line : text.split("\n")) {
             width = Math.max(width, getLineWidth(line, scale));
         }
-        return width;
+        return width + paddingX * scale * 2;
     }
 
     @Override
     protected float getHeight(float scale, boolean example) {
-        return text == null ? 0 : (text.split("\n").length * 12 - 4) * scale;
+        return text == null ? 0 : (text.split("\n").length * 12 - 4) * scale + paddingY * scale * 2;
     }
 
     protected abstract String getText(boolean example);
@@ -170,4 +170,19 @@ public abstract class SBBoxesTextHud extends Hud{
         options = {"No Shadow", "Shadow", "Full Shadow"}
     )
     protected int textType = 0;
+
+    @Slider(
+        name = "X-Padding",
+        description = "The horizontal padding of the HUD.",
+        min = 0,
+        max = 10
+    )
+    protected float paddingX = 5f;
+    @Slider(
+        name = "Y-Padding",
+        description = "The Vertical padding of the HUD.",
+        min = 0,
+        max = 10
+    )
+    protected float paddingY = 2.5f;
 }

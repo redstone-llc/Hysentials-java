@@ -9,12 +9,16 @@ import llc.redstone.hysentials.websocket.Socket
 class UpdateCache: Channel("data") {
     val jsonParser: JsonParser = JsonParser()
     override fun onReceive(obj: JsonObject) {
+        val authUserData = obj["user"].asJsonObject
         val userData = obj["data"].asJsonObject
         val serverData = obj["server"].asJsonObject
         val onlineUsers = obj["users"].asJsonArray
         val groups = obj["groups"].asJsonArray
 
+        Socket.user = HysentialsSchema.AuthUser.deserialize(authUserData)
+        Socket.user.socket = Socket.CLIENT
         Socket.cachedUser = HysentialsSchema.User.deserialize(userData)
+        Socket.user.cache = Socket.cachedUser
         Socket.cachedServerData = HysentialsSchema.ServerData.deserialize(serverData)
         Socket.cachedUsers.clear()
         Socket.cachedGroups.clear()

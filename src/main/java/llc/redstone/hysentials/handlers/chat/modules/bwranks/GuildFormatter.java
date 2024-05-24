@@ -37,7 +37,10 @@ public class GuildFormatter {
                 String tag = (ChatConfig.guildChatSuffix ? m.group(3) : "");
                 String message = m.group(4);
 
-                String hex = (FormattingConfig.hexRendering()) ? "<#c6f5c0>" : "";
+                String hex = ChatConfig.guildChatColor;
+                if (hex.equals("<#c6f5c0>") && !FormattingConfig.hexRendering()) {
+                    hex = "";
+                }
                 if (ChatConfig.guildChatPrefix) {
                     UChat.chat(prefix() + "&2" + BwRanksUtils.getReplace(prefix, name, null) + tag + hex + ": " + message);
                 } else {

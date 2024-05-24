@@ -93,7 +93,7 @@ public class HousingScoreboard {
             }
             newText += newCharacter;
         }
-        return C.removeColor(newText);
+        return newText;
     }
 
     public String removePrefix(String text) {

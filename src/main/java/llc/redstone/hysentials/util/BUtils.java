@@ -1,12 +1,15 @@
 package llc.redstone.hysentials.util;
 
 import cc.polyfrost.oneconfig.platform.Platform;
+import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
+import llc.redstone.hysentials.handlers.redworks.BwRanks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 public class BUtils {
     public static int randomInt(int min, int max) {
@@ -101,5 +104,29 @@ public class BUtils {
             }
         }
         return jsonObject;
+    }
+
+    public static String replaceFancyFormatting(String input) {
+        if (input == null) return null;
+        if (!FormattingConfig.fancyRendering()) return input;
+
+        //Start with hypixel ranks
+        for (HypixelRanks rank : HypixelRanks.values()) {
+            Pattern pattern = Pattern.compile(rank.getAsPlaceholder() + rank.getNametag());
+            if (pattern.matcher(input).find()) {
+                input = pattern.matcher(input).replaceAll(rank.getPrefixReplace());
+                input = input.replaceAll(rank.getChat(), "");
+            }
+        }
+
+        //Then rs ranks
+        for (BlockWAPIUtils.Rank rank : BlockWAPIUtils.Rank.values()) {
+            Pattern pattern = Pattern.compile(rank.getPlaceholder() + rank.getNametagColor());
+            if (pattern.matcher(input).find()) {
+                input = pattern.matcher(input).replaceAll(rank.getPrefix());
+                input = input.replaceAll(rank.getChatColor(), "");
+            }
+        }
+        return input;
     }
 }

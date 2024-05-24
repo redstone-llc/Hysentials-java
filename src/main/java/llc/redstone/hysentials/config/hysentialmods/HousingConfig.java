@@ -74,6 +74,14 @@ public class HousingConfig extends Config {
     public static boolean housingNameScoreboard = true;
 
     @Switch(
+        name = "Housing Name Colors",
+        category = "Housing",
+        subcategory = "General",
+        description = "Adds color to the housing name in the scoreboards title."
+    )
+    public static boolean housingNameColors = true;
+
+    @Switch(
         name = "Shift+Right Click OpenInv",
         category = "Housing",
         subcategory = "General",

@@ -2,6 +2,7 @@ package llc.redstone.hysentials.handlers.sbb;
 
 import llc.redstone.hysentials.config.hysentialmods.HousingConfig;
 import llc.redstone.hysentials.config.hysentialmods.ScorebarsConfig;
+import llc.redstone.hysentials.util.C;
 import llc.redstone.hysentials.util.Renderer;
 import llc.redstone.hysentials.util.ScoreboardWrapper;
 import net.minecraft.client.Minecraft;
@@ -10,6 +11,8 @@ import net.minecraftforge.client.GuiIngameForge;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static llc.redstone.hysentials.handlers.sbb.SbbRenderer.housingScoreboard;
 
 public class Scoreboard {
     public static void scoreboard() {
@@ -30,9 +33,13 @@ public class Scoreboard {
 //        Collections.reverse(lines);
         if (lines.size() == 0) return;
         String title = ScoreboardWrapper.getTitle();
-        String housingName = SbbRenderer.housingScoreboard.getHousingName();
+        String housingName = housingScoreboard.getHousingName();
         if (housingName != null && HousingConfig.housingNameScoreboard) {
-            title = "§e§l" + SbbRenderer.housingScoreboard.removeFormatting(housingName).toUpperCase();
+            if (HousingConfig.housingNameColors) {
+                title = "§e" + housingScoreboard.removeFormatting(housingName).toUpperCase();
+            } else {
+                title = "§e§l" + C.removeColor(housingScoreboard.removeFormatting(housingName).toUpperCase());
+            }
         }
         int titleWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(title);
         int width = Math.max(titleWidth, formattedLines.stream()

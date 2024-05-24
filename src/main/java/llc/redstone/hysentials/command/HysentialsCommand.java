@@ -4,6 +4,7 @@ import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
+import com.google.gson.JsonArray;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.HysentialsUtilsKt;
 import llc.redstone.hysentials.config.HysentialsConfig;
@@ -147,6 +148,17 @@ public class HysentialsCommand extends CommandBase {
                 break;
             }
 
+            case "leaderboard": {
+                //Types levels, quests, emeralds, settings
+                if (args.length > 1) {
+                    String[] newArgs = Arrays.copyOfRange(args, 2, args.length);
+                    handleLeaderboard(args[1], newArgs);
+                } else {
+                    UChat.chat(HysentialsConfig.chatPrefix + " §cYou must specify a type! Use /hysentials leaderboard <type> for a list of types.");
+                }
+                break;
+            }
+
             case "phone":
             case "menu": {
                 UChat.chat(HysentialsConfig.chatPrefix + " §cComing soon!");
@@ -193,6 +205,94 @@ public class HysentialsCommand extends CommandBase {
         }
     }
 
+    public static void handleLeaderboard(String command, String[] args) {
+        switch (command) {
+            case "levels": {
+                Socket.user.sendWithAuth(
+                    "leaderboardLookup",
+                    "type", "levels"
+                );
+                Socket.awaiting.add(new DuoVariable<>("leaderboardLookup", HysentialsCommand::handleLeaderboardJson));
+                break;
+            }
+//            case "quests": { Coming at some point
+//                break;
+//            }
+            case "emeralds": {
+                Socket.user.sendWithAuth(
+                    "leaderboardLookup",
+                    "type", "emeralds"
+                );
+                Socket.awaiting.add(new DuoVariable<>("leaderboardLookup", HysentialsCommand::handleLeaderboardJson));
+                break;
+            }
+            case "settings": {
+                if (args.length < 2) {
+                    UChat.chat(HysentialsConfig.chatPrefix + " §cYou must specify a setting to set! Use /hysentials leaderboard settings <setting> <value>");
+                    UChat.chat("§c         - hide <true/false> (Hides you from the leaderboard)");
+                    return;
+                }
+                switch (args[1]) {
+                    case "hide": {
+                        if (args.length < 3) {
+                            UChat.chat(HysentialsConfig.chatPrefix + " §cYou must specify a value to set! Use /hysentials leaderboard settings hide <true/false>");
+                            return;
+                        }
+                        boolean hide = Boolean.parseBoolean(args[2]);
+                        Socket.user.sendWithAuth(
+                            "leaderboardSettings",
+                            new JSONObject().put("hide", hide)
+                        );
+                        UChat.chat(HysentialsConfig.chatPrefix + " §aSuccessfully set leaderboard setting!");
+                        break;
+                    }
+                    default: {
+                        UChat.chat(HysentialsConfig.chatPrefix + " §cUnknown setting! Use /hysentials leaderboard settings <setting> <value>");
+                        UChat.chat("§c         - hide <true/false> (Hides you from the leaderboard)");
+                        break;
+                    }
+                }
+                break;
+            }
+            default: {
+                UChat.chat(HysentialsConfig.chatPrefix + " §cUnknown leaderboard type! Use /hysentials leaderboard <level/emeralds/settings> for a list of types.");
+                break;
+
+            }
+        }
+    }
+
+    public static void handleLeaderboardJson(JsonObject json) {
+        UTextComponent text = new UTextComponent("");
+        text.appendText("§9&m                                                           \n");
+        text.appendText(ChatLib.getCenteredText("&6Leaderboard\n"));
+        int page = 1; //Eventually this will be a variable
+        if (json.has("levels")) {
+            JsonArray levels = json.get("levels").getAsJsonArray();
+            //10 elements per page
+            int start = (page - 1) * 10;
+            int end = Math.min(start + 10, levels.size());
+            for (int i = start; i < end; i++) {
+                JsonObject obj = levels.get(i).getAsJsonObject();
+                text.appendText("&e" + (i + 1) + ". &7" + obj.get("username").getAsString() + " &8- &aLevel " + obj.get("level").getAsInt() + " &7(" + obj.get("xp").getAsInt() + " HEXP)\n");
+            }
+        } else if (json.has("emeralds")) {
+            JsonArray emeralds = json.get("emeralds").getAsJsonArray();
+            //10 elements per page
+            int start = (page - 1) * 10;
+            int end = Math.min(start + 10, emeralds.size());
+            for (int i = start; i < end; i++) {
+                JsonObject obj = emeralds.get(i).getAsJsonObject();
+                text.appendText("&e" + (i + 1) + ". &7" + obj.get("username").getAsString() + " &8- &a" + obj.get("emeralds").getAsInt() + " &7Emeralds\n");
+            }
+        }
+        if (json.get("count").getAsInt() - (page * 10) > 0) {
+            text.appendText("&eAnd " + (json.get("count").getAsInt() - (page * 10)) + " more...\n");
+        }
+        text.appendText("§9&m                                                           ");
+        text.chat();
+    }
+
     public static void handleImport(String id) {
         try {
             String codeToBeCompiled = null;
@@ -222,6 +322,13 @@ public class HysentialsCommand extends CommandBase {
     public void helpPage(int page) {
         UTextComponent text = new UTextComponent("");
         int maxPage = 3;
+        if (page > maxPage) {
+            UChat.chat(HysentialsConfig.chatPrefix + " §cInvalid page number max page number is " + maxPage + "! Use /hysentials help <page>");
+            return;
+        } else if (page < 1) {
+            UChat.chat(HysentialsConfig.chatPrefix + " §cInvalid page number min page number is 1! Use /hysentials help <page>");
+            return;
+        }
         text.appendText("§9&m                                                           \n");
         switch (page) {
             case 1: {
@@ -237,7 +344,7 @@ public class HysentialsCommand extends CommandBase {
                 text.appendText("&e/hysentials online &7- &bShows the online players.\n");
                 text.appendText("&e/hysentials menu &7- &bOpens the Hysentials menu.\n");
                 text.appendText("&e/hysentials discord &7- &bShows the discord invite link.\n");
-                text.appendText("&e/hysentials editor <file> &7- &bOpens the HTSL code editor.\n");
+                text.appendText("&e/hysentials leaderboard <level/emeralds/settings> &7- Leaderboard.\n");
                 text.appendText("§9&m                                                           ");
                 break;
             }
@@ -270,7 +377,7 @@ public class HysentialsCommand extends CommandBase {
                 text.appendText("&e/sll <line> <value> &7- &bSet lore line.\n");
                 text.appendText("&e/rename <name> &7- &bSet name on held item.\n");
                 text.appendText("&e/openinv <player> &7- &bView the held item and armor of a player.\n");
-                //2 more can be added here
+                //1 more can be added here
                 text.appendText("§9&m                                                           ");
             }
         }
@@ -427,29 +534,26 @@ public class HysentialsCommand extends CommandBase {
         }
     }
 
-    public static List<MovingObjectPosition> getMouseOverExtended(float dist)
-    {
+    public static List<MovingObjectPosition> getMouseOverExtended(float dist) {
         List<MovingObjectPosition> mopReturn = new ArrayList<>();
         Minecraft mc = FMLClientHandler.instance().getClient();
         Entity theRenderViewEntity = mc.getRenderViewEntity();
         AxisAlignedBB theViewBoundingBox = new AxisAlignedBB(
-            theRenderViewEntity.posX-0.5D,
-            theRenderViewEntity.posY-0.0D,
-            theRenderViewEntity.posZ-0.5D,
-            theRenderViewEntity.posX+0.5D,
-            theRenderViewEntity.posY+1.5D,
-            theRenderViewEntity.posZ+0.5D
+            theRenderViewEntity.posX - 0.5D,
+            theRenderViewEntity.posY - 0.0D,
+            theRenderViewEntity.posZ - 0.5D,
+            theRenderViewEntity.posX + 0.5D,
+            theRenderViewEntity.posY + 1.5D,
+            theRenderViewEntity.posZ + 0.5D
         );
         MovingObjectPosition returnMOP = null;
-        if (mc.theWorld != null)
-        {
+        if (mc.theWorld != null) {
             double var2 = dist;
             returnMOP = theRenderViewEntity.rayTrace(var2, 0);
             double calcdist = var2;
             Vec3 pos = theRenderViewEntity.getPositionEyes(0);
             var2 = calcdist;
-            if (returnMOP != null)
-            {
+            if (returnMOP != null) {
                 calcdist = returnMOP.hitVec.distanceTo(pos);
             }
 
@@ -468,34 +572,28 @@ public class HysentialsCommand extends CommandBase {
                     lookvec.zCoord * var2).expand(var9, var9, var9));
             double d = calcdist;
 
-            for (Entity entity : list)
-            {
-                if (entity.canBeCollidedWith())
-                {
+            for (Entity entity : list) {
+                if (entity.canBeCollidedWith()) {
                     float bordersize = entity.getCollisionBorderSize();
                     AxisAlignedBB aabb = new AxisAlignedBB(
-                        entity.posX-entity.width/2,
+                        entity.posX - entity.width / 2,
                         entity.posY,
-                        entity.posZ-entity.width/2,
-                        entity.posX+entity.width/2,
-                        entity.posY+entity.height,
-                        entity.posZ+entity.width/2);
+                        entity.posZ - entity.width / 2,
+                        entity.posX + entity.width / 2,
+                        entity.posY + entity.height,
+                        entity.posZ + entity.width / 2);
                     aabb.expand(bordersize, bordersize, bordersize);
                     MovingObjectPosition mop0 = aabb.calculateIntercept(pos, var8);
 
-                    if (aabb.isVecInside(pos))
-                    {
-                        if (0.0D < d || d == 0.0D)
-                        {
+                    if (aabb.isVecInside(pos)) {
+                        if (0.0D < d || d == 0.0D) {
                             mopReturn.add(new MovingObjectPosition(entity));
                             d = 0.0D;
                         }
-                    } else if (mop0 != null)
-                    {
+                    } else if (mop0 != null) {
                         double d1 = pos.distanceTo(mop0.hitVec);
 
-                        if (d1 < d || d == 0.0D)
-                        {
+                        if (d1 < d || d == 0.0D) {
                             mopReturn.add(new MovingObjectPosition(entity));
                             d = d1;
                         }

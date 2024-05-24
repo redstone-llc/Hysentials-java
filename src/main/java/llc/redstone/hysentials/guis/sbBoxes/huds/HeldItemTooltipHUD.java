@@ -127,14 +127,4 @@ public class HeldItemTooltipHUD extends SBBoxesTextHud {
         }
         return "";
     }
-
-    @Override
-    protected float getHeight(float scale, boolean example) {
-        return super.getHeight(scale, example) + 5 * scale;
-    }
-
-    @Override
-    protected float getWidth(float scale, boolean example) {
-        return super.getWidth(scale, example) + 10 * scale;
-    }
 }

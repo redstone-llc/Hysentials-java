@@ -3,6 +3,7 @@ package llc.redstone.hysentials.mixin;
 import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
 import llc.redstone.hysentials.util.C;
 import llc.redstone.hysentials.util.ImageIconRenderer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraftforge.fml.client.config.GuiUtils;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,6 +24,10 @@ public abstract class HoverTextMixin {
         int end = (0x505000FF & 0xFEFEFE) >> 1 | 0x505000FF & 0xFF000000;
         if (FormattingConfig.hoverOutlineColor && (startColor == 0x505000FF || endColor == end)) {
             String line = C.removeControlCodes(textLines.get(0)); //remove anything that doesn't effect color
+            if (Minecraft.getMinecraft().fontRendererObj.getStringWidth(line) == 0) { //If the string is empty or it should be empty (due to control codes) then draw the gradient
+                drawGradientRect(zLevel, left, top, right, bottom, startColor, endColor);
+                return;
+            }
             line = ImageIconRenderer.getHexFromString(line, true);
             if (line == null || line.isEmpty()) {
                 drawGradientRect(zLevel, left, top, right, bottom, startColor, endColor);
