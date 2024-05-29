@@ -2,28 +2,33 @@ package llc.redstone.hysentials.cosmetics.pepper;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
-import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
+import llc.redstone.hysentials.cosmetic.CosmeticManager;
 import llc.redstone.hysentials.cosmetics.AbstractCosmetic;
+import llc.redstone.hysentials.cosmetics.Cosmetic;
 import llc.redstone.hysentials.cosmetics.cubit.EntityCubit;
 import llc.redstone.hysentials.util.BUtils;
 import llc.redstone.hysentials.websocket.Socket;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
 import llc.redstone.hysentials.cosmetics.AbstractCosmetic;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class PepperCompanion extends AbstractCosmetic<EntityPepper> {
+public class PepperCompanion extends AbstractCosmetic<EntityPepper> implements Cosmetic {
     private Map<UUID, EntityPepper> peppers = new HashMap<>();
+    private PepperModel model = new PepperModel();
 
     public PepperCompanion() {
         super(false);
+        AbstractCosmetic.cosmetics.add(this);
     }
 
     @Override
@@ -33,9 +38,24 @@ public class PepperCompanion extends AbstractCosmetic<EntityPepper> {
 
     @Override
     public boolean canUse(EntityPlayer player) {
-        return CosmeticUtilsKt.equippedCosmetic(player.getUniqueID(), "pepper")
-            && CosmeticUtilsKt.hasCosmetic(player.getUniqueID(), "pepper")
+        return CosmeticManager.equippedCosmetic(player.getUniqueID(), "pepper")
+            && CosmeticManager.hasCosmetic(player.getUniqueID(), "pepper")
             && !player.isInvisible();
+    }
+
+    @Override
+    public ModelBase getModel() {
+        return model;
+    }
+
+    @Override
+    public ResourceLocation getTexture() {
+        return new ResourceLocation("hysentials:pets/pepper.png");
+    }
+
+    @Override
+    public String getName() {
+        return "pepper";
     }
 
     public static long cooldown = 0;

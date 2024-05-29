@@ -7,7 +7,7 @@ import cc.polyfrost.oneconfig.utils.Multithreading
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil
 import com.google.common.collect.Lists
 import llc.redstone.hysentials.Hysentials
-import llc.redstone.hysentials.cosmetic.getEquippedCosmetics
+import llc.redstone.hysentials.cosmetic.CosmeticManager.getEquippedCosmetics
 import llc.redstone.hysentials.guis.misc.HysentialsLevel
 import llc.redstone.hysentials.handlers.lobby.TabChanger
 import llc.redstone.hysentials.handlers.redworks.BwRanksUtils

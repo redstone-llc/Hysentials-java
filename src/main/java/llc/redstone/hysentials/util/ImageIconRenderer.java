@@ -1,7 +1,7 @@
 package llc.redstone.hysentials.util;
 
 import llc.redstone.hysentials.Hysentials;
-import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
+import llc.redstone.hysentials.cosmetic.CosmeticManager;
 import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
 import llc.redstone.hysentials.hook.FontRendererAcessor;
 import com.ibm.icu.text.ArabicShaping;
@@ -368,7 +368,7 @@ public class ImageIconRenderer extends FontRenderer {
                                     int height = icon.getHeight();
                                     float scaledHeight = (float) 9 / height;
                                     int scaledWidth = (int) (width * scaledHeight);
-                                    if (icon.emoji && uuid != null && CosmeticUtilsKt.hasCosmetic(uuid, "hymojis")) {
+                                    if (icon.emoji && uuid != null && CosmeticManager.hasCosmetic(uuid, "hymojis")) {
                                         j += str.length() + 1;
                                         i += scaledWidth;
                                         continue;

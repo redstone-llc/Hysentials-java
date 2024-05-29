@@ -2,8 +2,9 @@ package llc.redstone.hysentials.cosmetics.cubit;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
-import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
+import llc.redstone.hysentials.cosmetic.CosmeticManager;
 import llc.redstone.hysentials.cosmetics.AbstractCosmetic;
+import llc.redstone.hysentials.cosmetics.Cosmetic;
 import llc.redstone.hysentials.util.BUtils;
 import llc.redstone.hysentials.websocket.Socket;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
@@ -11,20 +12,26 @@ import llc.redstone.hysentials.cosmetics.AbstractCosmetic;
 import llc.redstone.hysentials.util.BUtils;
 import llc.redstone.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.client.renderer.EntityRenderer;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class CubitCompanion extends AbstractCosmetic<EntityCubit> {
+public class CubitCompanion extends AbstractCosmetic<EntityCubit> implements Cosmetic {
     private Map<UUID, EntityCubit> cubits = new HashMap<>();
+    private CubitModel model = new CubitModel();
 
     public CubitCompanion() {
         super(false);
+        AbstractCosmetic.cosmetics.add(this);
     }
 
     @Override
@@ -34,9 +41,24 @@ public class CubitCompanion extends AbstractCosmetic<EntityCubit> {
 
     @Override
     public boolean canUse(EntityPlayer player) {
-        return CosmeticUtilsKt.equippedCosmetic(player.getUniqueID(), "cubit")
-            && CosmeticUtilsKt.hasCosmetic(player.getUniqueID(), "cubit")
+        return CosmeticManager.equippedCosmetic(player.getUniqueID(), "cubit")
+            && CosmeticManager.hasCosmetic(player.getUniqueID(), "cubit")
             && !player.isInvisible();
+    }
+
+    @Override
+    public ModelBase getModel() {
+        return model;
+    }
+
+    @Override
+    public ResourceLocation getTexture() {
+        return new ResourceLocation("hysentials:pets/cubit.png");
+    }
+
+    @Override
+    public String getName() {
+        return "cubit";
     }
 
     public static long cooldown = 0;

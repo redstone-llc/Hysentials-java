@@ -12,6 +12,17 @@ import llc.redstone.hysentials.util.*
 import llc.redstone.hysentials.utils.splitToWords
 import llc.redstone.hysentials.websocket.Socket
 import com.google.common.collect.Lists
+import llc.redstone.hysentials.cosmetic.CosmeticManager.drawSlot
+import llc.redstone.hysentials.cosmetic.CosmeticManager.equipCosmetic
+import llc.redstone.hysentials.cosmetic.CosmeticManager.equippedCosmetic
+import llc.redstone.hysentials.cosmetic.CosmeticManager.getOwnedCosmetics
+import llc.redstone.hysentials.cosmetic.CosmeticManager.hasCosmetic
+import llc.redstone.hysentials.cosmetic.CosmeticManager.indexFromRarity
+import llc.redstone.hysentials.cosmetic.CosmeticManager.purchaseCosmetic
+import llc.redstone.hysentials.cosmetic.CosmeticManager.tabFromType
+import llc.redstone.hysentials.cosmetic.CosmeticManager.unEquipCosmetic
+import llc.redstone.hysentials.cosmetic.CosmeticManager.updateCosmetics
+import llc.redstone.hysentials.cosmetic.CosmeticTab.Companion.tabs
 import llc.redstone.hysentials.utils.drawEntityOnScreen
 import net.minecraft.client.Minecraft
 import net.minecraft.client.audio.PositionedSoundRecord
@@ -38,26 +49,6 @@ open class CosmeticGui : UScreen(), HysentialsGui {
         var type: String = "owned"
         var inventorySlots: ArrayList<Slot> = Lists.newArrayList()
         var paginationList: PaginationList<HysentialsSchema.Cosmetic>? = null
-
-        var ownedTabReal = CosmeticTab("owned", "Owned", ResourceLocation("hysentials:gui/wardrobe/tab/owned.png"), "32a852", 10.0, 10.0, 5.0, 4.0)
-        var headTabReal = CosmeticTab("head", "Headwear", ResourceLocation("hysentials:gui/wardrobe/tab/headwear.png"), "1787e3", 9.0, 10.0, 5.0, 22.0)
-        var backTabReal = CosmeticTab("back", "Chestwear", ResourceLocation("hysentials:gui/wardrobe/tab/chestwear.png"), "e69927", 9.0, 9.0, 5.0, 38.0)
-        var pantaloonsTabReal = CosmeticTab("pantaloons", "Pantaloons", ResourceLocation("hysentials:gui/wardrobe/tab/pantaloons.png"), "8327e6", 9.0, 11.0, 5.0, 53.0)
-        var bootsTabReal = CosmeticTab("boots", "Boots", ResourceLocation("hysentials:gui/wardrobe/tab/boots.png"), "ea323b", 11.0, 7.0, 4.0, 70.0)
-        var petsTabReal = CosmeticTab("pet", "Pets", ResourceLocation("hysentials:gui/wardrobe/tab/pets.png"), "e4ea32", 9.0, 10.0, 5.0, 83.0)
-        var chatTabReal = CosmeticTab("chat", "Chatbox", ResourceLocation("hysentials:gui/wardrobe/tab/chatbox.png"), "32eade", 9.0, 7.0, 5.0, 99.0)
-        var bundlesTabReal = CosmeticTab("bundle", "Bundles", ResourceLocation("hysentials:gui/wardrobe/tab/bundles.png"), "e832e6", 9.0, 10.0, 5.0, 112.0)
-
-        var tabs = listOf(
-            ownedTabReal,
-            headTabReal,
-            backTabReal,
-            pantaloonsTabReal,
-            bootsTabReal,
-            petsTabReal,
-            chatTabReal,
-            bundlesTabReal
-        )
     }
 
     var xSize = 290
@@ -76,6 +67,8 @@ open class CosmeticGui : UScreen(), HysentialsGui {
 
     var focused: Boolean = false
     var blinkTimer: Int = 0
+    var hoverTimer: Int = 0
+    var currentHover: Int = -1
 
     val input: Input = Input(0, 0, 0, 0).let {
         it.setEnabled(true)
@@ -108,23 +101,17 @@ open class CosmeticGui : UScreen(), HysentialsGui {
             }
         }
         try {
-            if (HysentialsConfig.wardrobeDarkMode) {
-                Renderer.drawImage(cosmeticBackground, guiLeft.toDouble(), guiTop.toDouble(), xSize.toDouble(), ySize.toDouble())
-            } else {
-                Renderer.drawImage(lightBackground, guiLeft.toDouble(), guiTop.toDouble(), xSize.toDouble(), ySize.toDouble())
-            }
+            // Draw the background (dark and light)
+            Renderer.drawImage(if (HysentialsConfig.wardrobeDarkMode) cosmeticBackground else lightBackground, guiLeft.toDouble(), guiTop.toDouble(), xSize.toDouble(), ySize.toDouble())
 
             val emerald = Socket.cachedUser?.emeralds ?: 0
-
-
             for (tab in tabs) {
                 tab.draw(guiLeft, guiTop)
             }
-
+            // Draw the selected tab
             val typeFinal = tabFromType(type)?.displayName ?: "Owned"
             mcFive.drawStringShadow(" > ${typeFinal.splitToWords().uppercase()} ($page/$maxPage)", guiLeft + 71f, guiTop + 5f, 0xFFFFFF)
-
-
+            // Draw the emerald count
             var largeFormat = DecimalFormat("#,###")
             mcFive.drawStringShadow(" ${largeFormat.format(emerald)}", guiLeft + 71f, guiTop + 149f, 0x55FF55)
 
@@ -132,10 +119,15 @@ open class CosmeticGui : UScreen(), HysentialsGui {
             GlStateManager.enableDepth()
             RenderHelper.enableStandardItemLighting()
             GlStateManager.enableRescaleNormal()
+            //Draw player entity
             drawEntityOnScreen(guiLeft + 256, guiTop + 124, 40, xAngle, -yAngle, mc.thePlayer)
 
             for (slot in inventorySlots) {
-                drawSlot(slot, mouseX, mouseY, partialTicks)
+                val page = paginationList!!.getPage(CosmeticGui.page)
+                if (page.size > slot.slotIndex) {
+                    val cosmetic = page[slot.slotIndex]
+                    drawSlot(slot, cosmetic)
+                }
                 if (getSlot(
                         mouseX.toFloat() - guiLeft,
                         mouseY.toFloat() - guiTop
@@ -168,6 +160,22 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 }
 
                 this.drawHoveringText(list, mouseX, mouseY, fontRenderer)
+//                val page = paginationList!!.getPage(CosmeticGui.page)
+//                if (page.size > theSlot!!.slotIndex) {
+//                    val cosmetic = page[theSlot!!.slotIndex]
+//                    if (currentHover == -1) {
+//                        currentHover = theSlot!!.slotIndex
+//                        hoverTimer = 0
+//                    } else if (currentHover == theSlot!!.slotIndex) {
+//                        hoverTimer++
+//                        if (hoverTimer >= 200) {
+//                            cosmetic.renderPreview(mouseX, mouseY, hoverTimer - 200)
+//                        }
+//                    } else {
+//                        currentHover = theSlot!!.slotIndex
+//                        hoverTimer = 0
+//                    }
+//                }
             }
 
             var rX = mouseX.toFloat() - guiLeft
@@ -308,23 +316,22 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 val uuid = Minecraft.getMinecraft().thePlayer.uniqueID
                 val emerald = Socket.cachedUser?.emeralds ?: 0
                 if (equippedCosmetic(uuid, cosmeticName) && hasCosmetic(uuid, cosmeticName)) {
-                    Hysentials.INSTANCE.cosmeticManager.unEquipCosmetic(cosmeticName) {
-                        if (!(JSONObject(it)["success"] as Boolean)) return@unEquipCosmetic
-                        initScreen(width, height)
-                    }
+                    unEquipCosmetic(cosmeticName)
+                    initScreen(width, height)
                 } else if (hasCosmetic(uuid, cosmeticName)) {
-                    Hysentials.INSTANCE.cosmeticManager.equipCosmetic(cosmeticName) {
-                        if (!(JSONObject(it)["success"] as Boolean)) return@equipCosmetic
-                        initScreen(width, height)
-                    }
+                    equipCosmetic(cosmeticName)
+                    initScreen(width, height)
                 } else if (!hasCosmetic(uuid, cosmeticName) && emerald >= cosmetic.cost) {
-                    Hysentials.INSTANCE.cosmeticManager.purchaseCosmetic(cosmeticName) {
-                        if (!(JSONObject(it)["success"] as Boolean)) return@purchaseCosmetic
-                        initScreen(width, height)
-                    }
+                    purchaseCosmetic(cosmeticName)
+                    initScreen(width, height)
                 }
             }
         }
+    }
+
+    override fun onScreenClose() {
+        super.onScreenClose()
+        updateCosmetics()
     }
 
     override fun onMouseReleased(mouseX: Double, mouseY: Double, state: Int) {

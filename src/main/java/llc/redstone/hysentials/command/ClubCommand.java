@@ -250,18 +250,20 @@ public class ClubCommand {
             UChat.chat("&cYou must be linked to a Discord account to use this feature.");
             return;
         }
-        try {
-            String s = NetworkUtils.getString(getHYSENTIALS_API() + "/club?uuid="
-                + Minecraft.getMinecraft().getSession().getProfile().getId().toString()
-                + "&key=" + Socket.serverId);
-            JsonObject clubData = new JsonParser().parse(s).getAsJsonObject();
-            if (!clubData.get("success").getAsBoolean()) {
-                UChat.chat(HysentialsConfig.chatPrefix + " &c" + clubData.get("message").getAsString());
-                return;
+        Multithreading.runAsync(() -> {
+            try {
+                String s = NetworkUtils.getString(getHYSENTIALS_API() + "/club?uuid="
+                    + Minecraft.getMinecraft().getSession().getProfile().getId().toString()
+                    + "&key=" + Socket.serverId);
+                JsonObject clubData = new JsonParser().parse(s).getAsJsonObject();
+                if (!clubData.get("success").getAsBoolean()) {
+                    UChat.chat(HysentialsConfig.chatPrefix + " &c" + clubData.get("message").getAsString());
+                    return;
+                }
+                new ClubDashboard(clubData).open(Minecraft.getMinecraft().thePlayer);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            new ClubDashboard(clubData).open(Minecraft.getMinecraft().thePlayer);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 }

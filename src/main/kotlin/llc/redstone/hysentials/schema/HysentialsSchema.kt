@@ -5,13 +5,16 @@ import com.google.gson.JsonPrimitive
 import com.neovisionaries.ws.client.WebSocket
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import llc.redstone.hysentials.cosmetic.colorFromRarity
-import llc.redstone.hysentials.cosmetic.equippedCosmetic
-import llc.redstone.hysentials.cosmetic.hasCosmetic
+import llc.redstone.hysentials.cosmetic.CosmeticManager.colorFromRarity
+import llc.redstone.hysentials.cosmetic.CosmeticManager.equippedCosmetic
+import llc.redstone.hysentials.cosmetic.CosmeticManager.hasCosmetic
+import llc.redstone.hysentials.cosmetics.AbstractCosmetic
+import llc.redstone.hysentials.cosmetics.Cosmetic
 import llc.redstone.hysentials.guis.container.GuiItem
 import llc.redstone.hysentials.util.Material
 import llc.redstone.hysentials.utils.formatCapitalize
 import llc.redstone.hysentials.websocket.Socket
+import net.minecraft.client.model.ModelBase
 import net.minecraft.item.ItemStack
 import org.json.JSONArray
 import org.json.JSONObject
@@ -50,10 +53,10 @@ class HysentialsSchema {
                     obj["firstJoin"].asDouble,
                     obj["lastJoin"].asDouble,
                     obj["rank"].asString,
-                    obj["hasPlus"]?.asBoolean?: false,
-                    obj["online"]?.asBoolean?: false,
-                    obj["isBoosting"]?.asBoolean?: false,
-                    obj["isEarlySupporter"]?.asBoolean?: false,
+                    obj["hasPlus"]?.asBoolean ?: false,
+                    obj["online"]?.asBoolean ?: false,
+                    obj["isBoosting"]?.asBoolean ?: false,
+                    obj["isEarlySupporter"]?.asBoolean ?: false,
                     obj["emeralds"]?.asInt ?: 0,
                     obj["exp"].asInt,
                     obj["givenLevel"].asInt,
@@ -103,10 +106,11 @@ class HysentialsSchema {
         var material: String?,
         var skullOwner: String? = null,
         @Transient var item: ItemStack? = null,
+        @Transient var cosmeticModel: llc.redstone.hysentials.cosmetics.Cosmetic? = null,
     ) {
         companion object {
             fun deserialize(obj: JsonObject): Cosmetic {
-                return Cosmetic(
+                val cos = Cosmetic(
                     obj["name"].asString,
                     obj["displayName"].asString,
                     obj["users"].asJsonArray.map { it.asString }.toCollection(ArrayList()),
@@ -124,6 +128,13 @@ class HysentialsSchema {
                     obj["material"]?.asString,
                     obj["skullOwner"]?.asString,
                 )
+                for (cosmetic in AbstractCosmetic.cosmetics) {
+                    if (cosmetic.name == cos.name) {
+
+                        cos.cosmeticModel = cosmetic
+                    }
+                }
+                return cos
             }
         }
 
@@ -159,7 +170,7 @@ class HysentialsSchema {
                     lore.add(if (emerald >= cost) "&aClick to purchase!" else "&cNot enough emeralds!")
                 } else if (cost == 0) {
                     lore.add("&eClick to purchase!")
-                } else if (cost == -1){
+                } else if (cost == -1) {
                     lore.add("")
                     lore.add("&cNot purchasable!")
                 }
@@ -295,6 +306,7 @@ class HysentialsSchema {
                 )
             }
         }
+
         fun sendWithAuth(method: String, data: JSONObject) {
             data.put("method", method)
             data.put("serverId", serverId)
@@ -425,7 +437,7 @@ class HysentialsSchema {
                     ),
                     obj.get("name").asString,
                     obj.get("description").asString,
-                    obj.get("type")?.asString?: "cluster",
+                    obj.get("type")?.asString ?: "cluster",
                     obj.get("createTime").asDouble,
                 )
             }

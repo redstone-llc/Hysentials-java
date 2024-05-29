@@ -19,7 +19,7 @@ public class LayerTdarthWings implements LayerRenderer<AbstractClientPlayer> {
         if (wings == null) {
             return;
         }
-        if (!wings.canUse(entitylivingbaseIn.getUniqueID())) {
+        if (!wings.canUse(entitylivingbaseIn)) {
             return;
         }
         if (entitylivingbaseIn.isInvisible()) return;

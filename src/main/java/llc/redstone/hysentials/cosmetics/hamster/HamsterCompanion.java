@@ -18,25 +18,30 @@
 package llc.redstone.hysentials.cosmetics.hamster;
 
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
-import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
+import llc.redstone.hysentials.cosmetic.CosmeticManager;
 import llc.redstone.hysentials.cosmetics.AbstractCosmetic;
+import llc.redstone.hysentials.cosmetics.Cosmetic;
 import llc.redstone.hysentials.event.InvokeEvent;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
 import llc.redstone.hysentials.cosmetics.AbstractCosmetic;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 import java.util.*;
 
-public class HamsterCompanion extends AbstractCosmetic<EntityHamster> {
+public class HamsterCompanion extends AbstractCosmetic<EntityHamster> implements Cosmetic {
     private Map<UUID, EntityHamster> hamsters = new HashMap<>();
+    private HamsterModel model = new HamsterModel();
 
     public HamsterCompanion() {
         super(false);
+        AbstractCosmetic.cosmetics.add(this);
     }
 
 
@@ -65,9 +70,24 @@ public class HamsterCompanion extends AbstractCosmetic<EntityHamster> {
 
     @Override
     public boolean canUse(EntityPlayer player) {
-        return CosmeticUtilsKt.equippedCosmetic(player.getUniqueID(), "hamster")
-            && CosmeticUtilsKt.hasCosmetic(player.getUniqueID(), "hamster")
+        return CosmeticManager.equippedCosmetic(player.getUniqueID(), "hamster")
+            && CosmeticManager.hasCosmetic(player.getUniqueID(), "hamster")
             && !player.isInvisible();
+    }
+
+    @Override
+    public ModelBase getModel() {
+        return model;
+    }
+
+    @Override
+    public ResourceLocation getTexture() {
+        return new ResourceLocation("hysentials:pets/hamsterbrown.png");
+    }
+
+    @Override
+    public String getName() {
+        return "hamster";
     }
 
     @Override

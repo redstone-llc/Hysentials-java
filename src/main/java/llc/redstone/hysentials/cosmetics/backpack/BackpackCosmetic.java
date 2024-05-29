@@ -1,24 +1,30 @@
 package llc.redstone.hysentials.cosmetics.backpack;
 
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
-import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
+import llc.redstone.hysentials.cosmetic.CosmeticManager;
 import llc.redstone.hysentials.cosmetics.AbstractCosmetic;
+import llc.redstone.hysentials.cosmetics.Cosmetic;
 import llc.redstone.hysentials.cosmetics.hats.cat.CatHat;
 import llc.redstone.hysentials.cosmetics.hats.cat.CatModel;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BackpackCosmetic {
+public class BackpackCosmetic implements Cosmetic {
     public static List<BackpackCosmetic> backpacks = new ArrayList<>();
+    boolean catpack;
     BackpackModel model;
     CatPackModel catModel;
     String name;
     ResourceLocation texture;
     public BackpackCosmetic(String name, boolean catpack) {
+        this.catpack = catpack;
         if (catpack) {
             catModel = new CatPackModel();
         } else {
@@ -26,10 +32,24 @@ public class BackpackCosmetic {
         }
         this.name = name;
         texture = new ResourceLocation("hysentials:backpacks/" + name + ".png");
+        AbstractCosmetic.cosmetics.add(this);
     }
     public boolean canUse(EntityPlayer player) {
-        return CosmeticUtilsKt.equippedCosmetic(player.getUniqueID(), name)
-            && CosmeticUtilsKt.hasCosmetic(player.getUniqueID(), name);
+        return CosmeticManager.equippedCosmetic(player.getUniqueID(), name)
+            && CosmeticManager.hasCosmetic(player.getUniqueID(), name);
+    }
+
+    public ModelBase getModel() {
+        return catpack ? catModel : model;
+    }
+
+    public ResourceLocation getTexture() {
+        return texture;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     public static void loadBackpacks() {

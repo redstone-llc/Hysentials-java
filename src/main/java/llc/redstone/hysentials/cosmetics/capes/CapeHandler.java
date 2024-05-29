@@ -1,6 +1,6 @@
 package llc.redstone.hysentials.cosmetics.capes;
 
-import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
+import llc.redstone.hysentials.cosmetic.CosmeticManager;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
@@ -25,11 +25,11 @@ public class CapeHandler {
             for (String id : Socket.cachedUsers.keySet()) {
                 UUID uuid = UUID.fromString(id);
                 boolean wearingCape = false;
-                for (HysentialsSchema.Cosmetic cosmetic : CosmeticUtilsKt.getEquippedCosmetics(uuid)) {
+                for (HysentialsSchema.Cosmetic cosmetic : CosmeticManager.getEquippedCosmetics(uuid)) {
                     if (cosmetic.getSubType() != null && cosmetic.getSubType().equals("cape")) {
                         wearingCape = true;
                         String name = cosmetic.getName();
-                        if (CosmeticUtilsKt.hasCosmetic(uuid, name)) {
+                        if (CosmeticManager.hasCosmetic(uuid, name)) {
                             ResourceLocation location = new ResourceLocation(cosmetic.getResource());
                             resourceMap.put(uuid, cosmetic.getResource());
                             try {

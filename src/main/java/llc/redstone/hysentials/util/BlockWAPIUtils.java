@@ -4,6 +4,9 @@ import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.HysentialsUtilsKt;
 import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
 import llc.redstone.hysentials.config.hysentialmods.rank.RankStuff;
+import llc.redstone.hysentials.cosmetic.CosmeticGui;
+import llc.redstone.hysentials.cosmetics.AbstractCosmetic;
+import llc.redstone.hysentials.cosmetics.Cosmetic;
 import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
 import llc.redstone.hysentials.handlers.redworks.BwRanksUtils;
 import llc.redstone.hysentials.schema.HysentialsSchema;
@@ -14,6 +17,7 @@ import net.minecraft.client.Minecraft;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class BlockWAPIUtils {
     public static List<HysentialsSchema.Action> actions = new ArrayList<>();
@@ -26,9 +30,11 @@ public class BlockWAPIUtils {
     public static void getOnline() {
         if (Socket.CLIENT == null || !Socket.CLIENT.isOpen()) return;
         try {
-            JsonElement cosmetics;
+            JsonElement cosmetics = null;
             try {
-                cosmetics = NetworkUtils.getJsonElement(HysentialsUtilsKt.getHYSENTIALS_API() + "/cosmetic", true);
+                if (!(Minecraft.getMinecraft().currentScreen instanceof CosmeticGui)) {
+                    cosmetics = NetworkUtils.getJsonElement(HysentialsUtilsKt.getHYSENTIALS_API() + "/cosmetic", true);
+                }
 
                 JsonElement a = NetworkUtils.getJsonElement(HysentialsUtilsKt.getHYSENTIALS_API() + "/actions", true);
                 JsonObject json = a.getAsJsonObject();
@@ -38,6 +44,7 @@ public class BlockWAPIUtils {
                     actions.add(a1);
                 });
 
+                if (cosmetics == null) return;
                 JsonObject object = cosmetics.getAsJsonObject();
                 JsonArray array = object.getAsJsonArray("cosmetics");
                 BlockWAPIUtils.cosmetics = new ArrayList<>();
@@ -45,12 +52,21 @@ public class BlockWAPIUtils {
                     HysentialsSchema.Cosmetic cosmetic = HysentialsSchema.Cosmetic.Companion.deserialize(cosmeticObj.getAsJsonObject());
                     BlockWAPIUtils.cosmetics.add(cosmetic);
                 }
+
             } catch (Exception ignored) {
                 ignored.printStackTrace();
             }
 
         } catch (Exception e) {
             return;
+        }
+    }
+
+    public static void setCosmeticInstance() {
+        for (HysentialsSchema.Cosmetic cosmetic : cosmetics) {
+            for (Cosmetic c: AbstractCosmetic.cosmetics) {
+
+            }
         }
     }
 
@@ -73,6 +89,11 @@ public class BlockWAPIUtils {
         return cosmetics;
     }
 
+    public static List<HysentialsSchema.Cosmetic> getCosmetic(String type) {
+        if (cosmetics == null) return new ArrayList<>();
+        return cosmetics.stream().filter(c -> c.getType().equals(type)).collect(Collectors.toList());
+    }
+
     public static String getRequest(String endpoint) {
         return HysentialsUtilsKt.getHYSENTIALS_API() + "/" + endpoint + "?key=" + Socket.serverId + "&uuid=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString();
     }
@@ -87,11 +108,11 @@ public class BlockWAPIUtils {
     }
 
     public static Rank getRank(UUID uuid) {
-        BlockWAPIUtils.Rank rank;
+        Rank rank;
         try {
-            rank = BlockWAPIUtils.Rank.valueOf(Socket.cachedUsers.get(uuid.toString()).getRank().toUpperCase());
+            rank = Rank.valueOf(Socket.cachedUsers.get(uuid.toString()).getRank().toUpperCase());
         } catch (Exception e) {
-            rank = BlockWAPIUtils.Rank.DEFAULT;
+            rank = Rank.DEFAULT;
         }
         return rank;
     }

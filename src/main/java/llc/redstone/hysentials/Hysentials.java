@@ -109,7 +109,6 @@ public class Hysentials {
     private final ChatHandler chatHandler = new ChatHandler();
 
     public final GuiDisplayHandler guiDisplayHandler = new GuiDisplayHandler();
-    public final CosmeticManager cosmeticManager = new CosmeticManager();
     public static List<ICommand> commands;
 
     public ModAPIHandler hypixelModAPI;

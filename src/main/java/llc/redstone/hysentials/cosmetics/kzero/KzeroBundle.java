@@ -2,7 +2,7 @@ package llc.redstone.hysentials.cosmetics.kzero;
 
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
-import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
+import llc.redstone.hysentials.cosmetic.CosmeticManager;
 import net.minecraft.client.entity.AbstractClientPlayer;
 
 public class KzeroBundle {
@@ -19,8 +19,8 @@ public class KzeroBundle {
     }
 
     public static boolean canUse(AbstractClientPlayer player, Type type) {
-        return CosmeticUtilsKt.equippedCosmetic(player.getUniqueID(), "kzero " + type.name().toLowerCase())
-            && CosmeticUtilsKt.hasCosmetic(player.getUniqueID(), "kzero " + type.name().toLowerCase());
+        return CosmeticManager.equippedCosmetic(player.getUniqueID(), "kzero " + type.name().toLowerCase())
+            && CosmeticManager.hasCosmetic(player.getUniqueID(), "kzero " + type.name().toLowerCase());
     }
 
     public enum Type {

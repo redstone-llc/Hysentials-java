@@ -45,7 +45,7 @@ public abstract class PaginationContainer extends Container {
         newItems.sort(Comparator.comparing(ItemStack::getDisplayName));
 
         paginationList = new PaginationList<>(newItems, ((rows - 2) * 7));
-        maxPages = paginationList.size();
+        maxPages = paginationList.getPageCount();
         if (page > maxPages) {
             page = maxPages;
         }

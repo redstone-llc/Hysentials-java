@@ -14,12 +14,15 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static java.lang.Thread.sleep;
 
 public abstract class AbstractCosmetic <E extends Entity>{
+    public static List<Cosmetic> cosmetics = new ArrayList<>();
     private final boolean selfOnly;
 
     public AbstractCosmetic(boolean selfOnly) {

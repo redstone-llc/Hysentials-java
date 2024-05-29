@@ -1,9 +1,12 @@
 package llc.redstone.hysentials.cosmetics.wings.tdarth;
 
-import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
+import llc.redstone.hysentials.cosmetic.CosmeticManager;
+import llc.redstone.hysentials.cosmetics.Cosmetic;
 import llc.redstone.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -13,7 +16,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class TdarthCosmetic {
+public class TdarthCosmetic implements Cosmetic {
     ResourceLocation texture;
     TdarthModel model = new TdarthModel();
     public static HashMap<UUID, DynamicTexture> textureMap = new HashMap<>();
@@ -57,7 +60,27 @@ public class TdarthCosmetic {
         } catch (Exception ignored) {}
     }
     public boolean canUse(UUID uuid) {
-        return CosmeticUtilsKt.equippedCosmetic(uuid, "tdarth")
-            && CosmeticUtilsKt.hasCosmetic(uuid, "tdarth");
+        return CosmeticManager.equippedCosmetic(uuid, "tdarth")
+            && CosmeticManager.hasCosmetic(uuid, "tdarth");
+    }
+
+    @Override
+    public boolean canUse(EntityPlayer player) {
+        return canUse(player.getUniqueID());
+    }
+
+    @Override
+    public ModelBase getModel() {
+        return model;
+    }
+
+    @Override
+    public ResourceLocation getTexture() {
+        return texture;
+    }
+
+    @Override
+    public String getName() {
+        return "tdarth";
     }
 }

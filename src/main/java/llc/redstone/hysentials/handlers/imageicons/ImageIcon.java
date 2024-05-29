@@ -1,7 +1,7 @@
 package llc.redstone.hysentials.handlers.imageicons;
 
 import llc.redstone.hysentials.cosmetic.CosmeticGui;
-import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
+import llc.redstone.hysentials.cosmetic.CosmeticManager;
 import llc.redstone.hysentials.util.MUtils;
 import llc.redstone.hysentials.util.ImageIconRenderer;
 import net.minecraft.client.Minecraft;
@@ -138,7 +138,7 @@ public class ImageIcon {
     public static Pattern stringPattern = Pattern.compile(":([a-z_\\-0-9?]+):", 2);
 
     public int renderImage(float x, float y, boolean shadow, int oldColor, UUID uuid, float alpha) {
-        if (emoji && uuid != null && !CosmeticUtilsKt.hasCosmetic(uuid, "hymojis")) {
+        if (emoji && uuid != null && !CosmeticManager.hasCosmetic(uuid, "hymojis")) {
             return -1;
         }
         int width = this.getWidth();

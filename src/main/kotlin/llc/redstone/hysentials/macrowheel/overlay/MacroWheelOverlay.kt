@@ -18,8 +18,10 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.client.event.GuiScreenEvent
+import net.minecraftforge.fml.client.config.GuiUtils
 
 var stopped = false;
+
 class MacroWheelOverlay(
     val x: Float,
     val y: Float,
@@ -27,7 +29,7 @@ class MacroWheelOverlay(
     val background: OneColor
 ) {
     companion object {
-        fun newI (): MacroWheelOverlay {
+        fun newI(): MacroWheelOverlay {
             val hudConfig = Hysentials.INSTANCE.config.macroWheelHud
             hudConfig.position.setSize(34f * hudConfig.scale, 34f * hudConfig.scale)
             val hud = MacroWheelOverlay(
@@ -39,6 +41,7 @@ class MacroWheelOverlay(
             return hud
         }
     }
+
     fun drawPost(event: GuiScreenEvent.DrawScreenEvent.Post, inputHandler: InputHandler) {
         GlStateManager.pushMatrix()
         for (i in 0 until 8) {
@@ -70,7 +73,7 @@ class MacroWheelOverlay(
                 GlStateManager.enableRescaleNormal()
                 GlStateManager.enableColorMaterial()
                 GlStateManager.enableLighting()
-                val otherScale = 2 * (scale/5f)
+                val otherScale = 2 * (scale / 5f)
                 GlStateManager.scale(otherScale, otherScale, otherScale)
 
                 Minecraft.getMinecraft().renderItem.renderItemIntoGUI(
@@ -81,7 +84,9 @@ class MacroWheelOverlay(
                 GlStateManager.popMatrix()
             }
         }
+        GlStateManager.popMatrix()
 
+        GlStateManager.pushMatrix()
         for (i in 0 until 8) {
             val macro = Hysentials.INSTANCE.macroJson.getMacro(i)
 
@@ -109,9 +114,9 @@ class MacroWheelOverlay(
                         C.translate(it)
                     })
 
-                    val otherScale = 1 * (scale/5f)
+                    val otherScale = 1 * (scale / 5f)
                     GlStateManager.scale(otherScale, otherScale, otherScale)
-                    net.minecraftforge.fml.client.config.GuiUtils.drawHoveringText(
+                    GuiUtils.drawHoveringText(
                         lore,
                         inputHandler.mouseX().toInt().toScaled(otherScale),
                         inputHandler.mouseY().toInt().toScaled(otherScale),
@@ -123,7 +128,10 @@ class MacroWheelOverlay(
 
                     if (inputHandler.isMouseDown(0)) {
                         for (command in Hysentials.commands) {
-                            if (command.commandName == macro.command.split(" ")[0]) {
+                            if (command.commandName == macro.command.split(" ")[0] || command.commandAliases.contains(
+                                    macro.command.split(" ")[0]
+                                )
+                            ) {
                                 command.processCommand(
                                     Minecraft.getMinecraft().thePlayer,
                                     macro.command.substring(macro.command.indexOf(" ") + 1).split(" ").toTypedArray()
@@ -158,7 +166,7 @@ class MacroWheelOverlay(
         GlStateManager.popMatrix()
     }
 
-    fun stop () {
+    fun stop() {
         stopped = true
         MacroWheelData.MacroWheel.wasMacroWheelActive = false
         if (Minecraft.getMinecraft().currentScreen == null) {
@@ -167,13 +175,15 @@ class MacroWheelOverlay(
     }
 
     fun Float.toScaled(scale: Float): Float {
-        return this * 1/scale
+        return this * 1 / scale
     }
+
     fun Int.toScaled(scale: Int): Int {
-        return this * 1/scale
+        return this * 1 / scale
     }
+
     fun Int.toScaled(scale: Float): Int {
-        return (this * 1/scale).toInt()
+        return (this * 1 / scale).toInt()
     }
 
     fun draw(it: Long, partialTicks: Float, inputHandler: InputHandler?) {
@@ -218,7 +228,6 @@ class MacroWheelOverlay(
             }
         }
     }
-
 
 
     fun drawCross(it: Long, x: Float, y: Float, color: Int) {

@@ -1,9 +1,13 @@
 package llc.redstone.hysentials.command;
 
+import cc.polyfrost.oneconfig.gui.OneConfigGui;
+import cc.polyfrost.oneconfig.gui.pages.ModConfigPage;
+import cc.polyfrost.oneconfig.gui.pages.ModsPage;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
+import cc.polyfrost.oneconfig.utils.gui.GuiUtils;
 import com.google.gson.JsonArray;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.HysentialsUtilsKt;
@@ -94,7 +98,12 @@ public class HysentialsCommand extends CommandBase {
             }
 
             case "config": {
-                Hysentials.INSTANCE.getConfig().openGui();
+                ModConfigPage page = new ModConfigPage(Hysentials.INSTANCE.getConfig().mod.defaultPage);
+                ModsPage page2 = new ModsPage();
+                page.parents.add(page2);
+                page.parents.add(page);
+
+                GuiUtils.displayScreen(new OneConfigGui(page));
                 break;
             }
 
@@ -255,7 +264,7 @@ public class HysentialsCommand extends CommandBase {
                 break;
             }
             default: {
-                UChat.chat(HysentialsConfig.chatPrefix + " §cUnknown leaderboard type! Use /hysentials leaderboard <level/emeralds/settings> for a list of types.");
+                UChat.chat(HysentialsConfig.chatPrefix + " §cUnknown leaderboard type! Use /hysentials leaderboard <levels/emeralds/settings> for a list of types.");
                 break;
 
             }
@@ -344,7 +353,7 @@ public class HysentialsCommand extends CommandBase {
                 text.appendText("&e/hysentials online &7- &bShows the online players.\n");
                 text.appendText("&e/hysentials menu &7- &bOpens the Hysentials menu.\n");
                 text.appendText("&e/hysentials discord &7- &bShows the discord invite link.\n");
-                text.appendText("&e/hysentials leaderboard <level/emeralds/settings> &7- Leaderboard.\n");
+                text.appendText("&e/hs leaderboard <levels/emeralds/settings> &7- &bLeaderboard.\n");
                 text.appendText("§9&m                                                           ");
                 break;
             }

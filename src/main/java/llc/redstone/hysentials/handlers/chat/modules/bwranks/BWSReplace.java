@@ -5,7 +5,7 @@ import cc.polyfrost.oneconfig.libs.universal.UChat;
 import llc.redstone.hysentials.config.hysentialmods.ChatConfig;
 import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
 import llc.redstone.hysentials.config.hysentialmods.HousingConfig;
-import llc.redstone.hysentials.cosmetic.CosmeticUtilsKt;
+import llc.redstone.hysentials.cosmetic.CosmeticManager;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.util.*;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
@@ -209,12 +209,12 @@ public class BWSReplace implements ChatReceiveModule {
     }
 
     private static String bold(UUID id) {
-        boolean bold = id != null && CosmeticUtilsKt.equippedCosmetic(id, "bold messages");
+        boolean bold = id != null && CosmeticManager.equippedCosmetic(id, "bold messages");
         return bold ? "§l" : "";
     }
 
     private static String italic(UUID id) {
-        boolean italic = id != null && CosmeticUtilsKt.equippedCosmetic(id, "italic messages");
+        boolean italic = id != null && CosmeticManager.equippedCosmetic(id, "italic messages");
         return italic ? "§o" : "";
     }
 
