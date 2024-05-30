@@ -13,6 +13,7 @@ import llc.redstone.hysentials.macrowheel.overlay.MacroWheelOverlayKt;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -73,6 +74,7 @@ public class GuiIngameForgeMixin {
 
     @Inject(method = "renderGameOverlay", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GlStateManager;enableAlpha()V", shift = At.Shift.AFTER))
     public void hysentials$renderMacroWheel(float partialTicks, CallbackInfo ci) {
+        GlStateManager.pushMatrix();
         if (HysentialsConfig.macroWheelKeyBind.isActive() && Minecraft.getMinecraft().currentScreen == null && MacroWheelData.MacroWheel.getCooldown() < System.currentTimeMillis()) {
             if (!MacroWheelOverlayKt.getStopped()) {
                 MacroWheelOverlay overlay = MacroWheelOverlay.Companion.newI();
@@ -101,6 +103,7 @@ public class GuiIngameForgeMixin {
                 Minecraft.getMinecraft().mouseHelper.grabMouseCursor();
             }
         }
+        GlStateManager.popMatrix();
     }
 
     @Unique

@@ -36,7 +36,7 @@ public class BackpackCosmetic implements Cosmetic {
     }
     public boolean canUse(EntityPlayer player) {
         return CosmeticManager.equippedCosmetic(player.getUniqueID(), name)
-            && CosmeticManager.hasCosmetic(player.getUniqueID(), name);
+            && (CosmeticManager.hasCosmetic(player.getUniqueID(), name) || CosmeticManager.isPreviewing(player.getUniqueID(), name));
     }
 
     public ModelBase getModel() {

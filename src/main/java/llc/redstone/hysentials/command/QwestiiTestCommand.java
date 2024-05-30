@@ -39,8 +39,7 @@ public class QwestiiTestCommand extends CommandBase {
                 Thread.sleep(1000);
                 UChat.chat("\n&4K A B O O M\n");
                 Thread.sleep(3000);
-                Minecraft.getMinecraft().crashed(new CrashReport("Kaboom", new Throwable())
-                );
+                Minecraft.getMinecraft().crashed(new CrashReport("Kaboom", new Throwable()));
             } catch (InterruptedException ignored) {
             }
         });

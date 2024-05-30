@@ -8,6 +8,7 @@ import kotlinx.serialization.Transient
 import llc.redstone.hysentials.cosmetic.CosmeticManager.colorFromRarity
 import llc.redstone.hysentials.cosmetic.CosmeticManager.equippedCosmetic
 import llc.redstone.hysentials.cosmetic.CosmeticManager.hasCosmetic
+import llc.redstone.hysentials.cosmetic.CosmeticManager.previewing
 import llc.redstone.hysentials.cosmetics.AbstractCosmetic
 import llc.redstone.hysentials.cosmetics.Cosmetic
 import llc.redstone.hysentials.guis.container.GuiItem
@@ -173,6 +174,11 @@ class HysentialsSchema {
                 } else if (cost == -1) {
                     lore.add("")
                     lore.add("&cNot purchasable!")
+                }
+                if (previewing.contains(name)) {
+                    lore.add("&cRight-Click to remove preview!")
+                } else {
+                    lore.add("&bRight-Click to preview!")
                 }
             }
             when (subType) {

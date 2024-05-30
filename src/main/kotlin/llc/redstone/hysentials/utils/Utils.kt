@@ -70,6 +70,7 @@ object Utils {
         }
         return previous
     }
+
     @JvmStatic
     fun getLevel(exp: Int): Float {
         var level = 0f
@@ -81,12 +82,14 @@ object Utils {
         level += exp / getExpForLevel(level.toInt()).toFloat()
         return level
     }
+
+    //new
     @JvmStatic
     fun getExpStart(exp: Int): Int {
         var level = 0f
         var remainingExp = exp
-        while (remainingExp >= getExpForLevel(level.toInt())) {
-            remainingExp -= getExpForLevel(level.toInt())
+        while (remainingExp >= getExpForLevel(level.toInt() + 1)) {
+            remainingExp -= getExpForLevel(level.toInt() + 1)
             level++
         }
         return remainingExp

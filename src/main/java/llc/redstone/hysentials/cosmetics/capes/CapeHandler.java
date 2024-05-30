@@ -29,7 +29,7 @@ public class CapeHandler {
                     if (cosmetic.getSubType() != null && cosmetic.getSubType().equals("cape")) {
                         wearingCape = true;
                         String name = cosmetic.getName();
-                        if (CosmeticManager.hasCosmetic(uuid, name)) {
+                        if (CosmeticManager.hasCosmetic(uuid, name) || CosmeticManager.isPreviewing(uuid, name)) {
                             ResourceLocation location = new ResourceLocation(cosmetic.getResource());
                             resourceMap.put(uuid, cosmetic.getResource());
                             try {

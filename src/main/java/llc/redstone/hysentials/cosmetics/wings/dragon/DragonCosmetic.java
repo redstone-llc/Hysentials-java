@@ -17,7 +17,7 @@ public class DragonCosmetic implements Cosmetic {
     }
     public boolean canUse(EntityPlayer player) {
         return CosmeticManager.equippedCosmetic(player.getUniqueID(), "dragon")
-            && CosmeticManager.hasCosmetic(player.getUniqueID(), "dragon");
+            && (CosmeticManager.hasCosmetic(player.getUniqueID(), "dragon") || CosmeticManager.isPreviewing(player.getUniqueID(), "dragon"));
     }
 
     @Override

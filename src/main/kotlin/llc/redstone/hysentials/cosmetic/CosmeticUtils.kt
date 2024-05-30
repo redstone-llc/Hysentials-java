@@ -4,7 +4,6 @@ import cc.polyfrost.oneconfig.utils.Multithreading
 import com.google.gson.JsonElement
 import llc.redstone.hysentials.HYSENTIALS_API
 import llc.redstone.hysentials.Hysentials
-import llc.redstone.hysentials.cosmetic.CosmeticGui.Companion.paginationList
 import llc.redstone.hysentials.schema.HysentialsSchema
 import llc.redstone.hysentials.schema.HysentialsSchema.Cosmetic.Companion.deserialize
 import llc.redstone.hysentials.util.BlockWAPIUtils
@@ -22,37 +21,48 @@ import java.util.*
 
 object CosmeticManager {
     var actions = mapOf(
-        "equip" to mutableListOf<String>(),
-        "unequip" to mutableListOf<String>(),
-        "purchase" to mutableListOf<String>()
+        "equip" to mutableSetOf<String>(),
+        "unequip" to mutableSetOf<String>(),
+        "purchase" to mutableSetOf<String>()
     )
 
-    fun unEquipCosmetic(name: String) {
-        if (name == "kzero bundle") return kzero(false)
+    var previewing = mutableListOf<String>()
+
+    fun unEquipCosmetic(name: String, preview: Boolean = false) {
+        if (name == "kzero bundle") kzero(false)
         val cosmetics = BlockWAPIUtils.getCosmetics()
         val cosmetic = cosmetics.find { it.name == name }
         cosmetic?.let {
             if (it.equipped.contains(Minecraft.getMinecraft().thePlayer.uniqueID.toString())) {
                 it.equipped.remove(Minecraft.getMinecraft().thePlayer.uniqueID.toString())
             }
-            actions["unequip"]?.add(name)
+            if (preview) {
+                previewing.remove(name)
+            } else {
+                actions["unequip"]
+            }
         }
     }
 
-    fun equipCosmetic(name: String) {
-        if (name == "kzero bundle") return kzero(true)
+    fun equipCosmetic(name: String, preview: Boolean = false) {
+        if (name == "kzero bundle") kzero(true)
         val cosmetics = BlockWAPIUtils.getCosmetics()
         val cosmetic = cosmetics.find { it.name == name }
         cosmetic?.let {
             if (BlockWAPIUtils.getCosmetic(it.type).isNotEmpty()) {
                 BlockWAPIUtils.getCosmetic(it.type).forEach { cosmetic ->
                     unEquipCosmetic(cosmetic.name)
+                    previewing.remove(cosmetic.name)
                 }
             }
             if (!it.equipped.contains(Minecraft.getMinecraft().thePlayer.uniqueID.toString())) {
                 it.equipped.add(Minecraft.getMinecraft().thePlayer.uniqueID.toString())
             }
-            actions["equip"]?.add(name)
+            if (preview) {
+                previewing.add(name)
+            } else {
+                actions["equip"]?.add(name)
+            }
         }
     }
 
@@ -63,11 +73,10 @@ object CosmeticManager {
             "kzero slipper"
         )
         for (cosmetic in list) {
-            val name = cosmetic.replace(" ", "%20")
             if (equip) {
-                equipCosmetic(name)
+                equipCosmetic(cosmetic)
             } else {
-                unEquipCosmetic(name)
+                unEquipCosmetic(cosmetic)
             }
         }
     }
@@ -102,10 +111,11 @@ object CosmeticManager {
                     }
                 }
             }
+            previewing.clear()
             actions = mapOf(
-                "equip" to mutableListOf<String>(),
-                "unequip" to mutableListOf<String>(),
-                "purchase" to mutableListOf<String>()
+                "equip" to mutableSetOf<String>(),
+                "unequip" to mutableSetOf<String>(),
+                "purchase" to mutableSetOf<String>()
             )
             var cosmetics: JsonElement? =
                 NetworkUtils.getJsonElement("$HYSENTIALS_API/cosmetic", true) ?: return@runAsync
@@ -165,7 +175,7 @@ object CosmeticManager {
         try {
             val cosmetics = BlockWAPIUtils.getCosmetics()
             cosmetics.find { it.name == name }?.let {
-                if (it.equipped.contains(uuid.toString())) {
+                if (it.equipped.contains(uuid.toString()) && it.users.contains(uuid.toString())) {
                     return true
                 }
             }
@@ -186,6 +196,12 @@ object CosmeticManager {
         } catch (_: Exception) {
         }
         return false
+    }
+
+    @JvmStatic
+    fun isPreviewing(uuid: UUID, name: String): Boolean {
+        if (uuid != Minecraft.getMinecraft().thePlayer.uniqueID) return false
+        return previewing.contains(name)
     }
 
     @JvmStatic

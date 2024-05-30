@@ -16,7 +16,7 @@ public class TechnoCrown implements Cosmetic {
     }
     public boolean canUse(EntityPlayer player) {
         return CosmeticManager.equippedCosmetic(player.getUniqueID(), "techno crown")
-            && CosmeticManager.hasCosmetic(player.getUniqueID(), "techno crown");
+            && (CosmeticManager.hasCosmetic(player.getUniqueID(), "techno crown") || CosmeticManager.isPreviewing(player.getUniqueID(), "techno crown"));
     }
 
     @Override

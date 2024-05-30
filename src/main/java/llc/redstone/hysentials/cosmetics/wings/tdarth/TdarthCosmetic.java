@@ -61,7 +61,7 @@ public class TdarthCosmetic implements Cosmetic {
     }
     public boolean canUse(UUID uuid) {
         return CosmeticManager.equippedCosmetic(uuid, "tdarth")
-            && CosmeticManager.hasCosmetic(uuid, "tdarth");
+            && (CosmeticManager.hasCosmetic(uuid, "tdarth") || CosmeticManager.isPreviewing(uuid, "tdarth"));
     }
 
     @Override

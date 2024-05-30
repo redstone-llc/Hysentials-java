@@ -115,6 +115,7 @@ class MacroWheelOverlay(
                     })
 
                     val otherScale = 1 * (scale / 5f)
+                    GlStateManager.pushMatrix()
                     GlStateManager.scale(otherScale, otherScale, otherScale)
                     GuiUtils.drawHoveringText(
                         lore,
@@ -125,6 +126,7 @@ class MacroWheelOverlay(
                         -1,
                         Minecraft.getMinecraft().fontRendererObj
                     )
+                    GlStateManager.popMatrix()
 
                     if (inputHandler.isMouseDown(0)) {
                         for (command in Hysentials.commands) {

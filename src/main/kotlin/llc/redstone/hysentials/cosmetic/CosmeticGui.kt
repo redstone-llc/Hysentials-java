@@ -18,6 +18,7 @@ import llc.redstone.hysentials.cosmetic.CosmeticManager.equippedCosmetic
 import llc.redstone.hysentials.cosmetic.CosmeticManager.getOwnedCosmetics
 import llc.redstone.hysentials.cosmetic.CosmeticManager.hasCosmetic
 import llc.redstone.hysentials.cosmetic.CosmeticManager.indexFromRarity
+import llc.redstone.hysentials.cosmetic.CosmeticManager.previewing
 import llc.redstone.hysentials.cosmetic.CosmeticManager.purchaseCosmetic
 import llc.redstone.hysentials.cosmetic.CosmeticManager.tabFromType
 import llc.redstone.hysentials.cosmetic.CosmeticManager.unEquipCosmetic
@@ -29,6 +30,8 @@ import net.minecraft.client.audio.PositionedSoundRecord
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.inventory.Slot
+import net.minecraft.scoreboard.Score
+import net.minecraft.scoreboard.ScoreDummyCriteria
 import net.minecraft.util.EnumChatFormatting
 import net.minecraft.util.ResourceLocation
 import org.json.JSONObject
@@ -67,8 +70,6 @@ open class CosmeticGui : UScreen(), HysentialsGui {
 
     var focused: Boolean = false
     var blinkTimer: Int = 0
-    var hoverTimer: Int = 0
-    var currentHover: Int = -1
 
     val input: Input = Input(0, 0, 0, 0).let {
         it.setEnabled(true)
@@ -102,7 +103,13 @@ open class CosmeticGui : UScreen(), HysentialsGui {
         }
         try {
             // Draw the background (dark and light)
-            Renderer.drawImage(if (HysentialsConfig.wardrobeDarkMode) cosmeticBackground else lightBackground, guiLeft.toDouble(), guiTop.toDouble(), xSize.toDouble(), ySize.toDouble())
+            Renderer.drawImage(
+                if (HysentialsConfig.wardrobeDarkMode) cosmeticBackground else lightBackground,
+                guiLeft.toDouble(),
+                guiTop.toDouble(),
+                xSize.toDouble(),
+                ySize.toDouble()
+            )
 
             val emerald = Socket.cachedUser?.emeralds ?: 0
             for (tab in tabs) {
@@ -110,7 +117,12 @@ open class CosmeticGui : UScreen(), HysentialsGui {
             }
             // Draw the selected tab
             val typeFinal = tabFromType(type)?.displayName ?: "Owned"
-            mcFive.drawStringShadow(" > ${typeFinal.splitToWords().uppercase()} ($page/$maxPage)", guiLeft + 71f, guiTop + 5f, 0xFFFFFF)
+            mcFive.drawStringShadow(
+                " > ${typeFinal.splitToWords().uppercase()} ($page/$maxPage)",
+                guiLeft + 71f,
+                guiTop + 5f,
+                0xFFFFFF
+            )
             // Draw the emerald count
             var largeFormat = DecimalFormat("#,###")
             mcFive.drawStringShadow(" ${largeFormat.format(emerald)}", guiLeft + 71f, guiTop + 149f, 0x55FF55)
@@ -160,22 +172,6 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 }
 
                 this.drawHoveringText(list, mouseX, mouseY, fontRenderer)
-//                val page = paginationList!!.getPage(CosmeticGui.page)
-//                if (page.size > theSlot!!.slotIndex) {
-//                    val cosmetic = page[theSlot!!.slotIndex]
-//                    if (currentHover == -1) {
-//                        currentHover = theSlot!!.slotIndex
-//                        hoverTimer = 0
-//                    } else if (currentHover == theSlot!!.slotIndex) {
-//                        hoverTimer++
-//                        if (hoverTimer >= 200) {
-//                            cosmetic.renderPreview(mouseX, mouseY, hoverTimer - 200)
-//                        }
-//                    } else {
-//                        currentHover = theSlot!!.slotIndex
-//                        hoverTimer = 0
-//                    }
-//                }
             }
 
             var rX = mouseX.toFloat() - guiLeft
@@ -183,7 +179,12 @@ open class CosmeticGui : UScreen(), HysentialsGui {
 
             for (tab in tabs) {
                 if (tab.isHovered(rX.toDouble(), rY.toDouble())) {
-                    drawHoveringText(listOf("§8➔ <#${tab.color}>${tab.displayName} Cosmetics"), mouseX, mouseY, fontRenderer)
+                    drawHoveringText(
+                        listOf("§8➔ <#${tab.color}>${tab.displayName} Cosmetics"),
+                        mouseX,
+                        mouseY,
+                        fontRenderer
+                    )
                 }
             }
 
@@ -252,7 +253,6 @@ open class CosmeticGui : UScreen(), HysentialsGui {
         Renderer.untranslate(0.0, 0.0, 0.0)
         GlStateManager.popMatrix()
     }
-
 
 
     override fun onMouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int) {
@@ -325,6 +325,25 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                     purchaseCosmetic(cosmeticName)
                     initScreen(width, height)
                 }
+            }
+        } else if (mouseButton == 1) { // Right click to preview
+            val slot = getSlot(
+                mouseX.toFloat() - guiLeft,
+                mouseY.toFloat() - guiTop
+            )
+            if (slot != -1 && slot < inventorySlots.size && inventoryMap.containsKey(type)) {
+                val cosmetics: List<HysentialsSchema.Cosmetic> = inventoryMap[type]!!
+                val paginationList = PaginationList(cosmetics, 32)
+                val page = paginationList.getPage(page)
+                if (slot >= page.size) return
+                val cosmetic = page[slot]
+                val cosmeticName = cosmetic.name
+                if (!previewing.contains(cosmeticName)) {
+                    equipCosmetic(cosmeticName, true)
+                } else {
+                    unEquipCosmetic(cosmeticName, true)
+                }
+                initScreen(width, height)
             }
         }
     }
@@ -468,29 +487,49 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                     if (page > 1) {
                         page--
                         updatePage()
-                        this.mc.soundHandler.playSound(PositionedSoundRecord.create(ResourceLocation("gui.button.press"), 1.0f))
+                        this.mc.soundHandler.playSound(
+                            PositionedSoundRecord.create(
+                                ResourceLocation("gui.button.press"),
+                                1.0f
+                            )
+                        )
                     }
                 })
             it.add(Button(192, 126, 29, 20, "hysentials:gui/wardrobe/right.png", instance,
-                    onHover = { _, _ -> page < maxPage }) { _, _, _ ->
-                    if (page < maxPage) {
-                        page++
-                        updatePage()
-                        this.mc.soundHandler.playSound(PositionedSoundRecord.create(ResourceLocation("gui.button.press"), 1.0f))
-                    }
-                })
+                onHover = { _, _ -> page < maxPage }) { _, _, _ ->
+                if (page < maxPage) {
+                    page++
+                    updatePage()
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
+                }
+            })
             it.add(Button(18, 126, 29, 20, "hysentials:gui/wardrobe/left-light.png", instance) { _, _, _ ->
                 if (page > 1) {
                     page--
                     updatePage()
-                    this.mc.soundHandler.playSound(PositionedSoundRecord.create(ResourceLocation("gui.button.press"), 1.0f))
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
                 }
             })
             it.add(Button(192, 126, 29, 20, "hysentials:gui/wardrobe/right-light.png", instance) { _, _, _ ->
                 if (page < maxPage) {
                     page++
                     updatePage()
-                    this.mc.soundHandler.playSound(PositionedSoundRecord.create(ResourceLocation("gui.button.press"), 1.0f))
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
                 }
             })
         }

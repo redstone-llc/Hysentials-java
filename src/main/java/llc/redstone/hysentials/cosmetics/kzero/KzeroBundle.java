@@ -20,7 +20,8 @@ public class KzeroBundle {
 
     public static boolean canUse(AbstractClientPlayer player, Type type) {
         return CosmeticManager.equippedCosmetic(player.getUniqueID(), "kzero " + type.name().toLowerCase())
-            && CosmeticManager.hasCosmetic(player.getUniqueID(), "kzero " + type.name().toLowerCase());
+            && (CosmeticManager.hasCosmetic(player.getUniqueID(), "kzero " + type.name().toLowerCase()) ||
+            CosmeticManager.isPreviewing(player.getUniqueID(), "kzero " + type.name().toLowerCase()));
     }
 
     public enum Type {

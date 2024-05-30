@@ -16,7 +16,7 @@ public class BlackCat implements Cosmetic {
     }
     public boolean canUse(EntityPlayer player) {
         return CosmeticManager.equippedCosmetic(player.getUniqueID(), "black cat")
-            && CosmeticManager.hasCosmetic(player.getUniqueID(), "black cat");
+            && (CosmeticManager.hasCosmetic(player.getUniqueID(), "black cat") || CosmeticManager.isPreviewing(player.getUniqueID(), "black cat"));
     }
 
     public BlackCatModel getModel() {
