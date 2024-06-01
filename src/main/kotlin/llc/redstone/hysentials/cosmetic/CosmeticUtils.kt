@@ -20,10 +20,11 @@ import org.json.JSONObject
 import java.util.*
 
 object CosmeticManager {
-    var actions = mapOf(
-        "equip" to mutableSetOf<String>(),
-        "unequip" to mutableSetOf<String>(),
-        "purchase" to mutableSetOf<String>()
+    var actions = mutableListOf<Actions>()
+
+    data class Actions(
+        var action: String,
+        var name: String
     )
 
     var previewing = mutableListOf<String>()
@@ -37,9 +38,9 @@ object CosmeticManager {
                 it.equipped.remove(Minecraft.getMinecraft().thePlayer.uniqueID.toString())
             }
             if (preview) {
-                previewing.remove(name)
+                previewing.remove(it.name)
             } else {
-                actions["unequip"]
+                actions.add(Actions("unequip", it.name))
             }
         }
     }
@@ -51,17 +52,19 @@ object CosmeticManager {
         cosmetic?.let {
             if (BlockWAPIUtils.getCosmetic(it.type).isNotEmpty()) {
                 BlockWAPIUtils.getCosmetic(it.type).forEach { cosmetic ->
-                    unEquipCosmetic(cosmetic.name)
-                    previewing.remove(cosmetic.name)
+                    if (cosmetic.equipped.contains(Minecraft.getMinecraft().thePlayer.uniqueID.toString())) {
+                        unEquipCosmetic(cosmetic.name)
+                        previewing.remove(cosmetic.name)
+                    }
                 }
             }
             if (!it.equipped.contains(Minecraft.getMinecraft().thePlayer.uniqueID.toString())) {
                 it.equipped.add(Minecraft.getMinecraft().thePlayer.uniqueID.toString())
             }
             if (preview) {
-                previewing.add(name)
+                previewing.add(it.name)
             } else {
-                actions["equip"]?.add(name)
+                actions.add(Actions("equip", it.name))
             }
         }
     }
@@ -89,7 +92,7 @@ object CosmeticManager {
                 it.users.add(Minecraft.getMinecraft().thePlayer.uniqueID.toString())
                 Socket.cachedUser.amountSpent = Socket.cachedUser.amountSpent?.plus(it.cost)
                 Socket.cachedUser.emeralds = Socket.cachedUser.emeralds.minus(it.cost)
-                actions["purchase"]?.add(cosmeticName)
+                actions.add(Actions("purchase", it.name))
             }
         }
     }
@@ -97,26 +100,20 @@ object CosmeticManager {
     fun updateCosmetics() {
         Multithreading.runAsync {
             for (action in actions) {
-                val list = action.value
-                val func = action.key
+                val func = action.action
+                val name = action.name
 
-                for (name in list) {
-                    val response =
-                        NetworkUtils.postString(HYSENTIALS_API + "/cosmetic?name=$name&function=${func}&uuid=${Minecraft.getMinecraft().thePlayer.uniqueID}&key=${Socket.serverId}")
-                    val json = JSONObject(response)
-                    if (json.get("success") == false) {
-                        Hysentials.INSTANCE.sendMessage(
-                            "&cFailed to $func $name: ${json.get("message")}",
-                        )
-                    }
+                val response =
+                    NetworkUtils.postString(HYSENTIALS_API + "/cosmetic?name=$name&function=${func}&uuid=${Minecraft.getMinecraft().thePlayer.uniqueID}&key=${Socket.serverId}")
+                val json = JSONObject(response)
+                if (json.get("success") == false) {
+                    Hysentials.INSTANCE.sendMessage(
+                        "&cFailed to $func $name: ${json.get("message")}",
+                    )
                 }
             }
             previewing.clear()
-            actions = mapOf(
-                "equip" to mutableSetOf<String>(),
-                "unequip" to mutableSetOf<String>(),
-                "purchase" to mutableSetOf<String>()
-            )
+            actions = mutableListOf()
             var cosmetics: JsonElement? =
                 NetworkUtils.getJsonElement("$HYSENTIALS_API/cosmetic", true) ?: return@runAsync
             val `object` = cosmetics!!.asJsonObject

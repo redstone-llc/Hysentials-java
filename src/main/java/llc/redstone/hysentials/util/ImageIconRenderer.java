@@ -117,7 +117,7 @@ public class ImageIconRenderer extends FontRenderer {
                     }
                     accessor.setTextColor(textColor);
                     this.setColor((float) (textColor >> 16) / 255.0F, (float) (textColor >> 8 & 255) / 255.0F, (float) (textColor & 255) / 255.0F, accessor.alpha());
-                    i += 8;
+                    i += 8; //9?
                     continue;
                 }
             }
@@ -131,6 +131,7 @@ public class ImageIconRenderer extends FontRenderer {
                     if (num.matches("\\d+") && !num.isEmpty()) {
                         this.posX += renderNumberedString(num, hex, (int) this.posX, (int) this.posY, textColor, shadow);
                         i += hex.length() + num.length() + 2;
+                        //Is this supposed to be 3?
                         continue;
                     }
                 }
@@ -569,10 +570,10 @@ public class ImageIconRenderer extends FontRenderer {
 
         while ((i = text.indexOf(167, i + 1)) != -1) {
             if (i < j - 1) {
-                if (i + 3 < j - 1 && isFormatColor(text.charAt(i + 3))) {
+                char c0 = text.charAt(i + 1);
+                if (!isFormatColor(c0) && i + 3 < j - 1 && isFormatColor(text.charAt(i + 3))) {
                     continue;
                 }
-                char c0 = text.charAt(i + 1);
                 if (isFormatColor(c0)) {
                     s = "§" + c0;
                 } else if (isFormatSpecial(c0)) {

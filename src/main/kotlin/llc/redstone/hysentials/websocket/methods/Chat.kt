@@ -51,7 +51,7 @@ class Chat : Channel("chat") {
             ).setHover(HoverEvent.Action.SHOW_TEXT, (rank.prefixCheck + hoverUsername)) // Hover over the username to see the rank
         ).appendSibling(
             UTextComponent(
-                " ${if (FormattingConfig.hexRendering()) "<#fff1d4>" else "&6"}" + // Color of the message
+                (if (FormattingConfig.hexRendering()) "<#fff1d4>" else "&6") + // Color of the message
                         ": $message" // The message
             )
         )
