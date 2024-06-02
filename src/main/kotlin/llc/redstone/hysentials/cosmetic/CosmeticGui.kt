@@ -338,7 +338,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 if (slot >= page.size) return
                 val cosmetic = page[slot]
                 val cosmeticName = cosmetic.name
-                if (!previewing.contains(cosmeticName)) {
+                if (!previewing.contains(cosmeticName) && !hasCosmetic(Minecraft.getMinecraft().thePlayer.uniqueID, cosmeticName)) {
                     equipCosmetic(cosmeticName, true)
                 } else {
                     unEquipCosmetic(cosmeticName, true)

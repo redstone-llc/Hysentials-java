@@ -30,7 +30,7 @@ object CosmeticManager {
     var previewing = mutableListOf<String>()
 
     fun unEquipCosmetic(name: String, preview: Boolean = false) {
-        if (name == "kzero bundle") kzero(false)
+        if (name == "kzero bundle") kzero(false, preview)
         val cosmetics = BlockWAPIUtils.getCosmetics()
         val cosmetic = cosmetics.find { it.name == name }
         cosmetic?.let {
@@ -46,7 +46,7 @@ object CosmeticManager {
     }
 
     fun equipCosmetic(name: String, preview: Boolean = false) {
-        if (name == "kzero bundle") kzero(true)
+        if (name == "kzero bundle") kzero(true, preview)
         val cosmetics = BlockWAPIUtils.getCosmetics()
         val cosmetic = cosmetics.find { it.name == name }
         cosmetic?.let {
@@ -69,7 +69,7 @@ object CosmeticManager {
         }
     }
 
-    fun kzero(equip: Boolean) {
+    fun kzero(equip: Boolean, preview: Boolean = false) {
         var list = listOf(
             "kzero hair",
             "kzero robe",
@@ -77,9 +77,9 @@ object CosmeticManager {
         )
         for (cosmetic in list) {
             if (equip) {
-                equipCosmetic(cosmetic)
+                equipCosmetic(cosmetic, preview)
             } else {
-                unEquipCosmetic(cosmetic)
+                unEquipCosmetic(cosmetic, preview)
             }
         }
     }

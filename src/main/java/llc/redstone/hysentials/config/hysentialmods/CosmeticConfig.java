@@ -27,23 +27,6 @@ public class CosmeticConfig extends Config {
     )
     public static boolean disableCustomCapes = false;
 
-    @Switch(
-        name = "Wind Effect",
-        category = "Comsetics",
-        subcategory = "Capes",
-        description = "Will give the capes a windy effect making it look like they are blowing in the wind."
-    )
-    public static boolean windEffect = true;
-
-    @Dropdown(
-        name = "Cape Animation",
-        category = "Comsetics",
-        subcategory = "Capes",
-        description = "Which animation the capes should render with.",
-        options = {"Blocky Animation", "Silky Animation"}
-    )
-    public static int blockyCapes = 0;
-
     public CosmeticConfig() {
         super(new Mod("Cosmetics", ModType.UTIL_QOL, "/assets/hysentials/mods/cosmetics.png", 244, 80), "hysentials-cosmetic.json");
         initialize();

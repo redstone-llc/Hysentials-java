@@ -23,8 +23,6 @@
     "MinecraftAccessor",
     "MinecraftMixin_LeftClickInteract",
     "MixinRenderManager",
-    "PlayerMixin",
-    "PlayerModelMixin",
     "PlayerRendererMixin",
     "RenderItemMixin",
     "RenderLivingMixin",

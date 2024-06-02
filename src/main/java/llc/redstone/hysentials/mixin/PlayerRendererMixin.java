@@ -1,6 +1,5 @@
 package llc.redstone.hysentials.mixin;
 
-import llc.redstone.hysentials.cosmetics.capes.CustomCapeRenderLayer;
 import llc.redstone.hysentials.cosmetics.backpack.LayerBackPack;
 import llc.redstone.hysentials.cosmetics.hats.blackcat.LayerBlackCatHat;
 import llc.redstone.hysentials.cosmetics.hats.cat.LayerCatHat;
@@ -35,7 +34,6 @@ public abstract class PlayerRendererMixin extends RendererLivingEntity<AbstractC
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onCreate(CallbackInfo info) {
-        addLayer(new CustomCapeRenderLayer((RenderPlayer)(Object)this, getMainModel()));
         addLayer(new LayerTechnoCrown((RenderPlayer)(Object)this));
         addLayer(new LayerCatHat((RenderPlayer)(Object)this));
         addLayer(new LayerBackPack((RenderPlayer)(Object)this));
