@@ -57,6 +57,8 @@ public class BWSReplace implements ChatReceiveModule {
 
         IChatComponent chatComponent = event.message;
         List<IChatComponent> siblings = event.message.getSiblings();
+        siblings = fixSiblings(siblings);
+
 
         HashMap<String, UUID> users = new HashMap<>();
 
@@ -124,6 +126,9 @@ public class BWSReplace implements ChatReceiveModule {
                         }
                         Matcher m1 = Pattern.compile(regex1).matcher(s);
                         if (m1.find(0)) {
+                            if (!isRank(m1.group(0).split(" ")[0])) {
+                                continue;
+                            }
                             blockwRank = rank;
                             if (uuidBold == null) uuidBold = user.getValue();
                             s = s.replaceAll("\\[[A-Za-z§0-9+]+] " + name, replacement).replaceAll("§[7f]: ", rank.getChatColor() + ": " + italic(uuidBold) + bold(uuidBold));
@@ -180,32 +185,79 @@ public class BWSReplace implements ChatReceiveModule {
                 siblings.set(siblings.indexOf(sibling), textComponent);
             }
 
-            //I'm not too sure if this actually works or not
-            Pattern actionRegex = pattern;
-            Matcher actionMatcher = actionRegex.matcher(s.replaceAll("§r", ""));
-            if (actionMatcher.find()) {
-                String finalS = s;
-                String name = actionMatcher.group(1);
-                int i = name.lastIndexOf("<");
-                name = name.substring(i + 1);
-                int startM = finalS.indexOf("<" + name + ":" + actionMatcher.group(2) + ">");
+            try {
 
-                HysentialsSchema.Action action = BlockWAPIUtils.getAction(name, actionMatcher.group(2));
+                //I'm not too sure if this actually works or not
+                Pattern actionRegex = pattern;
+                Matcher actionMatcher = actionRegex.matcher(s.replaceAll("§r", ""));
+                if (actionMatcher.find()) {
+                    String finalS = s;
+                    String name = actionMatcher.group(1);
+                    int i = name.lastIndexOf("<");
+                    name = name.substring(i + 1);
+                    int startM = finalS.indexOf("<" + name + ":" + actionMatcher.group(2) + ">");
 
-                if (action != null) {
-                    String mes = finalS.substring(0, startM);
-                    String mes2 = finalS.substring(startM + ("<" + name + ":" + actionMatcher.group(2) + ">").length());
-                    UTextComponent messageComponent = new UTextComponent("&b" + action.getAction().getCreator() + "'s " + action.getAction().getName() + " &7(Copy)");
-                    messageComponent.setHover(HoverEvent.Action.SHOW_TEXT, "§eClick to copy the action");
-                    messageComponent.setClick(ClickEvent.Action.SUGGEST_COMMAND, action.getId());
-                    UTextComponent all = new UTextComponent("");
-                    all.appendSibling(new UTextComponent(mes)).appendSibling(messageComponent).appendSibling(new UTextComponent(mes2));
-                    siblings.set(siblings.indexOf(sibling), all);
+                    HysentialsSchema.Action action = BlockWAPIUtils.getAction(name, actionMatcher.group(2));
+
+                    if (action != null) {
+                        String mes = finalS.substring(0, startM);
+                        String mes2 = finalS.substring(startM + ("<" + name + ":" + actionMatcher.group(2) + ">").length());
+                        UTextComponent messageComponent = new UTextComponent("&b" + action.getAction().getCreator() + "'s " + action.getAction().getName() + " &7(Copy)");
+                        messageComponent.setHover(HoverEvent.Action.SHOW_TEXT, "§eClick to copy the action");
+                        messageComponent.setClick(ClickEvent.Action.SUGGEST_COMMAND, action.getId());
+                        UTextComponent all = new UTextComponent("");
+                        all.appendSibling(new UTextComponent(mes)).appendSibling(messageComponent).appendSibling(new UTextComponent(mes2));
+                        siblings.set(siblings.indexOf(sibling), all);
+                    }
                 }
+
+                //Most likely concurrent modification exception
+            } catch (Exception ignored) {
             }
         }
+        chatComponent.getSiblings().clear();
+        chatComponent.getSiblings().addAll(siblings);
         Minecraft.getMinecraft().thePlayer.addChatMessage(chatComponent);
         event.setCanceled(true);
+    }
+
+    private List<IChatComponent> fixSiblings(List<IChatComponent> siblings) {
+        List<IChatComponent> newSiblings = new ArrayList<>(siblings);
+        UTextComponent updating = null;
+        List<IChatComponent> toRemove = new ArrayList<>();
+        int startIndex = -1;
+
+        for (IChatComponent sibling : siblings) {
+            UTextComponent textComponent = new UTextComponent(sibling);
+            //remove first two and §r
+            if (sibling.getFormattedText().length() < 3) continue;
+            String s = sibling.getFormattedText().replace("§r", "");
+            if (s.contains("[")) {
+                updating = textComponent;
+                startIndex = newSiblings.indexOf(sibling);
+                continue;
+            }
+
+            if (updating != null) {
+                updating.appendSibling(textComponent);
+                toRemove.add(sibling);
+            }
+
+            if (updating != null && s.contains("]")) {
+                for (HypixelRanks rank : HypixelRanks.values()) {
+                    if (updating.getFormattedText().replace("§r", "").contains(rank.getPrefix())) {
+                        for (IChatComponent remove : toRemove) {
+                            newSiblings.remove(remove);
+                        }
+                        newSiblings.remove(sibling);
+                        newSiblings.set(startIndex, updating);
+                        break;
+                    }
+                }
+                updating = null;
+            }
+        }
+        return newSiblings;
     }
 
     private static String bold(UUID id) {

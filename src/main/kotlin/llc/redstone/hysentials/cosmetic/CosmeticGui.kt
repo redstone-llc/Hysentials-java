@@ -60,6 +60,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
     protected var guiTop = 0
 
     var inventory: CosmeticInventory? = null
+    var confirm = CosmeticPurchaseConfirm()
     var theSlot: Slot? = null
     var inventoryMap: HashMap<String, ArrayList<HysentialsSchema.Cosmetic>> = HashMap()
     var cosmeticBackground = ResourceLocation("hysentials:gui/wardrobe/background.png")
@@ -127,10 +128,6 @@ open class CosmeticGui : UScreen(), HysentialsGui {
             var largeFormat = DecimalFormat("#,###")
             mcFive.drawStringShadow(" ${largeFormat.format(emerald)}", guiLeft + 71f, guiTop + 149f, 0x55FF55)
 
-            GlStateManager.enableLighting()
-            GlStateManager.enableDepth()
-            RenderHelper.enableStandardItemLighting()
-            GlStateManager.enableRescaleNormal()
             //Draw player entity
             drawEntityOnScreen(guiLeft + 256, guiTop + 124, 40, xAngle, -yAngle, mc.thePlayer)
 
@@ -151,14 +148,16 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                     val j1 = slot.xDisplayPosition
                     val l2 = slot.yDisplayPosition
                     GlStateManager.colorMask(true, true, true, false)
-                    drawGradientRect(j1, l2, j1 + 25, l2 + 26, -2130706433, -2130706433)
+                    if (!confirm.open) {
+                        drawGradientRect(j1, l2, j1 + 25, l2 + 26, -2130706433, -2130706433)
+                    }
                     GlStateManager.colorMask(true, true, true, true)
                     GlStateManager.enableLighting()
                     GlStateManager.enableDepth()
                 }
             }
             val inventoryplayer = mc.thePlayer.inventory
-            if (inventoryplayer.itemStack == null && theSlot != null && theSlot!!.hasStack) {
+            if (inventoryplayer.itemStack == null && theSlot != null && theSlot!!.hasStack && !confirm.open) {
                 val itemstack1 = theSlot!!.stack
                 val list: MutableList<String> =
                     itemstack1.getTooltip(mc.thePlayer, mc.gameSettings.advancedItemTooltips)
@@ -178,7 +177,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
             var rY = mouseY.toFloat() - guiTop
 
             for (tab in tabs) {
-                if (tab.isHovered(rX.toDouble(), rY.toDouble())) {
+                if (tab.isHovered(rX.toDouble(), rY.toDouble()) && !confirm.open) {
                     drawHoveringText(
                         listOf("§8➔ <#${tab.color}>${tab.displayName} Cosmetics"),
                         mouseX,
@@ -188,42 +187,44 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 }
             }
 
-            when {
+            if (!confirm.open) {
+                when {
 
-                rX in 277.0..284.0 && rY in 5.0..11.0 -> {
-                    drawHoveringText(
-                        listOf(
-                            "§aEmeralds",
-                            "§8Currency",
-                            "",
-                            "§7Hysentials uses Emeralds as",
-                            "§7the main currency of the mod.",
-                            "§7Useful for things like quest",
-                            "§7rerolls cosmetic purchases,",
-                            "§7trading, and more! Emeralds are",
-                            "§7obtained by playing games and ",
-                            "§7earning small increments at a time",
-                            "§7(Winning a game will earn more)",
-                            "§7or by purchasing them on our website,",
-                            "§7at §9§nwww.redstone.llc/store§7."
-                        ), mouseX, mouseY, fontRenderer
-                    )
-                }
+                    rX in 277.0..284.0 && rY in 5.0..11.0 -> {
+                        drawHoveringText(
+                            listOf(
+                                "§aEmeralds",
+                                "§8Currency",
+                                "",
+                                "§7Hysentials uses Emeralds as",
+                                "§7the main currency of the mod.",
+                                "§7Useful for things like quest",
+                                "§7rerolls cosmetic purchases,",
+                                "§7trading, and more! Emeralds are",
+                                "§7obtained by playing games and ",
+                                "§7earning small increments at a time",
+                                "§7(Winning a game will earn more)",
+                                "§7or by purchasing them on our website,",
+                                "§7at §9§nstore.redstone.llc§7."
+                            ), mouseX, mouseY, fontRenderer
+                        )
+                    }
 
-                rX in 261.0..268.0 && rY in 5.0..11.0 -> {
-                    drawHoveringText(
-                        listOf(
-                            "§fOwned Cosmetics: §a${getOwnedCosmetics(mc.thePlayer.uniqueID).size}§7/§8${BlockWAPIUtils.getCosmetics().size}",
-                            "§fAmount Spent: §a${largeFormat.format(Socket.cachedUser.amountSpent ?: 0)} emeralds",
-                        ), mouseX, mouseY, fontRenderer
-                    )
-                }
+                    rX in 261.0..268.0 && rY in 5.0..11.0 -> {
+                        drawHoveringText(
+                            listOf(
+                                "§fOwned Cosmetics: §a${getOwnedCosmetics(mc.thePlayer.uniqueID).size}§7/§8${BlockWAPIUtils.getCosmetics().size}",
+                                "§fAmount Spent: §a${largeFormat.format(Socket.cachedUser.amountSpent ?: 0)} emeralds",
+                            ), mouseX, mouseY, fontRenderer
+                        )
+                    }
 
-                rX in 245.0..254.0 && rY in 5.0..12.0 -> {
-                    if (HysentialsConfig.wardrobeDarkMode) {
-                        drawHoveringText(listOf("Turn on Light Mode."), mouseX, mouseY)
-                    } else {
-                        drawHoveringText(listOf("Turn on Dark Mode."), mouseX, mouseY)
+                    rX in 245.0..254.0 && rY in 5.0..12.0 -> {
+                        if (HysentialsConfig.wardrobeDarkMode) {
+                            drawHoveringText(listOf("Turn on Light Mode."), mouseX, mouseY)
+                        } else {
+                            drawHoveringText(listOf("Turn on Dark Mode."), mouseX, mouseY)
+                        }
                     }
                 }
             }
@@ -242,14 +243,19 @@ open class CosmeticGui : UScreen(), HysentialsGui {
 
             Renderer.translate(guiLeft.toDouble(), guiTop.toDouble(), 0.0)
             buttons.forEach {
+                if (confirm.open) return@forEach
                 if (it.hoverImage?.endsWith("-light.png") == true && !HysentialsConfig.wardrobeDarkMode) {
                     it.draw(mouseX, mouseY)
                 } else if (HysentialsConfig.wardrobeDarkMode && it.hoverImage?.endsWith("-light.png") == false) {
                     it.draw(mouseX, mouseY)
                 }
             }
+            confirm.draw(mouseX, mouseY)
+
         } catch (ignored: Exception) {
         }
+
+
         Renderer.untranslate(0.0, 0.0, 0.0)
         GlStateManager.popMatrix()
     }
@@ -257,6 +263,10 @@ open class CosmeticGui : UScreen(), HysentialsGui {
 
     override fun onMouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int) {
         super.onMouseClicked(mouseX, mouseY, mouseButton)
+        if (confirm.open) {
+            confirm.click(mouseX, mouseY, mouseButton)
+            return
+        }
         buttons.forEach {
             if (it.hoverImage?.endsWith("-light.png") == true && !HysentialsConfig.wardrobeDarkMode) {
                 it.click(mouseX, mouseY, mouseButton)
@@ -287,6 +297,16 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 rX in 223.0..288.0 && rY in 20.0..159.0 -> {
                     isDragging = true
                     dragPos = Pair(mouseX, mouseY)
+                }
+
+                rX in 277.0..284.0 && rY in 5.0..11.0 -> {
+                    NetworkUtils.browseLink("https://store.redstone.llc")
+                    this.mc.soundHandler.playSound(
+                        PositionedSoundRecord.create(
+                            ResourceLocation("gui.button.press"),
+                            1.0f
+                        )
+                    )
                 }
 
                 rX in 245.0..254.0 && rY in 5.0..12.0 -> {
@@ -322,8 +342,12 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                     equipCosmetic(cosmeticName)
                     initScreen(width, height)
                 } else if (!hasCosmetic(uuid, cosmeticName) && emerald >= cosmetic.cost) {
-                    purchaseCosmetic(cosmeticName)
-                    initScreen(width, height)
+                    if (cosmetic.cost > 0) {
+                        confirm.open(cosmetic, this)
+                    } else {
+                        purchaseCosmetic(cosmeticName)
+                        initScreen(width, height)
+                    }
                 }
             }
         } else if (mouseButton == 1) { // Right click to preview
@@ -338,7 +362,11 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 if (slot >= page.size) return
                 val cosmetic = page[slot]
                 val cosmeticName = cosmetic.name
-                if (!previewing.contains(cosmeticName) && !hasCosmetic(Minecraft.getMinecraft().thePlayer.uniqueID, cosmeticName)) {
+                if (!previewing.contains(cosmeticName) && !hasCosmetic(
+                        Minecraft.getMinecraft().thePlayer.uniqueID,
+                        cosmeticName
+                    )
+                ) {
                     equipCosmetic(cosmeticName, true)
                 } else {
                     unEquipCosmetic(cosmeticName, true)
@@ -351,6 +379,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
     override fun onScreenClose() {
         super.onScreenClose()
         updateCosmetics()
+        confirm.close()
     }
 
     override fun onMouseReleased(mouseX: Double, mouseY: Double, state: Int) {

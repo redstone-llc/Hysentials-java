@@ -13,6 +13,7 @@ import llc.redstone.hysentials.cosmetics.hamster.HamsterCompanion;
 import llc.redstone.hysentials.cosmetics.hats.blackcat.BlackCat;
 import llc.redstone.hysentials.cosmetics.hats.blackcat.LayerBlackCatHat;
 import llc.redstone.hysentials.cosmetics.hats.cat.CatHat;
+import llc.redstone.hysentials.cosmetics.hats.ponjo.PonjoHelmet;
 import llc.redstone.hysentials.cosmetics.kzero.KzeroBundle;
 import llc.redstone.hysentials.cosmetics.miya.MiyaCompanion;
 import llc.redstone.hysentials.cosmetics.pepper.PepperCompanion;
@@ -131,6 +132,7 @@ public class Hysentials {
     public MiyaCompanion miyaCompanion = new MiyaCompanion();
     public HamsterCompanion hamsterCompanion = new HamsterCompanion();
     public TechnoCrown technoCrown = new TechnoCrown();
+    public PonjoHelmet ponjoHelmet = new PonjoHelmet();
     public BlackCat blackCat = new BlackCat();
     public KzeroBundle kzeroBundle = new KzeroBundle();
     public TdarthCosmetic tdarthCosmetic = new TdarthCosmetic();
@@ -435,6 +437,7 @@ public class Hysentials {
             eventBus.register(miyaCompanion);
             eventBus.register(hamsterCompanion);
             eventBus.register(technoCrown);
+            eventBus.register(ponjoHelmet);
             eventBus.register(kzeroBundle);
             eventBus.register(tdarthCosmetic);
             eventBus.register(dragonCosmetic);

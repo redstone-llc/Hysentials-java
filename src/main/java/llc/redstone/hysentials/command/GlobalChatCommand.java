@@ -39,15 +39,15 @@ public class GlobalChatCommand extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
         if (!BUtils.isHypixelOrSBX()) {
-            UChat.chat(HysentialsConfig.chatPrefix + "&cYou are not on a Hypixel server!");
+            UChat.chat(HysentialsConfig.chatPrefix + " &cYou are not on a Hypixel server!");
             return;
         }
         if (!ChatConfig.globalChat || !Hysentials.INSTANCE.getConfig().chatConfig.enabled) {
-            UChat.chat(HysentialsConfig.chatPrefix + "&cGlobal chat is disabled!");
+            UChat.chat(HysentialsConfig.chatPrefix + " &cGlobal chat is disabled!");
             return;
         }
         if (args.length == 0) {
-            UChat.chat(HysentialsConfig.chatPrefix + "&cInvalid usage! /globalchat <message>");
+            UChat.chat(HysentialsConfig.chatPrefix + " &cInvalid usage! /globalchat <message>");
             return;
         }
 

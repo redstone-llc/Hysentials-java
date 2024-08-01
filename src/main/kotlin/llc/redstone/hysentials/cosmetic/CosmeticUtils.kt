@@ -88,6 +88,7 @@ object CosmeticManager {
         val cosmetics = BlockWAPIUtils.getCosmetics()
         val cosmetic = cosmetics.find { it.name == cosmeticName }
         cosmetic?.let {
+            if (it.cost == -1) return@let
             if (!it.users.contains(Minecraft.getMinecraft().thePlayer.uniqueID.toString())) {
                 it.users.add(Minecraft.getMinecraft().thePlayer.uniqueID.toString())
                 Socket.cachedUser.amountSpent = Socket.cachedUser.amountSpent?.plus(it.cost)
@@ -164,6 +165,32 @@ object CosmeticManager {
         GlStateManager.colorMask(true, true, true, true)
 
 
+    }
+
+    fun drawItem(slotIn: Slot, cosmetic: HysentialsSchema.Cosmetic) {
+        val i: Int = slotIn.xDisplayPosition
+        val j: Int = slotIn.yDisplayPosition
+        GlStateManager.disableLighting()
+        GlStateManager.disableDepth()
+        GlStateManager.colorMask(true, true, true, false)
+        val itemstack: ItemStack = slotIn.stack ?: return
+        Minecraft.getMinecraft().renderItem.renderItemAndEffectIntoGUI(
+            itemstack,
+            i,
+            j
+        )
+        Minecraft.getMinecraft().renderItem.renderItemOverlayIntoGUI(
+            Minecraft.getMinecraft().fontRendererObj,
+            itemstack,
+            i,
+            j,
+            ""
+        )
+
+        Minecraft.getMinecraft().renderItem.zLevel = 0.0f
+        GlStateManager.enableLighting()
+        GlStateManager.enableDepth()
+        GlStateManager.colorMask(true, true, true, true)
     }
 
 

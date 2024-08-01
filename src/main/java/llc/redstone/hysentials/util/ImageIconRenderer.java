@@ -680,7 +680,7 @@ public class ImageIconRenderer extends FontRenderer {
                         }
                     }
                 }
-                if (c0 == 60 && l + 7 < text.length()) {
+                if (c0 == 60 && l + 9 < text.length()) {
                     String s = text.substring(l, l + 9);
                     if (s.matches("<#([0-9a-fA-F]){6}>")) {
                         l += 8 * k;

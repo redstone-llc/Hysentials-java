@@ -104,6 +104,10 @@ public class HeldItemTooltipHUD extends SBBoxesTextHud {
             }
         }
 
+        if (getText(false).isEmpty()) {
+            return false;
+        }
+
         return (o > 0 || spectatorText != null) && super.shouldShow();
     }
 

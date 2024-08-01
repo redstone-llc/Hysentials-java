@@ -133,7 +133,7 @@ public class ReplaceOption extends BasicOption implements IFocusable {
 
                     confirmButton.draw(vg, x + 800, y, inputHandler);
                     if (confirmButton.isClicked()) {
-                        update(replace, i);
+                        update(replace, i, keys.get(i));
                     }
 
                     deleteElement.draw(vg, x + 900, y, inputHandler);
@@ -165,6 +165,7 @@ public class ReplaceOption extends BasicOption implements IFocusable {
                 if (replace.addIcon.isClicked()) {
                     replace.replacements.put("", "");
                     addElements(replace, "", "", clubsPage);
+                    reload();
                 }
                 y += 40;
             }
@@ -184,21 +185,22 @@ public class ReplaceOption extends BasicOption implements IFocusable {
         }
     }
 
-    public void update(ReplaceStuff replaceStuff, int index) {
+    public void update(ReplaceStuff replaceStuff, int index, String s) {
         TextInputField replaceField = replaceStuff.replaceField.get(index);
         TextInputField withField = replaceStuff.withField.get(index);
-        String editKey = replaceStuff.replacements.keySet().toArray(new String[0])[index];
-        if (editKey.equals(replaceField.getInput())) {
+        System.out.println(replaceField.getInput() + " " + withField.getInput() + " " + s);
+        if (s.equals(replaceField.getInput())) {
             replaceStuff.replacements.put(replaceField.getInput(), withField.getInput());
         } else {
             replaceStuff.replacements.put(replaceField.getInput(), withField.getInput());
-            replaceStuff.replacements.remove(editKey);
+            replaceStuff.replacements.remove(s);
         }
         try {
             set(replacements);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
+        reload();
     }
 
     @Override

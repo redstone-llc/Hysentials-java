@@ -7,6 +7,7 @@ import llc.redstone.hysentials.guis.container.containers.club.HousingViewer;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import llc.redstone.hysentials.websocket.Socket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -33,6 +34,10 @@ public class VisitCommand extends CommandBase {
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
         if (args.length != 1) return;
         String player = args[0];
+        if (Socket.CLIENT == null || !Socket.CLIENT.isOpen()) {
+            Minecraft.getMinecraft().thePlayer.sendChatMessage("/visit " + player);
+            return;
+        }
         Multithreading.runAsync(() -> {
             try {
                 String s = NetworkUtils.getString(HysentialsUtilsKt.getHYSENTIALS_API() + "/club?alias=" + player);

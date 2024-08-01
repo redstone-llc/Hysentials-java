@@ -3,6 +3,7 @@ package llc.redstone.hysentials
 import llc.redstone.hysentials.updategui.UpdateChecker
 import llc.redstone.hysentials.util.NetworkUtils
 import kotlinx.coroutines.*
+import net.minecraft.launchwrapper.Launch
 import net.minecraftforge.common.MinecraftForge
 
 var HYSENTIALS_API = if (isLocalOn()) "http://localhost:8080/api" else "https://backend.redstone.llc/api"
@@ -31,6 +32,7 @@ val IO = object : CoroutineScope {
 
 fun init(version: String) {
     VERSION = version
+    println(Launch.blackboard["fml.deobfuscatedEnvironment"])
 }
 
 fun postInit() {

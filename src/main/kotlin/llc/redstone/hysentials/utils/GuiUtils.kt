@@ -9,6 +9,10 @@ import net.minecraft.entity.EntityLivingBase
 import net.minecraft.item.ItemStack
 
 fun drawEntityOnScreen(posX: Int, posY: Int, scale: Int, xAngle: Float, yAngle: Float, ent: EntityLivingBase) {
+    GlStateManager.enableLighting()
+    GlStateManager.enableDepth()
+    RenderHelper.enableStandardItemLighting()
+    GlStateManager.enableRescaleNormal()
     GlStateManager.enableColorMaterial()
     GlStateManager.pushMatrix()
     GlStateManager.translate(posX.toFloat(), posY.toFloat(), 50.0f)

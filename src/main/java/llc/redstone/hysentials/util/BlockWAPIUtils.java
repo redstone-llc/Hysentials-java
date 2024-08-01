@@ -29,6 +29,17 @@ public class BlockWAPIUtils {
      */
     public static void getOnline() {
         if (Socket.CLIENT == null || !Socket.CLIENT.isOpen()) return;
+
+        if (!Socket.user.getUuid().equals(Minecraft.getMinecraft().thePlayer.getUniqueID().toString())) {
+            Hysentials.INSTANCE.sendMessage("&cDetected UUID mismatch, reconnecting...");
+            if (Socket.CLIENT != null && Socket.CLIENT.isOpen()) {
+                Socket.manualDisconnect = true;
+                Socket.CLIENT.disconnect();
+            }
+            Socket.relogAttempts = 0;
+            Socket.createSocket();
+        }
+
         try {
             JsonElement cosmetics = null;
             try {

@@ -15,6 +15,7 @@ public enum HypixelRanks {
     HELPER("[HELPER] ", "helper", "§9", "helper"),
     ADMIN("[ADMIN] ", "admin", "§c", "admin"),
     YOUTUBER("[§fYOUTUBE§c] ", "youtube", "§c", "youtube"),
+    YT("[§fYT§c] ", "youtube", "§c", "youtube"),
     NPC("[NPC] ", "npc", "§8", "npc"),
 
     //mvp

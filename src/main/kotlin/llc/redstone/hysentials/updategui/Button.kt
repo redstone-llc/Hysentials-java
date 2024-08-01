@@ -23,7 +23,6 @@ class Button(
         if (gui == null) return
         val relativeX = mouseX - gui!!.getLeft()
         val relativeY = mouseY - gui!!.getTop()
-
         if (relativeX >= x && relativeX <= x + width && relativeY >= y && relativeY <= y + height) {
             onClick(mouseX, mouseY, mouseButton)
         }

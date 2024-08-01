@@ -28,18 +28,22 @@ public class ClubDashboardHandler {
             if (Navigator.getContainerName() == null || !Navigator.getContainerName().endsWith("Houses")) return;
             GuiChest chest = (GuiChest) Minecraft.getMinecraft().currentScreen;
             if (chest.getSlotUnderMouse().getHasStack()) {
-                event.getCi().cancel();
                 String name = chest.getSlotUnderMouse().getStack().getDisplayName();
                 List<String> lore = new ArrayList<>(getLore(chest.getSlotUnderMouse().getStack()));
                 List<String> newLore = new ArrayList<>();
                 for (String line : lore) {
                     line = line.replace("§r", "");
+                    if (line.startsWith("§8Available") || line.startsWith("§8Purchaseable")) {
+                        ClubDashboard.clubhouseSelect = false;
+                        return;
+                    }
                     if (line.startsWith("§7Cookies: ") || line.startsWith("§7Players: ")
                         || line.equals("§eRight Click to Manage!") || line.startsWith("§7Created: ")) {
                         continue;
                     }
                     newLore.add(line);
                 }
+                event.getCi().cancel();
                 ItemStack itemStack = chest.getSlotUnderMouse().getStack();
                 setLore(itemStack, newLore);
                 String username = Minecraft.getMinecraft().thePlayer.getName();

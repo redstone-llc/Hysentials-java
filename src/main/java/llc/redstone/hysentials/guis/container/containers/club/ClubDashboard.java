@@ -218,7 +218,7 @@ public class ClubDashboard extends Container {
                 clubhouseSelect = false;
                 UChat.chat("&cClubhouse selection request has expired!");
                 Minecraft.getMinecraft().thePlayer.closeScreen();
-            }, 5, TimeUnit.MINUTES);
+            }, 1, TimeUnit.MINUTES);
         });
     }
 

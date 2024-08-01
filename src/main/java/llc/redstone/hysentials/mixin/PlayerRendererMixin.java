@@ -3,6 +3,7 @@ package llc.redstone.hysentials.mixin;
 import llc.redstone.hysentials.cosmetics.backpack.LayerBackPack;
 import llc.redstone.hysentials.cosmetics.hats.blackcat.LayerBlackCatHat;
 import llc.redstone.hysentials.cosmetics.hats.cat.LayerCatHat;
+import llc.redstone.hysentials.cosmetics.hats.ponjo.LayerPonjoHelmet;
 import llc.redstone.hysentials.cosmetics.hats.technocrown.LayerTechnoCrown;
 import llc.redstone.hysentials.cosmetics.kzero.KzeroLayer;
 import llc.redstone.hysentials.cosmetics.wings.dragon.LayerDragonWings;
@@ -41,5 +42,6 @@ public abstract class PlayerRendererMixin extends RendererLivingEntity<AbstractC
         addLayer(new KzeroLayer((RenderPlayer)(Object)this));
         addLayer(new LayerTdarthWings((RenderPlayer)(Object)this));
         addLayer(new LayerDragonWings((RenderPlayer)(Object)this));
+        addLayer(new LayerPonjoHelmet((RenderPlayer)(Object)this));
     }
 }

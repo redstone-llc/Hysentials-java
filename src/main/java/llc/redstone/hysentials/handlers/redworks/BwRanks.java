@@ -50,7 +50,6 @@ public class BwRanks {
     @SubscribeEvent
     public void onWorldLoad(WorldEvent.Load event) {
         this.tick = 79;
-        BwRanksUtils.cache.invalidateAll();
     }
 
     @SubscribeEvent

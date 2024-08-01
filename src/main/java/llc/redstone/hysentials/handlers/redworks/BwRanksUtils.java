@@ -21,32 +21,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BwRanksUtils {
-    private static final AtomicInteger counter = new AtomicInteger(0);
-    private static final ThreadPoolExecutor POOL = new ThreadPoolExecutor(
-        50, 50,
-        0L, TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>(), (r) -> new Thread(
-        r,
-        String.format("%s Cache Thread %s", Hysentials.MOD_NAME, counter.incrementAndGet())
-    )
-    );
-
-    //thread to clear cache every 5 seconds
-    static {
-        POOL.prestartAllCoreThreads();
-        POOL.setKeepAliveTime(5, TimeUnit.SECONDS);
-        POOL.allowCoreThreadTimeOut(true);
-    }
-
-    public static final Cache<UUID, String> cache = Caffeine.newBuilder().executor(POOL).maximumSize(40).build();
     public static String getMessage(String message, String name, UUID uuid, boolean plus, boolean checksColor) {
         String s = checkRegexes(message, name, uuid);
         if (s != null) {
             return s;
-        }
-
-        if (cache.getIfPresent(uuid) != null) {
-            return cache.getIfPresent(uuid);
         }
 
         try {
@@ -67,6 +45,9 @@ public class BwRanksUtils {
                 }
                 Matcher m1 = Pattern.compile(regex1, Pattern.UNICODE_CASE).matcher(message);
                 if (m1.find(0)) {
+                    if (!isRank(m1.group(0).split(" ")[0])) {
+                        return message;
+                    }
                     message = message.replaceAll("\\[[A-Za-z§0-9+]+] " + name, replacement).replace("§7:", "§f:");
                 } else if (Pattern.compile(regex2, Pattern.UNICODE_CASE).matcher(message.split("§7:")[0]).find(0)) {
                     message = message.replaceAll("(§r§7|§7)" + name, replacement).replace("§7:", "§f:");
@@ -90,9 +71,6 @@ public class BwRanksUtils {
         }
 
         if (message.equals(name)) return message;
-
-        cache.put(uuid, message);
-
         return message;
     }
 
@@ -101,23 +79,24 @@ public class BwRanksUtils {
         Matcher teamsM = teamsP.matcher(message.replaceAll("§r", ""));
 
         if (teamsM.find()) {
+            boolean h = FormattingConfig.hexRendering();
             switch (teamsM.group(1)) {
                 case "§8§lS":
-                    return ":gray: <#d9d9d9>" + teamsM.group(2);
+                    return ":gray: " + (h ? "<#d9d9d9>": "§8") + teamsM.group(2);
                 case "§e§lY":
-                    return ":yellow: <#ebd028>" + teamsM.group(2);
+                    return ":yellow: " + (h ? "<#ebd028>": "§e") + teamsM.group(2);
                 case "§f§lW":
-                    return ":white: <#d9d9d9>" + teamsM.group(2);
+                    return ":white: " + (h ? "<#d9d9d9>": "§f") + teamsM.group(2);
                 case "§a§lG":
-                    return ":green: <#56e656>" + teamsM.group(2);
+                    return ":green: <#56e656>" + (h ? "<#56e656>": "§a") + teamsM.group(2);
                 case "§c§lR":
-                    return ":red: &c" + teamsM.group(2);
+                    return ":red: §c" + teamsM.group(2);
                 case "§d§lP":
-                    return ":pink: <#e070e0>" + teamsM.group(2);
+                    return ":pink: " + (h ? "<#e070e0>": "§d") + teamsM.group(2);
                 case "§9§lB":
-                    return ":blue: &9" + teamsM.group(2);
+                    return ":blue: §9" + teamsM.group(2);
                 case "§b§lA":
-                    return ":aqua: <#67e9e9>" + teamsM.group(2);
+                    return ":aqua: " + (h ? "<#67e9e9>": "§d") + teamsM.group(2);
             }
         }
         return null;
@@ -172,6 +151,15 @@ public class BwRanksUtils {
             }
         }
         return new Object[]{replacement, r};
+    }
+
+    public static boolean isRank(String prefix) {
+        for (HypixelRanks r : HypixelRanks.values()) {
+            if (r.getPrefix().replace(" ", "").equals(prefix.replace("§r", ""))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static String getReplace(String prefix, String name, UUID uuid) {
