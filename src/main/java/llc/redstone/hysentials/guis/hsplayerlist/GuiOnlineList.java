@@ -134,14 +134,13 @@ public class GuiOnlineList extends Gui {
             if (t < list.size()) {
                 HysentialsSchema.User user = list.get(t);
                 String string2 = BlockWAPIUtils.getDisplayName(user);
-                if (bl) {
+                if (bl && user.getSkin() != null && !user.getSkin().isEmpty()) {
                     byte[] bytes = Base64.getDecoder().decode(user.getSkin());
                     try {
                         BufferedImage image = ImageIO.read(new ByteArrayInputStream(bytes));
                         DynamicTexture dynamicTexture = new DynamicTexture(image);
                         dynamicTexture.updateDynamicTexture();
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
                     }
 
                     int x = 8;

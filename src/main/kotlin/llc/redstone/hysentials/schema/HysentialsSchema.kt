@@ -41,7 +41,7 @@ class HysentialsSchema {
         var quests: MutableSet<Quest>?,
         var amountSpent: Int?,
         var hypixel: JsonObject,
-        var skin: String,
+        var skin: String?,
     ) {
         companion object {
             fun deserialize(obj: JsonObject): User {
