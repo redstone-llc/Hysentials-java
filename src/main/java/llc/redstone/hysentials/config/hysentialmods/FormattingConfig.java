@@ -30,6 +30,14 @@ public class FormattingConfig extends Config {
     public static boolean futuristicRanks = true;
 
     @Switch(
+        name = "Show Hysentials ranks",
+        category = "General",
+        subcategory = "Fancy Formatting",
+        description = "Enable showing custom Hysentials ranks in both chat and tab. (Admin, Team, etc.)"
+    )
+    public static boolean showHysentialsRanks = true;
+
+    @Switch(
         name = "Hex Colors",
         category = "General",
         subcategory = "Fancy Formatting",
@@ -322,6 +330,10 @@ public class FormattingConfig extends Config {
 
     public static boolean fancyRendering() {
         return (futuristicRanks || hexColors) && Hysentials.INSTANCE.getConfig().formattingConfig.enabled;
+    }
+
+    public static boolean showHysentialsRanks() {
+        return futuristicRanks && showHysentialsRanks && Hysentials.INSTANCE.getConfig().formattingConfig.enabled;
     }
 
     public static boolean hexRendering() {

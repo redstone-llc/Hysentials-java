@@ -113,7 +113,7 @@ public class BWSReplace implements ChatReceiveModule {
                     BlockWAPIUtils.Rank rank = BlockWAPIUtils.getRank(uuid);
                     String regex1 = "\\[[A-Za-z§0-9+]+] " + name;
                     String regex2 = "(§r§7|§7)" + name;
-                    if (rank != null && rank != BlockWAPIUtils.Rank.DEFAULT) {
+                    if (rank != null && rank != BlockWAPIUtils.Rank.DEFAULT && FormattingConfig.showHysentialsRanks()) {
                         String replacement = (rank.getPrefix() + name);
                         if (futuristic) {
                             replacement = (rank.getPlaceholder() + name);
