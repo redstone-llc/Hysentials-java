@@ -333,7 +333,7 @@ public class FormattingConfig extends Config {
     }
 
     public static boolean showHysentialsRanks() {
-        return futuristicRanks && showHysentialsRanks && Hysentials.INSTANCE.getConfig().formattingConfig.enabled;
+        return showHysentialsRanks && Hysentials.INSTANCE.getConfig().formattingConfig.enabled;
     }
 
     public static boolean hexRendering() {
