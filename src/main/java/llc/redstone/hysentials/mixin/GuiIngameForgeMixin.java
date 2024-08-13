@@ -123,7 +123,6 @@ public class GuiIngameForgeMixin {
     protected boolean hysentials$renderHysentialsPlayerList(int width, int height)
     {
         if (HysentialsConfig.onlinePlayersKeyBind.isActive() && Minecraft.getMinecraft().currentScreen == null) {
-            hysentials$hysentialsOnlineList.updatePlayerList(true);
             ScaledResolution res = new ScaledResolution(Minecraft.getMinecraft());
             hysentials$hysentialsOnlineList.renderPlayerlist(res.getScaledWidth());
             return true;
