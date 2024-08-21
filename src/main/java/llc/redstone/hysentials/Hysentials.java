@@ -32,6 +32,7 @@ import llc.redstone.hysentials.handlers.misc.QuestHandler;
 
 import llc.redstone.hysentials.macrowheel.MacroWheelData;
 import llc.redstone.hysentials.quest.Quest;
+import llc.redstone.hysentials.renderer.text.FancyFormattingKt;
 import llc.redstone.hysentials.util.*;
 import cc.polyfrost.oneconfig.utils.commands.CommandManager;
 import llc.redstone.hysentials.command.*;
@@ -152,8 +153,6 @@ public class Hysentials {
     public void init(FMLInitializationEvent event) {
         registerImages();
         config = new HysentialsConfig();
-        updateAndAdd();
-
         File file = new File(modDir, "./config/hysentials");
         if (!file.exists() && !file.mkdirs()) {
             throw new RuntimeException("Failed to create config directory! Please report this to sinender on Discord");
@@ -240,11 +239,11 @@ public class Hysentials {
         isHytils = Loader.isModLoaded("hytils-reborn");
         chatHandler.init();
 
-        imageIconRenderer = new ImageIconRenderer();
+//        imageIconRenderer = new ImageIconRenderer();
         minecraftFont = Minecraft.getMinecraft().fontRendererObj;
-        if (FormattingConfig.fancyRendering()) {
-            Minecraft.getMinecraft().fontRendererObj = imageIconRenderer;
-        }
+//        if (FormattingConfig.fancyRendering()) {
+//            Minecraft.getMinecraft().fontRendererObj = imageIconRenderer;
+//        }
 
         registerHandlers();
 
@@ -257,6 +256,13 @@ public class Hysentials {
         if (config.macroWheelHud.position.getX() == 0 && config.macroWheelHud.position.getY() == 0) {
             config.macroWheelHud.position.setPosition((Renderer.screen.getWidth() / 2f) - (34*5f) / 2, (Renderer.screen.getHeight() / 2f) - (34*5f) / 2);
         }
+
+        for (int i = 1000; 65000 > i ; i++) {
+            if (Minecraft.getMinecraft().fontRendererObj.getCharWidth((char) i) > 0) {
+                FancyFormattingKt.getChars().put((char) i, Minecraft.getMinecraft().fontRendererObj.getCharWidth((char) i));
+            }
+        }
+        updateAndAdd();
     }
     @Mod.EventHandler
     public void finishedStarting(FMLLoadCompleteEvent event) {

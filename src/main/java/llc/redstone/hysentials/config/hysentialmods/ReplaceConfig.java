@@ -18,6 +18,7 @@ import llc.redstone.hysentials.util.BlockWAPIUtils;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ReplaceConfig extends Config {
     @Switch(
@@ -86,8 +87,8 @@ public class ReplaceConfig extends Config {
         return option;
     }
 
-    public HashMap<String, String> getAllActiveReplacements() {
-        HashMap<String, String> replacements = new HashMap<>();
+    public ConcurrentHashMap<String, String> getAllActiveReplacements() {
+        ConcurrentHashMap<String, String> replacements = new ConcurrentHashMap<>();
         for (ReplaceStuff replaceStuff : globalReplacements) {
             replacements.putAll(replaceStuff.replacements);
         }

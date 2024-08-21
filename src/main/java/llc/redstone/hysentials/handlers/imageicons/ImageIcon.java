@@ -22,8 +22,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static llc.redstone.hysentials.renderer.text.FancyFormattingKt.getChars;
 
 public class ImageIcon {
     public static HashMap<String, ImageIcon> imageIcons = new HashMap<>();
@@ -36,6 +39,8 @@ public class ImageIcon {
     public int width;
     public int height;
     public boolean emoji;
+
+    public String replacement = null;
 
     public ImageIcon(String name, ResourceLocation resourceLocation, boolean emoji) {
         this.name = name;
@@ -95,6 +100,7 @@ public class ImageIcon {
             this.dynamicTexture = new DynamicTexture(image);
 //            this.resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(this.name, this.dynamicTexture);
         }
+        setReplacement();
     }
 
     public static void reloadIcons() {
@@ -137,32 +143,71 @@ public class ImageIcon {
 
     public static Pattern stringPattern = Pattern.compile(":([a-z_\\-0-9?]+):", 2);
 
-    public int renderImage(float x, float y, boolean shadow, int oldColor, UUID uuid, float alpha) {
-        if (emoji && uuid != null && !CosmeticManager.hasCosmetic(uuid, "hymojis")) {
-            return -1;
-        }
+    public void setReplacement() {
         int width = this.getWidth();
         int height = this.getHeight();
         float scaledHeight = 9.0f / height;
+        float updatedHeight = height * scaledHeight;
+        float updatedWidth = width * scaledHeight;
 
-        GlStateManager.pushMatrix();
+        int currentWidth = 0;
+        boolean isFirst = true;
+        AtomicBoolean breaks = new AtomicBoolean(false);
+        StringBuilder string = new StringBuilder();
+        while (currentWidth < updatedWidth) {
+            Integer charWidth = null;
+            for (Map.Entry<Character, Integer> entry : getChars().entrySet()) {
+                if (entry.getValue() + currentWidth <= updatedWidth) {
+                    charWidth = entry.getValue() + 1;
+                    break;
+                }
+            }
+            if (charWidth == null) {
+                break;
+            }
+            currentWidth += charWidth;
+            List<Character> charKeys = new ArrayList<>();
+            for (Map.Entry<Character, Integer> entry : getChars().entrySet()) {
+                if (entry.getValue().equals(charWidth)) {
+                    if (isFirst) {
+                        imageIcons.values().stream().filter(icon -> icon.replacement != null && !icon.replacement.isEmpty() && icon.replacement.charAt(0) == entry.getKey()).findFirst().ifPresent(icon -> {
+                            breaks.set(true);
+                        });
+                        if (breaks.get()) {
+                            continue;
+                        }
+                        isFirst = false;
+                    }
+                    charKeys.add(entry.getKey());
+                }
+            }
+            char charKey = charKeys.get(new Random().nextInt(charKeys.size()));
+            string.append(charKey);
+        }
+        System.out.println("Using " + string + " for " + name);
+        replacement = string.toString();
+    }
+
+    public float renderImage(float x, float y, boolean shadow, int oldColor, float alpha) {
+        int width = this.getWidth();
+        int height = this.getHeight();
+        float scaledHeight = 9.0f / height;
+        float updatedHeight = height * scaledHeight;
+        float updatedWidth = width * scaledHeight;
 
         dynamicTexture.updateDynamicTexture();
 
-        GlStateManager.scale(scaledHeight, scaledHeight, scaledHeight);
         int textColor = Integer.parseInt("FFFFFF", 16);
         if (shadow) {
             textColor = (textColor & 16579836) >> 2 | textColor & -16777216;
         }
         GlStateManager.color((float) (textColor >> 16) / 255.0F, (float) (textColor >> 8 & 255) / 255.0F, (float) (textColor & 255) / 255.0F, alpha);
-        drawModalRectWithCustomSizedTexture(x * (1 / scaledHeight), y * (1 / scaledHeight), 0, 0, width, height, width, height);
+        drawModalRectWithCustomSizedTexture(x, y, 0f, 0f, updatedWidth, updatedHeight, updatedWidth, updatedHeight);
         GlStateManager.color((float) (oldColor >> 16) / 255.0F, (float) (oldColor >> 8 & 255) / 255.0F, (float) (oldColor & 255) / 255.0F, alpha);
-        GlStateManager.popMatrix();
-
         return (int) (width * scaledHeight);
     }
 
-    public static void drawModalRectWithCustomSizedTexture(double x, double y, float u, float v, int width, int height, float textureWidth, float textureHeight) {
+    public static void drawModalRectWithCustomSizedTexture(double x, double y, float u, float v, float width, float height, float textureWidth, float textureHeight) {
         float f = 1.0F / textureWidth;
         float g = 1.0F / textureHeight;
         GL11.glBegin(GL11.GL_QUADS);

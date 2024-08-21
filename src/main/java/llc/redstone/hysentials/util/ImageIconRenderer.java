@@ -15,6 +15,7 @@ import net.minecraft.util.ResourceLocation;
 
 import java.awt.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static llc.redstone.hysentials.util.C.toHex;
 
@@ -35,45 +36,23 @@ public class ImageIconRenderer extends FontRenderer {
     }
 
     private void renderStringAtPosA(String text, boolean shadow) {
-        UUID uuid = null;
-        if (text.startsWith("§aHymojis: \n")) {
-            uuid = UUID.fromString("ad80d7cf-8115-4e2a-b15d-e5cc0bf6a9a2");
-        }
-        if (Minecraft.getMinecraft().currentScreen instanceof GuiChat) {
-            uuid = (Minecraft.getMinecraft().thePlayer == null) ? null : Minecraft.getMinecraft().thePlayer.getUniqueID();
-        }
-
-        try {
-//            if (BwRanks.replacementMap.size() > 0) {
-//                String finalText = text.replace("§r", "");
-//                for (Map.Entry<String, DuoVariable<UUID, String>> entry : BwRanks.replacementMap.entrySet()) {
-//                    if (finalText.startsWith(entry.getKey())) {
-//                        text = text.replace(entry.getKey(), entry.getValue().second);
-//                        uuid = entry.getValue().first;
-//                    }
-//                }
-//            }
-
-            HashMap<String, String> allActiveReplacements = Hysentials.INSTANCE.getConfig().replaceConfig.getAllActiveReplacements();
-            for (String key : allActiveReplacements.keySet()) {
-                String finalText = text.replace("§r", "");
-                String value = allActiveReplacements.get(key);
-                if (value == null) {
-                    continue;
-                }
-                if (value.isEmpty() || key.isEmpty()) {
-                    continue;
-                }
-                value = value.replace("&", "§");
-                key = key.replace("&", "§");
-                if (Hysentials.INSTANCE.getConfig().replaceConfig.isRegexEnabled()) {
-                    text = finalText.replaceAll(key, value);
-                } else {
-                    text = finalText.replace(key, value);
-                }
+        ConcurrentHashMap<String, String> allActiveReplacements = Hysentials.INSTANCE.getConfig().replaceConfig.getAllActiveReplacements();
+        for (String key : allActiveReplacements.keySet()) {
+            String finalText = text.replace("§r", "");
+            String value = allActiveReplacements.get(key);
+            if (value == null) {
+                continue;
             }
-
-        } catch (ConcurrentModificationException ignored) {
+            if (value.isEmpty() || key.isEmpty()) {
+                continue;
+            }
+            value = value.replace("&", "§");
+            key = key.replace("&", "§");
+            if (Hysentials.INSTANCE.getConfig().replaceConfig.isRegexEnabled()) {
+                text = finalText.replaceAll(key, value);
+            } else {
+                text = finalText.replace(key, value);
+            }
         }
         boolean lookingForQuestionMark = false;
         for (int i = 0; i < text.length(); ++i) {
@@ -93,7 +72,7 @@ public class ImageIconRenderer extends FontRenderer {
                         ImageIcon icon = ImageIcon.getIcon(str);
                         if (icon != null) {
                             float y = this.posY - 1;
-                            int positionAdd = icon.renderImage(this.posX, y, shadow, textColor, uuid, accessor.alpha());
+                            float positionAdd = icon.renderImage(this.posX, y, shadow, textColor, accessor.alpha());
                             if (positionAdd > 0) {
                                 this.posX += positionAdd;
                                 i += str.length() + 1;
@@ -319,30 +298,23 @@ public class ImageIconRenderer extends FontRenderer {
     }
 
     public int getStringWidth(String text) {
-        UUID uuid = null;
-        if (Minecraft.getMinecraft().currentScreen instanceof GuiChat) {
-            uuid = (Minecraft.getMinecraft().thePlayer == null) ? null : Minecraft.getMinecraft().thePlayer.getUniqueID();
-        }
-        try {
-            HashMap<String, String> allActiveReplacements = Hysentials.INSTANCE.getConfig().replaceConfig.getAllActiveReplacements();
-            for (String key : allActiveReplacements.keySet()) {
-                String finalText = text.replace("§r", "");
-                String value = allActiveReplacements.get(key);
-                if (value == null) {
-                    continue;
-                }
-                if (value.isEmpty() || key.isEmpty()) {
-                    continue;
-                }
-                value = value.replace("&", "§");
-                key = key.replace("&", "§");
-                if (Hysentials.INSTANCE.getConfig().replaceConfig.isRegexEnabled()) {
-                    text = finalText.replaceAll(key, value);
-                } else {
-                    text = finalText.replace(key, value);
-                }
+        ConcurrentHashMap<String, String> allActiveReplacements = Hysentials.INSTANCE.getConfig().replaceConfig.getAllActiveReplacements();
+        for (String key : allActiveReplacements.keySet()) {
+            String finalText = text.replace("§r", "");
+            String value = allActiveReplacements.get(key);
+            if (value == null) {
+                continue;
             }
-        } catch (ConcurrentModificationException ignored) {
+            if (value.isEmpty() || key.isEmpty()) {
+                continue;
+            }
+            value = value.replace("&", "§");
+            key = key.replace("&", "§");
+            if (Hysentials.INSTANCE.getConfig().replaceConfig.isRegexEnabled()) {
+                text = finalText.replaceAll(key, value);
+            } else {
+                text = finalText.replace(key, value);
+            }
         }
         if (text == null) {
             return 0;
@@ -369,15 +341,9 @@ public class ImageIconRenderer extends FontRenderer {
                                     int height = icon.getHeight();
                                     float scaledHeight = (float) 9 / height;
                                     int scaledWidth = (int) (width * scaledHeight);
-                                    if (icon.emoji && uuid != null && CosmeticManager.hasCosmetic(uuid, "hymojis")) {
-                                        j += str.length() + 1;
-                                        i += scaledWidth;
-                                        continue;
-                                    } else if (!icon.emoji) {
-                                        j += str.length() + 1;
-                                        i += scaledWidth;
-                                        continue;
-                                    }
+                                    j += str.length() + 1;
+                                    i += scaledWidth;
+                                    continue;
                                 }
                             }
                         }

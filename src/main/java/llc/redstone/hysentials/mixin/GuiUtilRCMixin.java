@@ -24,6 +24,7 @@ public class GuiUtilRCMixin {
         if (!FormattingConfig.fancyRendering()) {
             return fr.trimStringToWidth(c0, c1, c2);
         }
-        return Hysentials.INSTANCE.imageIconRenderer.trimStringToWidth(c0, c1, c2);
+//        return Hysentials.INSTANCE.imageIconRenderer.trimStringToWidth(c0, c1, c2);
+        return fr.trimStringToWidth(c0, c1, c2);
     }
 }

@@ -9,7 +9,6 @@
     "BossStatusMixin",
     "EntityPlayerSPMixin_MessageHandling",
     "EntityRendererMixin",
-    "FontRendererMixin",
     "GuiIngameAccessor",
     "GuiIngameForgeMixin",
     "GuiIngameMixin",
@@ -28,6 +27,8 @@
     "RenderLivingMixin",
     "RenderMixin",
     "SlotDecorationHotbarMixin",
-    "SlotDecorationMixin"
+    "SlotDecorationMixin",
+    "fancyformatting.ImageIconsMixin",
+    "fancyformatting.ReplacementMixin"
   ]
 }
