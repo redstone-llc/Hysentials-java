@@ -44,11 +44,15 @@ class MacroWheelHudConfigThing(
     ) var bgColor: OneColor,
 ): Hud(enabled, x, y, scale) {
     init {
+        if (position.x == 0f && position.anchor == AnchorPosition.TOP_LEFT) {
+            position.anchor = AnchorPosition.TOP_CENTER
+            position.y = 163.0f;
+        }
     }
 
     override fun draw(matrices: UMatrixStack?, x: Float, y: Float, scale: Float, example: Boolean) {
         NanoVGHelper.INSTANCE.setupAndDraw(true) {
-            MacroWheelOverlay(x + 0.5f, y + 0.5f, scale, bgColor).draw(
+            MacroWheelOverlay(x, y, scale, bgColor).draw(
                 it, 0f, InputHandler()
             )
         }

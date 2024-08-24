@@ -39,7 +39,7 @@ public class HeldItemTooltipHUD extends SBBoxesTextHud {
     private static final Minecraft mc = UMinecraft.getMinecraft();
 
     public HeldItemTooltipHUD() {
-        super(true, 1920f / 2, 1080f - 51f, 1, true, 2, new OneColor(0, 0, 0, 125), true, new OneColor(0, 0, 0, 52), new OneColor(255, 255, 255));
+        super(true, 1920f / 2, 1080f - 40f, 1, true, 2, new OneColor(0, 0, 0, 125), true, new OneColor(0, 0, 0, 52), new OneColor(255, 255, 255));
         this.textType = 1;
     }
 
