@@ -109,7 +109,6 @@ Hysentials is a content-expansion and QOL mod for Hypixel. It offers a plethora 
             </details>
         </ul>
     </details>
-
     <details open="">
         <summary>Leveling Menu</summary>
         <p>Access the leveling menu by typing <code>/hysentials level</code>. Here, you can view your level, XP, and progress towards the next level.</p>
