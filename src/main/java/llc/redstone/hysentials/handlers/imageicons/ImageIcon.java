@@ -39,7 +39,7 @@ public class ImageIcon {
     public int width;
     public int height;
     public boolean emoji;
-
+    public Character firstChar = null;
     public String replacement = null;
 
     public ImageIcon(String name, ResourceLocation resourceLocation, boolean emoji) {
@@ -141,50 +141,56 @@ public class ImageIcon {
         return height;
     }
 
-    public static Pattern stringPattern = Pattern.compile(":([a-z_\\-0-9?]+):", 2);
-
     public void setReplacement() {
         int width = this.getWidth();
         int height = this.getHeight();
         float scaledHeight = 9.0f / height;
-        float updatedHeight = height * scaledHeight;
         float updatedWidth = width * scaledHeight;
 
         int currentWidth = 0;
         boolean isFirst = true;
-        AtomicBoolean breaks = new AtomicBoolean(false);
         StringBuilder string = new StringBuilder();
-        while (currentWidth < updatedWidth) {
+        while (currentWidth <= updatedWidth) {
             Integer charWidth = null;
             for (Map.Entry<Character, Integer> entry : getChars().entrySet()) {
-                if (entry.getValue() + currentWidth <= updatedWidth) {
-                    charWidth = entry.getValue() + 1;
+                if (entry.getValue() + 1 + currentWidth <= updatedWidth) {
+                    charWidth = entry.getValue();
                     break;
                 }
             }
             if (charWidth == null) {
                 break;
             }
-            currentWidth += charWidth;
+            currentWidth += charWidth + 1;
             List<Character> charKeys = new ArrayList<>();
             for (Map.Entry<Character, Integer> entry : getChars().entrySet()) {
                 if (entry.getValue().equals(charWidth)) {
-                    if (isFirst) {
-                        imageIcons.values().stream().filter(icon -> icon.replacement != null && !icon.replacement.isEmpty() && icon.replacement.charAt(0) == entry.getKey()).findFirst().ifPresent(icon -> {
-                            breaks.set(true);
-                        });
-                        if (breaks.get()) {
-                            continue;
-                        }
-                        isFirst = false;
-                    }
                     charKeys.add(entry.getKey());
                 }
             }
-            char charKey = charKeys.get(new Random().nextInt(charKeys.size()));
+            char charKey;
+            if (isFirst) {
+                charKey = charKeys.get(new Random().nextInt(charKeys.size()));
+                for (ImageIcon icon : ImageIcon.imageIcons.values()) {
+                    if (icon.firstChar == charKey) {
+                        icon.setReplacement();
+                        break;
+                    }
+                }
+                firstChar = charKey;
+                isFirst = false;
+            } else if (!charKeys.isEmpty()) {
+                charKey = charKeys.get(new Random().nextInt(charKeys.size()));
+            } else {
+                currentWidth -= charWidth + 1;
+                continue;
+            }
             string.append(charKey);
         }
-        System.out.println("Using " + string + " for " + name);
+        if (string.length() == 0) {
+            setReplacement();
+            return;
+        }
         replacement = string.toString();
     }
 
@@ -195,6 +201,7 @@ public class ImageIcon {
         float updatedHeight = height * scaledHeight;
         float updatedWidth = width * scaledHeight;
 
+        GlStateManager.pushMatrix();
         dynamicTexture.updateDynamicTexture();
 
         int textColor = Integer.parseInt("FFFFFF", 16);
@@ -203,7 +210,8 @@ public class ImageIcon {
         }
         GlStateManager.color((float) (textColor >> 16) / 255.0F, (float) (textColor >> 8 & 255) / 255.0F, (float) (textColor & 255) / 255.0F, alpha);
         drawModalRectWithCustomSizedTexture(x, y, 0f, 0f, updatedWidth, updatedHeight, updatedWidth, updatedHeight);
-        GlStateManager.color((float) (oldColor >> 16) / 255.0F, (float) (oldColor >> 8 & 255) / 255.0F, (float) (oldColor & 255) / 255.0F, alpha);
+//        GlStateManager.color((float) (oldColor >> 16) / 255.0F, (float) (oldColor >> 8 & 255) / 255.0F, (float) (oldColor & 255) / 255.0F, alpha);
+        GlStateManager.popMatrix();
         return (int) (width * scaledHeight);
     }
 

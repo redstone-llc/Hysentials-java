@@ -28,6 +28,7 @@
     "RenderMixin",
     "SlotDecorationHotbarMixin",
     "SlotDecorationMixin",
+    "fancyformatting.HexColorMixin",
     "fancyformatting.ImageIconsMixin",
     "fancyformatting.ReplacementMixin"
   ]

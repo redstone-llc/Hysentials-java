@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.mixin.fancyformatting;
 
+import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
 import llc.redstone.hysentials.handlers.imageicons.ImageIcon;
 import llc.redstone.hysentials.renderer.text.FancyFormattingKt;
 import net.minecraft.client.gui.FontRenderer;
@@ -25,11 +26,16 @@ public abstract class ImageIconsMixin {
     protected float posY;
 
     @Unique
-    private String hysentials$text = null;
-    @Unique Boolean hysentials$shadow = null;
+    Boolean hysentials$shadow = null;
 
     @Unique
-    List<Character> hysentials$renderedChars = null;
+    String hysentials$renderedChars = null;
+    @Unique
+    boolean hysentials$working = false;
+    @Unique
+    boolean hysentials$onemore = false;
+    @Unique
+    ImageIcon hysentials$currentIcon = null;
 
     @Shadow
     protected abstract float renderChar(char ch, boolean italic);
@@ -37,58 +43,100 @@ public abstract class ImageIconsMixin {
     @Shadow
     protected abstract void doDraw(float f);
 
-    @ModifyArg(method = "renderStringAtPos", at = @At(value = "INVOKE", target = "Ljava/lang/String;charAt(I)C"))
+    @ModifyVariable(method = "renderStringAtPos", at = @At(value = "INVOKE", target = "Ljava/lang/String;charAt(I)C", ordinal = 0, shift = At.Shift.AFTER))
     private int renderStringAtPosReplace(int index) {
         try {
-            char c0 = hysentials$text.charAt(index);
-            for (ImageIcon icon : ImageIcon.imageIcons.values()) {
-                if (icon.replacement == null || icon.replacement.isEmpty()) continue;
-                if (icon.replacement.charAt(0) == c0) {
-                    System.out.println("Found replacement for " + c0);
-                    hysentials$renderedChars = new ArrayList<>();
-                    hysentials$renderedChars.add(c0);
-                    break;
-                }
-                if (hysentials$renderedChars != null && icon.replacement.charAt(hysentials$renderedChars.size()) == c0) {
-                    hysentials$renderedChars.add(c0);
-                    if (hysentials$renderedChars.size() == icon.replacement.length()) {
-                        hysentials$renderedChars = null;
-                        float f = icon.renderImage(posX, posY, hysentials$shadow, textColor, alpha);
-                        doDraw(f);
-                        break;
+            if (!FormattingConfig.fancyRendering()) {
+                resetHysentialsState();
+                return index;
+            }
+            if (FancyFormattingKt.getCurrentText() == null) return index;
+            String text = FancyFormattingKt.getCurrentText();
+            char c0 = text.charAt(index);
+
+            if (!hysentials$working) {
+                for (ImageIcon icon : ImageIcon.imageIcons.values()) {
+                    if (icon.firstChar == c0) {
+                        hysentials$currentIcon = icon;
+                        hysentials$renderedChars = "";
+                        hysentials$renderedChars += c0;
+                        System.out.println("How are you being called?");
+                        hysentials$working = true;
+                        return index;
                     }
-                } else {
-                    hysentials$renderedChars = null;
-                    hysentials$renderChars();
                 }
             }
-        } catch (Exception ignored) {}
+
+            if (!hysentials$working || hysentials$currentIcon == null || hysentials$renderedChars == null) return index;
+
+            ImageIcon icon = hysentials$currentIcon;
+
+            if (icon.replacement.isEmpty()) {
+                resetHysentialsState();
+                return index;
+            }
+
+            if (icon.replacement.length() <= hysentials$renderedChars.length()) {
+                resetHysentialsState();
+                return index;
+            }
+
+            if (icon.replacement.charAt(hysentials$renderedChars.length()) == c0) {
+                hysentials$renderedChars += c0;
+                String current = hysentials$renderedChars;
+
+                if (current.equals(icon.replacement)) {
+                    resetHysentialsState();
+                    hysentials$onemore = true;
+                    float renderedWidth = icon.renderImage(posX, posY, hysentials$shadow, textColor, alpha);
+                    doDraw(renderedWidth);
+                }
+            } else {
+                hysentials$renderChars();
+                resetHysentialsState();
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error during rendering string replacement: " + e.getMessage());
+            e.printStackTrace();
+            hysentials$renderChars();
+            resetHysentialsState();
+            hysentials$onemore = false;
+        }
+
         return index;
+    }
+
+    // Helper method to reset state
+    private void resetHysentialsState() {
+        hysentials$working = false;
+        hysentials$renderedChars = null;
+        hysentials$currentIcon = null;
     }
 
     @Inject(method = "renderChar", at = @At("HEAD"), cancellable = true)
     private void renderCharReplace(char ch, boolean italic, CallbackInfoReturnable<Float> cir) {
-        if (hysentials$renderedChars != null) {
-            cir.cancel();
+        if (hysentials$working || hysentials$onemore) {
+            cir.setReturnValue(0f);
+            System.out.println("onemore: " + hysentials$onemore + " working: " + hysentials$working);
+            if (hysentials$onemore) {
+                hysentials$onemore = false;
+                resetHysentialsState();
+                hysentials$working = false;
+            }
         }
     }
 
     @Unique
     private void hysentials$renderChars() {
-        if (hysentials$renderedChars == null) return;
-        for (char c : hysentials$renderedChars) {
+        if (!hysentials$working) return;
+        for (char c : hysentials$renderedChars.toCharArray()) {
             float f = this.renderChar(c, false);
             doDraw(f);
         }
     }
 
 
-    //Is there a better way to do these two?
-    @ModifyVariable(method = "renderStringAtPos", at = @At("HEAD"), argsOnly = true)
-    private String renderStringAtPosReplace(String text) {
-        hysentials$text = FancyFormattingKt.replaceString(text);
-        return FancyFormattingKt.replaceString(text);
-    }
     // Is there a better way to do these two?
     @ModifyVariable(method = "renderStringAtPos", at = @At("HEAD"), argsOnly = true, index = 2)
     private boolean renderStringAtPosReplace2(boolean value) {
@@ -98,7 +146,7 @@ public abstract class ImageIconsMixin {
 
     @Inject(method = "renderStringAtPos", at = @At("RETURN"))
     private void renderStringAtPosReplaceReturn(String text, boolean shadow, CallbackInfo ci) {
-        hysentials$text = null;
+        FancyFormattingKt.setCurrentText(null);
         hysentials$shadow = null;
     }
 

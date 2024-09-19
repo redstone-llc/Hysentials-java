@@ -263,21 +263,21 @@ public class FormattingConfig extends Config {
         addDependency("fancyRankInTab", "futuristicRanks");
         addDependency("fancyRankInChat", "futuristicRanks");
 
-        addListener("futuristicRanks", () -> {
-            if (FormattingConfig.fancyRendering()) {
-                Minecraft.getMinecraft().fontRendererObj = Hysentials.INSTANCE.imageIconRenderer;
-            } else {
-                Minecraft.getMinecraft().fontRendererObj = Hysentials.minecraftFont;
-            }
-        });
-
-        addListener("hexColors", () -> {
-            if (FormattingConfig.fancyRendering()) {
-                Minecraft.getMinecraft().fontRendererObj = Hysentials.INSTANCE.imageIconRenderer;
-            } else {
-                Minecraft.getMinecraft().fontRendererObj = Hysentials.minecraftFont;
-            }
-        });
+//        addListener("futuristicRanks", () -> {
+//            if (FormattingConfig.fancyRendering()) {
+//                Minecraft.getMinecraft().fontRendererObj = Hysentials.INSTANCE.imageIconRenderer;
+//            } else {
+//                Minecraft.getMinecraft().fontRendererObj = Hysentials.minecraftFont;
+//            }
+//        });
+//
+//        addListener("hexColors", () -> {
+//            if (FormattingConfig.fancyRendering()) {
+//                Minecraft.getMinecraft().fontRendererObj = Hysentials.INSTANCE.imageIconRenderer;
+//            } else {
+//                Minecraft.getMinecraft().fontRendererObj = Hysentials.minecraftFont;
+//            }
+//        });
     }
 
     public void initialize() {

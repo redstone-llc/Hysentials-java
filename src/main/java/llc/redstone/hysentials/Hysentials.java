@@ -151,7 +151,6 @@ public class Hysentials {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        registerImages();
         config = new HysentialsConfig();
         File file = new File(modDir, "./config/hysentials");
         if (!file.exists() && !file.mkdirs()) {
@@ -262,6 +261,7 @@ public class Hysentials {
                 FancyFormattingKt.getChars().put((char) i, Minecraft.getMinecraft().fontRendererObj.getCharWidth((char) i));
             }
         }
+        registerImages();
         updateAndAdd();
     }
     @Mod.EventHandler

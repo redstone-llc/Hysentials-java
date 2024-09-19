@@ -11,9 +11,17 @@ import org.apache.commons.lang3.StringUtils
 
 
 var chars : Map<Char, Int> = HashMap()
+var currentText: String? = null
+    private set
+
+@Override
+fun setCurrentText(s: String?): String? {
+    currentText = s
+    return currentText
+}
 
 fun replaceString(text: String): String {
-    val allActiveReplacements = Hysentials.INSTANCE.config.replaceConfig.allActiveReplacements?: return text
+    val allActiveReplacements = Hysentials.INSTANCE.config?.replaceConfig?.allActiveReplacements?: return text
     var doneText = text
     for (key in allActiveReplacements.keys) {
         var key = key
@@ -35,14 +43,13 @@ fun replaceString(text: String): String {
     return doneText
 }
 
-//Go through the text and look for :<iconName>: and replace it with random ascii characters that are the same display width as the icon
 fun replaceStringWithPlaceholder(text: String): String {
     if (chars.isEmpty()) return text
     var doneText = text
     Regex(":([a-zA-Z0-9_]+):").findAll(text).forEach {
         val icon = it.groupValues[1]
         if (icon.endsWith("?")) {
-            doneText = doneText.replace(":$icon:", ":${icon.substringBeforeLast("?")}:")
+            doneText = doneText.replace(":$icon:", ":${icon.substringBeforeLast("?:")}:")
             return@forEach
         }
         val iconData = ImageIcon.getIcon(icon) ?: return@forEach
