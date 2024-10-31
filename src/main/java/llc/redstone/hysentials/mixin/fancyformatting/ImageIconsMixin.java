@@ -95,7 +95,7 @@ public abstract class ImageIconsMixin {
                 }
                 case NUMBER: {
                     Number number = (Number) format.getValue();
-                    float y = this.posY - 1;
+                    float y = this.posY;
                     float positionAdd = ImageIconRenderer.renderNumberedString(number.getNumber(), number.getHex(), this.posX, y, textColor, shadow, alpha);
                     if (positionAdd > 0) {
                         this.posX += positionAdd;
