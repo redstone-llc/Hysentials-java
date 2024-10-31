@@ -1,5 +1,7 @@
 package llc.redstone.hysentials.mixin.fancyformatting;
 
+import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
+import llc.redstone.hysentials.renderer.text.FancyFormatting2;
 import llc.redstone.hysentials.renderer.text.FancyFormattingKt;
 import net.minecraft.client.gui.FontRenderer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -10,11 +12,11 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 public class ReplacementMixin {
     @ModifyVariable(method = "renderStringAtPos", at = @At("HEAD"), argsOnly = true)
     private String renderStringAtPosReplace(String text) {
-        return FancyFormattingKt.setCurrentText(FancyFormattingKt.replaceString(text));
+        return FancyFormatting2.Companion.replaceString(text, false);
     }
 
     @ModifyVariable(method = "getStringWidth", at = @At("HEAD"), argsOnly = true)
     private String getStringWidthReplace(String text) {
-        return FancyFormattingKt.replaceString(text);
+        return FancyFormatting2.Companion.replaceString(text, FormattingConfig.fancyRendering());
     }
 }

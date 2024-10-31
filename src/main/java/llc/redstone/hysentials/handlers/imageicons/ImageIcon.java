@@ -66,6 +66,22 @@ public class ImageIcon {
         ImageIcon.imageIcons.put(name, this);
     }
 
+    public ImageIcon(String name, String path, boolean emoji, boolean handles) {
+        this.name = name;
+        this.emoji = emoji;
+        this.path = path;
+        if (!handles) {
+            ImageIcon.imageIcons.put(name, this);
+            return;
+        }
+        try {
+            handleImageIcon();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        ImageIcon.imageIcons.put(name, this);
+    }
+
     public ImageIcon(String name, ResourceLocation resourceLocation) {
         this(name, resourceLocation, false);
     }
