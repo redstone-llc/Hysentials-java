@@ -53,5 +53,7 @@ void setRandomStyle(boolean randomStyle);
 
     float renderChar(char c, boolean shadow);
 
+    void renderStringAtPosA(String text, boolean shadow);
+
 
 }

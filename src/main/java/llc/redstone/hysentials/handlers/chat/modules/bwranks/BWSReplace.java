@@ -85,7 +85,7 @@ public class BWSReplace implements ChatReceiveModule {
                     boolean found = m1.find();
                     if (found || m2.find()) {
                         Matcher m = found ? m1 : m2;
-                        String color = C.toHex(m.group(1)).replace("#", "");
+                        String color = C.toHex(m.group(1), false);
                         String num = C.removeColor(m.group(2));
                         String symbol = m.group(3);
                         if (ChatConfig.levelPrefixColors) {

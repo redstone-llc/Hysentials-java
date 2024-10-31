@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.utils
 
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent
+import org.apache.commons.lang3.StringUtils
 import org.bitbucket.cowwoc.diffmatchpatch.DiffMatchPatch
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
@@ -16,6 +17,8 @@ fun CharSequence?.containsAny(vararg sequences: CharSequence?): Boolean {
     if (this == null) return false
     return sequences.any { it != null && this.contains(it) }
 }
+
+fun String.replace(key: String, replacement: String): String = StringUtils.replace(this, key, replacement)
 
 //shift a list of strings to the right and return the String
 fun List<String>.shiftRight(): String {

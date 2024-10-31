@@ -14,7 +14,7 @@ import java.util.Random;
 /*
 Font Renderer Accessor Mixin
  */
-@Mixin(value = FontRenderer.class, priority = Integer.MIN_VALUE)
+@Mixin(value = FontRenderer.class, priority = Integer.MAX_VALUE)
 public abstract class FontRendererMixin implements FontRendererAcessor {
 
     @Shadow
@@ -70,6 +70,9 @@ public abstract class FontRendererMixin implements FontRendererAcessor {
 
     @Shadow
     public abstract float renderChar(char ch, boolean italic);
+
+    @Shadow
+    public abstract void renderStringAtPos(String text, boolean shadow);
 
     @Shadow
     protected abstract void doDraw(float f);
