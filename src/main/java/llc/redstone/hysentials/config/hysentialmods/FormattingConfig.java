@@ -321,6 +321,7 @@ public class FormattingConfig extends Config {
     }
 
     public static boolean fancyRendering() {
+        if (Hysentials.INSTANCE == null || Hysentials.INSTANCE.getConfig() == null || Hysentials.INSTANCE.getConfig().formattingConfig == null) return false;
         return (futuristicRanks || hexColors) && Hysentials.INSTANCE.getConfig().formattingConfig.enabled;
     }
 

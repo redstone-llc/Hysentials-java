@@ -101,13 +101,13 @@ dependencies {
     // Adds the OneConfig library, so we can develop with it.
     modCompileOnly("cc.polyfrost:oneconfig-$platform:0.2.2-alpha+")
 
-    implementation("org.slick2d:slick2d-core:1.0.2") {
+    shade("org.slick2d:slick2d-core:1.0.2") {
         exclude(module = "lwjgl")
     }
-    implementation("org.json:json:20231013")
-    implementation("com.neovisionaries:nv-websocket-client:2.14")
-    implementation("net.hypixel:mod-api:0.4.0")
-    implementation("org.bitbucket.cowwoc:diff-match-patch:1.2")
+    shade("org.json:json:20231013")
+    shade("com.neovisionaries:nv-websocket-client:2.14")
+    shade("net.hypixel:mod-api:0.4.0")
+    shade("org.bitbucket.cowwoc:diff-match-patch:1.2")
 
     modRuntimeOnly("me.djtheredstoner:DevAuth-${if (platform.isFabric) "fabric" else if (platform.isLegacyForge) "forge-legacy" else "forge-latest"}:1.2.0")
 
@@ -205,6 +205,6 @@ tasks {
         }
         dependsOn(shadowJar)
         archiveClassifier.set("")
-        enabled = false
+        enabled = true
     }
 }
