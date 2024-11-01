@@ -2,6 +2,7 @@ package llc.redstone.hysentials.cosmetic
 
 import cc.polyfrost.oneconfig.libs.universal.UKeyboard
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft
 import cc.polyfrost.oneconfig.libs.universal.UScreen
 import llc.redstone.hysentials.Hysentials
 import llc.redstone.hysentials.config.HysentialsConfig
@@ -27,6 +28,7 @@ import llc.redstone.hysentials.cosmetic.CosmeticTab.Companion.tabs
 import llc.redstone.hysentials.utils.drawEntityOnScreen
 import net.minecraft.client.Minecraft
 import net.minecraft.client.audio.PositionedSoundRecord
+import net.minecraft.client.gui.FontRenderer
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.inventory.Slot
@@ -67,7 +69,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
     var lightBackground = ResourceLocation("hysentials:gui/wardrobe/background-light.png")
 
     var mcFive = HysentialsFontRenderer("Minecraft Five", 12f)
-    var fontRenderer: ImageIconRenderer? = Hysentials.INSTANCE.imageIconRenderer
+    var fontRenderer: FontRenderer = UMinecraft.getFontRenderer()
 
     var focused: Boolean = false
     var blinkTimer: Int = 0

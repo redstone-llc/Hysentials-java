@@ -395,7 +395,7 @@ public class HysentialsCommand extends CommandBase {
 
 
     private static void handleTest(String command, String args) {
-        if (Minecraft.getMinecraft().thePlayer.getName().equals("EndKloon") || Minecraft.getMinecraft().thePlayer.getName().equals("Sin_ender")) {
+        if (Minecraft.getMinecraft().thePlayer.getName().equals("EndKloon") || Minecraft.getMinecraft().thePlayer.getName().equals("Pumpkin_ender")) {
             switch (command.toLowerCase()) {
                 case "switch": {
                     boolean isCurrentlyLocal = HysentialsUtilsKt.getHYSENTIALS_API().equals("http://localhost:8080/api");

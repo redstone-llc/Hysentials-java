@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.renderer.text
 
+import cc.polyfrost.oneconfig.libs.caffeine.cache.Cache
 import cc.polyfrost.oneconfig.libs.caffeine.cache.Caffeine
 import llc.redstone.hysentials.Hysentials
 import llc.redstone.hysentials.handlers.imageicons.ImageIcon
@@ -46,13 +47,16 @@ class FancyFormatting2 {
         var hexPattern = Regex("(.+|)(<#[0-9A-Fa-f]{6}>)(.+|)")
         var numPattern = Regex("(.+|)(<[0-9A-Fa-f]{6}:[0-9]+>)(.+|)")
 
-        var cache = Caffeine.newBuilder().maximumSize(100).build<String, List<Format>>()
+        var cache: Cache<String, List<Format>>? = null;
 
         fun getFormats(text: String, testing: Boolean = true): List<Format> {
             if (text.isEmpty()) return emptyList()
 
-            if (cache.getIfPresent(text) != null) {
-                return cache.getIfPresent(text)!!
+            if (cache == null) {
+                cache = Caffeine.newBuilder().maximumSize(100).build()
+            }
+            if (cache?.getIfPresent(text) != null) {
+                return cache?.getIfPresent(text)?.toList() ?: emptyList()
             }
 
             var text = text
@@ -62,13 +66,19 @@ class FancyFormatting2 {
                 val before = it.groupValues[1]
                 val after = it.groupValues[3]
 
+
                 if (before.isNotEmpty()) {
                     var beforeFormats = getFormats(before)
                     formats.addAll(beforeFormats)
                 }
 
                 val icon = it.groupValues[2].substring(1, it.groupValues[2].length - 1)
-                val iconData = (ImageIcon.getIcon(icon)) ?: continue
+                val iconData = ImageIcon.getIcon(icon)
+                if (iconData == null) {
+                    text = text.replaceRange(it.range, "")
+                    formats.add(Format(FormatType.STRING, it.groups[1]!!.range, it.value))
+                    continue
+                }
                 formats.add(Format(FormatType.IMAGE_ICON, it.groups[2]!!.range, iconData))
 
                 if (after.isNotEmpty()) {
@@ -120,7 +130,7 @@ class FancyFormatting2 {
                 formats.add(Format(FormatType.STRING, 0..text.length, text))
             }
 
-            cache.put(text, formats)
+            cache?.put(text, formats)
             return formats
         }
 
@@ -133,7 +143,7 @@ class FancyFormatting2 {
 
         }
 
-        fun getLastFormat(text: String): String {
+        fun getLastFormat(text: String, last: String): String {
             val formats = getFormats(text, false)
             if (formats.isEmpty()) return text
             var lastFormat: String = ""
@@ -141,6 +151,9 @@ class FancyFormatting2 {
                 if (format.type == FormatType.STRING) {
                     if (!(format.value as String).contains("§")) continue
                     lastFormat = FontRenderer.getFormatFromString(format.value as String)
+                    if (lastFormat == "§r") {
+                        lastFormat = last
+                    }
                 }
 
                 if (format.type == FormatType.HEX) {
@@ -151,7 +164,7 @@ class FancyFormatting2 {
         }
 
         fun replaceString(text: String, hidden: Boolean): String {
-            val allActiveReplacements = Hysentials.INSTANCE.config?.replaceConfig?.allActiveReplacements ?: return text
+            val allActiveReplacements = Hysentials.INSTANCE?.config?.replaceConfig?.allActiveReplacements ?: return text
             var doneText = text
             for (key in allActiveReplacements.keys) {
                 var key = key

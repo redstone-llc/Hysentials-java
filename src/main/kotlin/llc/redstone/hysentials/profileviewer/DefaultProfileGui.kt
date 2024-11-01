@@ -2,6 +2,7 @@ package llc.redstone.hysentials.profileviewer
 
 import cc.polyfrost.oneconfig.libs.universal.UChat
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft
 import cc.polyfrost.oneconfig.libs.universal.UScreen
 import cc.polyfrost.oneconfig.utils.Multithreading
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil
@@ -17,6 +18,7 @@ import llc.redstone.hysentials.util.BlockWAPIUtils.getRequest
 import llc.redstone.hysentials.util.Renderer.drawImage
 import llc.redstone.hysentials.websocket.Socket
 import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.FontRenderer
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.entity.player.EntityPlayer
@@ -69,7 +71,7 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
     var inventorySlots: ArrayList<Slot> = Lists.newArrayList()
     var hypixelData: JSONObject? = null
     var hysentialData: HysentialsSchema.User? = null
-    val fontRenderer: ImageIconRenderer = Hysentials.INSTANCE.imageIconRenderer
+    val fontRenderer: FontRenderer = UMinecraft.getFontRenderer()
 
 
     override fun onDrawScreen(matrixStack: UMatrixStack, mouseX: Int, mouseY: Int, partialTicks: Float) {
@@ -92,6 +94,22 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                 (guiLeft + 17).toInt(),
                 (guiTop + 22).toInt(),
                 8.0f,
+                8.0f,
+                8,
+                8,
+                34,
+                34,
+                64.0f,
+                64.0f
+            )
+            // add the helmet
+            mc.textureManager.bindTexture(Minecraft.getMinecraft().netHandler.getPlayerInfo(player.uniqueID).locationSkin)
+            GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
+            GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f)
+            Gui.drawScaledCustomSizeModalRect(
+                (guiLeft + 17).toInt(),
+                (guiTop + 22).toInt(),
+                40.0f,
                 8.0f,
                 8,
                 8,
@@ -147,8 +165,9 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
                 var displayName = BwRanksUtils.getPlayerName(playerInfo, false)
                 displayName = TabChanger.modifyName(displayName, playerInfo)
 
+                var level = (hypixelData!!["level"] as Number).toDouble().roundToInt()
                 var lore = "§f$displayName\n" +
-                        "&7Hypixel Level: &e${(hypixelData!!["level"] as BigDecimal).toDouble().roundToInt()}\n"
+                        "&7Hypixel Level: &e${level}\n"
                 if (hysentialData != null) {
                     lore += "&7Hysentials Level: &e${getLevel(hysentialData!!.exp).roundToInt()}\n" +
                             "&7Emeralds: &a${largeFormat.format(hysentialData!!.emeralds)}"

@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.util;
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import com.google.common.collect.Lists;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.cosmetic.CosmeticManager;
@@ -30,13 +31,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import static llc.redstone.hysentials.util.C.toHex;
 import static net.minecraft.client.gui.GuiUtilRenderComponents.func_178909_a;
 
-public class ImageIconRenderer extends FontRenderer {
+public class ImageIconRenderer {
     FontRendererAcessor accessor = (FontRendererAcessor) this;
     public static HysentialsFontRenderer mcFive;
 
     public ImageIconRenderer() {
-        super(Minecraft.getMinecraft().gameSettings, new ResourceLocation("textures/font/ascii.png"), Minecraft.getMinecraft().getTextureManager(), false);
-        super.onResourceManagerReload(null);
         mcFive = new HysentialsFontRenderer("Minecraft Five", 12f);
     }
 
@@ -45,65 +44,6 @@ public class ImageIconRenderer extends FontRenderer {
             mcFive = new HysentialsFontRenderer("Minecraft Five", 12f);
         }
         return mcFive;
-    }
-
-    @Override
-    public void onResourceManagerReload(IResourceManager resourceManager) {
-        super.onResourceManagerReload(resourceManager);
-        ImageIcon.reloadIcons();
-    }
-
-    private List<String> renderedText = new ArrayList<>();
-
-    private void renderStringAtPosA(String text, boolean shadow) {
-        superRenderStringAtPos(text, shadow);
-        return;
-
-
-//        text = FancyFormatting2.Companion.replaceString(text);
-//        List<Format> formats = FancyFormatting2.Companion.getFormats(text, false);
-//        if (!renderedText.contains(text)) {
-//            renderedText.add(text);
-//            System.out.println("Text: " + text);
-//            System.out.println("Formats: " + formats);
-//        }
-//        for (Format format: formats) {
-//            switch (format.getType()) {
-//                case STRING:
-//                    superRenderStringAtPos(format.getValue().toString(), shadow);
-//                    break;
-//                case HEX: {
-//                    int hex = (int) format.getValue();
-//                    reset();
-//                    if (shadow) {
-//                        hex = (hex & 16579836) >> 2 | hex & -16777216;
-//                    }
-//                    accessor.setTextColor(hex);
-//                    this.setColor((float) (hex >> 16) / 255.0F, (float) (hex >> 8 & 255) / 255.0F, (float) (hex & 255) / 255.0F, accessor.alpha());
-//                    break;
-//                }
-//                case IMAGE_ICON: {
-//                    ImageIcon icon = (ImageIcon) format.getValue();
-//                    float y = this.posY - 1;
-//                    float positionAdd = icon.renderImage(this.posX, y, shadow, accessor.getTextColor(), accessor.alpha());
-//                    if (positionAdd > 0) {
-//                        this.posX += positionAdd;
-//                    }
-//                    break;
-//                }
-//                default: {
-//                    return;
-//                }
-//            }
-//        }
-    }
-
-    private void reset() {
-        accessor.setRandomStyle(false);
-        accessor.setBoldStyle(false);
-        accessor.setStrikethroughStyle(false);
-        accessor.setUnderlineStyle(false);
-        accessor.setItalicStyle(false);
     }
 
     public static int renderNumberedString(String num, String hex, float x, float y, int oldColor, boolean dropShadow, float alpha) {
@@ -119,188 +59,16 @@ public class ImageIconRenderer extends FontRenderer {
         }
         int textColor = (int) (alpha * 255f) << 24 | c.getRed() << 16 | c.getGreen() << 8 | c.getBlue();
         setColorA((float) (bgColor >> 16) / 255.0F, (float) (bgColor >> 8 & 255) / 255.0F, (float) (bgColor & 255) / 255.0F, alpha);
-        float width = mcFive.getWidth(num) + 2;
+        float width = getMcFive().getWidth(num) + 2;
         Renderer.drawRect(x, y, width, 7);
         setColorA((float) (oldColor >> 16) / 255.0F, (float) (oldColor >> 8 & 255) / 255.0F, (float) (oldColor & 255) / 255.0F, alpha);
-        mcFive.drawString(num, x + 1, y, textColor);
+        getMcFive().drawString(num, x + 1, y, textColor);
         setColorA((float) (oldColor >> 16) / 255.0F, (float) (oldColor >> 8 & 255) / 255.0F, (float) (oldColor & 255) / 255.0F, alpha);
         return (int) width;
     }
 
     public static void setColorA(float r, float g, float b, float a) {
         GlStateManager.color(r, g, b, a);
-    }
-
-    public int getStringWidth(String text) {
-        return super.getStringWidth(FancyFormatting2.Companion.replaceString(text, true));
-    }
-
-    public static boolean checkIfHexadecimal(String potentialHex) {
-        for (char ch : potentialHex.toCharArray()) {
-            boolean isHex =
-                ('0' <= ch && ch <= '9') ||
-                    ('a' <= ch && ch <= 'f') ||
-                    ('A' <= ch && ch <= 'F');
-
-            if (!isHex) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public int getCharWidth(char character) {
-        if (character == 167) {
-            return -1;
-        } else if (character == ' ') {
-            return 4;
-        } else {
-            int i = "ÀÁÂÈÊËÍÓÔÕÚßãõğİıŒœŞşŴŵžȇ\u0000\u0000\u0000\u0000\u0000\u0000\u0000 !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\u0000ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αβΓπΣσμτΦΘΩδ∞∅∈∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■\u0000".indexOf(character);
-            if (character > 0 && i != -1 && !getUnicodeFlag()) {
-                return this.charWidth[i];
-            } else if (this.glyphWidth[character] != 0) {
-                int j = this.glyphWidth[character] >>> 4;
-                int k = this.glyphWidth[character] & 15;
-                ++k;
-                return (k - j) / 2 + 1;
-            } else {
-                return 0;
-            }
-        }
-    }
-
-    private float renderChar(char ch, boolean italic) {
-        if (ch == ' ') {
-            return 4.0F;
-        } else {
-            int i = "ÀÁÂÈÊËÍÓÔÕÚßãõğİıŒœŞşŴŵžȇ\u0000\u0000\u0000\u0000\u0000\u0000\u0000 !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\u0000ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αβΓπΣσμτΦΘΩδ∞∅∈∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■\u0000".indexOf(ch);
-            return i != -1 && !getUnicodeFlag() ? this.renderDefaultChar(i, italic) : this.renderUnicodeChar(ch, italic);
-        }
-    }
-
-    public void resetStyles() {
-        accessor.setRandomStyle(false);
-        accessor.setBoldStyle(false);
-        accessor.setStrikethroughStyle(false);
-        accessor.setUnderlineStyle(false);
-        accessor.setItalicStyle(false);
-    }
-
-    public int drawStringWithShadow(String text, float x, float y, int color) {
-        return this.drawString(text, x, y, color, true);
-    }
-
-    public int drawString(String text, int x, int y, int color) {
-        return this.drawString(text, (float) x, (float) y, color, false);
-    }
-
-    public int drawString(String text, float x, float y, int color) {
-        return this.drawString(text, x, y, color, false);
-    }
-
-    public int drawString(String text, float x, float y, int color, boolean dropShadow) {
-        this.enableAlpha();
-        this.resetStyles();
-        int i;
-        if (dropShadow) {
-            i = this.renderString(text, x + 1.0F, y + 1.0F, color, true);
-            i = Math.max(i, this.renderString(text, x, y, color, false));
-        } else {
-            i = this.renderString(text, x, y, color, false);
-        }
-
-        return i;
-    }
-
-    public void drawCenteredString(String text, float x, float y, int color) {
-        drawString(text, x - ((int) getStringWidth(text) >> 1), y, color);
-    }
-
-    private int renderString(String text, float x, float y, int color, boolean dropShadow) {
-        if (text == null) {
-            return 0;
-        } else {
-            if (this.getBidiFlag()) {
-                text = this.bidiReorder(text);
-            }
-
-            if ((color & -67108864) == 0) {
-                color |= -16777216;
-            }
-
-            if (dropShadow) {
-                color = (color & 16579836) >> 2 | color & -16777216;
-            }
-
-            accessor.setRed((float) (color >> 16 & 255) / 255.0F);
-            accessor.setBlue((float) (color >> 8 & 255) / 255.0F);
-            accessor.setGreen((float) (color & 255) / 255.0F);
-            this.accessor.setAlpha((float) (color >> 24 & 255) / 255.0F);
-            this.setColor(accessor.red(), accessor.blue(), accessor.green(), accessor.alpha());
-            this.posX = x;
-            this.posY = y;
-            this.renderStringAtPosA(text, dropShadow);
-            return (int) this.posX;
-        }
-    }
-
-    private String bidiReorder(String text) {
-        try {
-            Bidi bidi = new Bidi((new ArabicShaping(8)).shape(text), 127);
-            bidi.setReorderingMode(0);
-            return bidi.writeReordered(2);
-        } catch (ArabicShapingException e) {
-            e.printStackTrace();
-        }
-        return text;
-    }
-
-    private static boolean isFormatColor(char colorChar) {
-        return colorChar >= '0' && colorChar <= '9' || colorChar >= 'a' && colorChar <= 'f' || colorChar >= 'A' && colorChar <= 'F';
-    }
-
-    private static boolean isFormatSpecial(char formatChar) {
-        return formatChar >= 'k' && formatChar <= 'o' || formatChar >= 'K' && formatChar <= 'O' || formatChar == 'r' || formatChar == 'R';
-    }
-
-    public static String getFormatFromString(String text) {
-        String s = "";
-        int i = -1;
-        int j = text.length();
-
-        while ((i = text.indexOf(167, i + 1)) != -1) {
-            if (i < j - 1) {
-                char c0 = text.charAt(i + 1);
-                if (!isFormatColor(c0) && i + 3 < j - 1 && isFormatColor(text.charAt(i + 3))) {
-                    continue;
-                }
-                if (isFormatColor(c0)) {
-                    s = "§" + c0;
-                } else if (isFormatSpecial(c0)) {
-                    s = s + "§" + c0;
-                }
-            }
-        }
-
-        i = -1;
-        j = text.length();
-
-        while ((i = text.indexOf('<', i + 1)) != -1) {
-            if (i < j - 1) {
-                char c0 = text.charAt(i + 1);
-                if (c0 != '#') continue;
-                if (i + 8 < text.length()) {
-                    String hex = text.substring(i + 2, i + 8);
-                    if (text.charAt(i + 1) == '#' && checkIfHexadecimal(hex)) {
-                        s = "<#" + hex + ">";
-                    }
-                    i += 8;
-                }
-            }
-        }
-
-
-        return s;
     }
 
     public static String getHexFromString(String text, boolean getFirst) {
@@ -344,15 +112,146 @@ public class ImageIconRenderer extends FontRenderer {
         return color;
     }
 
+    private static boolean checkIfHexadecimal(String hex) {
+        try {
+            Integer.parseInt(hex, 16);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public static List<IChatComponent> splitTextOld(IChatComponent chatComponent, int maxWidth, FontRenderer fontRenderer, boolean addNewLine, boolean keepFormatting) {
+        int currentWidth = 0;
+        IChatComponent currentLine = new ChatComponentText("");
+        List<IChatComponent> lines = Lists.newArrayList();
+        List<IChatComponent> components = Lists.newArrayList(chatComponent);
+
+        for (int i = 0; i < components.size(); ++i) {
+            IChatComponent component = components.get(i);
+            String text = component.getUnformattedTextForChat();
+            boolean newLine = false;
+            String remainingText;
+
+            if (text.contains("\n")) {
+                int newLineIndex = text.indexOf(10);
+                remainingText = text.substring(newLineIndex + 1);
+                text = text.substring(0, newLineIndex + 1);
+                ChatComponentText newComponent = new ChatComponentText(remainingText);
+                newComponent.setChatStyle(component.getChatStyle().createShallowCopy());
+                components.add(i + 1, newComponent);
+                newLine = true;
+            }
+
+            TriVariable<Integer, String, String> duoFormatted = formatString(func_178909_a(component.getChatStyle().getFormattingCode() + text, keepFormatting));
+            String formattedText = duoFormatted.getSecond();
+            remainingText = formattedText.endsWith("\n") ? formattedText.substring(0, formattedText.length() - 1) : formattedText;
+            TriVariable<Integer, String, String> duoRemaining = formatString(remainingText);
+            int textWidth = duoRemaining.getFirst();
+            ChatComponentText newComponentText = new ChatComponentText(duoRemaining.getSecond());
+            newComponentText.setChatStyle(component.getChatStyle().createShallowCopy());
+
+            String color = duoFormatted.getThird();
+
+            if (currentWidth + textWidth > maxWidth) {
+                String trimmedText = fontRenderer.trimStringToWidth(formattedText, maxWidth - currentWidth, false);
+                TriVariable<Integer, String, String> duoTrimmed = formatString(trimmedText);
+                trimmedText = duoTrimmed.getSecond();
+                String overflowText = trimmedText.length() < formattedText.length() ? formattedText.substring(trimmedText.length()) : null;
+                color = duoTrimmed.getThird();
+                if (overflowText != null && overflowText.length() > 0) {
+                    int lastSpaceIndex = trimmedText.lastIndexOf(" ");
+                    if (lastSpaceIndex >= 0 && formatString(formattedText.substring(0, lastSpaceIndex)).first > 0) {
+                        duoTrimmed = formatString(formattedText.substring(0, lastSpaceIndex));
+                        trimmedText = duoTrimmed.second;
+                        color = duoTrimmed.third;
+                        if (addNewLine) {
+                            ++lastSpaceIndex;
+                        }
+                        overflowText = formattedText.substring(lastSpaceIndex);
+                    } else if (currentWidth > 0 && !formattedText.contains(" ")) {
+                        trimmedText = "";
+                        overflowText = formattedText;
+                    }
+
+                    overflowText = color + overflowText;
+                    ChatComponentText overflowComponent = new ChatComponentText(overflowText);
+                    overflowComponent.setChatStyle(component.getChatStyle().createShallowCopy());
+                    components.add(i + 1, overflowComponent);
+                }
+
+                duoTrimmed = formatString(trimmedText);
+                textWidth = duoTrimmed.getFirst();
+                newComponentText = new ChatComponentText(duoTrimmed.second);
+                newComponentText.setChatStyle(component.getChatStyle().createShallowCopy());
+                newLine = true;
+            }
+
+            if (currentWidth + textWidth <= maxWidth) {
+                currentWidth += textWidth;
+                currentLine.appendSibling(newComponentText);
+            } else {
+                newLine = true;
+            }
+
+            if (newLine) {
+                lines.add(currentLine);
+                currentWidth = 0;
+                currentLine = new ChatComponentText("");
+            }
+        }
+
+        lines.add(currentLine);
+        return lines;
+    }
+
+    private static TriVariable<Integer, String, String> formatString(String formattedText) {
+        String color = FancyFormatting2.Companion.getLastFormat(formattedText, "");
+        List<Format> formats = FancyFormatting2.Companion.getFormats(formattedText, false);
+        int textWidth = 0;
+
+        StringBuilder result = new StringBuilder();
+        for (Format format: formats) {
+            switch (format.getType()) {
+                case STRING:
+                    String s = format.getValue().toString();
+                    textWidth += UMinecraft.getFontRenderer().getStringWidth(s);
+
+                    result.append(color).append(s);
+                    color = FancyFormatting2.Companion.getLastFormat(s, color);
+                    break;
+                case HEX:
+                    color = "<#" + Integer.toHexString((int) format.getValue()) + ">";
+                    result.append("<#").append(Integer.toHexString((int) format.getValue())).append(">");
+                    break;
+                case IMAGE_ICON:
+                    ImageIcon icon = (ImageIcon) format.getValue();
+                    int width = icon.getWidth();
+                    int height = icon.getHeight();
+                    float scaledHeight = 9.0f / height;
+                    int updatedWidth = (int) (width * scaledHeight);
+                    textWidth += updatedWidth;
+                    result.append(":").append(icon.getName()).append(":");
+                    break;
+                case NUMBER:
+                    Number number = (Number) format.getValue();
+                    String num = number.getNumber();
+                    textWidth += (int) (getMcFive().getWidth(num) + 2);
+                    result.append("<").append(number.getHex()).append(":").append(num).append(">");
+                    break;
+            }
+        }
+        return new TriVariable<>(textWidth, result.toString(), color);
+    }
+
     public static List<IChatComponent> splitText(IChatComponent text, int maxWidth, FontRenderer fontRenderer, boolean preserveFormatting, boolean useUnicode) {
         int currentWidth = 0;
-        IChatComponent currentComponent = new ChatComponentText("");
         List<IChatComponent> resultComponents = Lists.newArrayList();
         List<IChatComponent> componentsToProcess = new ArrayList<>(Collections.singletonList(text));
 
-        int i = 0;
         while (!componentsToProcess.isEmpty()) {
-            IChatComponent component = componentsToProcess.get(i);
+            IChatComponent currentComponent = new ChatComponentText("");
+            IChatComponent component = componentsToProcess.get(0);
             String formattedText = func_178909_a(component.getFormattedText(), useUnicode);
 
             if (formattedText.contains("\n")) {
@@ -360,13 +259,15 @@ public class ImageIconRenderer extends FontRenderer {
                 for (String split : splitText) {
                     ChatComponentText newComponent = new ChatComponentText(split);
                     newComponent.setChatStyle(component.getChatStyle().createShallowCopy());
-                    componentsToProcess.add(i + 1, newComponent);
+                    componentsToProcess.add(newComponent);
                 }
+                componentsToProcess.remove(0);
                 continue;
             }
 
-            String color = FancyFormatting2.Companion.getLastFormat(formattedText);
-            for (Format format: FancyFormatting2.Companion.getFormats(formattedText, false)) {
+            String color = FancyFormatting2.Companion.getLastFormat(formattedText, "");
+            List<Format> formats = FancyFormatting2.Companion.getFormats(formattedText, false);
+            for (Format format: formats) {
                 switch (format.getType()) {
                     case STRING:
                         ChatComponentText newComponent = new ChatComponentText(color + format.getValue().toString());
@@ -382,10 +283,12 @@ public class ImageIconRenderer extends FontRenderer {
                                     currentComponent = new ChatComponentText("");
                                     currentWidth = 0;
                                 }
+                                color = FancyFormatting2.Companion.getLastFormat(split, color);
                                 currentComponent.appendSibling(new ChatComponentText(color + split + " "));
                                 currentWidth += splitWidth + 4; // 4 is the width of a space
                             }
                         } else {
+                            color = FancyFormatting2.Companion.getLastFormat(s, color);
                             currentComponent.appendSibling(newComponent);
                             currentWidth += textWidth;
                         }
@@ -423,100 +326,10 @@ public class ImageIconRenderer extends FontRenderer {
                         currentWidth += (int) (mcFive.getWidth(num) + 2);
                 }
             }
-            componentsToProcess.remove(i);
+            resultComponents.add(currentComponent);
+            componentsToProcess.remove(0);
         }
 
-        resultComponents.add(currentComponent);
         return resultComponents;
-    }
-
-    private void superRenderStringAtPos(String text, boolean shadow) {
-        for(int i = 0; i < text.length(); ++i) {
-            char c0 = text.charAt(i);
-            int i1;
-            int j1;
-            if (c0 == 167 && i + 1 < text.length()) {
-                i1 = "0123456789abcdefklmnor".indexOf(text.toLowerCase(Locale.ENGLISH).charAt(i + 1));
-                if (i1 < 16) {
-                    accessor.setRandomStyle(false);
-                    accessor.setBoldStyle(false);
-                    accessor.setStrikethroughStyle(false);
-                    accessor.setUnderlineStyle(false);
-                    accessor.setItalicStyle(false);
-                    if (i1 < 0 || i1 > 15) {
-                        i1 = 15;
-                    }
-
-                    if (shadow) {
-                        i1 += 16;
-                    }
-
-                    j1 = accessor.getColorCode()[i1];
-                    accessor.setTextColor(j1);
-                    this.setColor((float)(j1 >> 16) / 255.0F, (float)(j1 >> 8 & 255) / 255.0F, (float)(j1 & 255) / 255.0F, accessor.alpha());
-                } else if (i1 == 16) {
-                    accessor.setRandomStyle(true);
-                } else if (i1 == 17) {
-                    accessor.setBoldStyle(true);
-                } else if (i1 == 18) {
-                    accessor.setStrikethroughStyle(true);
-                } else if (i1 == 19) {
-                    accessor.setUnderlineStyle(true);
-                } else if (i1 == 20) {
-                    accessor.setItalicStyle(true);
-                } else if (i1 == 21) {
-                    reset();
-                    this.setColor(accessor.red(), accessor.blue(), accessor.green(), accessor.alpha());
-                }
-
-                ++i;
-            } else {
-                i1 = "ÀÁÂÈÊËÍÓÔÕÚßãõğİıŒœŞşŴŵžȇ\u0000\u0000\u0000\u0000\u0000\u0000\u0000 !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\u0000ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αβΓπΣσμτΦΘΩδ∞∅∈∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■\u0000".indexOf(c0);
-                if (accessor.isRandomStyle() && i1 != -1) {
-                    j1 = this.getCharWidth(c0);
-
-                    char c1;
-                    do {
-                        i1 = this.fontRandom.nextInt("ÀÁÂÈÊËÍÓÔÕÚßãõğİıŒœŞşŴŵžȇ\u0000\u0000\u0000\u0000\u0000\u0000\u0000 !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\u0000ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αβΓπΣσμτΦΘΩδ∞∅∈∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■\u0000".length());
-                        c1 = "ÀÁÂÈÊËÍÓÔÕÚßãõğİıŒœŞşŴŵžȇ\u0000\u0000\u0000\u0000\u0000\u0000\u0000 !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\u0000ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αβΓπΣσμτΦΘΩδ∞∅∈∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■\u0000".charAt(i1);
-                    } while(j1 != this.getCharWidth(c1));
-
-                    c0 = c1;
-                }
-
-                float f1 = i1 != -1 && !accessor.isUnicodeFlag() ? 1.0F : 0.5F;
-                boolean flag = (c0 == 0 || i1 == -1 || accessor.isUnicodeFlag()) && shadow;
-                if (flag) {
-                    this.posX -= f1;
-                    this.posY -= f1;
-                }
-
-                float f = this.renderChar(c0, accessor.isItalicStyle());
-                if (flag) {
-                    this.posX += f1;
-                    this.posY += f1;
-                }
-
-                if (accessor.isBoldStyle()) {
-                    this.posX += f1;
-                    if (flag) {
-                        this.posX -= f1;
-                        this.posY -= f1;
-                    }
-
-                    this.renderChar(c0, accessor.isItalicStyle());
-                    this.posX -= f1;
-                    if (flag) {
-                        this.posX += f1;
-                        this.posY += f1;
-                    }
-
-                    ++f;
-                }
-
-                this.doDraw(f);
-            }
-        }
-
     }
 }
