@@ -2,6 +2,7 @@ package llc.redstone.hysentials.handlers.chat.modules.bwranks;
 
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.config.hysentialmods.ChatConfig;
 import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
 import llc.redstone.hysentials.config.hysentialmods.HousingConfig;
@@ -217,7 +218,7 @@ public class BWSReplace implements ChatReceiveModule {
         }
         chatComponent.getSiblings().clear();
         chatComponent.getSiblings().addAll(siblings);
-        Minecraft.getMinecraft().thePlayer.addChatMessage(chatComponent);
+        UMinecraft.getPlayer().addChatMessage(chatComponent);
         event.setCanceled(true);
     }
 

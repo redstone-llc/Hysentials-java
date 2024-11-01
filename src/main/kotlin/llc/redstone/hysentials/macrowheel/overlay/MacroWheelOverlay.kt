@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.macrowheel.overlay
 
 import cc.polyfrost.oneconfig.config.core.OneColor
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft
 import cc.polyfrost.oneconfig.libs.universal.UResolution
 import cc.polyfrost.oneconfig.renderer.NanoVGHelper
 import cc.polyfrost.oneconfig.utils.InputHandler
@@ -135,7 +136,7 @@ class MacroWheelOverlay(
                                 )
                             ) {
                                 command.processCommand(
-                                    Minecraft.getMinecraft().thePlayer,
+                                    UMinecraft.getPlayer(),
                                     macro.command.substring(macro.command.indexOf(" ") + 1).split(" ").toTypedArray()
                                 )
                                 stop()
@@ -143,7 +144,7 @@ class MacroWheelOverlay(
                             }
                         }
 
-                        Minecraft.getMinecraft().thePlayer.sendChatMessage("/" + macro.command)
+                        UMinecraft.getPlayer()!!.sendChatMessage("/" + macro.command)
                         stop()
                     } else if (inputHandler.isMouseDown(1)) {
                         MacroWheelEditor(i).open()

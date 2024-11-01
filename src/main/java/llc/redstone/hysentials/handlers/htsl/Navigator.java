@@ -2,6 +2,7 @@ package llc.redstone.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.HysentialsUtilsKt;
 import llc.redstone.hysentials.config.hysentialmods.HousingConfig;
 import llc.redstone.hysentials.event.events.GuiLoadedEvent;
@@ -98,7 +99,7 @@ public class Navigator {
     }
 
     public static void setArrowToSlot(int slotId) throws IllegalAccessException {
-        Slot slot = Minecraft.getMinecraft().thePlayer.openContainer.getSlot(slotId);
+        Slot slot = UMinecraft.getPlayer().openContainer.getSlot(slotId);
         int slotX = slot.xDisplayPosition;
         int slotY = slot.yDisplayPosition;
         int guiTop = Navigator.guiTop.getInt(Minecraft.getMinecraft().currentScreen);
@@ -120,7 +121,7 @@ public class Navigator {
         } else {
             GuiMouseClickEvent event = new GuiMouseClickEvent(slotId, new CallbackInfo("test", true));
             MinecraftForge.EVENT_BUS.post(event);
-            if (!event.getCi().isCancelled()) Minecraft.getMinecraft().playerController.windowClick(Minecraft.getMinecraft().thePlayer.openContainer.windowId, slotId, 2, 3, Minecraft.getMinecraft().thePlayer);
+            if (!event.getCi().isCancelled()) Minecraft.getMinecraft().playerController.windowClick(UMinecraft.getPlayer().openContainer.windowId, slotId, 2, 3, UMinecraft.getPlayer());
             setNotReady();
         }
     }
@@ -209,7 +210,7 @@ public class Navigator {
     }
 
     public static boolean selectOption(String optionName) {
-        Container playerContainer = Minecraft.getMinecraft().thePlayer.openContainer;
+        Container playerContainer = UMinecraft.getPlayer().openContainer;
         for (int index = 0; index < playerContainer.inventorySlots.size(); index++) {
             ItemStack item = playerContainer.getSlot(index).getStack();
             if (item == null) continue; // Skip empty slots
@@ -230,7 +231,7 @@ public class Navigator {
     }
 
     public static boolean selectOptionOrClick(String optionName, int slot) {
-        Container playerContainer = Minecraft.getMinecraft().thePlayer.openContainer;
+        Container playerContainer = UMinecraft.getPlayer().openContainer;
         for (int index = 0; index < playerContainer.inventorySlots.size(); index++) {
             ItemStack item = playerContainer.getSlot(index).getStack();
             if (item == null) continue; // Skip empty slots
@@ -256,7 +257,7 @@ public class Navigator {
     }
 
     public static boolean pageOne() {
-        Container playerContainer = Minecraft.getMinecraft().thePlayer.openContainer;
+        Container playerContainer = UMinecraft.getPlayer().openContainer;
         int currentPage = 1;
         if (Navigator.getContainerName().matches("\\(\\d/\\d\\)")) {
             currentPage = Integer.parseInt(Navigator.getContainerName().split("/")[0].replace("(", ""));
@@ -272,7 +273,7 @@ public class Navigator {
     }
 
     public static boolean selectOption(int slot, int page) {
-        Container playerContainer = Minecraft.getMinecraft().thePlayer.openContainer;
+        Container playerContainer = UMinecraft.getPlayer().openContainer;
         int currentPage = 1;
         if (Navigator.getContainerName().split("/").length > 1) {
             currentPage = Integer.parseInt(Navigator.getContainerName().split("/")[0].replace("(", ""));
@@ -299,7 +300,7 @@ public class Navigator {
 
 
     public static void goBack() {
-        click(Minecraft.getMinecraft().thePlayer.openContainer.inventorySlots.size() - BACK_BUTTON_SLOT_OFFSET - 36);
+        click(UMinecraft.getPlayer().openContainer.inventorySlots.size() - BACK_BUTTON_SLOT_OFFSET - 36);
     }
 
     public static void inputAnvil(String text) {

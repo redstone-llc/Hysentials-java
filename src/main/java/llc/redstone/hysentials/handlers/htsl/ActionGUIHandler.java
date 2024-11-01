@@ -2,6 +2,7 @@ package llc.redstone.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.handlers.sbb.SbbRenderer;
 import llc.redstone.hysentials.htsl.compiler.CommitSystemKt;
 import llc.redstone.hysentials.htsl.compiler.CompileKt;
@@ -75,7 +76,7 @@ public class ActionGUIHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onGuiRender(GuiScreenEvent.BackgroundDrawnEvent event) {
-        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
+        if (UMinecraft.getPlayer() == null || UMinecraft.getPlayer().openContainer == null)
             return;
         if (!isInActionGui()) return;
         GlStateManager.pushMatrix();
@@ -117,8 +118,8 @@ public class ActionGUIHandler {
         int margin = (housingEditor.exists()) ? 5 : 30;
         int sizeDifference = 10;
 
-        Slot slot = Minecraft.getMinecraft().thePlayer.openContainer.getSlot(48);
-        Slot slot2 = Minecraft.getMinecraft().thePlayer.openContainer.getSlot(51);
+        Slot slot = UMinecraft.getPlayer().openContainer.getSlot(48);
+        Slot slot2 = UMinecraft.getPlayer().openContainer.getSlot(51);
         if (!slot.getHasStack()) {
             ItemStack item = GuiItem.makeColorfulItem(Material.STORAGE_MINECART, "&aUpload to Action Library", 1, 0, "&7Uploads your current function project", "&7to the Action Library.", "", "&eLeft-Click to upload!", "&bRight-click to upload more functions!");
             slot.putStack(item);
@@ -148,7 +149,7 @@ public class ActionGUIHandler {
 
     @SubscribeEvent
     public void guiKey(GuiKeyboardEvent event) {
-        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
+        if (UMinecraft.getPlayer() == null || UMinecraft.getPlayer().openContainer == null)
             return;
         if (!isInActionGui()) return;
         File htsl = new File("./config/ChatTriggers/modules/HTSL");
@@ -165,7 +166,7 @@ public class ActionGUIHandler {
 
     @SubscribeEvent
     public void mouseClick(GuiMouseClickEvent event) {
-        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
+        if (UMinecraft.getPlayer() == null || UMinecraft.getPlayer().openContainer == null)
             return;
         if (!isInActionGui()) return;
         File htsl = new File("./config/ChatTriggers/modules/HTSL");

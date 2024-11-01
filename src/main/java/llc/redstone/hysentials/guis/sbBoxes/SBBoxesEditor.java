@@ -19,6 +19,7 @@ import llc.redstone.hysentials.util.ScoreboardWrapper;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.scoreboard.Score;
@@ -42,6 +43,7 @@ import static llc.redstone.hysentials.utils.StringUtilsKt.stripControlCodes;
 public class SBBoxesEditor extends HysentialsGui {
     static boolean scroll = true;
     int scrollAmount = 0;
+    private FontRenderer fontRendererObj = Minecraft.getMinecraft().fontRendererObj;
     static Renderer.IconButton collapseIcon;
     static Renderer.IconButton expandIcon;
     public static OneConfigGui configGui;
@@ -49,6 +51,7 @@ public class SBBoxesEditor extends HysentialsGui {
     private static RegexCreator regexCreator;
 
     private static final int SNAPPING_DISTANCE = 10;
+
     private final HashMap<SBBoxes, GrabOffset> editingHuds = new HashMap<>();
     private boolean isDragging;
 

@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.command;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.guis.misc.SetTextureGui;
 import llc.redstone.hysentials.util.BUtils;
 import llc.redstone.hysentials.guis.misc.SetTextureGui;
@@ -43,7 +44,7 @@ public class SetTextureCommand extends CommandBase {
             return;
         }
 
-        if (Minecraft.getMinecraft().thePlayer.getHeldItem() == null) {
+        if (UMinecraft.getPlayer().getHeldItem() == null) {
             UChat.chat("&cYou must be holding an item to use this command.");
             return;
         }

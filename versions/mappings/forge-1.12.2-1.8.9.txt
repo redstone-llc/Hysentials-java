@@ -1,0 +1,22 @@
+net.minecraft.util.math.BlockPos net.minecraft.util.BlockPos
+net.minecraft.event.HoverEvent net.minecraft.util.text.event.HoverEvent
+net.minecraft.event.ClickEvent net.minecraft.util.text.event.ClickEvent
+net.minecraft.event.ClickEvent.Action net.minecraft.util.text.event.ClickEvent.Action
+net.minecraft.event.HoverEvent.Action net.minecraft.util.text.event.HoverEvent.Action
+net.minecraft.command.ICommand getName() getCommandName()
+net.minecraft.command.ICommand getUsage() getCommandUsage()
+net.minecraft.world.World getBiomeProvider() getWorldChunkManager()
+net.minecraft.world.World getBiome() getBiomeGenForCoords()
+net.minecraft.network.play.server.SPacketEntityStatus net.minecraft.network.play.server.S19PacketEntityStatus
+net.minecraft.util.Vec3 x xCoord
+net.minecraft.util.Vec3 y yCoord
+net.minecraft.util.Vec3 z zCoord
+net.minecraft.util.Vec3 add() addVector()
+net.minecraft.network.status.server.SPacketServerInfo net.minecraft.network.status.server.S00PacketServerInfo
+net.minecraft.util.text.TextComponentString net.minecraft.util.ChatComponentText
+net.minecraft.network.status.client.CPacketPing net.minecraft.network.status.client.C01PacketPing
+net.minecraft.network.status.server.SPacketPong net.minecraft.network.status.server.S01PacketPong
+net.minecraft.network.status.client.CPacketServerQuery net.minecraft.network.status.client.C00PacketServerQuery
+net.minecraft.util.text.ITextComponent net.minecraft.util.IChatComponent
+net.minecraft.client.renderer.entity.RenderLiving net.minecraft.client.renderer.entity.RendererLivingEntity
+net.minecraft.client.renderer.entity.RenderManager renderEntity() doRenderEntity()

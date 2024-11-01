@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.handlers.npc;
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import kotlin.jvm.internal.ReflectionFactory;
 import llc.redstone.hysentials.handlers.npc.lost.LostRidable;
 import com.mojang.authlib.GameProfile;
@@ -253,7 +254,7 @@ public abstract class NPC {
     public BlockPos pos = null;
     public BlockPos checkPosition(int radius) {
         World world = Minecraft.getMinecraft().theWorld;
-        int centerX = Minecraft.getMinecraft().thePlayer.getPosition().getX();
+        int centerX = UMinecraft.getPlayer().getPosition().getX();
         int centerY = Minecraft.getMinecraft().thePlayer.getPosition().getY();
         int centerZ = Minecraft.getMinecraft().thePlayer.getPosition().getZ();
 

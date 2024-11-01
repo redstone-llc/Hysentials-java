@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.macrowheel
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft
 import llc.redstone.hysentials.Hysentials
 import llc.redstone.hysentials.guis.container.Container
 import llc.redstone.hysentials.guis.container.GuiItem
@@ -67,7 +68,7 @@ class MacroWheelSelector : Container("Command Wheel Selector", 6) {
         }
         setAction(49) {
             it.event.cancel()
-            Minecraft.getMinecraft().thePlayer.closeScreen()
+            UMinecraft.getPlayer()!!.closeScreen()
         }
         val macroSlots = arrayOf(12, 13, 14, 21, 23, 30, 31, 32)
         for (i in 0 until 8) {
@@ -75,19 +76,19 @@ class MacroWheelSelector : Container("Command Wheel Selector", 6) {
                 setAction(macroSlots[i]) {
                     if (it.button == 0) {
                         it.event.cancel()
-                        Minecraft.getMinecraft().thePlayer.closeScreen()
+                        UMinecraft.getPlayer()!!.closeScreen()
                         MacroWheelEditor(i).open()
                     } else if (it.button == 1) {
                         it.event.cancel()
                         Hysentials.INSTANCE.macroJson.removeMacro(i)
-                        Minecraft.getMinecraft().thePlayer.closeScreen()
+                        UMinecraft.getPlayer()!!.closeScreen()
                         MacroWheelSelector().open()
                     }
                 }
             } else {
                 setAction(macroSlots[i]) {
                     it.event.cancel()
-                    Minecraft.getMinecraft().thePlayer.closeScreen()
+                    UMinecraft.getPlayer()!!.closeScreen()
                     val newMacroWheel = MacroWheelData.MacroWheel(i, "Macro #${i + 1}", "help", Material.COMMAND, "")
                     Hysentials.INSTANCE.macroJson.addMacro(newMacroWheel)
                     MacroWheelEditor(i).open()

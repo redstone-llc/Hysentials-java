@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.handlers.htsl;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.config.hysentialmods.HousingConfig;
 import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
 import llc.redstone.hysentials.guis.ResolutionUtil;
@@ -42,7 +43,7 @@ public class Queue {
 
     @SubscribeEvent
     public void guiRender(GuiScreenEvent.BackgroundDrawnEvent event) {
-        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
+        if (UMinecraft.getPlayer() == null || UMinecraft.getPlayer().openContainer == null)
             return;
         if (!(Minecraft.getMinecraft().currentScreen instanceof GuiContainer)) return;
         if (queue.size() == 0) return;
@@ -73,7 +74,7 @@ public class Queue {
 
     @SubscribeEvent
     public void mouseClick(GuiMouseClickEvent event) {
-        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
+        if (UMinecraft.getPlayer() == null || UMinecraft.getPlayer().openContainer == null)
             return;
         if (queue.size() == 0) return;
         if (cancel.mousePressed(Minecraft.getMinecraft(), event.getX(), event.getY())) {
@@ -169,7 +170,7 @@ public class Queue {
                 Navigator.command(String.valueOf(current.getValue()));
                 break;
             case "export":
-                List<ItemStack> items = Minecraft.getMinecraft().thePlayer.openContainer.inventorySlots.stream().map(Slot::getStack).collect(Collectors.toList());
+                List<ItemStack> items = UMinecraft.getPlayer().openContainer.inventorySlots.stream().map(Slot::getStack).collect(Collectors.toList());
                 items = items.subList(0, items.size() - 36 - 9);
                 current.func(items);
                 break;
@@ -206,7 +207,7 @@ public class Queue {
                 break;
             }
             case "close": {
-                Minecraft.getMinecraft().thePlayer.closeScreen();
+                UMinecraft.getPlayer().closeScreen();
                 started = false;
                 break;
             }
@@ -235,7 +236,7 @@ public class Queue {
         startedTime = 0;
         totalTime = 0;
         started = false;
-        Minecraft.getMinecraft().thePlayer.closeScreen();
+        UMinecraft.getPlayer().closeScreen();
     }
 
     @SubscribeEvent

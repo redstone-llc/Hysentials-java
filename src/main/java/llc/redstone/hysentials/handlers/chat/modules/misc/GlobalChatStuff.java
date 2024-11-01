@@ -2,6 +2,7 @@ package llc.redstone.hysentials.handlers.chat.modules.misc;
 
 import cc.polyfrost.oneconfig.events.event.ChatSendEvent;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.command.HypixelChatCommand;
 import llc.redstone.hysentials.handlers.chat.ChatReceiveModule;
 import llc.redstone.hysentials.handlers.chat.ChatSendModule;
@@ -46,8 +47,8 @@ public class GlobalChatStuff {
                 JSONObject json = new JSONObject();
                 json.put("method", "chat");
                 json.put("message", message);
-                json.put("username", Minecraft.getMinecraft().thePlayer.getName());
-                json.put("uuid", Minecraft.getMinecraft().thePlayer.getCommandSenderEntity().getUniqueID().toString());
+                json.put("username", UMinecraft.getPlayer().getName());
+                json.put("uuid", UMinecraft.getPlayer().getCommandSenderEntity().getUniqueID().toString());
                 json.put("server", false);
                 json.put("displayName", Minecraft.getMinecraft().thePlayer.getDisplayName().getFormattedText()); //This gets overwritten by the server lol!
                 json.put("key", Socket.serverId);

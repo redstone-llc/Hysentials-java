@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.utils
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UMessage
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent
 import llc.redstone.hysentials.util.Renderer
@@ -55,7 +56,7 @@ object ChatLib {
      * @param text the message to be sent
      */
     @JvmStatic
-    fun say(text: String) = Minecraft.getMinecraft().thePlayer?.sendChatMessage(text)
+    fun say(text: String) = UMinecraft.getPlayer()?.sendChatMessage(text)
 
     /**
      * Runs a command.
@@ -66,7 +67,7 @@ object ChatLib {
     @JvmOverloads
     @JvmStatic
     fun command(text: String, clientSide: Boolean = false) {
-        if (clientSide) ClientCommandHandler.instance.executeCommand(Minecraft.getMinecraft().thePlayer, "/$text")
+        if (clientSide) ClientCommandHandler.instance.executeCommand(UMinecraft.getPlayer(), "/$text")
         else say("/$text")
     }
 

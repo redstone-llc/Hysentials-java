@@ -4,6 +4,7 @@ import Apec.Components.Gui.GuiIngame.ApecGuiIngameForge;
 import cc.polyfrost.oneconfig.events.EventManager;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.cosmetics.capes.CapeHandler;
 import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
 import llc.redstone.hysentials.config.hysentialmods.icons.IconStuff;
@@ -200,7 +201,6 @@ public class Hysentials {
         commands.add(new OpenInvCommand());
         commands.add(new SetTextureCommand());
         commands.add(new HymojiCommand());
-        commands.add(new ClaimCommand());
 //        commands.add(new GroupChatCommand());
 
         for (ICommand command : commands) {
@@ -208,6 +208,7 @@ public class Hysentials {
         }
         CommandManager.INSTANCE.registerCommand(new SBBoxesCommand());
         CommandManager.INSTANCE.registerCommand(new ActionLibraryCommand());
+        CommandManager.INSTANCE.registerCommand(new ClaimCommand());
         CommandManager.INSTANCE.registerCommand(new ClubCommand());
 
         Quest.registerQuests();
@@ -238,11 +239,7 @@ public class Hysentials {
         isHytils = Loader.isModLoaded("hytils-reborn");
         chatHandler.init();
 
-//        imageIconRenderer = new ImageIconRenderer();
-        minecraftFont = Minecraft.getMinecraft().fontRendererObj;
-//        if (FormattingConfig.fancyRendering()) {
-//            Minecraft.getMinecraft().fontRendererObj = imageIconRenderer;
-//        }
+        minecraftFont = UMinecraft.getFontRenderer();
 
         registerHandlers();
 
@@ -256,11 +253,6 @@ public class Hysentials {
             config.macroWheelHud.position.setPosition((Renderer.screen.getWidth() / 2f) - (34*5f) / 2, (Renderer.screen.getHeight() / 2f) - (34*5f) / 2);
         }
 
-        for (int i = 1000; 65000 > i ; i++) {
-            if (Minecraft.getMinecraft().fontRendererObj.getCharWidth((char) i) > 0) {
-                FancyFormattingKt.getChars().put((char) i, Minecraft.getMinecraft().fontRendererObj.getCharWidth((char) i));
-            }
-        }
         registerImages();
         updateAndAdd();
     }

@@ -2,6 +2,7 @@ package llc.redstone.hysentials.hyphone
 
 import cc.polyfrost.oneconfig.libs.universal.UChat
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft
 import cc.polyfrost.oneconfig.libs.universal.UScreen
 import llc.redstone.hysentials.Hysentials
 import llc.redstone.hysentials.cosmetic.CosmeticGui
@@ -68,18 +69,18 @@ class HyPhoneGUI : UScreen(), HysentialsGui {
         buttons.clear()
         buttons.let {
             it.add(Button(4, 28, 70, 52, "hysentials:gui/hysentials_level.png", instance) { _, _, _ ->
-                Minecraft.getMinecraft().thePlayer.closeScreen()
+                UMinecraft.getPlayer()!!.closeScreen()
                 HysentialsLevel(0).open()
             })
             it.add(Button(4, 82, 70, 52, "hysentials:gui/game_menu.png", instance) { _, _, _ ->
                 UChat.chat("&cComing soon!")
             })
             it.add(Button(76, 28, 88, 34, "hysentials:gui/config_menu.png", instance) { _, _, _ ->
-                Minecraft.getMinecraft().thePlayer.closeScreen()
+                UMinecraft.getPlayer()!!.closeScreen()
                 Hysentials.INSTANCE.config.openGui()
             })
             it.add(Button(76, 64, 88, 34, "hysentials:gui/cosmetic_menu.png", instance) { _, _, _ ->
-                Minecraft.getMinecraft().thePlayer.closeScreen()
+                UMinecraft.getPlayer()!!.closeScreen()
                 Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(CosmeticGui())
             })
             it.add(Button(76, 100, 88, 34, "hysentials:gui/coming_soon.png", instance) { _, _, _ ->

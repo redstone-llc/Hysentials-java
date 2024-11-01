@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.command;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.util.BUtils;
 import llc.redstone.hysentials.util.MUtils;
 import llc.redstone.hysentials.util.C;
@@ -44,7 +45,7 @@ public class SetLoreLineCommand extends CommandBase {
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
         if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative() || BUtils.isSBX()) {
             if (processRedirect(this, args)) return;
-            Minecraft.getMinecraft().thePlayer.sendChatMessage("/setloreline " + String.join(" ", args));
+            UMinecraft.getPlayer().sendChatMessage("/setloreline " + String.join(" ", args));
             return;
         }
         if (args.length < 2) {

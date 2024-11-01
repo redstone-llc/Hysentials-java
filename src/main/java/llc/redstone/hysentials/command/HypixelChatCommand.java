@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.command;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.config.hysentialmods.ChatConfig;
 import llc.redstone.hysentials.util.BUtils;
 import llc.redstone.hysentials.Hysentials;
@@ -36,7 +37,7 @@ public class HypixelChatCommand extends CommandBase {
         ArrayList<String> chats = new ArrayList<>(Arrays.asList("All", "Global", "Party", "Guild", "Officer", "Skyblock-Coop"));
         ArrayList<String> chatAliases = new ArrayList<>(Arrays.asList("a", "gl", "p", "g", "o", "coop"));
         if (!BUtils.isHypixelOrSBX()) {
-            Minecraft.getMinecraft().thePlayer.sendChatMessage("/chat " + String.join(" ", args));
+            UMinecraft.getPlayer().sendChatMessage("/chat " + String.join(" ", args));
             return;
         }
         if (args.length == 0) {

@@ -54,7 +54,7 @@ public class EntityHamster extends EntityTameable {
         setCustomNameTag(C.AQUA + name + "'s Hamster Companion");
         preventEntitySpawning = false;
         ownerName = name;
-        armorStand = new EntityArmorStand(worldObj);
+        armorStand = new EntityArmorStand(this.worldObj);
         armorStand.setInvisible(true);
         armorStand.noClip = true;
         armorStand.setAlwaysRenderNameTag(true);
@@ -81,7 +81,7 @@ public class EntityHamster extends EntityTameable {
                 float f4 = 0.91F;
 
                 if (onGround) {
-                    f4 = worldObj.getBlockState(new BlockPos(MathHelper.floor_double(posX), MathHelper.floor_double(getEntityBoundingBox().minY) - 1,
+                    f4 = this.worldObj.getBlockState(new BlockPos(MathHelper.floor_double(posX), MathHelper.floor_double(getEntityBoundingBox().minY) - 1,
                         MathHelper.floor_double(posZ))).getBlock().slipperiness * 0.91F;
                 }
 
@@ -91,7 +91,7 @@ public class EntityHamster extends EntityTameable {
                 f4 = 0.91F;
 
                 if (onGround) {
-                    f4 = worldObj.getBlockState(new BlockPos(MathHelper.floor_double(posX), MathHelper.floor_double(getEntityBoundingBox().minY) - 1,
+                    f4 = this.worldObj.getBlockState(new BlockPos(MathHelper.floor_double(posX), MathHelper.floor_double(getEntityBoundingBox().minY) - 1,
                         MathHelper.floor_double(posZ))).getBlock().slipperiness * 0.91F;
                 }
 
@@ -105,10 +105,10 @@ public class EntityHamster extends EntityTameable {
 
                 moveEntity(motionX, motionY, motionZ);
 
-                if (isCollidedHorizontally && isOnLadder()) motionY = 0.2D;
+                if (this.isCollidedHorizontally && isOnLadder()) motionY = 0.2D;
 
-                if (worldObj.isRemote && (!worldObj.isBlockLoaded(new BlockPos((int) posX, 0, (int) posZ)) ||
-                    !worldObj.getChunkFromBlockCoords(new BlockPos((int) posX, 0, (int) posZ)).isLoaded())) {
+                if (this.worldObj.isRemote && (!this.worldObj.isBlockLoaded(new BlockPos((int) posX, 0, (int) posZ)) ||
+                    !this.worldObj.getChunkFromBlockCoords(new BlockPos((int) posX, 0, (int) posZ)).isLoaded())) {
                     motionY = posY > 0.0D ? -0.1D : 0.0D;
                 } else {
                     motionY -= 0.08D;
@@ -126,7 +126,7 @@ public class EntityHamster extends EntityTameable {
                 motionZ *= 0.5D;
                 motionY -= 0.02D;
 
-                if (isCollidedHorizontally && isOffsetPositionInLiquid(motionX, motionY + 0.6000000238418579D - posY + d1, motionZ)) {
+                if (this.isCollidedHorizontally && isOffsetPositionInLiquid(motionX, motionY + 0.6000000238418579D - posY + d1, motionZ)) {
                     motionY = 0.30000001192092896D;
                 }
             }
@@ -150,7 +150,7 @@ public class EntityHamster extends EntityTameable {
             motionZ *= f1;
             motionY -= 0.02D;
 
-            if (isCollidedHorizontally && isOffsetPositionInLiquid(motionX, motionY + 0.6000000238418579D - posY + d0, motionZ)) {
+            if (this.isCollidedHorizontally && isOffsetPositionInLiquid(motionX, motionY + 0.6000000238418579D - posY + d0, motionZ)) {
                 motionY = 0.30000001192092896D;
             }
         }

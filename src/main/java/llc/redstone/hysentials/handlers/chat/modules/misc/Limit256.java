@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.handlers.chat.modules.misc;
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.config.hysentialmods.ChatConfig;
 import llc.redstone.hysentials.util.BUtils;
 import net.minecraft.client.Minecraft;
@@ -28,7 +29,7 @@ public class Limit256 {
     @SubscribeEvent
     public void onRenderGameOverlay(GuiOpenEvent e) {
         try {
-            if (!Minecraft.getMinecraft().thePlayer.worldObj.isRemote)
+            if (!UMinecraft.getPlayer().worldObj.isRemote)
                 return;
         } catch (NullPointerException exc) {
             return;

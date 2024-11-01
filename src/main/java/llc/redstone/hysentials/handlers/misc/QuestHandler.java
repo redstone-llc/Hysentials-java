@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.handlers.misc;
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.quest.Quest;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.websocket.Request;
@@ -82,7 +83,7 @@ public class QuestHandler {
             "questId", quest.getId(),
             "active", quest.isActive,
             "key", Socket.serverId,
-            "uuid", Minecraft.getMinecraft().thePlayer.getUniqueID().toString()
+            "uuid", UMinecraft.getPlayer().getUniqueID().toString()
         ).toString());
     }
 
@@ -90,7 +91,7 @@ public class QuestHandler {
         Socket.CLIENT.sendText(new Request(
             "method", "rerollQuest",
             "key", Socket.serverId,
-            "uuid", Minecraft.getMinecraft().thePlayer.getUniqueID().toString()
+            "uuid", UMinecraft.getPlayer().getUniqueID().toString()
         ).toString());
     }
 
@@ -99,7 +100,7 @@ public class QuestHandler {
             "method", "checkQuest",
             "questId", quest.getId(),
             "key", Socket.serverId,
-            "uuid", Minecraft.getMinecraft().thePlayer.getUniqueID().toString()
+            "uuid", UMinecraft.getPlayer().getUniqueID().toString()
         ).toString());
     }
 }

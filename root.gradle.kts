@@ -5,5 +5,8 @@ plugins {
 }
 
 preprocess {
-    "1.8.9-forge"(10809, "srg") {}
+    val forge10809 = createNode("1.8.9-forge", 10809, "srg")
+    val forge11202 = createNode("1.12.2-forge", 11202, "srg")
+
+    forge11202.link(forge10809, file("versions/mappings/forge-1.12.2-1.8.9.txt"))
 }

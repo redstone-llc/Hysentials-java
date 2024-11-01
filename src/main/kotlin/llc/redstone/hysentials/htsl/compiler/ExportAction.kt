@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.htsl.compiler
 
 import cc.polyfrost.oneconfig.libs.universal.UChat
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent
 import llc.redstone.hysentials.HYSENTIALS_API
 import llc.redstone.hysentials.Hysentials
@@ -203,7 +204,7 @@ class ExportAction {
         }
 
         fun exportAction(name: String) {
-            var items = Minecraft.getMinecraft().thePlayer.openContainer.inventorySlots.map { it.stack }
+            var items = UMinecraft.getPlayer()!!.openContainer.inventorySlots.map { it.stack }
             items = items.subList(0, items.size - 36 - 9)
             actionobjs = mutableListOf()
 
@@ -225,7 +226,7 @@ class ExportAction {
                 val json = JSONObject();
                 json.put("name", name);
                 json.put("code", code);
-                json.put("creator", Minecraft.getMinecraft().thePlayer.getName());
+                json.put("creator", UMinecraft.getPlayer()!!.getName());
                 json.put("description", "Exported from Hysentials");
                 val codespace = JSONObject();
                 codespace.put("functions", actions.size);
@@ -277,7 +278,7 @@ class ExportAction {
         }
 
         private fun getItems(): MutableList<ItemStack?> {
-            return Minecraft.getMinecraft().thePlayer.openContainer.inventorySlots.map { it.stack }.toMutableList()
+            return UMinecraft.getPlayer()!!.openContainer.inventorySlots.map { it.stack }.toMutableList()
         }
 
         fun processPage(

@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.handlers.htsl;
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.handlers.redworks.BwRanks;
 import llc.redstone.hysentials.htsl.compiler.ExportAction;
 import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
@@ -63,12 +64,12 @@ public class FunctionsGUIHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onGuiRender(GuiScreenEvent.BackgroundDrawnEvent event) {
-        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
+        if (UMinecraft.getPlayer() == null || UMinecraft.getPlayer().openContainer == null)
             return;
         if (!isInFunctionsGui()) return;
         if (Navigator.getContainerSize() != 54) return;
         GlStateManager.pushMatrix();
-        Slot slot = Minecraft.getMinecraft().thePlayer.openContainer.getSlot(48);
+        Slot slot = UMinecraft.getPlayer().openContainer.getSlot(48);
 
         if (!slot.getHasStack()) {
             ItemStack item = GuiItem.makeColorfulItem(Material.STORAGE_MINECART, "&aUpload to Action Library", 1, 0, "&7Uploads a selection of", "&7functions to your desired", "&7destination.", "", "&7Once you are done", "&7choosing your functions,", "&7click this again to", "&7start the export", "", "&eClick to toggle selecting!");
@@ -124,7 +125,7 @@ public class FunctionsGUIHandler {
 
     @SubscribeEvent
     public void mouseClick(GuiMouseClickEvent event) {
-        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
+        if (UMinecraft.getPlayer() == null || UMinecraft.getPlayer().openContainer == null)
             return;
         if (Navigator.getContainerName() == null || !Navigator.getContainerName().equals("Functions")) return;
         if (!showChoose) return;
@@ -148,7 +149,7 @@ public class FunctionsGUIHandler {
     String exportName = null;
 
     private void performClickAction(String exportMethod) {
-        EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+        EntityPlayerSP player = UMinecraft.getPlayer();
         Minecraft.getMinecraft().theWorld.playSound(player.posX, player.posY, player.posZ, "random.click", 1, 1, false);
         ExportAction.setExportMethod(exportMethod);
         showChoose = false;
@@ -162,7 +163,7 @@ public class FunctionsGUIHandler {
 
     @SubscribeEvent
     public void onGuiSlotClick(GuiMouseClickEvent event) {
-        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
+        if (UMinecraft.getPlayer() == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
             return;
         if (Navigator.getContainerName() == null || !Navigator.getContainerName().equals("Functions")) return;
         GuiScreen screen = Minecraft.getMinecraft().currentScreen;

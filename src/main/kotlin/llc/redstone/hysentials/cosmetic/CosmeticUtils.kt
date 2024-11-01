@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.cosmetic
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft
 import cc.polyfrost.oneconfig.utils.Multithreading
 import com.google.gson.JsonElement
 import llc.redstone.hysentials.HYSENTIALS_API
@@ -34,8 +35,8 @@ object CosmeticManager {
         val cosmetics = BlockWAPIUtils.getCosmetics()
         val cosmetic = cosmetics.find { it.name == name }
         cosmetic?.let {
-            if (it.equipped.contains(Minecraft.getMinecraft().thePlayer.uniqueID.toString())) {
-                it.equipped.remove(Minecraft.getMinecraft().thePlayer.uniqueID.toString())
+            if (it.equipped.contains(UMinecraft.getPlayer()!!.uniqueID.toString())) {
+                it.equipped.remove(UMinecraft.getPlayer()!!.uniqueID.toString())
             }
             if (preview) {
                 previewing.remove(it.name)
@@ -52,14 +53,14 @@ object CosmeticManager {
         cosmetic?.let {
             if (BlockWAPIUtils.getCosmetic(it.type).isNotEmpty()) {
                 BlockWAPIUtils.getCosmetic(it.type).forEach { cosmetic ->
-                    if (cosmetic.equipped.contains(Minecraft.getMinecraft().thePlayer.uniqueID.toString())) {
+                    if (cosmetic.equipped.contains(UMinecraft.getPlayer()!!.uniqueID.toString())) {
                         unEquipCosmetic(cosmetic.name)
                         previewing.remove(cosmetic.name)
                     }
                 }
             }
-            if (!it.equipped.contains(Minecraft.getMinecraft().thePlayer.uniqueID.toString())) {
-                it.equipped.add(Minecraft.getMinecraft().thePlayer.uniqueID.toString())
+            if (!it.equipped.contains(UMinecraft.getPlayer()!!.uniqueID.toString())) {
+                it.equipped.add(UMinecraft.getPlayer()!!.uniqueID.toString())
             }
             if (preview) {
                 previewing.add(it.name)
@@ -89,8 +90,8 @@ object CosmeticManager {
         val cosmetic = cosmetics.find { it.name == cosmeticName }
         cosmetic?.let {
             if (it.cost == -1) return@let
-            if (!it.users.contains(Minecraft.getMinecraft().thePlayer.uniqueID.toString())) {
-                it.users.add(Minecraft.getMinecraft().thePlayer.uniqueID.toString())
+            if (!it.users.contains(UMinecraft.getPlayer()!!.uniqueID.toString())) {
+                it.users.add(UMinecraft.getPlayer()!!.uniqueID.toString())
                 Socket.cachedUser.amountSpent = Socket.cachedUser.amountSpent?.plus(it.cost)
                 Socket.cachedUser.emeralds = Socket.cachedUser.emeralds.minus(it.cost)
                 actions.add(Actions("purchase", it.name))
@@ -105,7 +106,7 @@ object CosmeticManager {
                 val name = action.name
 
                 val response =
-                    NetworkUtils.postString(HYSENTIALS_API + "/cosmetic?name=$name&function=${func}&uuid=${Minecraft.getMinecraft().thePlayer.uniqueID}&key=${Socket.serverId}")
+                    NetworkUtils.postString(HYSENTIALS_API + "/cosmetic?name=$name&function=${func}&uuid=${UMinecraft.getPlayer()!!.uniqueID}&key=${Socket.serverId}")
                 val json = JSONObject(response)
                 if (json.get("success") == false) {
                     Hysentials.INSTANCE.sendMessage(
@@ -136,7 +137,7 @@ object CosmeticManager {
         GlStateManager.disableDepth()
         GlStateManager.colorMask(true, true, true, false)
         val name = cosmetic.name
-        val uuid = Minecraft.getMinecraft().thePlayer.uniqueID
+        val uuid = UMinecraft.getPlayer()!!.uniqueID
         if (equippedCosmetic(uuid, name)) {
             Renderer.drawImage(slotResource, i.toDouble(), j.toDouble(), 25.0, 26.0)
         }
@@ -224,7 +225,7 @@ object CosmeticManager {
 
     @JvmStatic
     fun isPreviewing(uuid: UUID, name: String): Boolean {
-        if (uuid != Minecraft.getMinecraft().thePlayer.uniqueID) return false
+        if (uuid != UMinecraft.getPlayer()!!.uniqueID) return false
         return previewing.contains(name)
     }
 

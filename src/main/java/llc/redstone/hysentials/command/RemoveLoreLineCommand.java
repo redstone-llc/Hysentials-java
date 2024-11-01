@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.command;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.util.BUtils;
 import llc.redstone.hysentials.util.MUtils;
 import net.minecraft.client.Minecraft;
@@ -41,7 +42,7 @@ public class RemoveLoreLineCommand extends CommandBase {
     public void processCommand(ICommandSender sender, String[] args) {
         if (!Minecraft.getMinecraft().playerController.getCurrentGameType().isCreative() || BUtils.isSBX()) {
             if (processRedirect(this, args)) return;
-            Minecraft.getMinecraft().thePlayer.sendChatMessage("/removeloreline " + String.join(" ", args));
+            UMinecraft.getPlayer().sendChatMessage("/removeloreline " + String.join(" ", args));
             return;
         }
         if (args.length == 0) {
@@ -61,7 +62,7 @@ public class RemoveLoreLineCommand extends CommandBase {
             return;
         }
 
-        ItemStack item = Minecraft.getMinecraft().thePlayer.getHeldItem();
+        ItemStack item = UMinecraft.getPlayer().getHeldItem();
         if (item == null || item.getItem() == null) {
             UChat.chat("&cYou must be holding an item!");
             return;
@@ -74,7 +75,7 @@ public class RemoveLoreLineCommand extends CommandBase {
         List<String> lore = getLore(item);
         lore.remove(line - 1);
         setLore(item, lore);
-        RenameCommand.setCreativeAction(item, Minecraft.getMinecraft().thePlayer.inventory.currentItem);
+        RenameCommand.setCreativeAction(item, UMinecraft.getPlayer().inventory.currentItem);
         UChat.chat("&aSuccessfully removed line &e" + line + "&a!");
     }
 }

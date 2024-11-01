@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.macrowheel
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft
 import llc.redstone.hysentials.Hysentials
 import llc.redstone.hysentials.guis.container.Container
 import llc.redstone.hysentials.guis.container.GuiItem
@@ -124,7 +125,7 @@ class MacroWheelEditor(i: Int) : Container("Macro #${i + 1}", 6) {
         }
         setAction(49) {
             it.event.cancel()
-            Minecraft.getMinecraft().thePlayer.closeScreen()
+            UMinecraft.getPlayer()!!.closeScreen()
         }
 
         setAction(48) {

@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.command;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.util.BUtils;
@@ -206,7 +207,7 @@ public class GroupChatCommand extends CommandBase {
                 }
                 Hysentials.INSTANCE.sendMessage("&aYou are in the following group chats:");
                 for (HysentialsSchema.Group group : Socket.cachedGroups) {
-                    if (group.getOwner().equals(Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString()))
+                    if (group.getOwner().equals(UMinecraft.getPlayer().getGameProfile().getId().toString()))
                         UChat.chat("   - &6" + group.getName() + " &7(" + group.getMembers().size() + " members)");
                     else
                         UChat.chat("   - &a" + group.getName() + " &7(" + group.getMembers().size() + " members)");

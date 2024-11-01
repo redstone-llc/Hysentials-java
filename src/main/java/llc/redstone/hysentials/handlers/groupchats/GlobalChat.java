@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.handlers.groupchats;
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
@@ -22,7 +23,7 @@ public class GlobalChat {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         final LocrawInfo locraw = LocrawUtil.INSTANCE.getLocrawInfo();
-        if (event.phase != TickEvent.Phase.START || Minecraft.getMinecraft().thePlayer == null || !HypixelUtils.INSTANCE.isHypixel() || locraw == null) {
+        if (event.phase != TickEvent.Phase.START || UMinecraft.getPlayer() == null || !HypixelUtils.INSTANCE.isHypixel() || locraw == null) {
             return;
         }
 

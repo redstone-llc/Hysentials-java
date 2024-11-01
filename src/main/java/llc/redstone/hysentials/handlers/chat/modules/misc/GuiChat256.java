@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.handlers.chat.modules.misc;
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.guis.container.containers.club.ClubDashboard;
 import net.minecraft.client.Minecraft;
@@ -70,6 +71,6 @@ public class GuiChat256 extends GuiChat {
             packet = new C01PacketChatMessage(msg);
         }
 
-        Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(packet);
+        UMinecraft.getPlayer().sendQueue.addToSendQueue(packet);
     }
 }

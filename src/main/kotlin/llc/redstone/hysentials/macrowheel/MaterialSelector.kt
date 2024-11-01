@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.macrowheel
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft
 import llc.redstone.hysentials.Hysentials
 import llc.redstone.hysentials.guis.container.Backable
 import llc.redstone.hysentials.guis.container.GuiAction
@@ -32,7 +33,7 @@ class MaterialSelector(private var macro: MacroWheelData.MacroWheel) : Paginatio
                     .uppercase())
             macro.icon = material
             macro.save()
-            Minecraft.getMinecraft().thePlayer.closeScreen()
+            UMinecraft.getPlayer()!!.closeScreen()
             MacroWheelEditor(macro.index).open()
         }
     }

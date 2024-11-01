@@ -1,9 +1,6 @@
 package llc.redstone.hysentials.mixin;
 
-import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.hysentialmods.FormattingConfig;
-import llc.redstone.hysentials.renderer.text.FancyFormatting2;
-import llc.redstone.hysentials.renderer.text.FancyFormatting2Kt;
 import llc.redstone.hysentials.util.ImageIconRenderer;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiUtilRenderComponents;
@@ -11,10 +8,8 @@ import net.minecraft.util.IChatComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(value = GuiUtilRenderComponents.class)

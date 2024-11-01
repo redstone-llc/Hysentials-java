@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.command;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Greedy;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import llc.redstone.hysentials.util.BlockWAPIUtils;
@@ -53,10 +54,10 @@ public class ClubCommand {
             String id = BwRanks.randomString(8);
             JSONObject json = new JSONObject();
             json.put("name", name);
-            json.put("owner", Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString());
+            json.put("owner", UMinecraft.getPlayer().getGameProfile().getId().toString());
             try (InputStreamReader input = new InputStreamReader(Hysentials.post(getHYSENTIALS_API() + "/club/create"
                 + "?id=" + id
-                + "&uuid=" + Minecraft.getMinecraft().thePlayer.getGameProfile().getId().toString()
+                + "&uuid=" + UMinecraft.getPlayer().getGameProfile().getId().toString()
                 + "&key=" + Socket.serverId, json)
                 , StandardCharsets.UTF_8)) {
                 String s = IOUtils.toString(input);
@@ -120,7 +121,7 @@ public class ClubCommand {
                     break;
                 }
                 case "item": {
-                    ItemStack item = Minecraft.getMinecraft().thePlayer.inventory.getCurrentItem();
+                    ItemStack item = UMinecraft.getPlayer().inventory.getCurrentItem();
                     if (item == null) {
                         UChat.chat("&cYou must be holding an item to use this command.");
                         return;
@@ -260,7 +261,7 @@ public class ClubCommand {
                     UChat.chat(HysentialsConfig.chatPrefix + " &c" + clubData.get("message").getAsString());
                     return;
                 }
-                new ClubDashboard(clubData).open(Minecraft.getMinecraft().thePlayer);
+                new ClubDashboard(clubData).open(UMinecraft.getPlayer());
             } catch (Exception e) {
                 e.printStackTrace();
             }

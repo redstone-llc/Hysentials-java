@@ -2,6 +2,7 @@ package llc.redstone.hysentials.cosmetic
 
 import cc.polyfrost.oneconfig.libs.universal.UKeyboard
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft
 import cc.polyfrost.oneconfig.libs.universal.UScreen
 import llc.redstone.hysentials.Hysentials
 import llc.redstone.hysentials.config.HysentialsConfig
@@ -28,13 +29,9 @@ import llc.redstone.hysentials.utils.drawEntityOnScreen
 import net.minecraft.client.Minecraft
 import net.minecraft.client.audio.PositionedSoundRecord
 import net.minecraft.client.renderer.GlStateManager
-import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.inventory.Slot
-import net.minecraft.scoreboard.Score
-import net.minecraft.scoreboard.ScoreDummyCriteria
 import net.minecraft.util.EnumChatFormatting
 import net.minecraft.util.ResourceLocation
-import org.json.JSONObject
 import java.text.DecimalFormat
 import java.util.*
 import java.util.stream.Collectors
@@ -333,7 +330,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 if (slot >= page.size) return
                 val cosmetic = page[slot]
                 val cosmeticName = cosmetic.name
-                val uuid = Minecraft.getMinecraft().thePlayer.uniqueID
+                val uuid = UMinecraft.getPlayer()!!.uniqueID
                 val emerald = Socket.cachedUser?.emeralds ?: 0
                 if (equippedCosmetic(uuid, cosmeticName) && hasCosmetic(uuid, cosmeticName)) {
                     unEquipCosmetic(cosmeticName)
@@ -363,7 +360,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 val cosmetic = page[slot]
                 val cosmeticName = cosmetic.name
                 if (!previewing.contains(cosmeticName) && !hasCosmetic(
-                        Minecraft.getMinecraft().thePlayer.uniqueID,
+                        UMinecraft.getPlayer()!!.uniqueID,
                         cosmeticName
                     )
                 ) {
@@ -395,7 +392,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
             if (search.isEmpty() && keyCode == UKeyboard.KEY_SPACE) return
             input.textboxKeyTyped(typedChar, keyCode)
             if (keyCode == 1) { // keycode for escape key
-                Minecraft.getMinecraft().thePlayer.closeScreen()
+                UMinecraft.getPlayer()!!.closeScreen()
                 return
             }
             if (keyCode == 15) { // keycode for tab key
@@ -477,7 +474,7 @@ open class CosmeticGui : UScreen(), HysentialsGui {
                 0.6f
             )
         )
-        val uuid = Minecraft.getMinecraft().thePlayer.uniqueID
+        val uuid = UMinecraft.getPlayer()!!.uniqueID
 
         //sort cosmetics by rarity and if they have it or not
         val cosmetics = BlockWAPIUtils.getCosmetics().sortedWith(

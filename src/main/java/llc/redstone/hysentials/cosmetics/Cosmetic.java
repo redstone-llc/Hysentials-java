@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.cosmetics;
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiEnchantment;
 import net.minecraft.client.gui.ScaledResolution;
@@ -26,7 +27,7 @@ public interface Cosmetic {
     String getName();
 
     default void renderPreview(int x, int y, int ticks) {
-        EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+        EntityPlayer player = UMinecraft.getPlayer();
         Minecraft mc = Minecraft.getMinecraft();
         float zLevel = 350;
 //        if (!canUse(player)) return;

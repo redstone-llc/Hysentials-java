@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.websocket.methods
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent
 import com.google.gson.JsonObject
 import llc.redstone.hysentials.Hysentials
@@ -56,6 +57,6 @@ class Chat : Channel("chat") {
             )
         )
 
-        Minecraft.getMinecraft().thePlayer.addChatMessage(component)
+        UMinecraft.getPlayer()!!.addChatMessage(component)
     }
 }

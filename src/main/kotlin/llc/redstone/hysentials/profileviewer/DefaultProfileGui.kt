@@ -2,6 +2,7 @@ package llc.redstone.hysentials.profileviewer
 
 import cc.polyfrost.oneconfig.libs.universal.UChat
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft
 import cc.polyfrost.oneconfig.libs.universal.UScreen
 import cc.polyfrost.oneconfig.utils.Multithreading
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil
@@ -366,7 +367,7 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
 
             val hypixel = NetworkUtils.getString(getRequest("hypixel") + "&lookup=" + player.uniqueID.toNoDash())
             if (hypixel == null) {
-                Minecraft.getMinecraft().thePlayer.closeScreen()
+                UMinecraft.getPlayer()!!.closeScreen()
                 UChat.chat("&cFailed to get data from Hypixel API.")
                 return@runAsync
             }
@@ -378,7 +379,7 @@ class DefaultProfileGui(var player: EntityPlayer) : UScreen() {
 
             val guild = NetworkUtils.getString(getRequest("hypixel/guild") + "&lookup=" + player.uniqueID.toNoDash())
             if (guild == null) {
-                Minecraft.getMinecraft().thePlayer.closeScreen()
+                UMinecraft.getPlayer()!!.closeScreen()
                 UChat.chat("&cFailed to get data from Hypixel API.")
                 return@runAsync
             }

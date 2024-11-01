@@ -40,7 +40,7 @@ public class LostRidable extends EntityTameable {
                 float f4 = 0.35F;
 
                 if (onGround) {
-                    f4 = worldObj.getBlockState(new BlockPos(MathHelper.floor_double(posX), MathHelper.floor_double(getEntityBoundingBox().minY) - 1,
+                    f4 = this.worldObj.getBlockState(new BlockPos(MathHelper.floor_double(posX), MathHelper.floor_double(getEntityBoundingBox().minY) - 1,
                         MathHelper.floor_double(posZ))).getBlock().slipperiness * 0.91F;
                 }
 
@@ -51,7 +51,7 @@ public class LostRidable extends EntityTameable {
                 f4 = 0.91F;
 
                 if (onGround) {
-                    f4 = worldObj.getBlockState(new BlockPos(MathHelper.floor_double(posX), MathHelper.floor_double(getEntityBoundingBox().minY) - 1,
+                    f4 = this.worldObj.getBlockState(new BlockPos(MathHelper.floor_double(posX), MathHelper.floor_double(getEntityBoundingBox().minY) - 1,
                         MathHelper.floor_double(posZ))).getBlock().slipperiness * 0.91F;
                 }
 
@@ -71,10 +71,10 @@ public class LostRidable extends EntityTameable {
                 moveEntity(motionX, motionY, motionZ);
                 adventure.entity.moveFlying(strafe, forward, f5);
 
-                if (isCollidedHorizontally && isOnLadder()) motionY = 0.2D;
+                if (this.isCollidedHorizontally && isOnLadder()) motionY = 0.2D;
 
-                if (worldObj.isRemote && (!worldObj.isBlockLoaded(new BlockPos((int) posX, 0, (int) posZ)) ||
-                    !worldObj.getChunkFromBlockCoords(new BlockPos((int) posX, 0, (int) posZ)).isLoaded())) {
+                if (this.worldObj.isRemote && (!this.worldObj.isBlockLoaded(new BlockPos((int) posX, 0, (int) posZ)) ||
+                    !this.worldObj.getChunkFromBlockCoords(new BlockPos((int) posX, 0, (int) posZ)).isLoaded())) {
                     motionY = posY > 0.0D ? -0.1D : 0.0D;
                     adventure.entity.motionY = motionY;
                 } else {
@@ -102,7 +102,7 @@ public class LostRidable extends EntityTameable {
                 adventure.entity.motionY = motionY;
                 adventure.entity.motionZ = motionZ;
 
-                if (isCollidedHorizontally && isOffsetPositionInLiquid(motionX, motionY + 0.6000000238418579D - posY + d1, motionZ)) {
+                if (this.isCollidedHorizontally && isOffsetPositionInLiquid(motionX, motionY + 0.6000000238418579D - posY + d1, motionZ)) {
                     motionY = 0.30000001192092896D;
                 }
                 adventure.entity.motionY = motionY;
@@ -132,7 +132,7 @@ public class LostRidable extends EntityTameable {
             adventure.entity.motionY = motionY;
             adventure.entity.motionZ = motionZ;
 
-            if (isCollidedHorizontally && isOffsetPositionInLiquid(motionX, motionY + 0.6000000238418579D - posY + d0, motionZ)) {
+            if (this.isCollidedHorizontally && isOffsetPositionInLiquid(motionX, motionY + 0.6000000238418579D - posY + d0, motionZ)) {
                 motionY = 0.30000001192092896D;
             }
             adventure.entity.motionY = motionY;

@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static llc.redstone.hysentials.renderer.text.FancyFormattingKt.getChars;
 
 public class ImageIcon {
     public static HashMap<String, ImageIcon> imageIcons = new HashMap<>();
@@ -116,7 +115,6 @@ public class ImageIcon {
             this.dynamicTexture = new DynamicTexture(image);
 //            this.resourceLocation = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(this.name, this.dynamicTexture);
         }
-        setReplacement();
     }
 
     public static void reloadIcons() {
@@ -155,59 +153,6 @@ public class ImageIcon {
 
     public int getHeight() {
         return height;
-    }
-
-    public void setReplacement() {
-        int width = this.getWidth();
-        int height = this.getHeight();
-        float scaledHeight = 9.0f / height;
-        float updatedWidth = width * scaledHeight;
-
-        int currentWidth = 0;
-        boolean isFirst = true;
-        StringBuilder string = new StringBuilder();
-        while (currentWidth <= updatedWidth) {
-            Integer charWidth = null;
-            for (Map.Entry<Character, Integer> entry : getChars().entrySet()) {
-                if (entry.getValue() + 1 + currentWidth <= updatedWidth) {
-                    charWidth = entry.getValue();
-                    break;
-                }
-            }
-            if (charWidth == null) {
-                break;
-            }
-            currentWidth += charWidth + 1;
-            List<Character> charKeys = new ArrayList<>();
-            for (Map.Entry<Character, Integer> entry : getChars().entrySet()) {
-                if (entry.getValue().equals(charWidth)) {
-                    charKeys.add(entry.getKey());
-                }
-            }
-            char charKey;
-            if (isFirst) {
-                charKey = charKeys.get(new Random().nextInt(charKeys.size()));
-                for (ImageIcon icon : ImageIcon.imageIcons.values()) {
-                    if (icon.firstChar == charKey) {
-                        icon.setReplacement();
-                        break;
-                    }
-                }
-                firstChar = charKey;
-                isFirst = false;
-            } else if (!charKeys.isEmpty()) {
-                charKey = charKeys.get(new Random().nextInt(charKeys.size()));
-            } else {
-                currentWidth -= charWidth + 1;
-                continue;
-            }
-            string.append(charKey);
-        }
-        if (string.length() == 0) {
-            setReplacement();
-            return;
-        }
-        replacement = string.toString();
     }
 
     public float renderImage(float x, float y, boolean shadow, int oldColor, float alpha) {

@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.handlers.groupchats;
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import org.json.JSONObject;
@@ -26,10 +27,10 @@ public class GroupChatMessage implements ChatSendModule {
                 JSONObject json = new JSONObject();
                 json.put("method", "chat");
                 json.put("message", message);
-                json.put("username", Minecraft.getMinecraft().thePlayer.getName());
-                json.put("uuid", Minecraft.getMinecraft().thePlayer.getUniqueID().toString());
+                json.put("username", UMinecraft.getPlayer().getName());
+                json.put("uuid", UMinecraft.getPlayer().getUniqueID().toString());
                 json.put("server", false);
-                json.put("displayName", Minecraft.getMinecraft().thePlayer.getDisplayName().getFormattedText()); //This gets overwritten by the server lol!
+                json.put("displayName", UMinecraft.getPlayer().getDisplayName().getFormattedText()); //This gets overwritten by the server lol!
                 json.put("key", Socket.serverId);
                 Socket.CLIENT.sendText(json.toString());
                 return null;

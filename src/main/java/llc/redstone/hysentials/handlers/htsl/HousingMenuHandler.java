@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.handlers.htsl;
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.event.events.GuiMouseClickEvent;
 import llc.redstone.hysentials.guis.actionLibrary.ActionLibrary;
 import llc.redstone.hysentials.guis.container.GuiItem;
@@ -22,10 +23,10 @@ import static llc.redstone.hysentials.handlers.guis.GameMenuOpen.field_lowerChes
 public class HousingMenuHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
         public void onGuiRender(GuiScreenEvent.BackgroundDrawnEvent event) {
-        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.openContainer == null)
+        if (UMinecraft.getPlayer() == null || UMinecraft.getPlayer().openContainer == null)
             return;
         if (!isInHousingMenu()) return;
-        Slot slot = Minecraft.getMinecraft().thePlayer.openContainer.getSlot(22);
+        Slot slot = UMinecraft.getPlayer().openContainer.getSlot(22);
         if (!slot.getHasStack()) {
             ItemStack item = GuiItem.makeColorfulItem(Material.STORAGE_MINECART, "&aAction Library", 1, 0, "&7Opens the Action Library", "&7GUI.", "", "&eLeft-Click to browse!");
             slot.putStack(item);
@@ -42,8 +43,8 @@ public class HousingMenuHandler {
             if (slot == null) return;
             if (slot.getSlotIndex() == 22) {
                 event.getCi().cancel();
-                Minecraft.getMinecraft().thePlayer.closeScreen();
-                new ActionLibrary().open(Minecraft.getMinecraft().thePlayer);
+                UMinecraft.getPlayer().closeScreen();
+                new ActionLibrary().open(UMinecraft.getPlayer());
             }
         }
     }

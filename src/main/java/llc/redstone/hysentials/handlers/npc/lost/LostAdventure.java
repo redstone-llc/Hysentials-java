@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.handlers.npc.lost;
 
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
@@ -234,7 +235,7 @@ public class LostAdventure extends NPC {
                     hologram.set(0, "§bLost Mage");
                     hologramEntities.get(0).setCustomNameTag("§bLost Mage");
                     setName("§e§lFOLLOWING YOU");
-                    lostRidable = new LostRidable(Minecraft.getMinecraft().theWorld, Minecraft.getMinecraft().thePlayer, this);
+                    lostRidable = new LostRidable(Minecraft.getMinecraft().theWorld, UMinecraft.getPlayer(), this);
                     lostRidable.setPosition(lastX, lastY, lastZ);
                     lostRidable.setOwnerId(Minecraft.getMinecraft().thePlayer.getUniqueID().toString());
                     Minecraft.getMinecraft().theWorld.addEntityToWorld(lostRidable.getEntityId(), lostRidable);

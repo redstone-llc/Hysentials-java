@@ -1,6 +1,7 @@
 package llc.redstone.hysentials.updategui
 
 import cc.polyfrost.oneconfig.libs.universal.UKeyboard
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft
 import cc.polyfrost.oneconfig.libs.universal.UResolution
 import cc.polyfrost.oneconfig.renderer.NanoVGHelper
 import cc.polyfrost.oneconfig.renderer.asset.Image
@@ -99,7 +100,7 @@ class RequestUpdateGui(private var inGame: Boolean, private var deleteOld: Boole
                 if (!inGame) {
                     Minecraft.getMinecraft().displayGuiScreen(GuiMainMenu())
                 } else {
-                    Minecraft.getMinecraft().thePlayer.closeScreen()
+                    UMinecraft.getPlayer()!!.closeScreen()
                 }
             }
 
@@ -108,7 +109,7 @@ class RequestUpdateGui(private var inGame: Boolean, private var deleteOld: Boole
                 if (!inGame) {
                     Minecraft.getMinecraft().displayGuiScreen(GuiMainMenu())
                 } else {
-                    Minecraft.getMinecraft().thePlayer.closeScreen()
+                    UMinecraft.getPlayer()!!.closeScreen()
                 }
             }
 

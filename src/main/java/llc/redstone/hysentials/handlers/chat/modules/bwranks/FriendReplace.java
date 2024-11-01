@@ -2,6 +2,7 @@ package llc.redstone.hysentials.handlers.chat.modules.bwranks;
 
 import cc.polyfrost.oneconfig.events.event.ChatReceiveEvent;
 import cc.polyfrost.oneconfig.libs.universal.UChat;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.util.MUtils;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
@@ -55,7 +56,7 @@ public class FriendReplace implements ChatReceiveModule {
                 siblings.set(siblings.indexOf(comp), component1);
             }
         }
-        Minecraft.getMinecraft().thePlayer.addChatMessage(component);
+        UMinecraft.getPlayer().addChatMessage(component);
         event.setCanceled(true);
         collecting = false;
     }

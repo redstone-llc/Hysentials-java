@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.handlers.lobby;
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawUtil;
@@ -22,7 +23,7 @@ public class HousingLagReducer {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         final LocrawInfo locraw = LocrawUtil.INSTANCE.getLocrawInfo();
-        if (event.phase != TickEvent.Phase.START || Minecraft.getMinecraft().thePlayer == null || !HypixelUtils.INSTANCE.isHypixel() || this.tick >= 20 || locraw == null) {
+        if (event.phase != TickEvent.Phase.START || UMinecraft.getPlayer() == null || !HypixelUtils.INSTANCE.isHypixel() || this.tick >= 20 || locraw == null) {
             return;
         }
         if (++this.tick == 10) {
@@ -34,7 +35,7 @@ public class HousingLagReducer {
             if (locraw.getGameType().equals(LocrawInfo.GameType.HOUSING) && locraw.getGameMode().equals("lobby")) {
                 hiddenArmorStands.clear();
                 for (Entity entity : Minecraft.getMinecraft().theWorld.loadedEntityList) {
-                    if (entity instanceof EntityArmorStand && entity.getDistanceToEntity(Minecraft.getMinecraft().thePlayer) > 20) {
+                    if (entity instanceof EntityArmorStand && entity.getDistanceToEntity(UMinecraft.getPlayer()) > 20) {
                         hiddenArmorStands.add((EntityArmorStand) entity);
                     }
                 }

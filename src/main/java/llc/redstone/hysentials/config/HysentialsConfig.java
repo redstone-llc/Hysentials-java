@@ -11,6 +11,7 @@ import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.config.elements.BasicOption;
 import cc.polyfrost.oneconfig.config.elements.OptionPage;
 import cc.polyfrost.oneconfig.libs.universal.UKeyboard;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import cc.polyfrost.oneconfig.utils.NetworkUtils;
 import llc.redstone.hysentials.Hysentials;
 import llc.redstone.hysentials.config.hysentialmods.*;
@@ -248,7 +249,7 @@ public class HysentialsConfig extends Config {
         this.hideIf("openHytilsConfig", () -> !Hysentials.INSTANCE.isHytils);
         this.hideIf("installHytils", () -> Hysentials.INSTANCE.isHytils);
         this.registerKeyBind(keyBind, () -> {
-            Minecraft.getMinecraft().thePlayer.closeScreen();
+            UMinecraft.getPlayer().closeScreen();
             Hysentials.INSTANCE.guiDisplayHandler.setDisplayNextTick(new CosmeticGui());
         });
     }

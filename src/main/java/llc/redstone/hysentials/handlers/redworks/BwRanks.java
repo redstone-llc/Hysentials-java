@@ -5,6 +5,7 @@ import cc.polyfrost.oneconfig.gui.pages.ModConfigPage;
 import cc.polyfrost.oneconfig.gui.pages.ModsPage;
 import cc.polyfrost.oneconfig.gui.pages.Page;
 import cc.polyfrost.oneconfig.libs.universal.ChatColor;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.hypixel.HypixelUtils;
 import cc.polyfrost.oneconfig.utils.hypixel.LocrawInfo;
@@ -54,7 +55,7 @@ public class BwRanks {
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.START || Minecraft.getMinecraft().thePlayer == null || !BUtils.isHypixelOrSBX()) {
+        if (event.phase != TickEvent.Phase.START || UMinecraft.getPlayer() == null || !BUtils.isHypixelOrSBX()) {
             return;
         }
         if (++this.tick == 80) {

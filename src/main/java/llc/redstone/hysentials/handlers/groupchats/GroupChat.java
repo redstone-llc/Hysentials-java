@@ -1,5 +1,6 @@
 package llc.redstone.hysentials.handlers.groupchats;
 
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import llc.redstone.hysentials.schema.HysentialsSchema;
 import cc.polyfrost.oneconfig.libs.universal.wrappers.message.UTextComponent;
 import cc.polyfrost.oneconfig.utils.Multithreading;
@@ -28,7 +29,7 @@ public class GroupChat {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         final LocrawInfo locraw = LocrawUtil.INSTANCE.getLocrawInfo();
-        if (event.phase != TickEvent.Phase.START || Minecraft.getMinecraft().thePlayer == null || !HypixelUtils.INSTANCE.isHypixel() || locraw == null) {
+        if (event.phase != TickEvent.Phase.START || UMinecraft.getPlayer() == null || !HypixelUtils.INSTANCE.isHypixel() || locraw == null) {
             return;
         }
 
