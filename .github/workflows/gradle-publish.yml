@@ -39,4 +39,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: hysentials-artifacts
-        path: /versions/*/build/libs/
+        path: /versions/**/build/libs/
