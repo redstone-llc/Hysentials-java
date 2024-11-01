@@ -96,14 +96,13 @@ public class GuiOnlineList extends Gui {
         int s;
         //draw hsob
         drawRect(width / 2 - r / 2 - 1, 0, width / 2 + r / 2 + 1, (int) ((r/2.688172043) + 10), Integer.MIN_VALUE);
+        GlStateManager.pushAttrib();
         this.mc.getTextureManager().bindTexture(hsob);
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.enableAlpha();
         GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
         drawModalRectWithCustomSizedTexture(width / 2 - (r + 10) / 2, 0, 0, 0, r + 10, (int) ((r/2.688172043) + 10), r + 10, r/3f + 10);
+        GlStateManager.popAttrib();
         q += (int) (r/2.688172043);
-        this.mc.getTextureManager().bindTexture(GuiIngame.icons);
 
 
         drawRect(width / 2 - r / 2 - 1, q - 1, width / 2 + r / 2 + 1, q + m * 9, Integer.MIN_VALUE);
